@@ -9,7 +9,7 @@ const uri = process.env.MONGODB_URI;
 const port = process.env.PORT;
 
 // Route Imports
-const testRouter = require('./routes/testRoute');
+const exampleRouter = require('./routes/exampleRoute.js');
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
@@ -29,7 +29,7 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.use('/test', testRouter);
+app.use('/test', exampleRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
