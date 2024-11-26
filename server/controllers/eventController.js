@@ -1,15 +1,16 @@
-const Example = require("../models/eventModel");
+const Event = require("../models/eventModel");
 
 // Example of creating a document in the database
 const createEvent = async (req, res) => {
-  const test = new Event(req.body);
-  try {
-    const data = await test.save(test);
+  const event = new Event(req.body);
+  try{
+    const data = await event.save(event);
     res.send(data);
   } catch (err) {
     console.error(err);
   }
 };
+
 
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
@@ -21,58 +22,33 @@ const getEventById = async (req, res) => {
   }
 };
 
-const eventSchema = new mongoose.Schema({
-  id: {
-    required: true,
-    type: String,
-  },
-  date: {
-    required: true,
-    type: Date,
-  },
-  description: {
-    required: true,
-    type: String,
-  },
-  location: {
-    required: true,
-    type: GeoJSON,
-  },
-  organizerID: {
-    required: true,
-    type: String,
-  },
-  tags: {
-    required: true,
-    type: [String],
-  },
-  registeredUsers: {
-    required: true,
-    type: [String],
-  },
-  activity: {
-    required: true,
-    type: [String],
-  },
-});
+const getAllEvents = async (req,res) =>
+{
+  try {
+    const events = await Event.find();
+    res.send(events);
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find({ _id: req.OrganizerID });
+    const events = await Event.find(req.body);
     res.send(events);
 
-    if (!user) {
+    if (!events) {
       console.log(
         res.status(404).json({ message: "Organizer Events not found" })
       );
     }
-    const { _id, name, email, phone, location } = user;
+    const { _id, name, email, phone, location } = events;
   } catch (err) {
     console.error(err);
   }
 };
 
-const updateEvent = async (req, res) => {
+const editEventDetails = async (req, res) => {
   const eventId = req.params.id;
   try {
     const event = await Event.findByIdAndUpdate(eventId, req.body, {
@@ -98,4 +74,9 @@ const deleteEvent = async (req, res) => {
 
 module.exports = {
   createEvent,
+  getEventById,
+  getAllEvents,
+  getEvents,
+  editEventDetails,
+  deleteEvent,
 };

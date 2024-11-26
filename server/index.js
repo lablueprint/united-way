@@ -10,6 +10,7 @@ const port = process.env.PORT;
 
 // Route Imports
 const exampleRouter = require('./routes/exampleRoute.js');
+const eventRouter = require('./routes/eventRoutes.js');
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
@@ -30,6 +31,9 @@ app.use(express.json());
 
 // API Routes
 app.use('/test', exampleRouter);
+
+app.use('/events', eventRouter);
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

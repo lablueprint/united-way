@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-  id: {
-    required: true,
-    type: String,
-  },
+  // id: {
+  //   required: true,
+  //   type: String,
+  // },
   date: {
     required: true,
     type: Date,
@@ -14,8 +14,15 @@ const eventSchema = new mongoose.Schema({
     type: String,
   },
   location: {
-    required: true,
-    type: GeoJSON,
+    type: {
+      type: String, // GeoJSON type (e.g., "Point")
+      enum: ['Point'], // Restrict to "Point" for this schema
+      required: true,
+    },
+    coordinates: {
+      type: [Number], // Array of numbers [longitude, latitude]
+      required: true,
+    },
   },
   organizerID: {
     required: true,
@@ -28,11 +35,14 @@ const eventSchema = new mongoose.Schema({
   registeredUsers: {
     required: true,
     type: [String],
-  },  
+  },
   activity: {
     required: true,
     type: [String],
   },
 });
+
+// Create a 2dsphere index for geospatial queries
+eventSchema.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('Event', eventSchema);
