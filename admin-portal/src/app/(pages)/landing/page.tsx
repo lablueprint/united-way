@@ -1,5 +1,9 @@
 "use client"
 import axios, { AxiosResponse } from "axios";
+
+// Added following line
+import EventCard from '../../_components/EventCard';
+
 import { useState } from "react";
 export default function Landing() {
   const [responseValue, setResponseValue] = useState();
@@ -17,6 +21,7 @@ export default function Landing() {
   return (
     <div>
         Welcome to the test landing page.
+        <EventCard></EventCard>
         <button onClick={() => {console.log("Result: ", exampleGetToRoot())}}>
           Example HTTP Request button
         </button>
