@@ -18,10 +18,17 @@ const organizationSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
-//   location : {
-//     required: true,
-//     type: GeoJSON,
-//   },
+  location: {
+    type: {
+      type: String, // GeoJSON type (e.g., "Point")
+      enum: ['Point'], // Restrict to "Point" for this schema
+      required: true,
+    },
+    coordinates: {
+      type: [Number], // Array of numbers [longitude, latitude]
+      required: true,
+    },
+  },
   name : {
     required: true,
     type: String,
