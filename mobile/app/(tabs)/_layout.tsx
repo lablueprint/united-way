@@ -39,6 +39,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <></>,
         }}
       />
+      <Tabs.Screen
+        name="event-details"
+        options={{
+          title: 'Event Details',
+          tabBarButton: () => null, // Hide from the tab bar
+        }}
+      />
     </Tabs>
   );
 }
