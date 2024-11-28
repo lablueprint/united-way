@@ -15,6 +15,7 @@ const createEvent = async (req, res) => {
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
   try {
+    console.log("Got event data");
     const event = await Event.findById(eventId);
     res.send(event);
   } catch (err) {
@@ -62,6 +63,7 @@ const editEventDetails = async (req, res) => {
 
 const deleteEvent = async (req, res) => {
   try {
+    console.log("Event deleted successfully");
     const data = await Event.findByIdAndDelete(req.params.id);
     res.json({
       message: "Event deleted successfully",

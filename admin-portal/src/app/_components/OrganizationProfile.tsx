@@ -1,0 +1,44 @@
+import React, { useState, useEffect } from 'react';
+import axios, { AxiosResponse } from "axios";
+import EventCard from "./EventCard";
+
+interface EventData {
+    _id?: string;
+    name?: string;
+    date?: string;
+    description?: string;
+    location?: string;
+    tags?: string[];
+}
+
+
+export default function OrganizationProfile () {
+    const [eventIds, setEventIds] = useState([]);
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const response : AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/getAllEvents`);
+                setEventIds(response.data.map((event : EventData) => event._id));
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+        fetchEvents();
+    }, []);
+
+    return (
+        <div>
+            <h1>Organization Profile</h1>
+            <div>
+                <h2>Events</h2>
+                <div>
+                    {eventIds.map((id: string) => {
+                        return <EventCard id={id} key={id}/>;
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+}

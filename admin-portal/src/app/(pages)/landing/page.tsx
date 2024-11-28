@@ -3,6 +3,7 @@ import axios, { AxiosResponse } from "axios";
 
 // Added following line
 import EventCard from '../../_components/EventCard';
+import OrganizationProfile from '../../_components/OrganizationProfile';
 
 import { useState } from "react";
 export default function Landing() {
@@ -21,7 +22,9 @@ export default function Landing() {
   return (
     <div>
         Welcome to the test landing page.
-        <EventCard></EventCard>
+        <EventCard id={"674565d380c3def8b66fa1b7"}></EventCard>
+        <OrganizationProfile></OrganizationProfile>
+        
         <button onClick={() => {console.log("Result: ", exampleGetToRoot())}}>
           Example HTTP Request button
         </button>
