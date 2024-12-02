@@ -15,10 +15,12 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
-    "expo": "~52.0.7",
+    "axios": "^1.7.8",
+    "expo": "^52.0.10",
     "expo-blur": "~14.0.1",
     "expo-constants": "~17.0.3",
     "expo-font": "~13.0.1",

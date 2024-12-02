@@ -9,7 +9,7 @@ const uri = process.env.MONGODB_URI;
 const port = process.env.PORT;
 
 // Route Imports
-const exampleRouter = require('./routes/exampleRoute.js');
+const userRouter = require('./routes/userRoutes.js');
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
@@ -29,7 +29,9 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.use('/test', exampleRouter);
+//app.use('/test', exampleRouter);
+app.use('/user', userRouter);
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -38,3 +40,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Server started at port ${port}`);
 });
+
