@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 
 // Example of a model schema to validate and structure documents
 const organizationSchema = new mongoose.Schema({
-  id: {
-    required: true,
-    type: String,
-  },
   activeEvents: {
     required: true,
     type: [String],
