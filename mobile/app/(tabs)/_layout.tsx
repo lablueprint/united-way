@@ -32,14 +32,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <></>,
         }}
       />
-
-<Tabs.Screen
-        name="UserSignUpForm"
-        options={{
-          title: 'UserSignUp',
-          tabBarIcon: ({ color }) => <></>,
-        }}
-      />
     </Tabs>
   );
 }
