@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-  // id: {
-  //   required: true,
-  //   type: String,
-  // },
+  name: {
+    required: true,
+    type: String,
+  },
   date: {
     required: true,
     type: Date,
@@ -38,9 +38,17 @@ const eventSchema = new mongoose.Schema({
   },
   activity: {
     required: true,
-    type: [String],
+    inventoryDetails: mongoose.Schema.Types.Mixed,
+    type: [{
+      type: { type: String, required: true },
+      content: mongoose.Schema.Types.Mixed,
+      timeStart: { type: Date, required: true },
+      timeEnd: { type: Date, required: true },
+      active: { type: Boolean, required: true },
+    }],
   },
 });
+
 
 // Create a 2dsphere index for geospatial queries
 eventSchema.index({ location: '2dsphere' });
