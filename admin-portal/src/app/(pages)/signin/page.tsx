@@ -5,7 +5,12 @@ import QRCode from 'react-qr-code';
 
 export default function EventDetailsPage() {
   const [eventId, setEventId] = useState("");
-  const [eventDetails, setEventDetails] = useState(null);
+  const [eventDetails, setEventDetails] = useState({
+    id: "",
+    name: "",
+    description: "",
+    org: "",
+  });
 
   const handleGenerateQRCode = () => {
     // Simulate fetching event details using the entered event ID
