@@ -6,27 +6,6 @@ interface EventCardProps {
     id: string;
 }
 
-const deleteEvent = async (id: string) => {
-    try {
-        const response: AxiosResponse = await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/deleteEvent/${id}`);
-        return response;
-    } catch (err) {
-        console.log(err);
-        return err;
-    }
-};
-
-const getEventById = async (id: string) => {
-    try {
-        const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/getEventById/${id}`);
-        console.log("got event");
-        return response.data;
-    } catch (err) {
-        console.log(err);
-        return err;
-    }
-};
-
 interface ActivityContent {
     [key: string]: unknown;
 }
@@ -66,44 +45,58 @@ export default function EventCard({ id }: EventCardProps) {
         activities: []
     });
 
+    const deleteEvent = async () => {
+        try {
+            const response: AxiosResponse = await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/deleteEvent/${id}`);
+            return response;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    };
+    
+    const getEventById = async () => {
+        try {
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/getEventById/${id}`);
+            console.log("got event");
+            return response.data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
-            const data = await getEventById(id);
+            const data = await getEventById();
             setEventData(data);
         };
         fetchData();
-    }, [id]);
+    }, []);
 
     const handleEditClick = () => {
-        setIsEditing(true); // Show EditCard
-        console.log("start editing")
+        // Show EditCard modal
+        setIsEditing(true);
     };
     const handleCloseClick = () => {
-        setIsEditing(false); // Show EditCard
-        console.log("close modal")
+        // Close EditCard modal
+        setIsEditing(false);
     };
 
     return (
+        // Show event name, show buttons on hover
         <div
             onMouseEnter={() => setShowButtons(true)}
             onMouseLeave={() => setShowButtons(false)}
-            style={{ color: "red" }}
         >
+            <p>{eventData.name}</p>
             {showButtons && (
                 <>
-                    <button onClick={() => deleteEvent(id)}>Delete</button>
+                    <button onClick={() => deleteEvent()}>Delete</button>
                     <button onClick={handleEditClick}>Edit</button>
                 </>
             )}
-            <p>{eventData.name}</p>
-            {/* {isEditing && (
-                <div className="modal-overlay" onClick={handleCloseClick}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <EditCard id={id} />
-                        <button className="close-button" onClick={handleCloseClick}>Close</button>
-                    </div>
-                </div>
-            )} */}
+            
             {isEditing && <EditCard id={id} handleCloseClick={handleCloseClick}/>}
         </div>
     );

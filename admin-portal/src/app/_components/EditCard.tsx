@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 
 interface EditCardProps {
@@ -6,67 +6,90 @@ interface EditCardProps {
     handleCloseClick: () => void;
 }
 
-interface ActivityContent {
-    [key: string]: unknown; // Represents mixed content in the `content` field
-  }
-  
-  interface Activity {
-    type: string; // Type of the activity (e.g., "Workshop", "Keynote")
-    content: ActivityContent; // Additional details about the activity
-    timeStart: Date; // Start time of the activity
-    timeEnd: Date; // End time of the activity
-    active: boolean; // Whether the activity is active
-  }
-
-interface EventData {
-    _id?: string;
-    name?: string;
-    date?: Date;
-    description?: string;
-    location?: string;
-    organizerId?: string;
-    tags?: string[];
-    registeredUsers?: string[];
-    activities?: Activity[];
-}
-
-const editEvent = async (id : string, updatedEventData: EventData) => {
-    try {
-        const response : AxiosResponse = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/editEventDetails/${id}`, updatedEventData);
-        return response;
-    } catch (err) {
-        console.log(err);
-        return err;
-    }
-}
-
 export default function EditCard({ id, handleCloseClick }: EditCardProps) {
-    // const [editDetails, doneEdit] = useState(false);
-    // const [loading, setLoading] = useState(true);
-    const [updatedEventData, setUpdatedEventData] = useState<EventData>({ });
+  //variables to store the updated event details
+  const [updatedName, setUpdatedName] = useState<string>("");
+  const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
+  const [updatedDescription, setUpdatedDescription] = useState<string>("");
+  const [updatedTags, setUpdatedTags] = useState<string[]>([]);
+    
+    //function to get the event details by id
+    const getEventById = async () => {
+        try {
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/getEventById/${id}`);
+            console.log("got event");
+            return response.data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    };
+    
+    //fetch the event details by id
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await getEventById();
+            setUpdatedName(data.name);
+            setUpdatedDate(new Date(data.date));
+            setUpdatedDescription(data.description);
+            setUpdatedTags(data.tags || []);
+        };
+        fetchData();
+    }, []);    
 
-    // useEffect(() => {
-        
-    // }, []);
+    //function to edit the event details
+    const editEvent = async () => {
+        try {
+            const response : AxiosResponse = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/editEventDetails/${id}`,
+                {
+                    name: updatedName,
+                    date: updatedDate, 
+                    description: updatedDescription,
+                    tags: updatedTags
+                });
+            return response;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    }
+
+    const handleSubmit = async () => {
+        try {
+            await editEvent();
+            //inherit the function from the parent component to close the modal
+            handleCloseClick();
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     return (
-        <div>
+        //change all the element details to be the new information from the input fields after submit is pressed
+        <form onSubmit={handleSubmit}>
             <label>
                 Name:
-                <input type="text" name="name" placeholder="Name" value={updatedEventData.name} />
+                <input type="text" name="name" placeholder="Name" value={updatedName} onChange={(event) => {setUpdatedName(event.target.value)}} />
             </label>
             <label>
                 Date:
-                <input type="date" name="date" placeholder="Date" />
+                <input type="date" name="date" placeholder="Date" value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''} onChange={(event) => {setUpdatedDate(new Date((event.target as HTMLInputElement).value))}} />
             </label>
             <label>
                 Description:
-                <input type="text" name="description" placeholder="Description" />
+                <input type="text" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => {setUpdatedDescription(event.target.value)}} />
             </label>
-            <button onClick={handleCloseClick}>
-                Submit Changes
-            </button>
-        </div>
+            <label>
+                Tags:
+                <input 
+                    type="text" 
+                    name="tags" 
+                    placeholder="Tags" 
+                    value={Array.isArray(updatedTags) ? updatedTags.join(', ') : ''} 
+                    onChange={(event) => {setUpdatedTags(event.target.value.split(', '))}}
+                />
+            </label>
+            <input type="submit" value="Submit" />
+        </form>
     );
-
 }
