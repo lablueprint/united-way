@@ -16,6 +16,7 @@ function RaffleEditor() {
 
 export default function EventActivity() {
   const [activityType, setActivityType] = useState("");
+  const [duration, setDuration] = useState(0);
 
   const renderEditor = () => {
     switch (activityType) {
@@ -48,6 +49,19 @@ export default function EventActivity() {
         <option value="raffle">Raffle</option>
       </select>
       <div style={{ marginTop: "20px" }}>{renderEditor()}</div>
+
+      <div style={{ marginTop: "20px" }}>
+        <h2>Set Activity Duration</h2>
+        <label>
+          Duration (in minutes):
+          <input
+            type="number"
+            value={duration}
+            onChange={(e) => setDuration(Math.max(0, parseInt(e.target.value) || 0))} // Ensures non-negative input
+            placeholder="Enter duration in minutes"
+          />
+        </label>
+      </div>
     </div>
   );
 }
