@@ -15,12 +15,12 @@ const eventSchema = new mongoose.Schema({
   },
   location: {
     type: {
-      type: String, // GeoJSON type (e.g., "Point")
-      enum: ['Point'], // Restrict to "Point" for this schema
+      type: String,
+      enum: ['Point'],
       required: true,
     },
     coordinates: {
-      type: [Number], // Array of numbers [longitude, latitude]
+      type: [Number],
       required: true,
     },
   },
@@ -48,7 +48,6 @@ const eventSchema = new mongoose.Schema({
     }],
   },
 });
-
 
 // Create a 2dsphere index for geospatial queries
 eventSchema.index({ location: '2dsphere' });

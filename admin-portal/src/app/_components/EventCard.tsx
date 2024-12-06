@@ -6,6 +6,7 @@ interface EventCardProps {
     id: string;
 }
 
+// EventData interface
 interface ActivityContent {
     [key: string]: unknown;
 }
@@ -23,7 +24,10 @@ interface EventData {
     name: string;
     date: Date;
     description: string;
-    location: string;
+    location: {
+        type: string;
+        coordinates: number[];
+    };
     organizerId: string;
     tags: string[];
     registeredUsers: string[];
@@ -39,7 +43,10 @@ export default function EventCard({ id }: EventCardProps) {
         name: "",
         date: new Date(),
         description: "",
-        location: "",
+        location: {
+            type: "",
+            coordinates: [],
+        },
         tags: [],
         registeredUsers: [],
         activities: []
