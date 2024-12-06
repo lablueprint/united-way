@@ -1,5 +1,5 @@
 "use client"
-// import axios, { AxiosResponse } from "axios";
+import "./EventSignIn.css";
 import React, { useState } from 'react';
 import QRCode from 'react-qr-code';
 
@@ -24,7 +24,7 @@ export default function EventDetailsPage() {
   };
 
   return (
-    <div style={{ textAlign: "center", margin: "20px" }}>
+    <div className="qr-code-align">
       <h1>Event QR Code Generator</h1>
       <input
         type="text"
