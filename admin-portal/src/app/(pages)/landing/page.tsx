@@ -1,7 +1,11 @@
+import OrganizationSignUpForm from "../../_components/OrganizationSignUpForm"
+
 export default function Landing() {
   return (
     <div>
-        Welcome to the test landing page.
+        <OrganizationSignUpForm>
+          
+        </OrganizationSignUpForm>
     </div>
   );
 }
