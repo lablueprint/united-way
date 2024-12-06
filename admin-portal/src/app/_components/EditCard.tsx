@@ -7,13 +7,13 @@ interface EditCardProps {
 }
 
 export default function EditCard({ id, handleCloseClick }: EditCardProps) {
-  //variables to store the updated event details
+  // Variables to store the updated event details
   const [updatedName, setUpdatedName] = useState<string>("");
   const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
   const [updatedDescription, setUpdatedDescription] = useState<string>("");
   const [updatedTags, setUpdatedTags] = useState<string[]>([]);
     
-    //function to get the event details by id
+    // Get the event details by ID
     const getEventById = async () => {
         try {
             const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/getEventById/${id}`);
@@ -25,7 +25,7 @@ export default function EditCard({ id, handleCloseClick }: EditCardProps) {
         }
     };
     
-    //fetch the event details by id
+    // Fetch the event details by ID
     useEffect(() => {
         const fetchData = async () => {
             const data = await getEventById();
@@ -37,7 +37,7 @@ export default function EditCard({ id, handleCloseClick }: EditCardProps) {
         fetchData();
     }, []);    
 
-    //function to edit the event details
+    // Edit the event details
     const editEvent = async () => {
         try {
             const response : AxiosResponse = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/editEventDetails/${id}`,
@@ -57,7 +57,7 @@ export default function EditCard({ id, handleCloseClick }: EditCardProps) {
     const handleSubmit = async () => {
         try {
             await editEvent();
-            //inherit the function from the parent component to close the modal
+            // Inherit the function from the parent component to close the modal
             handleCloseClick();
         } catch (error) {
             console.error(error);
@@ -65,7 +65,7 @@ export default function EditCard({ id, handleCloseClick }: EditCardProps) {
     }
 
     return (
-        //change all the element details to be the new information from the input fields after submit is pressed
+        // Change all the element details to be the new information from the input fields after submit is pressed
         <form onSubmit={handleSubmit}>
             <label>
                 Name:

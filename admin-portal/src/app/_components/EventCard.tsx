@@ -4,6 +4,7 @@ import EditCard from "./EditCard";
 
 interface EventCardProps {
     id: string;
+    removeFromList: (id: string) => void;
 }
 
 // EventData interface
@@ -34,7 +35,7 @@ interface EventData {
     activities: Activity[];
 }
 
-export default function EventCard({ id }: EventCardProps) {
+export default function EventCard({ id, removeFromList }: EventCardProps) {
     const [showButtons, setShowButtons] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [eventData, setEventData] = useState<EventData>({
@@ -54,6 +55,7 @@ export default function EventCard({ id }: EventCardProps) {
 
     const deleteEvent = async () => {
         try {
+            removeFromList(id);
             const response: AxiosResponse = await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/deleteEvent/${id}`);
             return response;
         } catch (err) {

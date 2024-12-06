@@ -31,7 +31,7 @@ interface EventData {
 }
 
 export default function OrganizationProfile () {
-    const [eventIds, setEventIds] = useState([]);
+    const [eventIds, setEventIds] = useState<string[]>([]);
 
     useEffect(() => {
         // Get all events
@@ -47,6 +47,10 @@ export default function OrganizationProfile () {
         fetchEvents();
     }, []);
 
+    const removeFromList = (id: string) => {
+        setEventIds(eventIds.filter((eventId) => eventId != id));
+    }
+
     return (
         <div>
             <h1>Organization Profile</h1>
@@ -54,7 +58,7 @@ export default function OrganizationProfile () {
                 <h2>Events</h2>
                 <div>
                     {eventIds.map((id: string) => {
-                        return <EventCard id={id} key={id}/>;
+                        return <EventCard id={id} key={id} removeFromList={removeFromList}/>;
                     })}
                 </div>
             </div>
