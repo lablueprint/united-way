@@ -1,37 +1,37 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import axios from "axios";
 
 
 export default function NewOrganizationForm() {
-    const [community, setCommunity] = useState('');
-    const [description, setDescription] = useState('');
-    const [location, setLocation] = useState('');
-    const [name, setName] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [community, setCommunity] = useState<string>('');
+    const [description, setDescription] = useState<string>('');
+    const [location, setLocation] = useState<string>('');
+    const [name, setName] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [confirmPassword, setConfirmPassword] = useState<string>('');
 
     const apiEndpoint = `http://${process.env.IP_ADDRESS}:${process.env.PORT}/org/createOrg`;
 
-    const handleSubmit = async () => {
-        if (password !== confirmPassword) {
-            return;
-        }
-        const formData = { community:community, description:description, location:{type: "Point", coordinates: [0, 0, 0]}, name:name, password:password, confirmPassword:confirmPassword, };
-        try {
-            const response = await axios.post(apiEndpoint, formData);
-            console.log('Response:', response.data);
-            setCommunity('');
-            setDescription('');
-            setLocation('');
-            setName('');
-            setPassword('');
-            setConfirmPassword('');
-        } catch (error) {
-            console.error('Error submitting form:', error);
-        }
-      };
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (password !== confirmPassword) {
+          return;
+      }
+      const formData = { community:community, description:description, location:{type: "Point", coordinates: [0, 0, 0]}, name:name, password:password, confirmPassword:confirmPassword, };
+      try {
+          await axios.post(apiEndpoint, formData);
+          setCommunity('');
+          setDescription('');
+          setLocation('');
+          setName('');
+          setPassword('');
+          setConfirmPassword('');
+      } catch (error) {
+          console.error('Error submitting form:', error);
+      } 
+    };
 
     return (
         <form onSubmit={handleSubmit}>

@@ -14,7 +14,6 @@ const createOrganization = async (req, res) => {
 const getAllOrganizations = async (req, res) => {
     try {
         const organizations = await Organization.find();
-        // console.log(organizations);
         res.json(organizations);
     } catch (err) {
         res.status(500).send('Error retrieving all organizations');
@@ -25,12 +24,10 @@ const getAllOrganizations = async (req, res) => {
 // pass in parameter of curly braces == no filter 
 const getOrganizationById = async (req, res) => {
     const organizationId = req.params.id;
-    console.log(organizationId);
     try {
         const organizationByID = await Organization.findOne({  _id: organizationId });
-        // console.log(organizationByID);
         if (organizationByID) {
-        res.json(organizationByID);
+            res.json(organizationByID);
         }
         else {
             res.status(404).send('Organization not found')
@@ -43,7 +40,6 @@ const getOrganizationById = async (req, res) => {
 const getOrganizations = async (req, res) => {
     try {
         const orgByInfo= await Organization.findOne( req.body );
-        console.log(req.body);
         if (orgByInfo) {
             res.json(orgByInfo);
         } 
@@ -55,12 +51,9 @@ const getOrganizations = async (req, res) => {
     }
 };
 
-// ask edward ab id passing
 const editOrganizationDetails = async (req, res) => {
     const orgId = req.params.id;
-    // console.log(orgId);
     const updateInput = req.body;
-    // console.log(updateInput);
 
     try {
         const result =  await Organization.updateOne( { _id: orgId }, { $set: updateInput});
@@ -79,10 +72,8 @@ const getAssociatedEvents = async (req, res) => {
     const orgId = req.params.id;
     try {
         const organizationByID = await Organization.findOne({  _id: orgId });
-        // console.log(organizationByID);
         if (organizationByID) {
             const eventList = organizationByID['activeEvents'];
-            console.log(eventList);
             res.json(eventList);
         }
         else {
@@ -107,19 +98,10 @@ const deleteOrganization = async (req, res) => {
     }
 }
 
-// const getOrganizations2 = async(req, res) => {
-//     const orgAttribute = req.params;
-//     console.log(orgAttr);
-//     try {
-//         const orgByAttr = await Organization.findOne()
-//     }
-    
-// }
 module.exports = {
     createOrganization,
     getAllOrganizations,
     getOrganizations,
-    // getAllOrganizations2,
     getOrganizationById,
     editOrganizationDetails,
     getAssociatedEvents,
