@@ -16,13 +16,11 @@ export default function NewOrganizationForm() {
 
     const handleSubmit = async () => {
         if (password !== confirmPassword) {
-            Alert.alert('Error', 'Passwords do not match.');
             return;
         }
         const formData = { community:community, description:description, location:{type: "Point", coordinates: [0, 0, 0]}, name:name, password:password, confirmPassword:confirmPassword, };
         try {
             const response = await axios.post(apiEndpoint, formData);
-            Alert.alert('Success', 'Organization created successfully!');
             console.log('Response:', response.data);
             setCommunity('');
             setDescription('');
@@ -32,7 +30,6 @@ export default function NewOrganizationForm() {
             setConfirmPassword('');
         } catch (error) {
             console.error('Error submitting form:', error);
-            Alert.alert('Error', 'Failed to create organization.');
         }
       };
 
