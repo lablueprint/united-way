@@ -7,11 +7,6 @@ userRouter.get('/get', userController.getAllUsers);
 userRouter.get('/:id', userController.getUserById);
 userRouter.delete('/:id', userController.deleteUser);
 userRouter.patch('/:id', userController.editUserDetails);
-
-/*
-exampleRouter.get('/get', (req, res) => {
-  res.send('Get API');
-});
-*/
+userRouter.post('/createUser', userController.createNewUser);
 
 module.exports = userRouter;

@@ -1,28 +1,38 @@
 import React from 'react';
 import { View, Button, TextInput } from 'react-native';
-// import axios from 'axios';
-// USECLIENT TO CHANGE STATE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+import axios from 'axios';
 
-interface whatever {
-  onChangeUser: (email, demographics, name, phoneNum, community) => void
-}
-
-export default function UserSignUpForm ({ onChangeUser }: whatever) {
-
+export default function UserSignUpForm () {
   const [email, onChangeEmail] = React.useState('');
   const [demographics, onChangeDemo] = React.useState('');
   const [name, onChangeName] = React.useState('');
   const [phoneNum, onChangePhoneNum] = React.useState('');
   const [community, onChangeCommunity] = React.useState('');
 
-const handleAddUser = () => {
-  onChangeUser(email, demographics, name, phoneNum, community);
-  onChangeEmail('');
-  onChangeDemo('');
-  onChangeName('');
-  onChangePhoneNum('');
-  onChangeCommunity('');
-}
+  const handleAddUser = async () => {
+    onChangeEmail('');
+    onChangeDemo('');
+    onChangeName('');
+    onChangePhoneNum('');
+    onChangeCommunity('');
+
+    const {data} = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/user/createUser`, {
+      collectedStamps: [],
+      demographics: {
+        gender: false,
+        ethnicity: "",
+        community: community,
+      },
+      email: email,
+      experiencePoints: 0,
+      name: name,
+      numStamps: 0,
+      pastEvents: [],
+      phoneNumber: phoneNum,
+      points: 0,
+      registeredEvents: []
+    })
+  }
 
   return (
     <View>
