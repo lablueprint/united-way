@@ -12,7 +12,7 @@ interface EventDetails {
 export default function EventPage() {
   // Retrieve the 'details' query parameter from the URL
   const { details } = useLocalSearchParams()
-  
+
   // Check if the details exist and parse them
   if (!details) {
     return <Text>No event details found.</Text>;

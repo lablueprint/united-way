@@ -45,7 +45,7 @@ export default function EventScanner() {
       const encodedDetails = encodeURIComponent(eventDetailsString);
       router.push(`/event-details?details=${encodedDetails}`);
     }
-  };  
+  };
 
   const handleReject = () => {
     setEventDetails(null);
