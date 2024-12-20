@@ -38,7 +38,6 @@ const eventSchema = new mongoose.Schema({
   },
   activity: {
     required: true,
-    inventoryDetails: mongoose.Schema.Types.Mixed,
     type: [{
       type: { type: String, required: true },
       content: mongoose.Schema.Types.Mixed,

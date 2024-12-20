@@ -1,38 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EditCard from "./EditCard";
+import { EventData } from '../_interfaces/EventInterfaces';
 
 interface EventCardProps {
     id: string;
     removeFromList: (id: string) => void;
-}
-
-// EventData interface
-interface ActivityContent {
-    [key: string]: unknown;
-}
-
-interface Activity {
-    type: string;
-    content: ActivityContent;
-    timeStart: Date;
-    timeEnd: Date;
-    active: boolean;
-}
-
-interface EventData {
-    _id: string;
-    name: string;
-    date: Date;
-    description: string;
-    location: {
-        type: string;
-        coordinates: number[];
-    };
-    organizerId: string;
-    tags: string[];
-    registeredUsers: string[];
-    activities: Activity[];
 }
 
 export default function EventCard({ id, removeFromList }: EventCardProps) {
@@ -56,19 +29,33 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
     const deleteEvent = async () => {
         try {
             removeFromList(id);
-            const response: AxiosResponse = await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/deleteEvent/${id}`);
-            return response;
+            await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`);
         } catch (err) {
             console.log(err);
-            return err;
         }
     };
-    
+
+    const editEvent = async (name: string, date: Date, description: string, tags: string[]) => {
+        try {
+            const response: AxiosResponse = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`,
+                {
+                    name: name,
+                    date: date,
+                    description: description,
+                    tags: tags
+                });
+            const { data } = response.data;
+            setEventData(data);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     const getEventById = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/getEventById/${id}`);
-            console.log("got event");
-            return response.data;
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`);
+            const { data } = response.data;
+            return data;
         } catch (err) {
             console.log(err);
             return err;
@@ -98,15 +85,15 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
             onMouseEnter={() => setShowButtons(true)}
             onMouseLeave={() => setShowButtons(false)}
         >
-            <p>{eventData.name}</p>
+            <p>{eventData?.name}</p>
             {showButtons && (
                 <>
-                    <button onClick={() => deleteEvent()}>Delete</button>
+                    <button onClick={deleteEvent}>Delete</button>
                     <button onClick={handleEditClick}>Edit</button>
                 </>
             )}
-            
-            {isEditing && <EditCard id={id} handleCloseClick={handleCloseClick}/>}
+
+            {isEditing && <EditCard id={id} handleCloseClick={handleCloseClick} handleEditEvent={editEvent} />}
         </div>
     );
 }

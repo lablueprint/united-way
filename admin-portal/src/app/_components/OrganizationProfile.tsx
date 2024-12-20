@@ -1,44 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
+import { EventData } from '../_interfaces/EventInterfaces';
 
-interface ActivityContent {
-    [key: string]: unknown;
-}
-
-// EventData interface
-interface Activity {
-    type: string;
-    content: ActivityContent;
-    timeStart: Date;
-    timeEnd: Date;
-    active: boolean;
-}
-
-interface EventData {
-    _id: string;
-    name: string;
-    date: Date;
-    description: string;
-    location: {
-        type: string;
-        coordinates: number[];
-    };
-    organizerId: string;
-    tags: string[];
-    registeredUsers: string[];
-    activities: Activity[];
-}
-
-export default function OrganizationProfile () {
+// TODO: Make the organization profile based on each individual organization instead of all events.
+export default function OrganizationProfile() {
     const [eventIds, setEventIds] = useState<string[]>([]);
 
     useEffect(() => {
         // Get all events
         const fetchEvents = async () => {
             try {
-                const response : AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/getAllEvents`);
-                setEventIds(response.data.map((event : EventData) => event._id));
+                const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`);
+                const { data } = response.data;
+                setEventIds(data.map((event: EventData) => event._id));
             }
             catch (err) {
                 console.log(err);
@@ -58,7 +33,7 @@ export default function OrganizationProfile () {
                 <h2>Events</h2>
                 <div>
                     {eventIds.map((id: string) => {
-                        return <EventCard id={id} key={id} removeFromList={removeFromList}/>;
+                        return <EventCard id={id} key={id} removeFromList={removeFromList} />;
                     })}
                 </div>
             </div>
