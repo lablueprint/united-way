@@ -10,6 +10,7 @@ const port = process.env.PORT;
 
 // Route Imports
 const exampleRouter = require('./routes/exampleRoute.js');
+const eventRouter = require('./routes/eventRoutes.js');
 const organizationRouter = require('./routes/organizationRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
 
@@ -34,6 +35,7 @@ app.use(express.json());
 app.use('/test', exampleRouter); // given ip address, /test is where example router logic will be handle
 app.use('/orgs', organizationRouter);
 app.use('/users', userRouter);
+app.use('/events', eventRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); //routers are groupings of endpoints
