@@ -16,7 +16,7 @@ export default function Landing() {
       setResponseValue(response.data);
     } catch (error) {
       console.log(error);
-    }
+    } // Post request
   }
 
   return (
