@@ -2,7 +2,6 @@
 import axios, { AxiosResponse } from "axios";
 
 // Added following line
-import EventCard from '../../_components/EventCard';
 import OrganizationProfile from '../../_components/OrganizationProfile';
 
 import { useState } from "react";
