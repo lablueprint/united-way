@@ -31,7 +31,7 @@ app.use(express.json());
 
 // API Routes
 app.use('/test', exampleRouter);
-app.use('/user', userRouter);
+app.use('/users', userRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

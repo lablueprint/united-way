@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Button, TextInput } from 'react-native';
 import axios from 'axios';
 
-export default function UserSignUpForm () {
+export default function UserSignUpForm() {
   const [email, onChangeEmail] = React.useState('');
   const [demographics, onChangeDemo] = React.useState('');
   const [name, onChangeName] = React.useState('');
@@ -16,7 +16,7 @@ export default function UserSignUpForm () {
     onChangePhoneNum('');
     onChangeCommunity('');
 
-    const {data} = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/user/createUser`, {
+    const { data } = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`, {
       collectedStamps: [],
       demographics: {
         gender: false,
@@ -36,32 +36,32 @@ export default function UserSignUpForm () {
 
   return (
     <View>
-        <TextInput
+      <TextInput
         placeholder="Email"
         onChangeText={onChangeEmail}
-        value={email}/>
+        value={email} />
 
-        <TextInput
+      <TextInput
         placeholder="Demographics"
         onChangeText={onChangeDemo}
-        value={demographics}/>
+        value={demographics} />
 
-        <TextInput
+      <TextInput
         placeholder="Name"
         onChangeText={onChangeName}
-        value={name}/>
+        value={name} />
 
-        <TextInput
+      <TextInput
         placeholder="PhoneNum"
         onChangeText={onChangePhoneNum}
-        value={phoneNum}/>
+        value={phoneNum} />
 
-        <TextInput
+      <TextInput
         placeholder="Community"
         onChangeText={onChangeCommunity}
-        value={community}/>
-        
-        <Button title="Print" onPress = {handleAddUser}/>
+        value={community} />
+
+      <Button title="Print" onPress={handleAddUser} />
     </View>
   );
 }
