@@ -31,7 +31,7 @@ app.use(express.json());
 
 // API Routes
 app.use('/test', exampleRouter); // given ip address, /test is where example router logic will be handle
-app.use('/org', organizationRouter);
+app.use('/orgs', organizationRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); //routers are groupings of endpoints

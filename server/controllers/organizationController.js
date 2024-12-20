@@ -4,9 +4,18 @@ const createOrganization = async (req, res) => {
     const newOrganization = new Organization(req.body);
     try {
         const data = await newOrganization.save(newOrganization);
-        res.send(data);
+        res.status(201).json({
+            status: "success",
+            message: "Organization successfully created.",
+            data: data
+        });
     } catch (err) {
-      console.error(err);
+        console.error(err);
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: user could not be created.",
+            data: {}
+        });
     }
 };
 
@@ -14,9 +23,17 @@ const createOrganization = async (req, res) => {
 const getAllOrganizations = async (req, res) => {
     try {
         const organizations = await Organization.find();
-        res.json(organizations);
+        res.status(200).json({
+            status: "success",
+            message: "Organization(s) successfully retrieved.",
+            data: organizations
+        });
     } catch (err) {
-        res.status(500).send('Error retrieving all organizations');
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: could not retrieve all organizations.",
+            data: {}
+        });
     }
 };
 
@@ -27,27 +44,51 @@ const getOrganizationById = async (req, res) => {
     try {
         const organizationByID = await Organization.findOne({  _id: organizationId });
         if (organizationByID) {
-            res.json(organizationByID);
+            res.status(200).json({
+                status: "success",
+                message: "Organization successfully retrieved.",
+                data: organizationByID
+            });
         }
         else {
-            res.status(404).send('Organization not found')
+            res.status(404).json({
+                status: "failure",
+                message: "Error: organization not found.",
+                data: {}
+            });
         }
     } catch (err) {
-        res.status(500).send('Error finding organization');
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: could not find organization.",
+            data: {}
+        });
     }
 };
 
-const getOrganizations = async (req, res) => {
+const getOrganizationsByFilter = async (req, res) => {
     try {
-        const orgByInfo= await Organization.findOne( req.body );
-        if (orgByInfo) {
-            res.json(orgByInfo);
-        } 
+        const orgByFilter = await Organization.find( req.body );
+        if (orgByFilter) {
+            res.status(200).json({
+                status: "success",
+                message: "Organization(s) successfully retrieved",
+                data: orgByFilter
+            });
+        }
         else {
-            res.status(404).send('Organization not found');
+            res.status(404).json({
+                status: "failure",
+                message: "Organization not found.",
+                data: {}
+            });
         }
     } catch (err) {
-        res.status(500).send('Error finding organization by attribute');
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: could not find organization by attribute.",
+            data: {}
+        });
     }
 };
 
@@ -56,14 +97,26 @@ const editOrganizationDetails = async (req, res) => {
     const updateInput = req.body;
 
     try {
-        const result =  await Organization.updateOne( { _id: orgId }, { $set: updateInput});
+        const result = await Organization.updateOne( { _id: orgId }, { $set: updateInput});
         if (result.modifiedCount === 0) {
-            res.status(404).send('Organization not found or no changes made');
+            res.status(404).json({
+                status: "failure",
+                message: "Organization not found or no changes made.",
+                data: result
+            });
+        } else {
+            res.status(200).json({
+                status: "success",
+                message: "Organization updated successfully.",
+                data: result
+            });
         }
-
-        res.send('Organization updated successfully');
     } catch (err) {
-        res.status(500).send('Update not completed');
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: update not completed.",
+            data: {}
+        });
     }
 }
 
@@ -74,13 +127,25 @@ const getAssociatedEvents = async (req, res) => {
         const organizationByID = await Organization.findOne({  _id: orgId });
         if (organizationByID) {
             const eventList = organizationByID['activeEvents'];
-            res.json(eventList);
+            res.status(200).json({
+                status: "success",
+                message: "Successfully received associated events for organization",
+                data: eventList
+            });
         }
         else {
-            res.status(404).send('Organization not found')
+            res.status(404).json({
+                status: "failure",
+                message: "Organization not found.",
+                data: {}
+            });
         }
     } catch (err) {
-        res.status(500).send('Error finding organization');
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error finding organization.",
+            data: {}
+        });
     }
 }
 
@@ -89,19 +154,31 @@ const deleteOrganization = async (req, res) => {
     try {
         const result = await Organization.deleteOne({ _id: orgId})
         if (result.deletedCount === 0){
-            res.status(404).send('Organization not found or already deleted');
+            res.status(404).json({
+                status: "failure",
+                message: "Organization not found or already deleted.",
+                data: {}
+            });
         } else {
-            res.send('Organization deleted successfully.');
+            res.status(200).json({
+                status: "success",
+                message: "Organization deleted successfully.",
+                data: result
+            });
         }
     } catch {
-        res.status(500).send('Error finding organization');
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: could not find organization.",
+            data: {}
+        });
     }
 }
 
 module.exports = {
     createOrganization,
     getAllOrganizations,
-    getOrganizations,
+    getOrganizationsByFilter,
     getOrganizationById,
     editOrganizationDetails,
     getAssociatedEvents,
