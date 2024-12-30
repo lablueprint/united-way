@@ -1,19 +1,35 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import UserSignUpForm from '../_components/UserSignUpForm';
+import { Stack } from 'expo-router';
+import { useSelector } from 'react-redux';
 
 const styles = StyleSheet.create({
-  homeStyle: {
-    padding: 5,
-    backgroundColor: "cyan",
-    marginTop: "30%",
-  }
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 16,
+    },
 });
 
 export default function HomeScreen() {
-  return (
-    <View style={styles.homeStyle}>
-      <UserSignUpForm />
-    </View>
-  );
+    const user = useSelector((state) => { return { userId: state.auth.userId, jwt: state.auth.jwt } })
+
+    console.log(user);
+    return (
+        <View style={styles.container} >
+            <Text>
+                Main home screen test.
+                User:
+                {
+                    user.userId
+                }
+
+                jwt:
+                {
+                    user.jwt
+                }
+            </Text>
+        </ View>
+    );
 }
