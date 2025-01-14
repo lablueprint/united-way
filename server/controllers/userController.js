@@ -36,6 +36,24 @@ const getUserById = async (req, res) => {
   }
 }
 
+const getUserByEmail = async (req, res) => {
+  try {
+    const userByEmail = await User.findOne({email: req.params["email"]});
+    res.status(200).json({
+      status: "success",
+      message: "User successfully retrieved",
+      data: userByEmail
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: user could not be retrieved via ID",
+      data: {}
+    });
+  }
+}
+
 const editUserDetails = async (req, res) => {
   try {
     const userbyID = await User.findOneAndUpdate({_id: req.params["id"]}, {$set: req.body}, {new: true}); //Doesn't catch invalid fields
@@ -91,5 +109,5 @@ const createNewUser = async (req, res) => {
 }
 
 module.exports = {
-  getAllUsers, getUserById, deleteUser, editUserDetails, createNewUser,
+  getAllUsers, getUserById, deleteUser, editUserDetails, createNewUser, getUserByEmail
 };

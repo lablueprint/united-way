@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import axios, { AxiosResponse } from "axios";
@@ -9,6 +9,13 @@ export default function SignUpScreen() {
     const [password, setPassword] = useState('');
 
     const handleAddUser = async () => {
+        if (!validateInputs()) {
+            return;
+        }
+        if (await userExists() != null) {
+            Alert.alert('This email is already associated with an account.');
+            return;
+        }
         try {
             const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
                 {
@@ -20,6 +27,40 @@ export default function SignUpScreen() {
         } catch (err) {
             console.log(err);
         }
+    }
+
+    const userExists = async () => {
+        try {
+            const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`);
+            return response.data.data;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const validateInputs = () => {
+        if (!validateEmail()) {
+            Alert.alert('Enter a valid email.');
+            return false;
+        } else if (!validatePassword()) {
+            Alert.alert('Enter a valid password. Your password must contain at least 12 characters including an uppercase letter, a lowercase letter, a symbol, and a number.')
+            return false;
+        }
+        return true;
+    }
+
+    const validatePassword = () => {
+        // Require 12+ characters including uppercase and lowercase letters, a symbol, and a number
+        return password.match(
+            /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{12,}$/
+        );
+    }
+
+    const validateEmail = () => {
+        // Practical implementation of RFC 2822 from https://www.regular-expressions.info/email.html
+        return email.toLowerCase().match(
+            /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+        );
     }
 
     return (
