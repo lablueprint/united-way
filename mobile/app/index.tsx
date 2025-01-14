@@ -9,13 +9,17 @@ export default function SignUpScreen() {
     const [password, setPassword] = useState('');
 
     const handleAddUser = async () => {
+        // Check if email and password are valid
+        // TODO: Backend password validation
         if (!validateInputs()) {
             return;
         }
+        // Check if email is in database already
         if (await userExists() != null) {
             Alert.alert('This email is already associated with an account.');
             return;
         }
+        // Add user to database
         try {
             const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
                 {
@@ -23,6 +27,8 @@ export default function SignUpScreen() {
                     password: password
                 }
             );
+            // Navigate to onboarding screen
+            // TODO: Redux (currently user ID is passed to the onboarding screen)
             router.push({ pathname: "/onboarding", params: { id: response.data.data._id } });
         } catch (err) {
             console.log(err);
@@ -30,6 +36,7 @@ export default function SignUpScreen() {
     }
 
     const userExists = async () => {
+        // Check if email is in database already
         try {
             const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`);
             return response.data.data;
@@ -90,11 +97,12 @@ export default function SignUpScreen() {
                 <Link href="/sign-in">
                     Already have an account? Sign in
                 </Link>
-            </View>
-            {/* Super special dev button */}
-            <Link href="/(tabs)" style={styles.footer}>
+                {/* Super special dev button */}
+            <Link href="/(tabs)" style={styles.text}>
                 Skip this and go home
             </Link>
+            </View>
+            
         </View>
     );
 }
@@ -112,8 +120,6 @@ const styles = StyleSheet.create({
     },
     text: {
         color: 'black',
-    },
-    footer: {
-        padding: 24,
+        margin: 24,
     }
 });

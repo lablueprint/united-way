@@ -1,13 +1,33 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import axios, { AxiosResponse } from "axios";
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
+    // Check if password is correct
+    // TODO: Encryption stuff (currently compares raw strings)
+    const targetUser = await getUserByEmail();
+    if (targetUser === null || password != targetUser.password) {
+      Alert.alert('Email or password is incorrect.');
+      return;
+    }
+    // If password is correct, proceed to home screen
+    // TODO: Redux (currently nothing is passed to the home screen)
+    router.push({ pathname: "/(tabs)" });
+  }
 
+  const getUserByEmail = async () => {
+    try {
+      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`);
+      return response.data.data;
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
@@ -21,6 +41,7 @@ export default function SignUpScreen() {
           onChangeText={setEmail}
           value={email}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
         <TextInput
           placeholder="Password"
@@ -36,11 +57,11 @@ export default function SignUpScreen() {
         <Link href="/">
           Don't have an account? Sign up
         </Link>
+        {/* Super special dev button */}
+        <Link href="/(tabs)" style={styles.text}>
+          Skip this and go home
+        </Link>
       </View>
-      {/* Super special dev button */}
-      <Link href="/(tabs)" style={styles.footer}>
-        Skip this and go home
-      </Link>
     </View>
   );
 }
@@ -58,8 +79,6 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'black',
-  },
-  footer: {
-    padding: 24,
-  },
+    margin: 24,
+  }
 });

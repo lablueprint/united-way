@@ -26,6 +26,8 @@ export default function OnboardingScreen() {
                     }
                 }
             );
+            // Navigate to home screen
+            // TODO: Redux (currently nothing is passed to the home screen)
             router.push("/(tabs)");
         } catch (err) {
             console.log(err);
@@ -48,7 +50,8 @@ export default function OnboardingScreen() {
                 onChangeText={setPhone}
                 value={phone}
             />
-            {/* <Picker
+            {/* TODO: Gender selector
+            <Picker
                 selectedValue={gender}
                 onValueChange={(itemValue) => setGender(itemValue)}
             >
@@ -70,11 +73,11 @@ export default function OnboardingScreen() {
                 Done
                 </Text>
             </TouchableOpacity>
+            {/* Super special dev button */}
+            <Link href="/(tabs)" style={styles.text}>
+                Skip this and go home
+            </Link>
         </View>
-        {/* Super special dev button */}
-        <Link href="/(tabs)" style={styles.footer}>
-            Skip this and go home
-        </Link>
         </View>
     );
 }
@@ -92,8 +95,6 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'black',
-  },
-  footer: {
-    padding: 24,
+    margin: 24,
   }
 });
