@@ -2,6 +2,18 @@ import React, { useState, useEffect, FormEvent } from "react";
 import axios, { AxiosResponse } from "axios";
 import QuizEditor from "./QuizEditor";
 
+interface Answer {
+  text: string;
+  correct: boolean;
+}
+
+interface Question {
+  title: string;
+  description: string;
+  type: "single-select" | "multi-select";
+  answers: Answer[];
+}
+
 interface EditCardProps {
   id: string;
   handleCloseClick: () => void;
@@ -9,7 +21,8 @@ interface EditCardProps {
     name: string,
     date: Date,
     description: string,
-    tags: string[]
+    tags: string[],
+    questions: Question[]
   ) => void;
 }
 
@@ -60,7 +73,8 @@ export default function EditCard({
         updatedName,
         updatedDate,
         updatedDescription,
-        updatedTags
+        updatedTags,
+        updatedQuestions
       );
       handleCloseClick();
     } catch (err) {

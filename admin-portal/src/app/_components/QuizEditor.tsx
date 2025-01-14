@@ -36,15 +36,8 @@ export default function QuizEditor({
 
   return (
     <div>
-      {updatedQuestions.map((question, index) => (
-        <EditCard
-          key={index}
-          index={index}
-          question={question}
-          handleEditQuestion={handleEditQuestion}
-        />
-      ))}
-      <button onClick={onSave(updatedQuestions)}>Save</button>
+      {/* {updatedQuestions.map((question, index) => ())} */}
+      <button onClick={() => onSave(updatedQuestions)}>Save</button>
       <button onClick={onCancel}>Cancel</button>
     </div>
   );
