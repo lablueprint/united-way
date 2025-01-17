@@ -12,11 +12,17 @@ interface Choices {
 //     options: Choices;
 // }
 
-export default function PollEditor()
+interface Poll {
+    questionData: string;
+    answerData: Choices[];
+}
+
+export default function PollEditor({ questionData, answerData }: Poll)
 {   
-    
-    const [answers, setAnswers] = useState<Choices[]>([{id:1, text: "", count: 0}])
-    const [question, setQuestion] = useState<string>("")
+    const [answers, setAnswers] = useState<Choices[]>(answerData )
+    const [question, setQuestion] = useState<string>(questionData)
+    console.log(answers)
+    console.log(question)
     const handleAnswerChange = (id: number,value: string) => {
         setAnswers((prevAnswers) =>
             prevAnswers.map((answer) =>
@@ -57,7 +63,11 @@ export default function PollEditor()
 
         console.log(data);
     }
-    
+
+    const handleCancel = () => {
+        setQuestion("");
+        setAnswers([{id:1, text: "", count: 0}]);
+    }
 
     return(
         <div>
@@ -84,7 +94,8 @@ export default function PollEditor()
                 }
                 <button onClick = {handleAddAnswer}> Add Answer </button> 
 
-            <button onClick = {handleSave}>Save</button>          
+            <button onClick = {handleSave}>Save</button> 
+            <button onClick = {handleCancel}>Cancel</button>         
         </div>
     )
 }

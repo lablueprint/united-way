@@ -4,7 +4,7 @@ import axios, { AxiosResponse } from "axios";
 import OrganizationProfile from '../../_components/OrganizationProfile';
 
 import { useState } from "react";
-import PollEditor from "@/app/_components/PollEditor";
+import PollCard from "@/app/_components/PollCard";
 export default function Landing() {
   const [responseValue, setResponseValue] = useState();
 
@@ -29,7 +29,7 @@ export default function Landing() {
         Result: {responseValue}
       </div>
       <></>
-      <PollEditor/>
+      <PollCard/>
     </div>
   );
 }
