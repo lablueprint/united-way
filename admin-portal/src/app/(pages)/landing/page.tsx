@@ -12,10 +12,10 @@ export default function Landing() {
   const exampleGetToRoot = async () => {
     try {
       console.log(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/`);
-      // const response: AxiosResponse = await axios.get(
-      //   `http://${process.env.IP_ADDRESS}:${process.env.PORT}/`
-      // );
-      // setResponseValue(response.data);
+      const response: AxiosResponse = await axios.get(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/`
+      );
+      setResponseValue(response.data);
     } catch (error) {
       console.log(error);
     } // Post request

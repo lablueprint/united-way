@@ -14,11 +14,11 @@ export default function OrganizationProfile() {
         console.log(
           `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`
         );
-        // const response: AxiosResponse = await axios.get(
-        //   `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`
-        // );
-        // const { data } = response.data;
-        // setEventIds(data.map((event: EventData) => event._id));
+        const response: AxiosResponse = await axios.get(
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`
+        );
+        const { data } = response.data;
+        setEventIds(data.map((event: EventData) => event._id));
       } catch (err) {
         console.log(err);
       }

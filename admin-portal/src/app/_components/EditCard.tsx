@@ -60,7 +60,8 @@ export default function EditCard({
       setUpdatedDate(new Date(data.date));
       setUpdatedDescription(data.description);
       setUpdatedTags(data.tags || []);
-      setQuestions(data.questions || []);
+      // console.log(data.activity);
+      setQuestions(data.activity || []);
     };
     fetchData();
   }, []);
@@ -96,12 +97,34 @@ export default function EditCard({
   }
 
   const handleSave = (questions: Question[]) => {
-    setQuestions(updatedQuestions);
+    setQuestions(questions); // Update questions with the new values from QuizEditor
   };
 
   const handleCancel = () => {
     console.log("Cancel Editing");
   };
+
+  const mockQuestions: Question[] = [
+    { title: "What is React?", 
+      description: "", 
+      type: "single-select", 
+      answers: [
+        { text: "Answer A", correct: true },
+        { text: "Answer B", correct: false },
+        { text: "Answer C", correct: false },
+        { text: "Answer D", correct: false },
+    ] },
+    { title: "Explain useState", 
+      description: "", 
+      type: "multi-select", 
+      answers: [
+          { text: "Answer A", correct: true },
+          { text: "Answer B", correct: false },
+          { text: "Answer C", correct: false },
+          { text: "Answer D", correct: false },
+      ] },
+  ];
+
 
   return (
     // Change all the element details to be the new information from the input fields after submit is pressed
@@ -156,11 +179,10 @@ export default function EditCard({
       </label>
       <h3>Quiz</h3>
       <QuizEditor
-        questions={updatedQuestions}
+        questions={mockQuestions}
         onSave={handleSave}
         onCancel={handleCancel}
       />
-      ;
       <input type="submit" value="Submit" />
     </form>
   );
