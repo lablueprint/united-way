@@ -15,4 +15,6 @@ eventRouter.post('/filtered', eventController.getEventsByFilter);
 eventRouter.patch('/:id', eventController.editEventDetails);
 eventRouter.delete('/:id', eventController.deleteEvent);
 
+eventRouter.post('/:id/addActivity', eventController.addActivity)
+
 module.exports = eventRouter;

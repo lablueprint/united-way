@@ -125,6 +125,24 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const addActivity = async (req, res) => {
+  try {
+      const { id } = req.params; 
+      const { activity } = req.body; 
+
+      const event = await Event.findById(id);
+      
+      event.activity.push(activity);
+
+      await event.save();
+
+      res.status(200).json({ message: "Activity added successfully.", event });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "An error occurred while adding the activity.", error });
+  }
+};
+
 module.exports = {
   createEvent,
   getEventById,
@@ -132,4 +150,5 @@ module.exports = {
   getEventsByFilter,
   editEventDetails,
   deleteEvent,
+  addActivity,
 };

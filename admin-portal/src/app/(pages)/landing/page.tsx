@@ -1,10 +1,10 @@
 "use client"
 import axios, { AxiosResponse } from "axios";
-
 // Added following line
 import OrganizationProfile from '../../_components/OrganizationProfile';
 
 import { useState } from "react";
+import PollEditor from "@/app/_components/PollEditor";
 export default function Landing() {
   const [responseValue, setResponseValue] = useState();
 
@@ -28,6 +28,8 @@ export default function Landing() {
       <div>
         Result: {responseValue}
       </div>
+      <></>
+      <PollEditor/>
     </div>
   );
 }

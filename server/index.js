@@ -13,6 +13,7 @@ const exampleRouter = require('./routes/exampleRoute.js');
 const eventRouter = require('./routes/eventRoutes.js');
 const organizationRouter = require('./routes/organizationRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
+const activityRouter = require('./routes/activityRoutes.js')
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
@@ -36,6 +37,7 @@ app.use('/test', exampleRouter); // given ip address, /test is where example rou
 app.use('/orgs', organizationRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
+app.use('/activity', activityRouter)
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); //routers are groupings of endpoints
