@@ -12,7 +12,8 @@ export default function SignUpScreen() {
     // Check if password is correct
     // TODO: Encryption stuff (currently compares raw strings)
     const targetUser = await getUserByEmail();
-    if (targetUser === null || password != targetUser.password) {
+    const signIn = await verifySignIn();
+    if (targetUser === null || signIn === null) {
       Alert.alert('Email or password is incorrect.');
       return;
     }
@@ -27,6 +28,23 @@ export default function SignUpScreen() {
       return response.data.data;
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  const verifySignIn = async () => {
+    try {
+      const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/auth/login`,
+        {
+          email: email,
+          password: password
+        }
+      );
+      
+      console.log(response.data);
+      return response.data.data;
+    } catch (err) {
+      console.log(err);
+      return null;
     }
   }
 

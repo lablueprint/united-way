@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
 	experiencePoints: Number,
 	name: String,
 	numStamps: Number,
+	password: String,
 	pastEvents: [String],
 	phoneNumber: String,
 	points: Number,

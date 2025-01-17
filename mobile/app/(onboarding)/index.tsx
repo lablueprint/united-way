@@ -1,12 +1,37 @@
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link, useRouter } from 'expo-router';
 import axios, { AxiosResponse } from "axios";
+import * as SecureStore from 'expo-secure-store';
+import { login } from '../_utils/redux/userSlice';
+import { useSelector } from 'react-redux';
 
 export default function SignUpScreen() {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const router = useRouter();
+    const dispatch = useDispatch();
+    // const user = useSelector((state) => { return { userId: state.auth.userId, jwt: state.auth.userId } })
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+
+    useEffect(() => {
+        const getUser = async () => {
+            return await SecureStore.getItemAsync("user");
+        }
+
+        const user = getUser();
+        // If the user doesn't have existing information saved or JWT is expired...
+        // console.log("user", user)
+        // if (user == null) {
+        // Gather username & password
+
+        // Query the backend to get the token and associated user identifier
+
+        // Save and dispatch this change
+        // dispatchUserDetails();
+        // }
+    }, [])
 
     const handleAddUser = async () => {
         // Check if email and password are valid
@@ -20,6 +45,7 @@ export default function SignUpScreen() {
             return;
         }
         // Add user to database
+        console.log("attempting to create new user");
         try {
             const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
                 {
@@ -27,9 +53,16 @@ export default function SignUpScreen() {
                     password: password
                 }
             );
+            console.log("received response");
             // Navigate to onboarding screen
             // TODO: Redux (currently user ID is passed to the onboarding screen)
-            router.push({ pathname: "/onboarding", params: { id: response.data.data._id } });
+            await dispatch(login({
+                userId: response.data.data._id,
+                authToken: response.data.authToken,
+                refreshToken: response.data.refreshToken
+            }))
+
+            router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken} });
         } catch (err) {
             console.log(err);
         }

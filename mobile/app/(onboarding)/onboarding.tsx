@@ -7,7 +7,7 @@ import axios, { AxiosResponse } from "axios";
 export default function OnboardingScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
-    const { id } = params;
+    const { id, authToken } = params;
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     // const [gender, setGender] = useState(false);
@@ -23,6 +23,12 @@ export default function OnboardingScreen() {
                     demographics: {
                         ethnicity: ethnicity,
                         community: community
+                    }
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': "application/json"
                     }
                 }
             );
