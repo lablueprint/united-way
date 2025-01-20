@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const activitySchema = new mongoose.Schema({
-    organizerID: { type: String, required: true },
+    eventID: { type: String, required: true },
     type: { type: String, required: true },
     content: mongoose.Schema.Types.Mixed,
     timeStart: { type: Date, required: true },

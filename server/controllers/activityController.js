@@ -1,10 +1,13 @@
 const Activity = require("../models/activityModel");
+const Event = require("../models/eventModel");
 
 // Example of creating a document in the database
 const createActivity = async (req, res) => {
   const activity = new Activity(req.body);
   try{
     const data = await activity.save(activity);
+    await Event.findByIdAndUpdate(data.eventID, { $push: { "activity": data._id} });
+
     res.status(201).json({
       status: "success",
       message: "Activity successfully created.",
@@ -100,10 +103,12 @@ const editActivityDetails = async (req, res) => {
 const deleteActivity = async (req, res) => {
   try {
     const data = await Activity.findByIdAndDelete(req.params.id);
+    await Event.findByIdAndUpdate(data.eventID, { $pull: { "activity": data._id } });
+
     res.status(200).json({
       status: "success",
       message: "Activity successfully deleted.",
-      data: data
+      data: {}
     });
   } catch (err) {
     console.error(err);
