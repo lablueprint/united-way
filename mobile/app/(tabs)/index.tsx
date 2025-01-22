@@ -1,11 +1,12 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import UserSignUpForm from '../_components/UserSignUpForm';
+import Events from '../_components/Events';
 
 const styles = StyleSheet.create({
   homeStyle: {
     padding: 5,
-    backgroundColor: "cyan",
+    backgroundColor: "#ff9600",
     marginTop: "30%",
   }
 });
@@ -13,7 +14,8 @@ const styles = StyleSheet.create({
 export default function HomeScreen() {
   return (
     <View style={styles.homeStyle}>
-      <UserSignUpForm />
+      <UserSignUpForm/>
+      <Events/>
     </View>
   );
 }
