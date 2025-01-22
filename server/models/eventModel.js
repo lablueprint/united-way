@@ -38,13 +38,7 @@ const eventSchema = new mongoose.Schema({
   },
   activity: {
     required: true,
-    type: [{
-      type: { type: String, required: true },
-      content: mongoose.Schema.Types.Mixed,
-      timeStart: { type: Date, required: true },
-      timeEnd: { type: Date, required: true },
-      active: { type: Boolean, required: true },
-    }],
+    type: [String],
   },
 });
 
