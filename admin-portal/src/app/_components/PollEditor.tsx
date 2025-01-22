@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import axios from 'axios';
+import axios, {AxiosResponse} from 'axios';
 
 interface Choices {
     id: number;
@@ -13,14 +13,16 @@ interface Choices {
 // }
 
 interface Poll {
+    idData: number;
     questionData: string;
     answerData: Choices[];
 }
 
-export default function PollEditor({ questionData, answerData }: Poll)
+export default function PollEditor({ idData, questionData, answerData }: Poll)
 {   
     const [answers, setAnswers] = useState<Choices[]>(answerData )
     const [question, setQuestion] = useState<string>(questionData)
+    
     console.log(answers)
     console.log(question)
     const handleAnswerChange = (id: number,value: string) => {
@@ -64,6 +66,17 @@ export default function PollEditor({ questionData, answerData }: Poll)
         console.log(data);
     }
 
+    const handleEdit = async (question: string, options: Choices[]) => {
+        const { data } = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/6785fa3aeee89e20063f6930/${idData}/editPoll`, {
+            content: {
+                question: question,
+                options: options,
+            },
+        });
+
+        console.log(data);
+    }
+
     const handleCancel = () => {
         setQuestion("");
         setAnswers([{id:1, text: "", count: 0}]);
@@ -95,7 +108,8 @@ export default function PollEditor({ questionData, answerData }: Poll)
                 <button onClick = {handleAddAnswer}> Add Answer </button> 
 
             <button onClick = {handleSave}>Save</button> 
-            <button onClick = {handleCancel}>Cancel</button>         
+            <button onClick = {handleCancel}>Cancel</button>
+            <button onClick = {handleEdit}>Edit</button>         
         </div>
     )
 }
