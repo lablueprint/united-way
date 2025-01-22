@@ -19,7 +19,7 @@ export default function Landing() {
     } catch (error) {
       console.log(error);
     } // Post request
-  };
+  }
 
   return (
     <div>
