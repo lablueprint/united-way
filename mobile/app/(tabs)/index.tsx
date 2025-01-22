@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { Stack } from 'expo-router';
 import { useSelector } from 'react-redux';
 
 const styles = StyleSheet.create({
@@ -14,8 +13,6 @@ const styles = StyleSheet.create({
 
 export default function HomeScreen() {
     const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-
-    console.log(user);
     return (
         <View style={styles.container} >
             <Text>
@@ -23,12 +20,9 @@ export default function HomeScreen() {
                 {
                     `\nuser: ${user.userId}`
                 }
-                
-
                 {
                     `\nauth: ${user.authToken}`
                 }
-
                 {
                     `\nrefresh: ${user.refreshToken}`
                 }

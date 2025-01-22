@@ -2,7 +2,6 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-nativ
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from "axios";
-// import { Picker } from '@react-native-picker/picker';
 
 export default function OnboardingScreen() {
     const router = useRouter();
@@ -10,7 +9,6 @@ export default function OnboardingScreen() {
     const { id, authToken } = params;
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    // const [gender, setGender] = useState(false);
     const [ethnicity, setEthnicity] = useState('');
     const [community, setCommunity] = useState('');
 
@@ -33,7 +31,6 @@ export default function OnboardingScreen() {
                 }
             );
             // Navigate to home screen
-            // TODO: Redux (currently nothing is passed to the home screen)
             router.push("/(tabs)");
         } catch (err) {
             console.log(err);
@@ -56,14 +53,7 @@ export default function OnboardingScreen() {
                 onChangeText={setPhone}
                 value={phone}
             />
-            {/* TODO: Gender selector
-            <Picker
-                selectedValue={gender}
-                onValueChange={(itemValue) => setGender(itemValue)}
-            >
-                <Picker.Item label="Male" value={false} />
-                <Picker.Item label="Female" value={true} />
-            </Picker> */}
+            {/* TODO: Gender selector */}
             <TextInput
                 placeholder="Ethnicity"
                 onChangeText={setEthnicity}
@@ -80,9 +70,9 @@ export default function OnboardingScreen() {
                 </Text>
             </TouchableOpacity>
             {/* Super special dev button */}
-            <Link href="/(tabs)" style={styles.text}>
+            {/* <Link href="/(tabs)" style={styles.text}>
                 Skip this and go home
-            </Link>
+            </Link> */}
         </View>
         </View>
     );

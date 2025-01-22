@@ -2,23 +2,29 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'reac
 import React, { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import axios, { AxiosResponse } from "axios";
+import { login } from '../_utils/redux/userSlice';
+import { useDispatch } from 'react-redux';
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleSignIn = async () => {
     // Check if password is correct
-    // TODO: Encryption stuff (currently compares raw strings)
     const targetUser = await getUserByEmail();
     const signIn = await verifySignIn();
     if (targetUser === null || signIn === null) {
       Alert.alert('Email or password is incorrect.');
       return;
     }
+    await dispatch(login({
+      userId: targetUser._id,
+      authToken: signIn.accessToken,
+      refreshToken: signIn.refreshToken
+    }))
     // If password is correct, proceed to home screen
-    // TODO: Redux (currently nothing is passed to the home screen)
     router.push({ pathname: "/(tabs)" });
   }
 
@@ -39,8 +45,6 @@ export default function SignUpScreen() {
           password: password
         }
       );
-      
-      console.log(response.data);
       return response.data.data;
     } catch (err) {
       console.log(err);
@@ -76,9 +80,9 @@ export default function SignUpScreen() {
           Don't have an account? Sign up
         </Link>
         {/* Super special dev button */}
-        <Link href="/(tabs)" style={styles.text}>
+        {/* <Link href="/(tabs)" style={styles.text}>
           Skip this and go home
-        </Link>
+        </Link> */}
       </View>
     </View>
   );

@@ -50,7 +50,6 @@ const getUserById = async (req, res) => {
 }
 
 const getUserByEmail = async (req, res) => {
-  console.log("hello, test, test, test");
   try {
     const userByEmail = await User.findOne({email: req.params["email"]});
     res.status(200).json({
