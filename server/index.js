@@ -37,7 +37,7 @@ app.use('/test', exampleRouter); // given ip address, /test is where example rou
 app.use('/orgs', organizationRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
-app.use('/activity', activityRouter)
+app.use('/activities', activityRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); //routers are groupings of endpoints
