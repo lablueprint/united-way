@@ -20,6 +20,51 @@ interface QuizEditorProp {
   onCancel: () => void;
 }
 
+// const deleteEvent = async () => {
+//   try {
+//       removeFromList(id);
+//       await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`);
+//   } catch (err) {
+//       console.log(err);
+//   }
+// };
+
+
+// const editEvent = async (name: string, date: Date, description: string, tags: string[]) => {
+//   try {
+//       const response: AxiosResponse = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`,
+//           {
+//               name: name,
+//               date: date,
+//               description: description,
+//               tags: tags
+//           });
+//       const { data } = response.data;
+//       setEventData(data);
+//   } catch (err) {
+//       console.log(err);
+//   }
+// }
+
+// const getEventById = async () => {
+//   try {
+//       const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`);
+//       const { data } = response.data;
+//       return data;
+//   } catch (err) {
+//       console.log(err);
+//       return err;
+//   }
+// };
+
+// useEffect(() => {
+//   const fetchData = async () => {
+//       const data = await getEventById();
+//       setEventData(data);
+//   };
+//   fetchData();
+// }, []);
+
 export default function QuizEditor({
   questions,
   onSave,
@@ -34,7 +79,6 @@ export default function QuizEditor({
     setUpdatedQuestions(newQuestions);
   };
 
-  console.log('this is in quiz', updatedQuestions);
   return (
     // <div className = "quiz-editor">
     //   <div className = "sidebar">

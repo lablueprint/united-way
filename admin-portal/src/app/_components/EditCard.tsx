@@ -51,17 +51,29 @@ export default function EditCard({
       return err;
     }
   };
+  const getActivityById = async () => {
+    try {
+        const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${id}`);
+        console.log("EditCard ActivityID", id);
+        const { data } = response.data;
+        return data;
+    } catch (err) {
+        console.log(err);
+        return err;
+    }
+};
 
   // Fetch the event details by ID
   useEffect(() => {
     const fetchData = async () => {
       const data = await getEventById();
+      const activity = await getActivityById();
       setUpdatedName(data.name);
       setUpdatedDate(new Date(data.date));
       setUpdatedDescription(data.description);
       setUpdatedTags(data.tags || []);
-      // console.log(data.activity);
-      setQuestions(data.activity || []);
+      console.log('step 0', activity);
+      setQuestions(activity);
     };
     fetchData();
   }, []);
@@ -179,7 +191,7 @@ export default function EditCard({
       </label>
       <h3>Quiz</h3>
       <QuizEditor
-        questions={mockQuestions}
+        questions={updatedQuestions}
         onSave={handleSave}
         onCancel={handleCancel}
       />

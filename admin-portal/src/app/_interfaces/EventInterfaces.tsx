@@ -1,8 +1,9 @@
-interface ActivityContent {
+export interface ActivityContent {
     [key: string]: unknown;
 }
 
-interface Activity {
+export interface Activity {
+    eventID: string;
     type: string;
     content: ActivityContent;
     timeStart: Date;
