@@ -7,7 +7,7 @@ const createActivity = async (req, res) => {
   try{
     const data = await activity.save(activity);
     await Event.findByIdAndUpdate(data.eventID, { $push: { "activity": data._id} });
-
+    console.log("Inside createActivity");
     res.status(201).json({
       status: "success",
       message: "Activity successfully created.",
@@ -63,21 +63,41 @@ const getAllActivities = async (req, res) =>
 
 const getActivitiesByFilter = async (req, res) => {
   try {
-    const activities = await Activity.find(req.body);
+    const { type } = req.body; // Extract type from request body
+    const activities = await Activity.find({ type }); // Filter activities by type
     res.status(200).json({
       status: "success",
-      message: "Activity successfully received.",
-      data: activities
+      message: "Activities successfully retrieved.",
+      data: activities,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error retrieving activities:", err);
     res.status(500).json({
       status: "failure",
-      message: "Server-side error: could not receive activities.",
-      data: {}
+      message: "Server-side error: could not retrieve activities.",
+      data: [],
     });
   }
 };
+
+
+// const getActivitiesByFilter = async (req, res) => {
+//   try {
+//     const activities = await Activity.find(req.body);
+//     res.status(200).json({
+//       status: "success",
+//       message: "Activity successfully received.",
+//       data: activities
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       status: "failure",
+//       message: "Server-side error: could not receive activities.",
+//       data: {}
+//     });
+//   }
+// };
 
 const editActivityDetails = async (req, res) => {
   const activityId = req.params.id;

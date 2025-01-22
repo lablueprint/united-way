@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import axios, {AxiosResponse} from 'axios';
+import axios /*,{AxiosResponse}*/ from 'axios';
 
 interface Choices {
     id: number;
@@ -20,7 +20,7 @@ interface Poll {
 
 export default function PollEditor({ idData, questionData, answerData }: Poll)
 {   
-    const [answers, setAnswers] = useState<Choices[]>(answerData )
+    const [answers, setAnswers] = useState<Choices[]>(answerData);
     const [question, setQuestion] = useState<string>(questionData)
     
     console.log(answers)
@@ -50,24 +50,23 @@ export default function PollEditor({ idData, questionData, answerData }: Poll)
         const now = new Date();
         const currentTimeISO = now.toISOString();
 
-        const { data } = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/6785fa3aeee89e20063f6930/addActivity`, {
-            activity: {
-                type: "poll",
-                content: {
-                    question: question,
-                    options: answers,
-                },
-                timeStart: currentTimeISO,
-                timeEnd: currentTimeISO,
-                active: true,
+        const { data } = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`, {
+            eventID: "67908dc3339ea31330c3ce11",
+            type: "poll",
+            content: {
+                question: question,
+                options: answers,
             },
+            timeStart: currentTimeISO,
+            timeEnd: currentTimeISO,
+            active: true,
         });
 
         console.log(data);
     }
 
     const handleEdit = async (question: string, options: Choices[]) => {
-        const { data } = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/6785fa3aeee89e20063f6930/${idData}/editPoll`, {
+        const { data } = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`, {
             content: {
                 question: question,
                 options: options,
@@ -109,7 +108,7 @@ export default function PollEditor({ idData, questionData, answerData }: Poll)
 
             <button onClick = {handleSave}>Save</button> 
             <button onClick = {handleCancel}>Cancel</button>
-            <button onClick = {handleEdit}>Edit</button>         
+            <button onClick = {() => handleEdit(question, answers)}>Edit</button>         
         </div>
     )
 }

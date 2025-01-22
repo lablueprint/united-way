@@ -20,19 +20,54 @@ export default function PollCard()
     
   const [polls, setPolls] = useState<PollInterface[]>([]);
   
+  // useEffect(() => {
+  //   const fetchPolls = async () => {
+  //     try {
+  //       const { data } = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/getEventById`);
+  //     } catch (error) {
+  //       console.error("Error fetching polls:", error)
+  //     }
+  //   }
+  // })
+  // useEffect(() => {
+  //   const fetchPolls = async () => {
+  //     try {
+  //       const { data } = await axios.post(
+  //         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/filtered`,
+  //         {
+  //           type: "poll", // Filter for activities of type "poll"
+  //         }
+  //       );
+  //       console.log(polls);
+  //       setPolls(data.polls); // Assuming the filtered activities are in `data.data`
+  //       console.log(data.polls);
+  //     } catch (error) {
+  //       console.error("Error fetching polls:", error);
+  //     }
+  //   };
+
+  //   fetchPolls(); // Call the function inside useEffect
+  // }, []); // Empty dependency array ensures this runs only once
+
   useEffect(() => {
     const fetchPolls = async () => {
       try {
-        const { data } = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/6785fa3aeee89e20063f6930/getPolls`);
-        setPolls(data.polls);
-        console.log(data.polls)
+        const { data } = await axios.post(
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/filtered`,
+          {
+            type: "poll", // Send type "poll" in the request body
+          }
+        );
+        setPolls(data.polls); // Save the filtered activities in state
+        console.log(data.polls);
       } catch (error) {
-        console.error("Error fetching polls:", error)
+        console.error("Error fetching polls:", error);
       }
-    }
-    fetchPolls();
+    };
+
+    fetchPolls(); // Call fetchPolls when the component mounts
   }, []);
-  
+
 
 
   // return (
@@ -54,18 +89,28 @@ export default function PollCard()
 
   return (
     <div>
+      <PollEditor 
+        idData={0}
+        questionData=""
+        answerData={[{
+          id: 0,
+          text: "",
+          count: 0,
+        }]}
+      />
       {polls.map((poll) => {
         console.log("Answers for poll:", poll._id);
         return (
-          <PollEditor
+          <PollEditor 
             key={poll._id}
             idData = {poll._id}
             questionData={poll.content.question}
             answerData={poll.content.options}
+            
           />
         );
       })}
     </div>
-  );
+  )
   
 }

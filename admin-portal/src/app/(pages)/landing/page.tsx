@@ -30,6 +30,7 @@ export default function Landing() {
       </div>
       <></>
       <PollCard/>
+      
     </div>
   );
 }

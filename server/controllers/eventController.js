@@ -148,7 +148,7 @@ const getPolls = async (req, res) => {
     const { id } = req.params;
 
     const event = await Event.findById(id);
-    const polls = event.activity.filter(a => a.type === 'poll');
+    const polls = event.activity.filter(a => a.type === 'poll' );
     
     res.status(200).json({
       polls: polls
@@ -163,29 +163,29 @@ const getPolls = async (req, res) => {
 }
 
 
-const editPolls = async (req, res) => {
-  const {id, pollId } = req.params;
-  try {
-    const event = await Event.findByIdAndUpdate(id, req.body, {
-      new: true,
-      const poll = await Event.activity.findByIdAndUpdate(pollId, req.body, {
-        new: true,
-      }
-    });
-    res.status(200).json({
-      status: "success",
-      message: "Event successfully edited.",
-      data: event
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      status: "failure",
-      message: "Server-side error: event could not be edited.",
-      data: {}
-    });
-  }
-};
+// const editPolls = async (req, res) => {
+//   const {id, pollId } = req.params;
+//   try {
+//     const event = await Event.findByIdAndUpdate(id, req.body, {
+//       new: true,
+//       const poll = await Event.activity.findByIdAndUpdate(pollId, req.body, {
+//         new: true,
+//       })
+//     });
+//     res.status(200).json({
+//       status: "success",
+//       message: "Event successfully edited.",
+//       data: event
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       status: "failure",
+//       message: "Server-side error: event could not be edited.",
+//       data: {}
+//     });
+//   }
+// };
 
 module.exports = {
   createEvent,
