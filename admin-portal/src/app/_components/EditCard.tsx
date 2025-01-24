@@ -1,6 +1,7 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import axios, { AxiosResponse } from "axios";
 import QuizEditor from "./QuizEditor";
+import { Activity } from "../_interfaces/EventInterfaces";
 
 interface Answer {
   text: string;
@@ -13,6 +14,7 @@ interface Question {
   type: "single-select" | "multi-select";
   answers: Answer[];
 }
+
 
 interface EditCardProps {
   id: string;
@@ -37,6 +39,8 @@ export default function EditCard({
   const [updatedDescription, setUpdatedDescription] = useState<string>("");
   const [updatedTags, setUpdatedTags] = useState<string[]>([]);
   const [updatedQuestions, setQuestions] = useState<Question[]>([]);
+  const [activityIds, setActivityIds] = useState<string[]>([]);
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
 
   // Get the event details by ID
   const getEventById = async () => {
@@ -51,10 +55,36 @@ export default function EditCard({
       return err;
     }
   };
-  const getActivityById = async () => {
+
+  const getActivityById = async (activityId: string) => {
     try {
-        const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${id}`);
-        console.log("EditCard ActivityID", id);
+      const response: AxiosResponse = await axios.get(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`
+      );
+      const { data } = response.data;
+      return data;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  };
+
+  // Fetch the event details by ID
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getEventById();
+      setUpdatedName(data.name);
+      setUpdatedDate(new Date(data.date));
+      setUpdatedDescription(data.description);
+      setUpdatedTags(data.tags || []);
+      setActivityIds(data.activity || []);
+    };
+    fetchData(); 
+  }, []);
+
+const getActivitiesByFilter = async () => {
+    try {
+        const response: AxiosResponse = await axios.get('http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/');
         const { data } = response.data;
         return data;
     } catch (err) {
@@ -62,21 +92,6 @@ export default function EditCard({
         return err;
     }
 };
-
-  // Fetch the event details by ID
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getEventById();
-      const activity = await getActivityById();
-      setUpdatedName(data.name);
-      setUpdatedDate(new Date(data.date));
-      setUpdatedDescription(data.description);
-      setUpdatedTags(data.tags || []);
-      console.log('step 0', activity);
-      setQuestions(activity);
-    };
-    fetchData();
-  }, []);
 
   // Edit the event details
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -115,28 +130,6 @@ export default function EditCard({
   const handleCancel = () => {
     console.log("Cancel Editing");
   };
-
-  const mockQuestions: Question[] = [
-    { title: "What is React?", 
-      description: "", 
-      type: "single-select", 
-      answers: [
-        { text: "Answer A", correct: true },
-        { text: "Answer B", correct: false },
-        { text: "Answer C", correct: false },
-        { text: "Answer D", correct: false },
-    ] },
-    { title: "Explain useState", 
-      description: "", 
-      type: "multi-select", 
-      answers: [
-          { text: "Answer A", correct: true },
-          { text: "Answer B", correct: false },
-          { text: "Answer C", correct: false },
-          { text: "Answer D", correct: false },
-      ] },
-  ];
-
 
   return (
     // Change all the element details to be the new information from the input fields after submit is pressed
@@ -189,12 +182,31 @@ export default function EditCard({
           }}
         />
       </label>
-      <h3>Quiz</h3>
-      <QuizEditor
-        questions={updatedQuestions}
-        onSave={handleSave}
-        onCancel={handleCancel}
-      />
+      <br/>
+      <label>
+        Activities:
+        <ul>
+        {activityIds.map((activityId) => (
+          <li key={activityId}>
+            {activityId}
+          <button type="button" onClick={async () => {
+            const activity = await getActivityById(activityId);
+            if (activity.type === "quiz") {
+              setQuestions(activity.questions || []);
+              setEditingActivityId(activityId); // Set the currently editing activity ID
+            }
+          }}>
+            Edit Activity
+          </button>
+          {editingActivityId === activityId && (
+            <QuizEditor
+              activityId = {activityId}
+            />
+          )}
+          </li>
+        ))}
+        </ul>
+      </label>
       <input type="submit" value="Submit" />
     </form>
   );

@@ -2,10 +2,18 @@ export interface ActivityContent {
     [key: string]: unknown;
 }
 
+export interface QuizContent {
+    title: string;
+    choices: [string];
+    answers: [number];
+    singleSelect: boolean;
+}
+
 export interface Activity {
+    _id: string;
     eventID: string;
     type: string;
-    content: ActivityContent;
+    content: unknown;
     timeStart: Date;
     timeEnd: Date;
     active: boolean;
