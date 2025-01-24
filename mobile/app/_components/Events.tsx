@@ -5,7 +5,8 @@ import axios from 'axios';
 const styles = StyleSheet.create({
     titletext: {
     fontSize: 40,
-    paddingTop: 200,
+    paddingTop: 50,
+    paddingLeft: '8%',
     color: "white",
   }
 });

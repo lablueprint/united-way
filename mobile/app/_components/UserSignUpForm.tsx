@@ -61,7 +61,7 @@ export default function UserSignUpForm() {
         onChangeText={onChangeCommunity}
         value={community} />
 
-      <Button title="Hello Caroline" onPress={handleAddUser} />
+      <Button title="Hello Daniel" onPress={handleAddUser} />
     </View>
   );
 }
