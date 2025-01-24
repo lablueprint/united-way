@@ -2,6 +2,7 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-nativ
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from "axios";
+import DropDownPicker from 'react-native-dropdown-picker';
 
 export default function OnboardingScreen() {
     const router = useRouter();
@@ -11,8 +12,17 @@ export default function OnboardingScreen() {
     const [phone, setPhone] = useState('');
     const [ethnicity, setEthnicity] = useState('');
     const [community, setCommunity] = useState('');
+    // Gender selector
+    const [open, setOpen] = useState(false);
+    const [gender, setGender] = useState(null);
+    const [items, setItems] = useState([
+        {label: 'Male', value: 'male'},
+        {label: 'Female', value: 'female'},
+        {label: 'Other', value: 'other'},
+    ]);
 
     const handleEditUser = async () => {
+        console.log(gender);
         try {
             const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${id}`,
                 {
@@ -20,7 +30,8 @@ export default function OnboardingScreen() {
                     phoneNumber: phone,
                     demographics: {
                         ethnicity: ethnicity,
-                        community: community
+                        community: community,
+                        gender: gender
                     }
                 },
                 {
@@ -53,7 +64,6 @@ export default function OnboardingScreen() {
                 onChangeText={setPhone}
                 value={phone}
             />
-            {/* TODO: Gender selector */}
             <TextInput
                 placeholder="Ethnicity"
                 onChangeText={setEthnicity}
@@ -63,6 +73,15 @@ export default function OnboardingScreen() {
                 placeholder="Community"
                 onChangeText={setCommunity}
                 value={community}
+            />
+            <DropDownPicker
+                open={open}
+                value={gender}
+                items={items}
+                setOpen={setOpen}
+                setValue={setGender}
+                setItems={setItems}
+                placeholder={'Gender'}
             />
             <TouchableOpacity onPress={handleEditUser}>
                 <Text>

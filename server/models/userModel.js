@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
 	collectedStamps: [String],
 	demographics: {
-		gender: Boolean,
+		gender: String,
 		ethnicity: String,
 		community: String
 	},
