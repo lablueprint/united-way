@@ -13,18 +13,18 @@ interface Choices {
 // }
 
 interface Poll {
+    eventID: string;
     idData: number;
     questionData: string;
     answerData: Choices[];
 }
-
-export default function PollEditor({ idData, questionData, answerData }: Poll)
+export default function PollEditor({ eventID, idData, questionData, answerData }: Poll)
 {   
     const [answers, setAnswers] = useState<Choices[]>(answerData);
     const [question, setQuestion] = useState<string>(questionData)
     
-    console.log(answers)
-    console.log(question)
+    // console.log(answers)
+    // console.log(question)
     const handleAnswerChange = (id: number,value: string) => {
         setAnswers((prevAnswers) =>
             prevAnswers.map((answer) =>
@@ -51,7 +51,7 @@ export default function PollEditor({ idData, questionData, answerData }: Poll)
         const currentTimeISO = now.toISOString();
 
         const { data } = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`, {
-            eventID: "67908dc3339ea31330c3ce11",
+            eventID: eventID,
             type: "poll",
             content: {
                 question: question,

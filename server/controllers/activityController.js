@@ -63,8 +63,18 @@ const getAllActivities = async (req, res) =>
 
 const getActivitiesByFilter = async (req, res) => {
   try {
-    const { type } = req.body; // Extract type from request body
-    const activities = await Activity.find({ type }); // Filter activities by type
+    const { eventID, type } = req.body; // Extract type and id from request body
+    
+    // Build the filter object
+    const filter = {};
+    if (type) filter.type = type; // If 'type' is provided, filter by 'type'
+    if (eventID) filter.eventID = eventID; // If 'id' is provided, filter by 'id'
+    console.log("Filter" + filter);
+
+    // Fetch activities using the filter
+    const activities = await Activity.find(filter);
+    // const {type } = req.body; // Extract type from request body
+    // const activities = await Activity.find({ type }); // Filter activities by type
     res.status(200).json({
       status: "success",
       message: "Activities successfully retrieved.",

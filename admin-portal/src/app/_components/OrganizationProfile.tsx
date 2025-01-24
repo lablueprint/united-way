@@ -33,6 +33,7 @@ export default function OrganizationProfile() {
                 <h2>Events</h2>
                 <div>
                     {eventIds.map((id: string) => {
+                        console.log("Event Id:" + id);
                         return <EventCard id={id} key={id} removeFromList={removeFromList} />;
                     })}
                 </div>
