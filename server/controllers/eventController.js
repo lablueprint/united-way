@@ -20,6 +20,69 @@ const createEvent = async (req, res) => {
   }
 };
 
+const addUserToEvent = async (req, res) => {
+  const origId = req.params.id;
+  const { newUser } = req.body;
+  console.log(newUser);
+  console.log(origId);
+  
+  try {
+    const result = await Event.updateOne( { _id: origId }, { $addToSet: { registeredUsers: newUser }});
+    console.log(result);
+    if (result.modifiedCount === 0) {
+        res.status(404).json({
+            status: "failure",
+            message: "Event not found or no changes made.",
+            data: result
+        });
+    } else {
+        res.status(200).json({
+            status: "success",
+            message: "Event updated successfully.",
+            data: result
+        });
+    }
+} catch (err) {
+    res.status(500).json({
+        status: "failure",
+        message: "Server-side error: update not completed.",
+        data: {}
+    });
+}
+}
+
+const removeUserFromEvent = async (req, res) => {
+  const eventId = req.params.id;
+  const userId = req.body;
+  console.log(removeId);
+  console.log(removeUser);
+  try {
+    const result = await Event.findOneAndUpdate(
+      { _id: eventId }, 
+      { $pull: { registeredUsers: userId}});
+    console.log(result);
+    if (result.modifiedCount === 0) {
+        res.status(404).json({
+            status: "failure",
+            message: "Event not found or no changes made.",
+            data: result
+        });
+    } else {
+        res.status(200).json({
+            status: "success",
+            message: "Event updated successfully.",
+            data: result
+        });
+    }
+} catch (err) {
+    res.status(500).json({
+        status: "failure",
+        message: "Server-side error: update not completed.",
+        data: {}
+    });
+}
+}
+
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
   try {
@@ -127,9 +190,11 @@ const deleteEvent = async (req, res) => {
 
 module.exports = {
   createEvent,
+  removeUserFromEvent,
   getEventById,
   getAllEvents,
   getEventsByFilter,
   editEventDetails,
   deleteEvent,
+  addUserToEvent,
 };

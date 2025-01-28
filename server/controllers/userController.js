@@ -36,6 +36,69 @@ const getUserById = async (req, res) => {
   }
 }
 
+const addEventToUser = async (req, res) => {
+  console.log(req.params.id);
+  console.log(req.body);
+  const userId = req.params.id;
+  const { newEvent } = req.body;
+  console.log('hi');
+  
+  try {
+    const result = await User.updateOne( { _id: userId }, { $addToSet: { registeredEvents: newEvent }});
+    console.log(result);
+    if (result.modifiedCount === 0) {
+        res.status(404).json({
+            status: "failure",
+            message: "Event not found or no changes made.",
+            data: result
+        });
+    } else {
+        res.status(200).json({
+            status: "success",
+            message: "Event updated successfully.",
+            data: result
+        });
+    }
+} catch (err) {
+    res.status(500).json({
+        status: "failure",
+        message: "Server-side error: update not completed.",
+        data: {}
+    });
+}
+}
+
+const removeEventFromUser = async (req, res) => {
+  const userId = req.params.id;
+  const { eventId } = req.body;
+  
+  try {
+    const result = await User.findOneAndUpdate(
+      { _id: userId }, 
+      { $pull: { registeredEvents: eventId}});
+    console.log(result);
+    if (result.modifiedCount === 0) {
+        res.status(404).json({
+            status: "failure",
+            message: "Event not found or no changes made.",
+            data: result
+        });
+    } else {
+        res.status(200).json({
+            status: "success",
+            message: "Event updated successfully.",
+            data: result
+        });
+    }
+} catch (err) {
+    res.status(500).json({
+        status: "failure",
+        message: "Server-side error: update not completed.",
+        data: {}
+    });
+}
+}
+
 const editUserDetails = async (req, res) => {
   try {
     const userbyID = await User.findOneAndUpdate({_id: req.params["id"]}, {$set: req.body}, {new: true}); //Doesn't catch invalid fields
@@ -91,5 +154,11 @@ const createNewUser = async (req, res) => {
 }
 
 module.exports = {
-  getAllUsers, getUserById, deleteUser, editUserDetails, createNewUser,
+  getAllUsers, 
+  getUserById, 
+  deleteUser, 
+  editUserDetails, 
+  createNewUser,
+  addEventToUser,
+  removeEventFromUser,
 };
