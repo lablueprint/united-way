@@ -19,14 +19,15 @@ export default function QuizEditor({
 }: QuizEditorProp) {
   const [updatedQuestions, setUpdatedQuestions] = useState<Question[]>([]);
   const [activity, setActivity] = useState<Activity>();
+  const [questionIndex, setQuestionIndex] = useState<number>(0);
 
   useEffect(() => {
     const fetchQuestions = async () => {
       const activityData = await getActivityById(activityId);
       setActivity(activityData);
       setUpdatedQuestions(activityData.content);
+      console.log(activityData);
     };
-
     fetchQuestions();
   }, [activityId]);
 
@@ -46,32 +47,47 @@ export default function QuizEditor({
     newQuestions[index] = updatedQuestion;
     setUpdatedQuestions(newQuestions);
   };
-
-  return (
-    // <div className = "quiz-editor">
-    //   <div className = "sidebar">
-    //     {updatedQuestions.map((_,index) => (
-      //       <button
-      //          key={index}
-      //          onClick={() => setCurrentQuestion(index)}
-      //          className={currentQuestionIndex == index ? "active" : ""} 
-      //          >
-      //           Question {index + 1}
-    //         </button>
-    //     ))}
-    //   </div>
-    // </div>
-    
-      <div>
-        <h2>Hello :o</h2>
-        {updatedQuestions.map((_, index) => (
-          <h3>
-            Question {index + 1}
-          </h3>
+  // console.log("updated questions @ index :p", updatedQuestions[0]);
+  // console.log("updated questions choices ", updatedQuestions[questionIndex].choices[0]);
+  if(updatedQuestions.length <=0) {
+    return <div />;
+  }
+  
+  else {
+  return (    
+    <div>
+      {
+        updatedQuestions.map((_, index) => {
+          return <button 
+          style = {
+            {
+              height: "1rem",
+              width: "1rem"
+            }
+          }
           
-        ))}
-      </div>
+          key ={`b${index}`}
+          onClick={() => setQuestionIndex(index)}
+          />
+        })
+        
+      }
+      {
+        questionIndex
+      }
+      {
+        
+        updatedQuestions[questionIndex].choices.map((choice, _) => {
+          return (
+          <div key={`🫠${choice}`}>
+            {choice}
+          </div>)
+        })
+      }
+    </div>
     
   );
+  
+}
 }
 
