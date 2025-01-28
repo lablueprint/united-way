@@ -3,17 +3,32 @@ import Poll from '../_components/Poll'
 
 export default function TabTwoScreen() {
   return (
-    <View>
-      <Text style={styles.text}>
-        Second page.
-      </Text>
-      <Poll id ="67908dc3339ea31330c3ce11"/>
+    // <View>
+    //   <Text style={styles.text}>
+    //     Second page.
+    //   </Text>
+    //   <Poll id ="67908dc3339ea31330c3ce11"/>
+    // </View>
+
+    <View style={styles.container}>
+      <Poll id="67908dc3339ea31330c3ce11" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {
+  // text: {
+  //   color: 'white',
+  // }
+  container: {
+    flex: 1,
+    backgroundColor: '#1a1a1a', // Dark background
+    padding: 20,
+  },
+  headerText: {
     color: 'white',
-  }
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
 });

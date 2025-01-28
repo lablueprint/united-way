@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Button, TextInput, Text, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import axios from 'axios';
 
 interface PollCardProps {
@@ -7,7 +7,6 @@ interface PollCardProps {
 }
 
 export default function Poll({ id }: PollCardProps) {
-
     interface PollInterface {
         eventID: string;
         _id: number;
@@ -21,42 +20,81 @@ export default function Poll({ id }: PollCardProps) {
         text: string;
         count: number;
     }
-    
-  const [polls, setPolls] = useState<PollInterface[]>([]);
 
-  const handleNextQuestion = async () => {
-      try {
-        console.log("Polls id: " + id);
-        const { data } = await axios.post(
-          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/filtered`,
-          {
-            eventID: id,
-            type: "poll", // Send type "poll" in the request body
-          }
-        );
+    const [polls, setPolls] = useState<PollInterface[]>([]);
 
-        setPolls(data.data); // Save the filtered activities in state
-        console.log("Data " + data.data);
-      } catch (error) {
-        console.error("Error fetching polls:", error);
-    }
-  }
+    useEffect(() => {
+        const fetchPolls = async () => {
+            try {
+                console.log("Fetching polls for eventID:", id);
+                const { data } = await axios.post(
+                    `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/filtered`,
+                    {
+                        eventID: id,
+                        type: "poll", // Send type "poll" in the request body
+                    }
+                );
 
-  return (
-    <Text> {/* Use ScrollView to handle long lists */}
-        {polls.map((poll) => (
-            <View key={poll._id} style={{ margin: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 5, color: 'white' }}>
-                    {poll.content.question}
-                </Text>
-                {poll.content.options.map((option) => (
-                    <Text key={option.id} style={{ marginVertical: 2, color: 'white' }}>
-                        {option.text} ({option.count} votes)
-                    </Text>
-                ))}
-            </View>
-        ))}
-        {/* <Button title="Next Question" onPress={() => handleNextQuestion('your-event-id')} /> */}
-    </Text>
-);
+                setPolls(data.data); // Save the filtered polls in state
+                console.log("Fetched polls:", data.data);
+            } catch (error) {
+                console.error("Error fetching polls:", error);
+            }
+        };
+
+        fetchPolls(); // Call the async function
+    }, [id]); // Dependency array ensures this effect runs when `id` changes
+
+    return (
+        <ScrollView style={styles.container}>
+            {polls.length > 0 ? (
+                polls.map((poll) => (
+                    <View key={poll._id} style={styles.pollCard}>
+                        <Text style={styles.questionText}>{poll.content.question}</Text>
+                        {poll.content.options.map((option) => (
+                            <Text key={option.id} style={styles.optionText}>
+                                {option.text} ({option.count} votes)
+                            </Text>
+                        ))}
+                    </View>
+                ))
+            ) : (
+                <Text style={styles.loadingText}>Loading polls...</Text>
+            )}
+        </ScrollView>
+    );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        marginTop: 10,
+    },
+    pollCard: {
+        backgroundColor: '#2c2c2c',
+        borderRadius: 10,
+        padding: 15,
+        marginVertical: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+    },
+    questionText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#fff',
+        marginBottom: 10,
+    },
+    optionText: {
+        fontSize: 16,
+        color: '#ccc',
+        marginVertical: 4,
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#aaa',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+});
