@@ -56,6 +56,7 @@ export default function PollCard({ id }: PollCardProps)
           text: "",
           count: 0,
         }]}
+        onSave={fetchPolls}
       />
       {polls.map((poll) => {
         // console.log("Answers for poll:", poll._id);
@@ -66,6 +67,7 @@ export default function PollCard({ id }: PollCardProps)
             idData = {poll._id}
             questionData={poll.content.question}
             answerData={poll.content.options}
+            onSave={fetchPolls}
           />
         );
       })}

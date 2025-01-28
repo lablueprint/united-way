@@ -17,8 +17,9 @@ interface Poll {
     idData: number;
     questionData: string;
     answerData: Choices[];
+    onSave: ()=>void;
 }
-export default function PollEditor({ eventID, idData, questionData, answerData }: Poll)
+export default function PollEditor({ eventID, idData, questionData, answerData, onSave }: Poll)
 {   
     const [answers, setAnswers] = useState<Choices[]>(answerData);
     const [question, setQuestion] = useState<string>(questionData)
@@ -40,10 +41,14 @@ export default function PollEditor({ eventID, idData, questionData, answerData }
     };
 
     const handleAddAnswer = () => {
+        console.log("Hellooooooooooo")
+        console.log(answers)
         setAnswers((prevAnswers) => [
             ...prevAnswers,
             {id: prevAnswers.length + 1, text: "", count: 0}
         ]);
+        console.log(answers)
+        
     };
 
     const handleSave = async () => {
@@ -61,6 +66,11 @@ export default function PollEditor({ eventID, idData, questionData, answerData }
             timeEnd: currentTimeISO,
             active: true,
         });
+
+        onSave();
+        setQuestion("");
+        setAnswers([{id: 0, text: "", count: 0}]);
+        
 
         console.log(data);
     }
@@ -104,11 +114,11 @@ export default function PollEditor({ eventID, idData, questionData, answerData }
                 ))
                     
                 }
-                <button onClick = {handleAddAnswer}> Add Answer </button> 
 
-            <button onClick = {handleSave}>Save</button> 
-            <button onClick = {handleCancel}>Cancel</button>
-            <button onClick = {() => handleEdit(question, answers)}>Edit</button>         
+            <button type="button" onClick = {handleAddAnswer}> Add Answer </button>
+            <button type="button" onClick = {handleSave}>Save</button> 
+            <button type="button" onClick = {handleCancel}>Cancel</button>
+            <button type="button" onClick = {() => handleEdit(question, answers)}>Edit</button>         
         </div>
     )
 }

@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   env: {
-    IP_ADDRESS: "192.168.1.113",
+    IP_ADDRESS: "131.179.71.113",
     PORT: "4000",
   }
 };
