@@ -1,32 +1,35 @@
 "use client"
 import "./EventSignIn.css";
-import React, { useState } from 'react';
+import React from 'react';
 import QRCode from 'react-qr-code';
 
-export default function EventDetailsPage() {
-  const [eventId, setEventId] = useState("");
-  const [eventDetails, setEventDetails] = useState({
-    id: "",
-    name: "",
-    description: "",
-    org: "",
-  });
+interface EventDetailsProps {
+  _id: string;
+}
+export default function EventDetailsPage({_id }:EventDetailsProps) {
+  // const [eventDetails, setEventDetails] = useState({
+  //   id: "",
+  //   name: "",
+  //   description: "",
+  //   org: "",
+  // });
 
-  const handleGenerateQRCode = () => {
-    // Simulate fetching event details using the entered event ID
-    const fetchedDetails = {
-      id: eventId,
-      name: `Event for ${eventId}`,
-      description: `Description for event ${eventId}`,
-      org: "Sample Organization",
-    };
-    setEventDetails(fetchedDetails);
-  };
+  // const handleGenerateQRCode = () => {
+  //   // Simulate fetching event details using the entered event ID
+  //   const fetchedDetails = {
+  //     id: _id,
+  //     name: `Event for ${_id}`,
+  //     description: `Description for event ${_id}`,
+  //     org: "Sample Organization",
+  //   };
+  //   setEventDetails(fetchedDetails);
+  // };
 
   return (
     <div className="qr-code-align">
-      <h1>Event QR Code Generator</h1>
-      <input
+      <QRCode value={_id}/>
+      {/* <h1>Event QR Code Generator</h1> */}
+      {/* <input
         type="text"
         placeholder="Enter Event ID"
         value={eventId}
@@ -37,8 +40,8 @@ export default function EventDetailsPage() {
           marginBottom: "10px",
           width: "60%",
         }}
-      />
-      <br />
+      /> */
+      /* <br />
       <button onClick={handleGenerateQRCode}>
         Generate QR Code
       </button>
@@ -48,9 +51,9 @@ export default function EventDetailsPage() {
           <h2>{eventDetails.name}</h2>
           <p>{eventDetails.description}</p>
           <p>Organized by: {eventDetails.org}</p>
-          <QRCode value={eventDetails.id} />
+          <QRCode value={_id} />
         </div>
-      )}
+      )} */}
     </div>
   );
 }

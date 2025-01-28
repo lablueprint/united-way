@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EditCard from "./EditCard";
+import EventModal from './EventModal';
 import { EventData } from '../_interfaces/EventInterfaces';
 
 interface EventCardProps {
@@ -11,6 +12,7 @@ interface EventCardProps {
 export default function EventCard({ id, removeFromList }: EventCardProps) {
     const [showButtons, setShowButtons] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [eventData, setEventData] = useState<EventData>({
         organizerId: "",
         _id: "",
@@ -79,11 +81,18 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         setIsEditing(false);
     };
 
+    const handleCardClick = () => {
+        // Show EventModal
+        console.log('card clicked');
+        setShowModal(true);
+    }
+    
     return (
         // Show event name, show buttons on hover
         <div
             onMouseEnter={() => setShowButtons(true)}
             onMouseLeave={() => setShowButtons(false)}
+            onClick={() => handleCardClick()}
         >
             <p>{eventData?.name}</p>
             {showButtons && (
@@ -92,9 +101,21 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
                     <button onClick={handleEditClick}>Edit</button>
                 </>
             )}
-
+            
+            {showModal && (
+                <>
+                    <EventModal 
+                        _id={eventData?._id}
+                        name={eventData?.name}
+                        description={eventData?.description}
+                        organizerId={eventData?.organizerId}
+                    />
+                </>
+            )}
+            
             {isEditing && <EditCard id={id} handleCloseClick={handleCloseClick} handleEditEvent={editEvent} />}
         </div>
     );
 }
+
 
