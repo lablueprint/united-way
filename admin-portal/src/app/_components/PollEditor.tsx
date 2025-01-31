@@ -52,8 +52,8 @@ export default function PollEditor({ eventID, idData, questionData, answerData, 
     };
 
     const handleSave = async () => {
-        const now = new Date();
-        const currentTimeISO = now.toISOString();
+        //const now = new Date();
+        //const currentTimeISO = now.toISOString();
 
         const { data } = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`, {
             eventID: eventID,
@@ -62,9 +62,9 @@ export default function PollEditor({ eventID, idData, questionData, answerData, 
                 question: question,
                 options: answers,
             },
-            timeStart: currentTimeISO,
-            timeEnd: currentTimeISO,
-            active: true,
+            // timeStart: currentTimeISO,
+            // timeEnd: currentTimeISO,
+            // active: true,
         });
 
         onSave();

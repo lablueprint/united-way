@@ -3,7 +3,26 @@ const Event = require("../models/eventModel");
 
 // Example of creating a document in the database
 const createActivity = async (req, res) => {
+  // const activityId = req.params.id;
+  // try {
+  //   const activity = await Activity.findByIdAndUpdate(activityId, req.body, {
+  //     new: true,
+  //   });
+  //   res.status(200).json({
+  //     status: "success",
+  //     message: "Activity successfully edited.",
+  //     data: activity
+  //   });
+  // } catch (err) {
+  //   console.error(err);
+  //   res.status(500).json({
+  //     status: "failure",
+  //     message: "Server-side error: activity could not be edited.",
+  //     data: {}
+  //   });
+  // }
   const activity = new Activity(req.body);
+  console.log("\n\Activity Log: " + activity);
   try{
     const data = await activity.save(activity);
     await Event.findByIdAndUpdate(data.eventID, { $push: { "activity": data._id} });
@@ -22,6 +41,29 @@ const createActivity = async (req, res) => {
     });
   }
 };
+
+const addPoll = async (req, res) => {
+  const activityType = req.params.type;
+  try {
+    const activity = await Activity.findByTypeAndUpdate(activityType, req.body, {
+      new: true,
+    });
+    res.status(200).json({
+      status: "success",
+      message: "Activity successfully edited.",
+      data: activity
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: activity could not be edited.",
+      data: {}
+    });
+  }
+    //     new: true,
+    //   });
+}
 
 const getActivityById = async (req, res) => {
   const activityId = req.params.id;
@@ -64,15 +106,18 @@ const getAllActivities = async (req, res) =>
 const getActivitiesByFilter = async (req, res) => {
   try {
     const { eventID, type } = req.body; // Extract type and id from request body
-    
+    console.log("Backend received:", req.body);
     // Build the filter object
     const filter = {};
     if (type) filter.type = type; // If 'type' is provided, filter by 'type'
     if (eventID) filter.eventID = eventID; // If 'id' is provided, filter by 'id'
     console.log("Filter" + filter);
+    
 
     // Fetch activities using the filter
     const activities = await Activity.find(filter);
+    console.log("Filter received:", filter);
+    console.log("Activities found:", activities)
     // const {type } = req.body; // Extract type from request body
     // const activities = await Activity.find({ type }); // Filter activities by type
     res.status(200).json({
