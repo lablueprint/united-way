@@ -14,6 +14,8 @@ const eventRouter = require('./routes/eventRoutes.js');
 const organizationRouter = require('./routes/organizationRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
 const activityRouter = require('./routes/activityRoutes.js')
+const transactionRouter = require('./routes/transactionRoutes.js');
+
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
@@ -38,6 +40,7 @@ app.use('/orgs', organizationRouter);
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
 app.use('/activities', activityRouter);
+app.use('/transactions', transactionRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); //routers are groupings of endpoints

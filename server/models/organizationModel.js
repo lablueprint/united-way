@@ -50,9 +50,7 @@ const organizationSchema = new mongoose.Schema({
     {
       name: { type: String, required: true }, // Reward name (e.g., "Cookie")
       cost: { type: Number, required: true }, 
-    },
-  ],
-
+    },],
   transactions: [
     {
       type: String, // mongoose.Schema.Types.ObjectId , ref: 'Transaction? 
