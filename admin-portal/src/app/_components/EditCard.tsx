@@ -100,7 +100,7 @@ const getActivitiesByFilter = async () => {
       handleEditEvent(
         updatedName,
         updatedDate,
-        updatedDescription,
+        updatedDescription, 
         updatedTags,
         updatedQuestions
       );
@@ -133,7 +133,8 @@ const getActivitiesByFilter = async () => {
 
   return (
     // Change all the element details to be the new information from the input fields after submit is pressed
-    <form onSubmit={handleSubmit}>
+    <>
+    {/* <form onSubmit={handleSubmit}> */}
       <label>
         Name:
         <input
@@ -207,7 +208,8 @@ const getActivitiesByFilter = async () => {
         ))}
         </ul>
       </label>
-      <input type="submit" value="Submit" />
-    </form>
+      {/* <input type="submit" value="Submit" /> */}
+    </>
+    // </form>
   );
 }
