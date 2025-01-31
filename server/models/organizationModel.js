@@ -37,6 +37,27 @@ const organizationSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
+
+  users: [
+    {
+      _id: { type: String, required: true }, // Reference to User 
+      // ID mongoose.Schema.Types.ObjectId , ref: 'User ? 
+      points: { type: Number, default: 0 }, // Points associated with the user
+    },
+  ],
+
+  rewards: [
+    {
+      name: { type: String, required: true }, // Reward name (e.g., "Cookie")
+      cost: { type: Number, required: true }, 
+    },
+  ],
+
+  transactions: [
+    {
+      type: String, // mongoose.Schema.Types.ObjectId , ref: 'Transaction? 
+      required: true
+    },],
 });
 
 module.exports = mongoose.model('Organization', organizationSchema);

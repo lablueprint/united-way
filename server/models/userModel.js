@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema({
 	numStamps: Number,
 	pastEvents: [String],
 	phoneNumber: String,
-	points: Number,
 	registeredEvents: [String]
 });
 
