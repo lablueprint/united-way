@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EditCard from "./EditCard";
 import { EventData } from '../_interfaces/EventInterfaces';
+import { ActivityContent } from '../_interfaces/EventInterfaces';
 
 interface EventCardProps {
     id: string;
@@ -24,6 +25,14 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         tags: [],
         registeredUsers: [],
         activities: []
+    });
+    const [activityData, setActivityData] = useState<ActivityContent>({
+        eventID: "",
+        type: "",
+        content: "",
+        timeStart: new Date(),
+        timeEnd: new Date(),
+        active: false,
     });
 
     const deleteEvent = async () => {
@@ -62,10 +71,28 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         }
     };
 
+    const getActivityById = async (activityID :string) => {
+        try {
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID}`);
+            // console.log("EventCard ActivityID", `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID[0]}`);
+            // console.log("EventCard [0]", activityID[0]);
+            const { data } = response.data;
+            // console.log("EventCard getActivityById", data);
+            return data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             const data = await getEventById();
+            // console.log("EventCard getEventById", data);
+            // const activityResponse = await getActivityById(data.activity);
+            // console.log("useEffect getActivityById", data.activity);
             setEventData(data);
+            // setActivityData(activityResponse);
         };
         fetchData();
     }, []);

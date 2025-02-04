@@ -1,6 +1,7 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import axios, { AxiosResponse } from "axios";
 import QuizEditor from "./QuizEditor";
+import { Activity } from "../_interfaces/EventInterfaces";
 
 interface Answer {
   text: string;
@@ -13,6 +14,7 @@ interface Question {
   type: "single-select" | "multi-select";
   answers: Answer[];
 }
+
 
 interface EditCardProps {
   id: string;
@@ -37,12 +39,27 @@ export default function EditCard({
   const [updatedDescription, setUpdatedDescription] = useState<string>("");
   const [updatedTags, setUpdatedTags] = useState<string[]>([]);
   const [updatedQuestions, setQuestions] = useState<Question[]>([]);
+  const [activityIds, setActivityIds] = useState<string[]>([]);
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
 
   // Get the event details by ID
   const getEventById = async () => {
     try {
       const response: AxiosResponse = await axios.get(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`
+      );
+      const { data } = response.data;
+      return data;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  };
+
+  const getActivityById = async (activityId: string) => {
+    try {
+      const response: AxiosResponse = await axios.get(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`
       );
       const { data } = response.data;
       return data;
@@ -60,10 +77,21 @@ export default function EditCard({
       setUpdatedDate(new Date(data.date));
       setUpdatedDescription(data.description);
       setUpdatedTags(data.tags || []);
-      setQuestions(data.questions || []);
+      setActivityIds(data.activity || []);
     };
-    fetchData();
+    fetchData(); 
   }, []);
+
+const getActivitiesByFilter = async () => {
+    try {
+        const response: AxiosResponse = await axios.get('http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/');
+        const { data } = response.data;
+        return data;
+    } catch (err) {
+        console.log(err);
+        return err;
+    }
+};
 
   // Edit the event details
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -72,7 +100,7 @@ export default function EditCard({
       handleEditEvent(
         updatedName,
         updatedDate,
-        updatedDescription,
+        updatedDescription, 
         updatedTags,
         updatedQuestions
       );
@@ -96,7 +124,7 @@ export default function EditCard({
   }
 
   const handleSave = (questions: Question[]) => {
-    setQuestions(updatedQuestions);
+    setQuestions(questions); // Update questions with the new values from QuizEditor
   };
 
   const handleCancel = () => {
@@ -105,7 +133,8 @@ export default function EditCard({
 
   return (
     // Change all the element details to be the new information from the input fields after submit is pressed
-    <form onSubmit={handleSubmit}>
+    <>
+    {/* <form onSubmit={handleSubmit}> */}
       <label>
         Name:
         <input
@@ -154,14 +183,33 @@ export default function EditCard({
           }}
         />
       </label>
-      <h3>Quiz</h3>
-      <QuizEditor
-        questions={updatedQuestions}
-        onSave={handleSave}
-        onCancel={handleCancel}
-      />
-      ;
-      <input type="submit" value="Submit" />
-    </form>
+      <br/>
+      <label>
+        Activities:
+        <ul>
+        {activityIds.map((activityId) => (
+          <li key={activityId}>
+            {activityId}
+          <button type="button" onClick={async () => {
+            const activity = await getActivityById(activityId);
+            if (activity.type === "quiz") {
+              setQuestions(activity.questions || []);
+              setEditingActivityId(activityId); // Set the currently editing activity ID
+            }
+          }}>
+            Edit Activity
+          </button>
+          {editingActivityId === activityId && (
+            <QuizEditor
+              activityId = {activityId}
+            />
+          )}
+          </li>
+        ))}
+        </ul>
+      </label>
+      {/* <input type="submit" value="Submit" /> */}
+    </>
+    // </form>
   );
 }
