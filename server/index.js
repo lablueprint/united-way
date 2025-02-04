@@ -37,6 +37,14 @@ app.use(express.json());
 // API Routes
 app.use('/test', exampleRouter); // given ip address, /test is where example router logic will be handle
 app.use('/auth', authRouter);
+
+app.use('/orgs', 
+  jwt(
+  {
+    secret: process.env.JWT_SECRET, 
+    algorithms: ["HS256"]
+  }).unless({path: ["/orgs/createOrg", "/orgs/filtered"]})
+)
 app.use('/orgs', organizationRouter);
 
 app.use('/users', 
@@ -44,7 +52,7 @@ app.use('/users',
   {
     secret: process.env.JWT_SECRET, 
     algorithms: ["HS256"]
-  }).unless({path: ["/users/createUser",  /^\/users\/email\/([^\/]*)$/]})
+  }).unless({path: ["/users/createUser", /^\/users\/email\/([^\/]*)$/]})
 )
 app.use('/users', userRouter);
 

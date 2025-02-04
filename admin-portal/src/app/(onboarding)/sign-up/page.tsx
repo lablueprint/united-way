@@ -22,8 +22,9 @@ export default function SignUp() {
       return;
     }
     try {
-      const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
+      await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
         {
+          name: "hello",
           email: email,
           password: password
         }
@@ -75,7 +76,7 @@ export default function SignUp() {
 
   return (
     <div>
-      For new users:
+      For new organizations:
       <form onSubmit={handleSubmit}>
         <p>Email:</p>
         <input

@@ -8,12 +8,13 @@ import axios, { AxiosResponse } from "axios";
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
   const router = useRouter();
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const targetOrg = await getOrgByEmail();
-    if (targetOrg.data.length === 0) {
+    const signIn = await verifySignIn();
+    if (targetOrg.data.length === 0 || signIn === null) {
       window.alert('Email or password is incorrect.');
       return;
     }
@@ -34,9 +35,25 @@ export default function SignIn() {
     }
   }
 
+  const verifySignIn = async () => {
+    try {
+      const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/auth/orgLogin`,
+        {
+          email: email,
+          password: password
+        }
+      );
+      console.log(response);
+      return response.data.data;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  }
+
   return (
     <div>
-      For returning users:
+      For returning organizations:
       <form onSubmit={handleSubmit}>
         <p>Email:</p>
         <input

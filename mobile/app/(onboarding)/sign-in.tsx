@@ -39,7 +39,7 @@ export default function SignUpScreen() {
 
   const verifySignIn = async () => {
     try {
-      const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/auth/login`,
+      const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/auth/userLogin`,
         {
           email: email,
           password: password
