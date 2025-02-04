@@ -18,7 +18,7 @@ export default function EventScanner() {
   const [scanned, setScanned] = useState(false);
   const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
   const [eventId, setEventId] = useState(""); 
-  const userId = 'example'; //constant user id placeholder
+  const userId = "6786d466b062d1e967f93f4f"; //constant user id placeholder
   const router = useRouter();
 
   useEffect(() => {
@@ -31,32 +31,30 @@ export default function EventScanner() {
   const handleBarCodeScanned = ({ type, data }: any) => {
     setScanned(true);
     setEventId(data);
+    fetchEventDetails(data);
   };
 
-  useEffect(() => {
-    const fetchEventDetails = async () => {
-      try {
-          console.log(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`);
-          const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`);
-          const { data } = response.data;
-          setEventDetails(data);
-      } catch (err) {
-          console.log('Error catching event details from event id:', err);
-          return err;
-      }
-    };
+
+  const fetchEventDetails = async (eventId : string) => {
+    try {
+        const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`);
+        const { data } = response.data;
+        setEventDetails(data);
+    } catch (err) {
+        console.log('Error catching event details from event id:', err);
+        return err;
+    }
+  };
     
-    fetchEventDetails();
-  }, [eventId]);
+
 
     const addEventToUser = async (eventId : string) => {
       try {
-        const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${id}/addEvent`,
+        await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${userId}/addEvent`,
           {
             newEvent: eventId,
           });
-        const { data } = response.data;
-        setEventDetails(data);
+
       } catch (err) {
           console.log(err);
       }
@@ -75,7 +73,7 @@ export default function EventScanner() {
 
     const removeUserFromEvent = async(userId : string) => {
       try {
-        const response = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
+        const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
           { userId: userId }
         );
         console.log('User unregistered successfully:', response.data);
@@ -86,7 +84,7 @@ export default function EventScanner() {
 
     const removeEventFromUser = async(eventId : string) => {
       try {
-        const response = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${id}/removeEvent`,
+        const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${userId}/removeEvent`,
           { eventId: eventId }
         );
         console.log('User unregistered successfully:', response.data);
@@ -135,6 +133,7 @@ export default function EventScanner() {
       {scanned && (
         <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
       )}
+      
     </View>
   );
 }

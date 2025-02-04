@@ -23,12 +23,9 @@ const createEvent = async (req, res) => {
 const addUserToEvent = async (req, res) => {
   const origId = req.params.id;
   const { newUser } = req.body;
-  console.log(newUser);
-  console.log(origId);
   
   try {
     const result = await Event.updateOne( { _id: origId }, { $addToSet: { registeredUsers: newUser }});
-    console.log(result);
     if (result.modifiedCount === 0) {
         res.status(404).json({
             status: "failure",
@@ -53,14 +50,12 @@ const addUserToEvent = async (req, res) => {
 
 const removeUserFromEvent = async (req, res) => {
   const eventId = req.params.id;
-  const userId = req.body;
-  console.log(removeId);
-  console.log(removeUser);
+  const userId = req.body.userId;
+
   try {
     const result = await Event.findOneAndUpdate(
       { _id: eventId }, 
       { $pull: { registeredUsers: userId}});
-    console.log(result);
     if (result.modifiedCount === 0) {
         res.status(404).json({
             status: "failure",

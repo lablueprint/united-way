@@ -37,15 +37,11 @@ const getUserById = async (req, res) => {
 }
 
 const addEventToUser = async (req, res) => {
-  console.log(req.params.id);
-  console.log(req.body);
   const userId = req.params.id;
   const { newEvent } = req.body;
-  console.log('hi');
   
   try {
     const result = await User.updateOne( { _id: userId }, { $addToSet: { registeredEvents: newEvent }});
-    console.log(result);
     if (result.modifiedCount === 0) {
         res.status(404).json({
             status: "failure",
@@ -70,8 +66,9 @@ const addEventToUser = async (req, res) => {
 
 const removeEventFromUser = async (req, res) => {
   const userId = req.params.id;
-  const { eventId } = req.body;
-  
+  const eventId  = req.body.eventId;
+  console.log('in remove event from user:', userId);
+  console.log(eventId);
   try {
     const result = await User.findOneAndUpdate(
       { _id: userId }, 
