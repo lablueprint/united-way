@@ -2,31 +2,13 @@ const Activity = require("../models/activityModel");
 const Event = require("../models/eventModel");
 
 // Example of creating a document in the database
+
 const createActivity = async (req, res) => {
-  // const activityId = req.params.id;
-  // try {
-  //   const activity = await Activity.findByIdAndUpdate(activityId, req.body, {
-  //     new: true,
-  //   });
-  //   res.status(200).json({
-  //     status: "success",
-  //     message: "Activity successfully edited.",
-  //     data: activity
-  //   });
-  // } catch (err) {
-  //   console.error(err);
-  //   res.status(500).json({
-  //     status: "failure",
-  //     message: "Server-side error: activity could not be edited.",
-  //     data: {}
-  //   });
-  // }
   const activity = new Activity(req.body);
-  console.log("\n\Activity Log: " + activity);
   try{
     const data = await activity.save(activity);
     await Event.findByIdAndUpdate(data.eventID, { $push: { "activity": data._id} });
-    console.log("Inside createActivity");
+
     res.status(201).json({
       status: "success",
       message: "Activity successfully created.",
@@ -41,29 +23,27 @@ const createActivity = async (req, res) => {
     });
   }
 };
-
-const addPoll = async (req, res) => {
-  const activityType = req.params.type;
-  try {
-    const activity = await Activity.findByTypeAndUpdate(activityType, req.body, {
-      new: true,
-    });
-    res.status(200).json({
-      status: "success",
-      message: "Activity successfully edited.",
-      data: activity
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      status: "failure",
-      message: "Server-side error: activity could not be edited.",
-      data: {}
-    });
-  }
-    //     new: true,
-    //   });
-}
+// const createActivity = async (req, res) => {
+//   const activity = new Activity(req.body);
+//   console.log("\n\Activity Log: " + activity);
+//   try{
+//     const data = await activity.save(activity);
+//     await Event.findByIdAndUpdate(data.eventID, { $push: { "activity": data._id} });
+//     console.log("Inside createActivity");
+//     res.status(201).json({
+//       status: "success",
+//       message: "Activity successfully created.",
+//       data: data
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       status: "failure",
+//       message: "Server-side error: activity could not be created.",
+//       data: {}
+//     });
+//   }
+// };
 
 const getActivityById = async (req, res) => {
   const activityId = req.params.id;
