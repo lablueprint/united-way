@@ -7,21 +7,27 @@ interface PollCardProps {
 }
 export default function PollCard({ id }: PollCardProps)
 {  
-    interface PollInterface {
-        eventID: string;
-        _id: number;
-        content: {
-            options: Choices[];
-            question: string;
-        };
-    }
-    interface Choices {
-        id: number;
-        text: string;
-        count: number;
-    }
+  interface PollInterface {
+      eventID: string;
+      _id: number;
+      content: {
+          options: Choices[];
+          question: string;
+      };
+  }
+  interface Choices {
+      id: number;
+      text: string;
+      count: number;
+  }
     
-  const [polls, setPolls] = useState<PollInterface[]>([]);
+  const [polls, setPolls] = useState<PollInterface[]>([{
+      eventID: id,
+      _id: 0,
+      content:{
+        options: [],
+        question: "",
+    }}]);
 
   const fetchPolls = async () => {
     try {
@@ -34,8 +40,9 @@ export default function PollCard({ id }: PollCardProps)
         }
       );
       console.log(data);
-      setPolls(data.data); // Save the filtered activities in state
-      console.log("Data " + data.data);
+      if(data.data.length != 0){
+        setPolls(data.data); // Save the filtered activities in state
+      }
     } catch (error) {
       console.error("Error fetching polls:", error);
     }
@@ -47,30 +54,34 @@ export default function PollCard({ id }: PollCardProps)
 
   return (
     <div>
-      <PollEditor 
+      {/* <PollEditor 
         eventID={id}
         idData={0}
-        questionData=""
-        answerData={[{
-          id: 0,
-          text: "",
-          count: 0,
+        questionsData={[{
+            id: 0,
+            question: "",
+            answers: [{
+              id: 0,
+              text: "",
+              count: 0,
+            }]
         }]}
         onSave={fetchPolls}
-      />
-      {polls.map((poll) => {
-        // console.log("Answers for poll:", poll._id);
-        return (
+      /> */}
+        
+        {polls.map((poll) => (
           <PollEditor 
             key={poll._id}
             eventID={poll.eventID}
-            idData = {poll._id}
-            questionData={poll.content.question}
-            answerData={poll.content.options}
+            idData={poll._id}
+            questionsData={Array.isArray(poll.content) ? poll.content.map((q, index) => ({
+              id: index + 1,  // Ensures IDs are unique and incremented
+              question: q.question,
+              answers: q.options,
+            })) : []} // Fallback to an empty array if poll.content is not an array
             onSave={fetchPolls}
           />
-        );
-      })}
+        ))}
     </div>
   )
   

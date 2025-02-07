@@ -22,6 +22,8 @@ interface PollProps {
 
 export default function PollEditor({ eventID, idData, questionsData, onSave }: PollProps) {
     const [questions, setQuestions] = useState<Question[]>(questionsData || []);
+    console.log("hrlloooooo")
+    console.log(questions)
 
     const handleQuestionChange = (id: number, value: string) => {
         setQuestions((prevQuestions) =>
@@ -91,36 +93,176 @@ export default function PollEditor({ eventID, idData, questionsData, onSave }: P
         setQuestions((prevQuestions) => prevQuestions.filter((q) => q.id !== questionId));
     };
 
+    // const handleSave = async () => {
+    //     const now = new Date();
+    //     const currentTimeISO = now.toISOString();
+    //     console.log("Sending poll data:", { idData, eventID, questions });
+      
+    //     try {
+    //       // Prepare the poll data to be sent to the backend
+    //       const poll = {
+    //         content: questions.map((q) => ({
+    //           question: q.question,
+    //           options: q.answers,
+    //         }))
+    //       };
+      
+    //       // If we have an existing activityId, we should update it
+    //       if (idData) {
+    //         console.log("there is a existing activityID");
+    //         // Assume that `idData` is the ID of the activity to be updated
+    //         const existingActivity = await axios.get(
+    //           `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`
+    //         );
+      
+    //         // Check if activity already contains a poll, and update it
+    //         if (existingActivity.data && existingActivity.data.content) {
+    //           // Append new poll to existing content
+    //           existingActivity.data.content.push(...poll.content);
+      
+    //           // Now send the updated content array to the backend
+    //           const { data } = await axios.patch(
+    //             `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`,
+    //             { content: existingActivity.data.content }
+    //           );
+      
+    //           console.log("Activity updated with new poll:", data);
+    //           onSave(); // Call your save callback
+    //         } else {
+    //             console.log("NOOO existing ID");
+    //           // If no existing poll, just create a new one
+    //           const { data } = await axios.post(
+    //             `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
+    //             {
+    //               eventID,
+    //               type: "poll",
+    //               content: poll.content,
+    //               timeStart: currentTimeISO,
+    //               timeEnd: currentTimeISO,
+    //               active: true,
+    //             }
+    //           );
+      
+    //           console.log("New poll activity created:", data);
+    //           onSave(); // Call your save callback
+    //         }
+    //       } else {
+    //         console.log("second else");
+    //         // If no `idData`, create a new poll (new activity)
+    //         const { data } = await axios.post(
+    //           `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
+    //           {
+    //             eventID,
+    //             type: "poll",
+    //             content: poll.content,
+    //             timeStart: currentTimeISO,
+    //             timeEnd: currentTimeISO,
+    //             active: true,
+    //           }
+    //         );
+      
+    //         console.log("New poll activity created:", data);
+    //         onSave(); // Call your save callback
+    //       }
+    //     } catch (error) {
+    //       console.error("Error saving activity:", error);
+    //     }
+    // };
+
     const handleSave = async () => {
-        console.log(idData);
+        const now = new Date();
+        const currentTimeISO = now.toISOString();
+        console.log("Sending poll data:", { idData, eventID, questions });
+    
         try {
-          const poll = {
-            eventID,
-            type: "poll",
-            content: questions.map((q) => ({
-              question: q.question,
-              options: q.answers,
-            })),
-          };
-      
-          const { data } = await axios.post(
-            `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
-            poll
-          );
-      
-          console.log("Response:", data);
-          onSave();
+            // Prepare the new poll data to be added
+            const newPollContent = questions.map((q) => ({
+                question: q.question,
+                options: q.answers,
+            }));
+            
+            if (idData) {
+                console.log("Updating existing poll with ID:", idData);
+
+                console.log("Existing activity content:", questionsData);
+                console.log("newPollContent" + newPollContent);
+    
+                if (questionsData) {
+                    // Merge the new questions with the existing ones (avoid duplicates)
+                    const updatedContent = [
+                        //...questionsData, // Keep existing questions
+                        ...newPollContent, // Add new ones
+                    ];
+
+                    console.log("Updated Content ", updatedContent);
+    
+                    // Update the existing poll with the merged content
+                    await axios.patch(
+                        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`,
+                        { content: updatedContent }
+                    );
+
+                    console.log("New question data", questionsData);
+    
+                    console.log("Poll successfully updated with new questions!");
+                }
+            } else {
+                console.log("Creating a new poll activity");
+    
+                // Create a new poll activity
+                const { data } = await axios.post(
+                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
+                    {
+                        eventID,
+                        type: "poll",
+                        content: newPollContent,
+                        timeStart: currentTimeISO,
+                        timeEnd: currentTimeISO,
+                        active: true,
+                    }
+                );
+    
+                console.log("New poll activity created:", data);
+            }
+    
+            onSave(); // Fetch updated polls after saving
         } catch (error) {
-          console.error("Error saving activity:", error);
+            console.error("Error saving activity:", error);
         }
-      };
+    };
+    
       
+
+    // const handleSave = async () => {
+    //     console.log(idData);
+    //     try {
+    //       const poll = {
+    //         eventID,
+    //         type: "poll",
+    //         content: questions.map((q) => ({
+    //           question: q.question,
+    //           options: q.answers,
+    //         })),
+    //       };
+      
+    //       const { data } = await axios.post(
+    //         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
+    //         poll
+    //       );
+      
+    //       console.log("Response:", data);
+    //       onSave();
+    //     } catch (error) {
+    //       console.error("Error saving activity:", error);
+    //     }
+    // };
 
     return (
         <div>
             {questions.map((question) => (
                 <div key={question.id} className="question-block">
                     <p>Question:</p>
+                    <h1>{question.id}</h1>
                     <input
                         type="text"
                         value={question.question}
@@ -133,7 +275,7 @@ export default function PollEditor({ eventID, idData, questionsData, onSave }: P
                             <input
                                 type="text"
                                 value={answer.text}
-                                onChange={(event) =>
+                                 onChange={(event) =>
                                     handleAnswerChange(question.id, answer.id, event.target.value)
                                 }
                                 placeholder="Enter an answer"
@@ -171,154 +313,3 @@ export default function PollEditor({ eventID, idData, questionsData, onSave }: P
         </div>
     );
 }
-
-
-// import React, {useState} from "react";
-// import axios /*,{AxiosResponse}*/ from 'axios';
-
-// interface Choices {
-//     id: number;
-//     text: string;
-//     count: number;
-// }
-
-// interface Poll {
-//     eventID: string;
-//     idData: number;
-//     questionData: string;
-//     answerData: Choices[];
-//     onSave: ()=>void;
-// }
-
-// export default function PollEditor({ eventID, idData, questionData, answerData, onSave }: Poll)
-// {   
-//     const [answers, setAnswers] = useState<Choices[]>(answerData);
-//     const [question, setQuestion] = useState<string>(questionData);
-//     const [pollID, setPollID] = useState<number|null>(idData || null);
-    
-//     const handleAnswerChange = (id: number,value: string) => {
-//         setAnswers((prevAnswers) =>
-//             prevAnswers.map((answer) =>
-//                 answer.id == id ? {...answer, text: value} : answer
-//             ));
-//     };
-//     const handleQuestionChange = (value: string) => {
-//         setQuestion(value);
-//     }
-
-//     const handleDeleteAnswer = (id:number) => {
-//         setAnswers((prevAnswers)=> prevAnswers.filter((answer) => answer.id !== id));
-//     };
-
-//     const handleAddAnswer = () => {
-//         console.log(answers)
-//         setAnswers((prevAnswers) => [
-//             ...prevAnswers,
-//             {id: prevAnswers.length + 1, text: "", count: 0}
-//         ]);
-//         console.log(answers)
-        
-//     };
-
-//     const handleSave = async () => {
-//         //const now = new Date();
-//         //const currentTimeISO = now.toISOString();
-
-//         if (!pollID)
-//         {
-//             const payload = {
-//                 eventID,
-//                 type: "poll",
-//                 content: [
-//                   {
-//                     question: question,
-//                     options: answers,
-//                   },
-//                 ],
-//                 timeStart: new Date().toISOString(), // Replace with actual start time
-//                 timeEnd: new Date().toISOString(), // Replace with actual end time
-//                 active: true, // Or any desired default value
-//               };
-            
-//               try {
-//                 const { data } = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`, payload);
-//                 console.log("Activity saved:", data);
-//               } catch (error) {
-//                 console.error("Error saving activity:", error);
-//               }
-//             // const { data } = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`, {
-//             //     eventID: eventID,
-//             //     type: "poll",
-//             //     content: [{
-                    
-//             //             question: question,
-//             //             options: answers,
-                    
-//             //     }],
-//             // });
-//             // console.log(data);
-//             // setPollID(data.pollID);
-
-//         }
-//         else {
-//             const { data } = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`, {
-//                 content: [{
-//                     question: question,
-//                     options: answers,
-//                 }],
-//             });
-//             console.log(data);
-//         }
-        
-//         onSave();
-//         setQuestion("");
-//         setAnswers([{id: 0, text: "", count: 0}]);
-//     }
-
-//     // const handleEdit = async (question: string, options: Choices[]) => {
-//     //     const { data } = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`, {
-//     //         content: {
-//     //             question: question,
-//     //             options: options,
-//     //         },
-//     //     });
-
-//     //     console.log(data);
-//     // }
-
-//     const handleCancel = () => {
-//         setQuestion("");
-//         setAnswers([{id:1, text: "", count: 0}]);
-//     }
-
-//     return(
-//         <div>
-//             <p>Question:</p>
-//             <input
-//                 type = "text"
-//                 value = {question}
-//                 onChange={(event) => handleQuestionChange(event.target.value)}
-//                 placeholder = "Enter a question"
-//             />
-//             <p>Answers:</p>
-//                 {answers.map((answer) => (
-//                     <div key = {answer.id}>
-//                         <input
-//                             type = "text"
-//                             value = {answer.text}
-//                             onChange = {(event) => handleAnswerChange(answer.id, event.target.value)}
-//                         />
-//                         <button onClick = {() => handleDeleteAnswer(answer.id)}> x </button>
-//                     </div>
-                    
-//                 ))
-                    
-//                 }
-
-//             <button type="button" onClick = {handleAddAnswer}> Add Answer </button>
-//             <button type="button" onClick = {handleSave}>Save</button> 
-//             <button type="button" onClick = {handleCancel}>Cancel</button>
-//             {/*<button type="button" onClick = {() => handleEdit(question, answers)}>Edit</button>  */}       
-//         </div>
-//     )
-// }
