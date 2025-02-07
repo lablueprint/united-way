@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
-import React, { useContext, useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import UserSignUpForm from '../_components/UserSignUpForm';
+import Quiz from '../_components/Quiz';
 
 const styles = StyleSheet.create({
   homeStyle: {
@@ -10,7 +10,6 @@ const styles = StyleSheet.create({
     marginTop: "30%",
   }
 });
-import UserSignUpForm from '../Components/UserSignUpForm';
 
 export default function HomeScreen() {
   // const { user, onChangeUser } = useState('');
@@ -23,21 +22,23 @@ export default function HomeScreen() {
 
 
 
-  function onChangeUser(email, demographics, name, phoneNum, community) {
-    onChangeEmail(email);
-    onChangeDemo(demographics);
-    onChangeName(name);
-    onChangePhoneNum(phoneNum);
-    onChangeCommunity(community);
-    console.log(email + " " + demographics + " " + name + " " + phoneNum + " " + community);
-  }
+  // function onChangeUser(email, demographics, name, phoneNum, community) {
+  //   onChangeEmail(email);
+  //   onChangeDemo(demographics);
+  //   onChangeName(name);
+  //   onChangePhoneNum(phoneNum);
+  //   onChangeCommunity(community);
+  //   console.log(email + " " + demographics + " " + name + " " + phoneNum + " " + community);
+  // }
   
   return (
     <View>
-      <UserSignUpForm onChangeUser={onChangeUser} />
-      <Text style={styles.text}>
+      {/* <UserSignUpForm onChangeUser={onChangeUser} /> */}
+      {/* <Text style={styles.homeStyle}> */}
+      <Text style={styles.homeStyle}>
         Hello world!
       </Text>
+      <Quiz/>
     </View>
   );
 }
