@@ -11,7 +11,7 @@ export default function TabTwoScreen() {
     // </View>
 
     <View style={styles.container}>
-      <Poll id="67908dc3339ea31330c3ce11" />
+      <Poll id="67908ee7339ea31330c3ce15" />
     </View>
   );
 }

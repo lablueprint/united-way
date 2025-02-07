@@ -1,12 +1,22 @@
 import React, {useState, useEffect} from "react";
 import axios from 'axios';
 import PollEditor from './PollEditor';
+import DateTimePicker from 'react-datetime-picker';
+import 'react-datetime-picker/dist/DateTimePicker.css';
+import 'react-calendar/dist/Calendar.css';
+import 'react-clock/dist/Clock.css';
 
 interface PollCardProps {
-  id: string; // Ensure the type here is a string, not an object
+  id: string;
 }
+
+type ValuePiece = Date | null;
+type Value = ValuePiece | [ValuePiece, ValuePiece];
+
 export default function PollCard({ id }: PollCardProps)
 {  
+  const [start, setStart] = useState<Value>(new Date());
+  const [end, setEnd] = useState<Value>(new Date());
   interface PollInterface {
       eventID: string;
       _id: number;
@@ -54,20 +64,12 @@ export default function PollCard({ id }: PollCardProps)
 
   return (
     <div>
-      {/* <PollEditor 
-        eventID={id}
-        idData={0}
-        questionsData={[{
-            id: 0,
-            question: "",
-            answers: [{
-              id: 0,
-              text: "",
-              count: 0,
-            }]
-        }]}
-        onSave={fetchPolls}
-      /> */}
+        <div>
+          <DateTimePicker onChange={setStart} value={start}/>
+        </div>
+        <div>
+          <DateTimePicker onChange={setEnd} value={end} />
+        </div>
         
         {polls.map((poll) => (
           <PollEditor 
@@ -75,10 +77,13 @@ export default function PollCard({ id }: PollCardProps)
             eventID={poll.eventID}
             idData={poll._id}
             questionsData={Array.isArray(poll.content) ? poll.content.map((q, index) => ({
-              id: index + 1,  // Ensures IDs are unique and incremented
+              id: index + 1, 
               question: q.question,
               answers: q.options,
-            })) : []} // Fallback to an empty array if poll.content is not an array
+     
+          })) : []}
+            startTime = {start}
+            endTime = {end}
             onSave={fetchPolls}
           />
         ))}
