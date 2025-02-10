@@ -222,6 +222,23 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
           >
             Cancel
           </button>
+
+          {/* Render "Add Question" button only for the last question */}
+        {questionIndex === updatedQuestions.length - 1 && (
+          <button
+            onClick={() =>
+              addQuestion(
+                "New Question Title", // Default title for the new question
+                [""], // Default empty choices array
+                [0], // Default empty answers array with one number
+                true // Default singleSelect as true
+              )
+            }
+          >
+            Add Question
+          </button>
+        )}
+
         </>
       </div>
     );
