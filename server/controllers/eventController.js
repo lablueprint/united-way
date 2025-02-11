@@ -21,10 +21,16 @@ const createEvent = async (req, res) => {
 };
 
 const addUserToEvent = async (req, res) => {
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401);
+    return;
+  }
+  
   const origId = req.params.id;
   const { newUser } = req.body;
   
   try {
+
     const result = await Event.updateOne( { _id: origId }, { $addToSet: { registeredUsers: newUser }});
     if (result.modifiedCount === 0) {
         res.status(404).json({
@@ -39,7 +45,7 @@ const addUserToEvent = async (req, res) => {
             data: result
         });
     }
-} catch (err) {
+} catch (err)   {
     res.status(500).json({
         status: "failure",
         message: "Server-side error: update not completed.",
@@ -49,6 +55,11 @@ const addUserToEvent = async (req, res) => {
 }
 
 const removeUserFromEvent = async (req, res) => {
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401);
+    return;
+  }
+
   const eventId = req.params.id;
   const userId = req.body.userId;
 

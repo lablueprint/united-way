@@ -1,6 +1,14 @@
+require('dotenv').config();
+const bcrypt = require('bcrypt')
 const User = require('../models/userModel');
+const { generateToken } = require("../controllers/authController")
 
 const getAllUsers = async (req, res) => {
+  if (req.auth.role != 'admin') {
+    res.status(401);
+    return;
+  }
+
   try {
     const allUsers = await User.find({});
     res.status(200).json({
@@ -19,6 +27,11 @@ const getAllUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
+  if (req.auth.role != 'admin') {
+    res.status(401);
+    return;
+  }
+
   try {
     const userbyID = await User.findOne({_id: req.params["id"]});
     res.status(200).json({
@@ -36,11 +49,18 @@ const getUserById = async (req, res) => {
   }
 }
 
+
 const addEventToUser = async (req, res) => {
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401);
+    return;
+  }
+
   const userId = req.params.id;
   const { newEvent } = req.body;
   
   try {
+    console.log('addEventToUser: ', req.auth);
     const result = await User.updateOne( { _id: userId }, { $addToSet: { registeredEvents: newEvent }});
     if (result.modifiedCount === 0) {
         res.status(404).json({
@@ -65,10 +85,13 @@ const addEventToUser = async (req, res) => {
 }
 
 const removeEventFromUser = async (req, res) => {
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401);
+    return;
+  }
+  
   const userId = req.params.id;
   const eventId  = req.body.eventId;
-  console.log('in remove event from user:', userId);
-  console.log(eventId);
   try {
     const result = await User.findOneAndUpdate(
       { _id: userId }, 
@@ -95,8 +118,31 @@ const removeEventFromUser = async (req, res) => {
     });
 }
 }
+const getUserByEmail = async (req, res) => {
+  try {
+    const userByEmail = await User.findOne({email: req.params["email"]});
+    res.status(200).json({
+      status: "success",
+      message: "User successfully retrieved",
+      data: userByEmail
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: user could not be retrieved via email",
+      data: {}
+    });
+  }
+
+}
 
 const editUserDetails = async (req, res) => {
+  if (req.auth.role != 'user') {
+    res.status(401);
+    return;
+  }
+
   try {
     const userbyID = await User.findOneAndUpdate({_id: req.params["id"]}, {$set: req.body}, {new: true}); //Doesn't catch invalid fields
     res.status(200).json({
@@ -114,6 +160,11 @@ const editUserDetails = async (req, res) => {
 }
 
 const deleteUser = async (req, res) => {
+  if (req.auth.role != 'user' && req.auth.role != 'admin') {
+    res.status(401);
+    return;
+  }
+
   try {
     const deleteUserbyID = await User.deleteOne({_id: req.params["id"]});
     res.status(200).json({
@@ -133,13 +184,21 @@ const deleteUser = async (req, res) => {
 
 const createNewUser = async (req, res) => {
   try {
+    // Salt and hash the password.
+    // Note: upon creation, the user should then be signed in on the front-end, so must add refresh/access tokens to reponse
+    bcrypt.hash(req.body.password, `$2b$${process.env.SALT_ROUNDS}$${process.env.HASH_SALT}`, async (err, hash) => {
+      req.body.password = hash;
     const user = new User(req.body);
     await user.save();
     res.status(201).json({
       status: "success",
       message: "User successfully created.",
-      data: user
-    });
+      data: user,
+        // Add access, refresh tokens here.
+        authToken: generateToken({tokenType: "access", uid: user._id, role: "user"}),
+        refreshToken: generateToken({tokenType: "refresh", uid: user._id})
+      });
+    })
   } catch (err) {
     console.error(err);
     res.status(500).json({
@@ -158,4 +217,5 @@ module.exports = {
   createNewUser,
   addEventToUser,
   removeEventFromUser,
+  getUserByEmail,
 };
