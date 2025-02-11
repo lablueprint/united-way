@@ -23,27 +23,6 @@ const createActivity = async (req, res) => {
     });
   }
 };
-// const createActivity = async (req, res) => {
-//   const activity = new Activity(req.body);
-//   console.log("\n\Activity Log: " + activity);
-//   try{
-//     const data = await activity.save(activity);
-//     await Event.findByIdAndUpdate(data.eventID, { $push: { "activity": data._id} });
-//     console.log("Inside createActivity");
-//     res.status(201).json({
-//       status: "success",
-//       message: "Activity successfully created.",
-//       data: data
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       status: "failure",
-//       message: "Server-side error: activity could not be created.",
-//       data: {}
-//     });
-//   }
-// };
 
 const getActivityById = async (req, res) => {
   const activityId = req.params.id;

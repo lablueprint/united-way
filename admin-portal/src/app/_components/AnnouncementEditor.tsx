@@ -31,7 +31,7 @@ export default function AnnouncementEditor() {
             value={message}
             onChange={(e) => handleUpdateMessage(index, e.target.value)}
             placeholder={`Message segment ${index + 1}`}
-            rows={3}
+            rows={2}
             style={{ width: "100%", resize: "none" }}
           />
           <div style={{ marginTop: "5px" }}>

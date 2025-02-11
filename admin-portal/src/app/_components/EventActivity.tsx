@@ -1,10 +1,7 @@
 "use client"
 import React, { useState } from 'react';
-import AnnouncementEditor from '@/app/_components/announcement';
-
-function PollEditor() {
-  return <div>Poll Editor: Create your poll questions here!</div>;
-}
+import AnnouncementEditor from '@/app/_components/AnnouncementEditor';
+import PollCard from '@/app/_components/PollCard';
 
 function QuizEditor() {
   return <div>Quiz Editor: Add quiz questions and answers here!</div>;
@@ -14,7 +11,11 @@ function RaffleEditor() {
   return <div>Raffle Editor: Set up your raffle details here!</div>;
 }
 
-export default function EventActivity() {
+interface EventActivityProps {
+  id: string;
+}
+
+export default function EventActivity({ id }: EventActivityProps) {
   const [activityType, setActivityType] = useState("");
   const [duration, setDuration] = useState(0);
 
@@ -23,7 +24,7 @@ export default function EventActivity() {
       case "announcement":
         return <AnnouncementEditor />;
       case "poll":
-        return <PollEditor />;
+        return <PollCard id={id} />;
       case "quiz":
         return <QuizEditor />;
       case "raffle":

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
-import PollCard from './PollCard';
+import EventActivity from './EventActivity';
 
 interface EditCardProps {
     id: string;
@@ -77,7 +77,7 @@ export default function EditCard({ id, handleCloseClick, handleEditEvent }: Edit
                 />
             </label>
             <input type="submit" value="Submit" />
-            <PollCard id={id}/>
+            <EventActivity id={id}/>
         </form>
     );
 }
