@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
+import CreateEventCard from "./CreateEventCard";
 import { EventData } from '../_interfaces/EventInterfaces';
 
 // TODO: Make the organization profile based on each individual organization instead of all events.
@@ -37,6 +38,7 @@ export default function OrganizationProfile() {
                     })}
                 </div>
             </div>
+            <CreateEventCard/>
         </div>
     );
 }
