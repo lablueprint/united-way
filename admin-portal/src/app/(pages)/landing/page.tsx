@@ -1,5 +1,7 @@
 "use client"
 import axios, { AxiosResponse } from "axios";
+import Link from 'next/link';
+
 
 // Added following line
 import OrganizationProfile from '../../_components/OrganizationProfile';
