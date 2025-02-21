@@ -10,7 +10,8 @@ export default function SignUpScreen() {
     } 
 
     const handleSignup = async () => {
-        router.push({pathname: "/login"})
+        router.push({pathname: "/sign-up"})
+        
     }
     return (
 
@@ -28,12 +29,12 @@ export default function SignUpScreen() {
             <Text style={styles.subtitle}>Stay in the loop</Text>
             
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.loginButton} onPress = {handleLogin}>
-                <Text style={styles.loginButtonText}>Login</Text>
+                <TouchableOpacity style={styles.loginButton} onPress = {handleSignup}>
+                <Text style={styles.loginButtonText}>Sign Up</Text>
                 </TouchableOpacity>
                 
-                <TouchableOpacity style={styles.getStartedButton} onPress = {handleSignup}>
-                <Text style={styles.getStartedText}>Get started without an account</Text>
+                <TouchableOpacity style={styles.getStartedButton} onPress = {handleLogin}>
+                <Text style={styles.getStartedText}>Login</Text>
                 </TouchableOpacity>
             </View>
             </View>
