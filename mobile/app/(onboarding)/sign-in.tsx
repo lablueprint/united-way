@@ -19,11 +19,11 @@ export default function SignUpScreen() {
       Alert.alert('Email or password is incorrect.');
       return;
     }
-    await dispatch(login({
+    dispatch(login({
       userId: targetUser._id,
       authToken: signIn.accessToken,
       refreshToken: signIn.refreshToken
-    }))
+    }));
     // If password is correct, proceed to home screen
     router.push({ pathname: "/(tabs)" });
   }

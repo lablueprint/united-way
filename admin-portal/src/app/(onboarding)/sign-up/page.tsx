@@ -2,17 +2,42 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import React, { useState, FormEvent } from 'react';
+import { useDispatch } from 'react-redux';
+import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
+import { login } from '../../_utils/redux/orgSlice';
 
 export default function SignUp() {
+  const [id, setId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+  const dispatch = useDispatch();
   const router = useRouter();
+
+  useEffect(() => {
+    const getOrg = async () => {
+      const storedOrg = localStorage.getItem('org');
+      if (storedOrg != null) {
+        const parsedOrg = JSON.parse(storedOrg);
+        setId(parsedOrg.orgId);
+        dispatch(login({
+          orgId: parsedOrg.orgId,
+          authToken: parsedOrg.authToken,
+          refreshToken: parsedOrg.refreshToken
+        }));
+      }
+    };
+    getOrg();
+  }, []);
+
+  if (id) {
+    router.push('/landing');
+  }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const orgByEmail = await getOrgByEmail();
+    console.log('pushing to onboarding');
     if (!validateInputs()) {
       return;
     }
@@ -22,13 +47,19 @@ export default function SignUp() {
       return;
     }
     try {
-      await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
+      const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
         {
-          name: "hello",
           email: email,
           password: password
         }
       );
+
+      // Navigate to onboarding screen
+      dispatch(login({
+        orgId: response.data.data._id,
+        authToken: response.data.authToken,
+        refreshToken: response.data.refreshToken
+      }));
       router.push('/onboarding');
     } catch (err) {
       console.log(err);

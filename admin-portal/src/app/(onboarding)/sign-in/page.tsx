@@ -4,11 +4,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import React, { useState, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
+import { login } from '../../_utils/redux/orgSlice';
+import { useDispatch } from 'react-redux';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,6 +21,11 @@ export default function SignIn() {
       window.alert('Email or password is incorrect.');
       return;
     }
+    dispatch(login({
+      orgId: targetOrg.data[0]._id,
+      authToken: signIn.accessToken,
+      refreshToken: signIn.refreshToken
+    }));
     router.push('/landing');
   };
 
@@ -28,6 +36,8 @@ export default function SignIn() {
           email: email
         }
       );
+      console.log('got org');
+      console.log(response.data.data[0]._id);
       return response.data;
     } catch (err) {
       console.log(err);
@@ -43,7 +53,8 @@ export default function SignIn() {
           password: password
         }
       );
-      console.log(response);
+      console.log('verify sign in');
+      console.log(response.data.data);
       return response.data.data;
     } catch (err) {
       console.log(err);

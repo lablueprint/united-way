@@ -13,7 +13,7 @@ const createOrganization = async (req, res) => {
                 status: "success",
                 message: "Organization successfully created.",
                 data: data,
-                authToken: generateToken({tokenType: "access", uid: data._id, role: "user"}),
+                authToken: generateToken({tokenType: "access", uid: data._id, role: "organization"}),
                 refreshToken: generateToken({tokenType: "refresh", uid: data._id})
             });
         })
