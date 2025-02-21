@@ -2,6 +2,10 @@
 import React, { useState } from 'react';
 import AnnouncementEditor from '@/app/_components/AnnouncementEditor';
 import PollCard from '@/app/_components/PollCard';
+import DateTimePicker from 'react-datetime-picker';
+import 'react-datetime-picker/dist/DateTimePicker.css';
+import 'react-calendar/dist/Calendar.css';
+import 'react-clock/dist/Clock.css';
 
 function QuizEditor() {
   return <div>Quiz Editor: Add quiz questions and answers here!</div>;
@@ -15,16 +19,28 @@ interface EventActivityProps {
   id: string;
 }
 
+type ValuePiece = Date | null;
+type Value = ValuePiece | [ValuePiece, ValuePiece];
+
 export default function EventActivity({ id }: EventActivityProps) {
   const [activityType, setActivityType] = useState("");
-  const [duration, setDuration] = useState(0);
+  const [start, setStart] = useState<Value>(new Date());
+  const [end, setEnd] = useState<Value>(new Date());
 
   const renderEditor = () => {
     switch (activityType) {
       case "announcement":
-        return <AnnouncementEditor />;
+        return <AnnouncementEditor
+          id={id}
+          timeStart={start instanceof Date ? start : new Date()} 
+          timeEnd={end instanceof Date ? end : new Date()}
+        />;
       case "poll":
-        return <PollCard id={id} />;
+        return <PollCard 
+          id={id} 
+          timeStart={start instanceof Date ? start : new Date()} 
+          timeEnd={end instanceof Date ? end : new Date()} 
+        />;
       case "quiz":
         return <QuizEditor />;
       case "raffle":
@@ -53,15 +69,8 @@ export default function EventActivity({ id }: EventActivityProps) {
 
       <div style={{ marginTop: "20px" }}>
         <h2>Set Activity Duration</h2>
-        <label>
-          Duration (in minutes):
-          <input
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(Math.max(0, parseInt(e.target.value) || 0))} // Ensures non-negative input
-            placeholder="Enter duration in minutes"
-          />
-        </label>
+          <DateTimePicker onChange={setStart} value={start} />
+          <DateTimePicker onChange={setEnd} value={end} />
       </div>
     </div>
   );

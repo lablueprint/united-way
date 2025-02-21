@@ -1,22 +1,24 @@
 import React, {useState, useEffect} from "react";
 import axios from 'axios';
 import PollEditor from './PollEditor';
-import DateTimePicker from 'react-datetime-picker';
-import 'react-datetime-picker/dist/DateTimePicker.css';
-import 'react-calendar/dist/Calendar.css';
-import 'react-clock/dist/Clock.css';
+// import DateTimePicker from 'react-datetime-picker';
+// import 'react-datetime-picker/dist/DateTimePicker.css';
+// import 'react-calendar/dist/Calendar.css';
+// import 'react-clock/dist/Clock.css';
 
 interface PollCardProps {
   id: string;
+  timeStart: Date;
+  timeEnd: Date;
 }
 
-type ValuePiece = Date | null;
-type Value = ValuePiece | [ValuePiece, ValuePiece];
+// type ValuePiece = Date | null;
+// type Value = ValuePiece | [ValuePiece, ValuePiece];
 
-export default function PollCard({ id }: PollCardProps)
+export default function PollCard({ id, timeStart, timeEnd }: PollCardProps)
 {  
-  const [start, setStart] = useState<Value>(new Date());
-  const [end, setEnd] = useState<Value>(new Date());
+  // const [start, setStart] = useState<Value>(new Date());
+  // const [end, setEnd] = useState<Value>(new Date());
   interface PollInterface {
       eventID: string;
       _id: number;
@@ -64,12 +66,12 @@ export default function PollCard({ id }: PollCardProps)
 
   return (
     <div>
-        <div>
+        {/* <div>
           <DateTimePicker onChange={setStart} value={start}/>
         </div>
         <div>
           <DateTimePicker onChange={setEnd} value={end} />
-        </div>
+        </div> */}
         
         {polls.map((poll) => (
           <PollEditor 
@@ -82,8 +84,8 @@ export default function PollCard({ id }: PollCardProps)
               answers: q.options,
      
           })) : []}
-            startTime = {start}
-            endTime = {end}
+            startTime = {timeStart}
+            endTime = {timeEnd}
             onSave={fetchPolls}
           />
         ))}
