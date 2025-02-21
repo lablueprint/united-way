@@ -7,6 +7,8 @@ import { EventData } from '../_interfaces/EventInterfaces';
 // TODO: Make the organization profile based on each individual organization instead of all events.
 export default function OrganizationProfile() {
     const [eventIds, setEventIds] = useState<string[]>([]);
+    const [orgName, setOrgName] = useState<string>("");
+    const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
         // Get all events
@@ -20,6 +22,7 @@ export default function OrganizationProfile() {
                 console.log(err);
             }
         }
+        setOrgName("test org"); // Hardcoded, Sign-in doesn't pass down org name yet
         fetchEvents();
     }, []);
 
@@ -38,7 +41,12 @@ export default function OrganizationProfile() {
                     })}
                 </div>
             </div>
-            <CreateEventCard/>
+            <div>
+                <button onClick={() =>setIsEditing(!isEditing)}>
+                    {isEditing ? "Cancel Event" : "Create Event"}
+                </button>
+                {isEditing && <CreateEventCard orgName={orgName}/>}
+            </div>
         </div>
     );
 }
