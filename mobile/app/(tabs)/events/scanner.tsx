@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import { useRouter } from 'expo-router';
+import { useSelector } from 'react-redux';
 import axios, { AxiosResponse } from "axios";
 
 interface EventDetails {
@@ -9,18 +10,15 @@ interface EventDetails {
   name: string;
   description: string;
   org: string;
-  username: string;
-  registeredUsers: string[];
 }
 
 export default function EventScanner() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
-  const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
+  const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);  
   const [eventId, setEventId] = useState(""); 
-  const userId = "6786d466b062d1e967f93f4f"; //constant user id placeholder
-  const router = useRouter();
-
+  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+  
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -34,73 +32,96 @@ export default function EventScanner() {
     fetchEventDetails(data);
   };
 
-
   const fetchEventDetails = async (eventId : string) => {
     try {
         const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`);
         const { data } = response.data;
         setEventDetails(data);
     } catch (err) {
-        console.log('Error catching event details from event id:', err);
-        return err;
+        console.error(err);
     }
   };
-    
 
-
-    const addEventToUser = async (eventId : string) => {
-      try {
-        await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${userId}/addEvent`,
-          {
-            newEvent: eventId,
-          });
-
-      } catch (err) {
-          console.log(err);
-      }
-  }
-  
-  // next time, click the button and see the console.log and what the data is and setUserId along user details
-    const addUserToEvent = async (userId : string) => {
-      try {
-        await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
-          { newUser: userId } // Sending userId in the request body
-        );
-      } catch (err) { 
-        console.error(err);
-      }
-    };
-
-    const removeUserFromEvent = async(userId : string) => {
-      try {
-        const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
-          { userId: userId }
-        );
-        console.log('User unregistered successfully:', response.data);
+  const addEventToUser = async (eventId : string) => {
+    try {
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`, 
+        {
+          newEvent: eventId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        });                                         
     } catch (err) {
         console.error(err);
     }
-    }
+  }
 
-    const removeEventFromUser = async(eventId : string) => {
-      try {
-        const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${userId}/removeEvent`,
-          { eventId: eventId }
-        );
-        console.log('User unregistered successfully:', response.data);
+  const addUserToEvent = async (userId : string) => {
+    try {
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
+        { 
+          newUser: userId, 
+        }, 
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) { 
+      console.error(err);
+    }
+  };
+  
+
+  const removeUserFromEvent = async(userId : string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
+        { 
+          userId: userId, 
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+        console.error(err);
+    }
+  }
+
+  const removeEventFromUser = async(eventId : string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
+        { 
+          eventId: eventId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
     } catch (err) {
       console.error(err);
     }
-    }
+  }
 
   const handleRegister = () => {
     addEventToUser(eventId);
-    addUserToEvent(userId);
+    addUserToEvent(user.userId);
   };
 
   const handleUnregister = () => {
     removeEventFromUser(eventId);
-    removeUserFromEvent(userId);
+    removeUserFromEvent(user.userId);
   };
 
   if (hasPermission === null) {
@@ -116,8 +137,8 @@ export default function EventScanner() {
         <Text style={styles.title}>Request to Join Event</Text>
         <Text style={styles.eventName}>{eventDetails.name}</Text>
         <View style={styles.buttonContainer}>
-          <Button title="Register" onPress={handleRegister} />
-          <Button title="Unregister" onPress={handleUnregister} />
+          <Button title="Accept" onPress={handleRegister} />
+          <Button title="Reject" onPress={handleUnregister} />
         </View>
       </View>
     );
@@ -133,7 +154,6 @@ export default function EventScanner() {
       {scanned && (
         <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
       )}
-      
     </View>
   );
 }
