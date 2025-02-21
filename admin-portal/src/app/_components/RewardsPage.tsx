@@ -6,14 +6,25 @@ interface RewardsSectionProps {
     onDelete: (reward: string) => void;
 }
 
+export interface Reward {
+    name: string;
+    cost: number;
+    _id: string;
+}
+
 export const RewardsSection: React.FC<RewardsSectionProps> = ({ rewards, onAdd, onDelete }) => {
-    const [newReward, setNewReward] = useState("");
+    const [newRewardName, setNewRewardName] = useState("");
+    const [newRewardCost, setNewRewardCost] = useState("");
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (newReward.trim()) {
-            onAdd(newReward.trim());
-            setNewReward("");
+        if (newRewardName.trim() && newRewardCost) {
+            onAdd({
+                name: newRewardName.trim(),
+                cost: parseFloat(newRewardCost),
+            });
+            setNewRewardName("");
+            setNewRewardCost("");
         }
     }
 
@@ -23,17 +34,23 @@ export const RewardsSection: React.FC<RewardsSectionProps> = ({ rewards, onAdd, 
             <form onSubmit={handleSubmit}>
                 <input 
                     type="text" 
-                    value={newReward} 
-                    onChange={(e) => setNewReward(e.target.value)}
-                    placeholder="Enter new reward"
+                    value={newRewardName} 
+                    onChange={(e) => setNewRewardName(e.target.value)}
+                    placeholder="Enter reward name"
+                />
+                <input 
+                    type="number" 
+                    value={newRewardCost} 
+                    onChange={(e) => setNewRewardCost(e.target.value)}
+                    placeholder="Enter reward cost"
                 />
                 <button type="submit">Add Reward</button>
             </form>
             <ul>
-                {rewards.map((reward, index) => (
-                    <li key={index}>
-                        {reward}
-                        <button onClick={() => onDelete(reward)}>Delete</button>
+                {rewards.map((reward) => (
+                    <li key={reward._id}>
+                        {reward.name} - Cost: {reward.cost}
+                        <button onClick={() => onDelete(reward._id)}>Delete</button>
                     </li>
                 ))}
             </ul>

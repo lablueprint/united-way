@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
 import { EventData } from '../_interfaces/EventInterfaces';
-import {RewardsSection} from './RewardsPage'
+import {RewardsSection, Reward} from './RewardsPage'
+
 
 // TODO: Make the organization profile based on each individual organization instead of all events.
 export default function OrganizationProfile() {
     const [eventIds, setEventIds] = useState<string[]>([]);
     const [orgData, setOrgData] = useState<any>(null);
-    const [rewards, setRewards] = useState<string[]>([]);
+    const [rewards, setRewards] = useState<Reward[]>([]);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
 
     useEffect(() => {
         // Get all events
@@ -20,7 +23,7 @@ export default function OrganizationProfile() {
 
                 const currOrg: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`);
                 console.log(currOrg.data.data);
-                setOrgData(currOrg.data.data);
+                setOrgData(currOrg.data.data.rewards);
                 setRewards(currOrg.data.data.rewards || []);
 
             }
@@ -29,7 +32,7 @@ export default function OrganizationProfile() {
             }
         }
         fetchEvents();
-    }, []);
+    }, [refreshTrigger]);
 
     const removeFromList = (id: string) => {
         setEventIds(eventIds.filter((eventId) => eventId != id));
@@ -41,35 +44,35 @@ export default function OrganizationProfile() {
         return (
             <div>
                 <h2>Organization Details</h2>
-                {Object.entries(org).map(([key, value]) => (
-                    <p key={key}><strong>{key}:</strong> {JSON.stringify(value)}</p>
-                ))}
+
+                {/* {org.map((reward) => (
+                    <p key={reward.id}><strong>{reward.name}:</strong> {JSON.stringify(reward.cost)}</p>
+                ))} */}
             </div>
         );
     }
 
-    const addReward = async (newReward: string) => {
-        const updatedRewards = [...rewards, newReward];
+    const addReward = async (newReward: Reward) => {
         try {
             const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
-                rewards: updatedRewards
+                rewards: [...rewards, newReward]
             });
             if (response.data.status === "success") {
-                setRewards(updatedRewards);
+                setRefreshTrigger(prev => prev + 1);
             }
         } catch (error) {
             console.error("Failed to add reward:", error);
         }
     }
-    
-    const deleteReward = async (rewardToDelete: string) => {
-        const updatedRewards = rewards.filter(reward => reward !== rewardToDelete);
+
+    const deleteReward = async (rewardId: string) => {
+        const updatedRewards = rewards.filter(reward => reward._id !== rewardId);
         try {
             const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
                 rewards: updatedRewards
             });
             if (response.data.status === "success") {
-                setRewards(updatedRewards);
+                setRefreshTrigger(prev => prev + 1);
             }
         } catch (error) {
             console.error("Failed to delete reward:", error);
@@ -79,7 +82,7 @@ export default function OrganizationProfile() {
     return (
         <div>
             <h1>Organization Profile</h1>
-            {orgData && <OrganizationDetails org={orgData} />}
+            {/* {orgData && <OrganizationDetails org={orgData} />} */}
             <div>
                 <h2>Events</h2>
                 <div>
