@@ -38,7 +38,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.homeStyle}>
-      <UserSignUpForm onChangeUser={onChangeUser} />
+      <UserSignUpForm />
     </View>
   );
 }

@@ -62,6 +62,7 @@ export default function SignUpScreen() {
           password: password,
         }
       );
+      console.log(response.data);
 
       // Navigate to onboarding screen
       await dispatch(
