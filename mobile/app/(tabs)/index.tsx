@@ -1,43 +1,44 @@
-import React, { useContext, useState, useEffect } from 'react';
-import React, { useContext, useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import UserSignUpForm from '../_components/UserSignUpForm';
+import React, { useContext, useState, useEffect } from "react";
+import { StyleSheet, View, Text } from "react-native";
+import { useSelector } from "react-redux";
+import UserSignUpForm from "../Components/UserSignUpForm";
 
 const styles = StyleSheet.create({
   homeStyle: {
     padding: 5,
-    backgroundColor: "cyan",
+    backgroundColor: "#ff9600",
     marginTop: "30%",
-  }
+  },
 });
-import UserSignUpForm from '../Components/UserSignUpForm';
 
 export default function HomeScreen() {
   // const { user, onChangeUser } = useState('');
-  const [email, onChangeEmail] = React.useState('');
-  const [demographics, onChangeDemo] = React.useState('');
-  const [name, onChangeName] = React.useState('');
-  const [phoneNum, onChangePhoneNum] = React.useState('');
-  const [community, onChangeCommunity] = React.useState('');
+  const [email, onChangeEmail] = React.useState("");
+  const [demographics, onChangeDemo] = React.useState("");
+  const [name, onChangeName] = React.useState("");
+  const [phoneNum, onChangePhoneNum] = React.useState("");
+  const [community, onChangeCommunity] = React.useState("");
 
-
-
-
-  function onChangeUser(email, demographics, name, phoneNum, community) {
+  function onChangeUser(
+    email: string,
+    demographics: string,
+    name: string,
+    phoneNum: string,
+    community: string
+  ) {
     onChangeEmail(email);
     onChangeDemo(demographics);
     onChangeName(name);
     onChangePhoneNum(phoneNum);
     onChangeCommunity(community);
-    console.log(email + " " + demographics + " " + name + " " + phoneNum + " " + community);
+    console.log(
+      email + " " + demographics + " " + name + " " + phoneNum + " " + community
+    );
   }
-  
+
   return (
-    <View>
+    <View style={styles.homeStyle}>
       <UserSignUpForm onChangeUser={onChangeUser} />
-      <Text style={styles.text}>
-        Hello world!
-      </Text>
     </View>
   );
 }
