@@ -30,14 +30,17 @@ export default function SignUp() {
     getOrg();
   }, []);
 
-  if (id) {
-    router.push('/landing');
-  }
+  useEffect(() => {
+    if (id) {
+      router.push('/landing');
+    }
+  }, [id]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const orgByEmail = await getOrgByEmail();
-    console.log('pushing to onboarding');
+    // Check if email and password are valid
+    // TODO: Backend password validation
     if (!validateInputs()) {
       return;
     }
@@ -46,6 +49,7 @@ export default function SignUp() {
       window.alert('This email is already associated with an account.');
       return;
     }
+    // Add org to database
     try {
       const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
         {

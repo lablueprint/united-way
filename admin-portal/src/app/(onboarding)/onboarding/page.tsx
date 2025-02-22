@@ -20,11 +20,13 @@ export default function Onboarding() {
     };
   }
 
+  // Get global state
   const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   const apiEndpoint = `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Submit form data
     const formData = { community: community, description: description, location: { type: "Point", coordinates: [0, 0, 0] }, name: name, };
     try {
       await axios.patch(apiEndpoint, formData,
@@ -51,7 +53,6 @@ export default function Onboarding() {
           onChange={(e) => setName(e.target.value)}
           value={name}
         />
-
         <p>Community:</p>
         <input
           type="text"
@@ -59,7 +60,6 @@ export default function Onboarding() {
           onChange={(e) => setCommunity(e.target.value)}
           value={community}
         />
-
         <p>Description:</p>
         <input
           type="text"

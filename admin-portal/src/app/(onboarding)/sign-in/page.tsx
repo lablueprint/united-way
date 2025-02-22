@@ -15,6 +15,7 @@ export default function SignIn() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Check if password is correct
     const targetOrg = await getOrgByEmail();
     const signIn = await verifySignIn();
     if (targetOrg.data.length === 0 || signIn === null) {
@@ -26,6 +27,7 @@ export default function SignIn() {
       authToken: signIn.accessToken,
       refreshToken: signIn.refreshToken
     }));
+    // If password is correct, proceed to home screen
     router.push('/landing');
   };
 
@@ -36,8 +38,6 @@ export default function SignIn() {
           email: email
         }
       );
-      console.log('got org');
-      console.log(response.data.data[0]._id);
       return response.data;
     } catch (err) {
       console.log(err);
@@ -53,8 +53,6 @@ export default function SignIn() {
           password: password
         }
       );
-      console.log('verify sign in');
-      console.log(response.data.data);
       return response.data.data;
     } catch (err) {
       console.log(err);

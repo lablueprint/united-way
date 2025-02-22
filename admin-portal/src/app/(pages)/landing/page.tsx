@@ -40,18 +40,10 @@ export default function Landing() {
       <OrganizationProfile></OrganizationProfile>
       <button onClick={() => { console.log("Result: ", exampleGetToRoot()) }}>
         Example HTTP Request button
-      </button>
-
-      {
-        `\norg: ${org.orgId}`
-      }
-      {
-        `\nauth: ${org.authToken}`
-      }
-      {
-        `\nrefresh: ${org.refreshToken}`
-      }
-
+      </button><br />
+      Org: {org.orgId}<br />
+      Auth: {org.authToken}<br />
+      Refresh: {org.refreshToken}<br />
       <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
         Log out
       </button>
