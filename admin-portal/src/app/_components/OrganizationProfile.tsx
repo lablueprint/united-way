@@ -8,7 +8,8 @@ import { EventData } from '../_interfaces/EventInterfaces';
 export default function OrganizationProfile() {
     const [eventIds, setEventIds] = useState<string[]>([]);
     const [orgName, setOrgName] = useState<string>("");
-    const [isEditing, setIsEditing] = useState(false);
+    const [orgID, setOrgID] = useState<string>("");
+    const [isEditing, setIsEditing] = useState<boolean>(false);
 
     useEffect(() => {
         // Get all events
@@ -23,6 +24,7 @@ export default function OrganizationProfile() {
             }
         }
         setOrgName("test org"); // Hardcoded, Sign-in doesn't pass down org name yet
+        setOrgID("11111");  // Hardcoded, Sign-in doesn't pass down org ID yet
         fetchEvents();
     }, []);
 
@@ -45,7 +47,8 @@ export default function OrganizationProfile() {
                 <button onClick={() =>setIsEditing(!isEditing)}>
                     {isEditing ? "Cancel Event" : "Create Event"}
                 </button>
-                {isEditing && <CreateEventCard orgName={orgName}/>}
+                {/* TODO: Pass down Org ID */}
+                {isEditing && <CreateEventCard orgName={orgName} changeState={setIsEditing} orgID={orgID}/>}
             </div>
         </div>
     );

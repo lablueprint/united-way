@@ -1,16 +1,18 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
-import { EventData } from "../_interfaces/EventInterfaces";
+import { EventTags } from "../_interfaces/EventInterfaces";
 
 interface CreateEventCardProps {
     orgName: string;
+    changeState: React.Dispatch<React.SetStateAction<boolean>>;
+    orgID: string;
 }
 
-export default function CreateEventCard({orgName}: CreateEventCardProps) {
+export default function CreateEventCard({orgName, changeState, orgID}: CreateEventCardProps) {
     const [updatedName, setUpdatedName] = useState<string>("");
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
     const [updatedDescription, setUpdatedDescription] = useState<string>("");
-    const [updatedTags, setUpdatedTags] = useState<string[]>([]);
+    const [updatedTags, setUpdatedTags] = useState<boolean[]>(Array(EventTags.length).fill(false));
     const [submissionStatus, setSubmissionStatus] = useState<string>("");
     // TODO: Location API state variables
 
@@ -18,24 +20,54 @@ export default function CreateEventCard({orgName}: CreateEventCardProps) {
         setUpdatedName("");
         setUpdatedDate(new Date);
         setUpdatedDescription("");
-        setUpdatedTags([]);
+        setUpdatedTags(Array(EventTags.length).fill(false));
         setSubmissionStatus("Cleared!");
     }
 
     const notEmpty = () => {
         return ((updatedName != "") &&
                 (updatedDescription != "") &&
-                (updatedTags.length > 0))
+                (!updatedTags.includes(true)))
     }
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async () => {
         try {
             if (notEmpty()) {
-                const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`);
-                setSubmissionStatus(`Success!: ${response}`);
+                const selectedTags = updatedTags
+                    .map((isSelected, index) => isSelected ? EventTags[index] : null)
+                    .filter(tag => tag !== null);
+                
+                const response: AxiosResponse = await axios.post(
+                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
+                    {
+                        name: updatedName,
+                        date: updatedDate,
+                        description: updatedDescription,
+                        location: {
+                            type: "Point",
+                            coordinates: [0, 0]
+                        },
+                        organizerID: orgID,
+                        tags: selectedTags,
+                        registeredUsers: [],
+                        activity: []
+                    }
+                );
+                setSubmissionStatus(`Success!: ${response.data.message}`);
+                changeState(false);
             }
             else {
-                setSubmissionStatus(`Error: Empty Args`);
+                var errs = "";
+                if (updatedName == "") {
+                    errs = errs + "Name ";
+                }
+                if (updatedDescription == "") {
+                    errs = errs + "Description ";
+                }
+                if (!updatedTags.includes(true)) {
+                    errs = errs + "Tags ";
+                }
+                setSubmissionStatus(`Error: Empty Args: ${errs}`);
             }
         } catch (err) {
             console.log(err);
@@ -49,31 +81,47 @@ export default function CreateEventCard({orgName}: CreateEventCardProps) {
                 New event for {orgName}:
             </h3>
 
-            <form onSubmit={handleSubmit}>
-                <label>
-                    Name:
-                    <input type="text" name="name" placeholder="Name" value={updatedName} onChange={(event) => { setUpdatedName(event.target.value) }} />
-                </label>
-                <label>
-                    Date:
-                    <input type="date" name="date" placeholder="Date" value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''} onChange={(event) => { setUpdatedDate(new Date((event.target as HTMLInputElement).value)) }} />
-                </label>
-                <label>
-                    Description:
-                    <input type="text" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} />
-                </label>
-                <label>
-                    Tags:       {/* TODO: Clarify tags */}
-                    <input
-                        type="text"
-                        name="tags"
-                        placeholder="Tags"
-                        value={Array.isArray(updatedTags) ? updatedTags.join(', ') : ''}
-                        onChange={(event) => { setUpdatedTags(event.target.value.split(', ')) }}
-                    />
-                </label>
-                <input type="submit" value="Publish!" /> {/* TODO: This always closes for some reason */}
-            </form>
+            <label>
+                Name:
+                <input type="text" name="name" placeholder="Name" value={updatedName} onChange={(event) => { setUpdatedName(event.target.value) }} />
+            </label>
+            <label>
+                Date:
+                <input type="date" name="date" placeholder="Date" value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''} onChange={(event) => { setUpdatedDate(new Date((event.target as HTMLInputElement).value)) }} />
+            </label>
+            <label>
+                Description:
+                <input type="text" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} />
+            </label>
+            <br/>
+            <label>
+                Tags:
+                {
+                    EventTags.map((tagName, index) => {
+                        return (
+                            <button key={index} onClick={() => {
+                                const newTags = [...updatedTags];
+                                newTags[index] = !newTags[index];
+                                setUpdatedTags(newTags);
+                            }}
+                            style={{
+                                backgroundColor: updatedTags[index] ? 'green' : 'red',
+                                color: 'white'
+                            }}>
+                                {tagName}
+                            </button>
+                        )
+                    })
+                }
+            </label>
+            <br/>
+            <button onClick={handleSubmit}>
+                Publish!
+            </button>
+{/* 
+            <button onClick={() => console.log(updatedTags)}>
+                Logging Button
+            </button> */}
             
             <button onClick={clearEvent}>
                 Clear
