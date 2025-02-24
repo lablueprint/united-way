@@ -15,10 +15,10 @@ interface EventDetails {
 export default function EventScanner() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
-  const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);  
-  const [eventId, setEventId] = useState(""); 
+  const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
+  const [eventId, setEventId] = useState("");
   const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-  
+
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -32,19 +32,24 @@ export default function EventScanner() {
     fetchEventDetails(data);
   };
 
-  const fetchEventDetails = async (eventId : string) => {
+  const fetchEventDetails = async (eventId: string) => {
     try {
-        const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`);
-        const { data } = response.data;
-        setEventDetails(data);
+      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`, {
+        headers: {
+          'Authorization': `Bearer ${user.authToken}`,
+          'Content-Type': "application/json"
+        },
+      });
+      const { data } = response.data;
+      setEventDetails(data);
     } catch (err) {
-        console.error(err);
+      console.error(err);
     }
   };
 
-  const addEventToUser = async (eventId : string) => {
+  const addEventToUser = async (eventId: string) => {
     try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`, 
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
         {
           newEvent: eventId,
         },
@@ -53,36 +58,17 @@ export default function EventScanner() {
             'Authorization': `Bearer ${user.authToken}`,
             'Content-Type': "application/json"
           },
-        });                                         
+        });
     } catch (err) {
-        console.error(err);
+      console.error(err);
     }
   }
 
-  const addUserToEvent = async (userId : string) => {
+  const addUserToEvent = async (userId: string) => {
     try {
       await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
-        { 
-          newUser: userId, 
-        }, 
         {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
-          },
-        }
-      );
-    } catch (err) { 
-      console.error(err);
-    }
-  };
-  
-
-  const removeUserFromEvent = async(userId : string) => {
-    try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
-        { 
-          userId: userId, 
+          newUser: userId,
         },
         {
           headers: {
@@ -92,14 +78,33 @@ export default function EventScanner() {
         }
       );
     } catch (err) {
-        console.error(err);
+      console.error(err);
+    }
+  };
+
+
+  const removeUserFromEvent = async (userId: string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
+        {
+          userId: userId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
     }
   }
 
-  const removeEventFromUser = async(eventId : string) => {
+  const removeEventFromUser = async (eventId: string) => {
     try {
       const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
-        { 
+        {
           eventId: eventId,
         },
         {

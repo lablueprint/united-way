@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, MouseEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EditCard from "./EditCard";
 import EventModal from './EventModal';
 import { EventData } from '../_interfaces/EventInterfaces';
+import { useSelector } from 'react-redux';
+import { RootState } from '../_interfaces/AuthInterfaces';
 
 interface EventCardProps {
     id: string;
@@ -27,11 +29,18 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         registeredUsers: [],
         activities: []
     });
+    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
-    const deleteEvent = async () => {
+    const deleteEvent = async (e: MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
         try {
             removeFromList(id);
-            await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`);
+            await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
+                }
+            });
         } catch (err) {
             console.log(err);
         }
@@ -45,7 +54,12 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
                     date: date,
                     description: description,
                     tags: tags
-                });
+                }, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
+                }
+            });
             const { data } = response.data;
             setEventData(data);
         } catch (err) {
@@ -55,7 +69,12 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
 
     const getEventById = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`);
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
+                }
+            });
             const { data } = response.data;
             return data;
         } catch (err) {
@@ -72,9 +91,10 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         fetchData();
     }, []);
 
-    const handleEditClick = () => {
+    const handleEditClick = (e: MouseEvent<HTMLButtonElement>) => {
         // Show EditCard modal
-        setIsEditing(true);
+        e.stopPropagation();
+        setIsEditing(!isEditing);
     };
     const handleCloseClick = () => {
         // Close EditCard modal
@@ -83,28 +103,29 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
 
     const handleCardClick = () => {
         // Show EventModal
-        console.log('card clicked');
-        setShowModal(true);
+        setShowModal(!showModal);
     }
-    
+
     return (
         // Show event name, show buttons on hover
-        <div
-            onMouseEnter={() => setShowButtons(true)}
-            onMouseLeave={() => setShowButtons(false)}
-            onClick={() => handleCardClick()}
-        >
-            <p>{eventData?.name}</p>
-            {showButtons && (
-                <>
-                    <button onClick={deleteEvent}>Delete</button>
-                    <button onClick={handleEditClick}>Edit</button>
-                </>
-            )}
-            
+        <div>
+            <div
+                onMouseEnter={() => setShowButtons(true)}
+                onMouseLeave={() => setShowButtons(false)}
+                onClick={() => handleCardClick()}
+            >
+                <p>{eventData?.name}</p>
+                {showButtons && (
+                    <>
+                        <button onClick={deleteEvent}>Delete</button>
+                        <button onClick={handleEditClick}>Edit</button>
+                    </>
+                )}
+            </div>
+
             {showModal && (
                 <>
-                    <EventModal 
+                    <EventModal
                         _id={eventData?._id}
                         name={eventData?.name}
                         description={eventData?.description}
@@ -112,7 +133,7 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
                     />
                 </>
             )}
-            
+
             {isEditing && <EditCard id={id} handleCloseClick={handleCloseClick} handleEditEvent={editEvent} />}
         </div>
     );

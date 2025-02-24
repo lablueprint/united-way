@@ -60,7 +60,6 @@ const addEventToUser = async (req, res) => {
   const { newEvent } = req.body;
   
   try {
-    console.log('addEventToUser: ', req.auth);
     const result = await User.updateOne( { _id: userId }, { $addToSet: { registeredEvents: newEvent }});
     if (result.modifiedCount === 0) {
         res.status(404).json({
@@ -96,7 +95,6 @@ const removeEventFromUser = async (req, res) => {
     const result = await User.findOneAndUpdate(
       { _id: userId }, 
       { $pull: { registeredEvents: eventId}});
-    console.log(result);
     if (result.modifiedCount === 0) {
         res.status(404).json({
             status: "failure",

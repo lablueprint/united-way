@@ -48,10 +48,6 @@ app.use('/orgs',
 app.use('/orgs', organizationRouter);
 
 app.use('/users', 
-  (req,res,next) => {
-    console.log(req);
-    next()
-  },
   jwt(
   {
     secret: process.env.JWT_SECRET, 
@@ -61,10 +57,6 @@ app.use('/users',
 app.use('/users', userRouter);
 
 app.use('/events',
-  (req,res,next) => {
-    console.log(req);
-    next()
-  },
   jwt (
     {
       secret: process.env.JWT_SECRET, 
