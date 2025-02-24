@@ -4,14 +4,24 @@ const { expressjwt: jwt } = require("express-jwt");
 const authRouter = express.Router();
 const authController = require('../controllers/authController');
 
-authRouter.post('/login',authController.verifyUserLogin)
+authRouter.post('/userLogin',authController.verifyUserLogin)
 
-authRouter.use('/refresh', 
+authRouter.use('/userRefresh', 
     jwt({
         secret: process.env.REFRESH_SECRET, 
         algorithms: ["HS256"]
     })
 )
-authRouter.post('/refresh', authController.refreshAccessToken)
+authRouter.post('/userRefresh', authController.refreshUserAccessToken)
+
+authRouter.post('/orgLogin',authController.verifyOrgLogin)
+
+authRouter.use('/orgRefresh', 
+    jwt({
+        secret: process.env.REFRESH_SECRET, 
+        algorithms: ["HS256"]
+    })
+)
+authRouter.post('/orgRefresh', authController.refreshOrgAccessToken)
 
 module.exports = authRouter;

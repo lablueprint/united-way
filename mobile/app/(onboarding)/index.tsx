@@ -9,9 +9,9 @@ import { login } from '../_utils/redux/userSlice';
 export default function SignUpScreen() {
     const [id, setId] = useState("");
     const [password, setPassword] = useState("");
+    const [email, setEmail] = useState('');
     const router = useRouter();
     const dispatch = useDispatch();
-    const [email, setEmail] = useState('');
 
     useEffect(() => {
         const getUser = async () => {
@@ -54,7 +54,7 @@ export default function SignUpScreen() {
             );
 
             // Navigate to onboarding screen
-            await dispatch(login({
+            dispatch(login({
                 userId: response.data.data._id,
                 authToken: response.data.authToken,
                 refreshToken: response.data.refreshToken

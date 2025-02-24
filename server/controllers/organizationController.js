@@ -1,19 +1,27 @@
+require('dotenv').config();
+const bcrypt = require('bcrypt');
 const Organization = require('../models/organizationModel');
+const { generateToken } = require("../controllers/authController")
 
 const createOrganization = async (req, res) => {
-    const newOrganization = new Organization(req.body);
     try {
-        const data = await newOrganization.save(newOrganization);
-        res.status(201).json({
-            status: "success",
-            message: "Organization successfully created.",
-            data: data
-        });
+        bcrypt.hash(req.body.password, `$2b$${process.env.SALT_ROUNDS}$${process.env.HASH_SALT}`, async (err, hash) => {
+            req.body.password = hash;
+            const newOrganization = new Organization(req.body);
+            const data = await newOrganization.save(newOrganization);
+            res.status(201).json({
+                status: "success",
+                message: "Organization successfully created.",
+                data: data,
+                authToken: generateToken({tokenType: "access", uid: data._id, role: "organization"}),
+                refreshToken: generateToken({tokenType: "refresh", uid: data._id})
+            });
+        })
     } catch (err) {
         console.error(err);
         res.status(500).json({
             status: "failure",
-            message: "Server-side error: user could not be created.",
+            message: "Server-side error: organization could not be created.",
             data: {}
         });
     }
@@ -21,6 +29,10 @@ const createOrganization = async (req, res) => {
 
 // only using req when we apply filters
 const getAllOrganizations = async (req, res) => {
+    if (req.auth.role != 'admin') {
+        res.status(401);
+        return;
+    }
     try {
         const organizations = await Organization.find();
         res.status(200).json({
@@ -40,6 +52,10 @@ const getAllOrganizations = async (req, res) => {
 // for async functions must use await -- so you can resolve content later
 // pass in parameter of curly braces == no filter 
 const getOrganizationById = async (req, res) => {
+    if (req.auth.role != 'admin') {
+        res.status(401);
+        return;
+    }
     const organizationId = req.params.id;
     try {
         const organizationByID = await Organization.findOne({  _id: organizationId });
@@ -93,9 +109,12 @@ const getOrganizationsByFilter = async (req, res) => {
 };
 
 const editOrganizationDetails = async (req, res) => {
+    if (req.auth.role != 'organization') {
+        res.status(401);
+        return;
+    }
     const orgId = req.params.id;
     const updateInput = req.body;
-
     try {
         const result = await Organization.updateOne( { _id: orgId }, { $set: updateInput});
         if (result.modifiedCount === 0) {
@@ -150,6 +169,10 @@ const getAssociatedEvents = async (req, res) => {
 }
 
 const deleteOrganization = async (req, res) => {
+    if (req.auth.role != 'organization' && req.auth.role != 'admin') {
+        res.status(401);
+        return;
+    }
     const orgId = req.params.id;
     try {
         const result = await Organization.deleteOne({ _id: orgId})
