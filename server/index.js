@@ -2,6 +2,7 @@ require('dotenv').config(); // populates all 'secrets' in everything we defined 
 
 // Module Imports
 const express = require('express'); //define route thru express 
+const { expressjwt: jwt } = require("express-jwt");
 const mongoose = require('mongoose');
 const cors = require('cors');
 
@@ -10,6 +11,7 @@ const port = process.env.PORT;
 
 // Route Imports
 const exampleRouter = require('./routes/exampleRoute.js');
+const authRouter = require('./routes/authRoutes.js')
 const eventRouter = require('./routes/eventRoutes.js');
 const organizationRouter = require('./routes/organizationRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
@@ -34,8 +36,26 @@ app.use(express.json());
 
 // API Routes
 app.use('/test', exampleRouter); // given ip address, /test is where example router logic will be handle
+app.use('/auth', authRouter);
+
+app.use('/orgs', 
+  jwt(
+  {
+    secret: process.env.JWT_SECRET, 
+    algorithms: ["HS256"]
+  }).unless({path: ["/orgs/createOrg", "/orgs/filtered"]})
+)
 app.use('/orgs', organizationRouter);
+
+app.use('/users', 
+  jwt(
+  {
+    secret: process.env.JWT_SECRET, 
+    algorithms: ["HS256"]
+  }).unless({path: ["/users/createUser", /^\/users\/email\/([^\/]*)$/]})
+)
 app.use('/users', userRouter);
+
 app.use('/events', eventRouter);
 app.use('/activities', activityRouter);
 
