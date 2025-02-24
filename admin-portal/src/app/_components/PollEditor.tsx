@@ -122,7 +122,11 @@ export default function PollEditor({ eventID, idData, questionsData, onSave, sta
                 // Update the existing poll with the merged content
                 await axios.patch(
                     `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`,
-                    { content: updatedContent }
+                    { 
+                        content: updatedContent,
+                        timeStart: startTime,
+                        timeEnd: endTime,
+                    }
                 );
 
                 console.log("New question data", questionsData);

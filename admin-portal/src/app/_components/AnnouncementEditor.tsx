@@ -100,7 +100,11 @@ export default function AnnouncementEditor({ id, timeStart, timeEnd }: Announcem
       if (message._id) {
         await axios.patch(
           `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${message._id}`,
-          { content: message.content }
+          { 
+            content: message.content,
+            timeStart,
+            timeEnd
+          }
         );
         console.log("Announcement successfully updated!");
       } else {
