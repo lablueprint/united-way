@@ -34,18 +34,21 @@ export default function SignUpScreen() {
     }
 
     const handleAddUser = async () => {
-        router.push({ pathname: "/two-step" });
+        //router.push({ pathname: "/two-step" });
+        console.log("trying to sign up");
         {/* Remove this later */}
         // Check if email and password are valid
         // TODO: Backend password validation
         if (!validateInputs()) {
             return;
         }
+        console.log("validated");
         // Check if email is in database already
         if (await userExists() != null) {
             Alert.alert('This email is already associated with an account.');
             return;
         }
+        console.log("check database");
         // Add user to database
         try {
             const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
@@ -54,8 +57,8 @@ export default function SignUpScreen() {
                     password: password
                 }
             );
-
-            // Navigate to onboarding screen
+            console.log("post to database");
+            //Navigate to onboarding screen
             await dispatch(login({
                 userId: response.data.data._id,
                 authToken: response.data.authToken,

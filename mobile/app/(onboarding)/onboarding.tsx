@@ -49,27 +49,35 @@ export default function OnboardingScreen() {
     }
 
     return (
-        <View style={styles.container}>
-        <View style={styles.content}>
-            <Text style={styles.text}>
+        <View style={styles.containerdd}>
+        <View style={styles.contentdd}>
+            <Text style={styles.textdd}>
                 Let's get you onboarded!
             </Text>
+            <Text style={styles.subtitle}>Name</Text>
             <TextInput
+                style={styles.input}
                 placeholder="Name"
                 onChangeText={setName}
                 value={name}
             />
+            <Text style={styles.subtitle}>Phone</Text>
             <TextInput
+                style={styles.input}
                 placeholder="Phone"
                 onChangeText={setPhone}
                 value={phone}
             />
+            <Text style={styles.subtitle}>Ethnicity</Text>
             <TextInput
+                style={styles.input}
                 placeholder="Ethnicity"
                 onChangeText={setEthnicity}
                 value={ethnicity}
             />
+            <Text style={styles.subtitle}>Community</Text>
             <TextInput
+                style={styles.input}
                 placeholder="Community"
                 onChangeText={setCommunity}
                 value={community}
@@ -83,8 +91,8 @@ export default function OnboardingScreen() {
                 setItems={setItems}
                 placeholder={'Gender'}
             />
-            <TouchableOpacity onPress={handleEditUser}>
-                <Text>
+            <TouchableOpacity onPress={handleEditUser} style = {styles.continueButton}>
+                <Text style = {styles.continueButtonText}>
                 Done
                 </Text>
             </TouchableOpacity>
@@ -98,18 +106,64 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  containerdd: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  content: {
+  contentdd: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  text: {
+  textdd: {
     color: 'black',
     margin: 24,
-  }
-});
+  },
+    outerContainer: {
+      flex: 1,
+      padding: 2,
+      backgroundColor: '#007AFF',
+    },
+    container: {
+      flex: 1,
+      backgroundColor: 'white',
+      borderRadius: 40,
+    },
+    content: {
+      flex: 1,
+      padding: 20,
+      marginTop: 40,
+    },
+    header: {
+      marginBottom: 40,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 8,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: '#666',
+    },
+    input: {
+      backgroundColor: '#F5F5F5',
+      padding: 16,
+      borderRadius: 8,
+      fontSize: 18,
+      marginBottom: 24,
+      letterSpacing: 1,
+    },
+    continueButton: {
+      backgroundColor: 'black',
+      padding: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    continueButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  });
