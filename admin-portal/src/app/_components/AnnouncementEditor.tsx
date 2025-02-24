@@ -1,80 +1,120 @@
-"use client"
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-
 interface Message {
-  id: number;
-  text: string;
+  eventID: string;
+  _id: number;
+  content: { text: string }[];
 }
-
 interface AnnouncementEditorProps {
   id: string;
-  // eventID: string;
-  // onSave: () => void;
   timeStart: Date;
   timeEnd: Date;
 }
 
 export default function AnnouncementEditor({ id, timeStart, timeEnd }: AnnouncementEditorProps) {
-  const [messages, setMessages] = useState<Message[]>([{ id: 1, text: "" }]);
+  const [message, setMessage] = useState<Message | null>(null);
 
-  // Add a new message segment with a unique ID
-  const handleAddMessage = () => {
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        id: prevMessages.length ? Math.max(...prevMessages.map((m) => m.id)) + 1 : 1,
-        text: "",
-      },
-    ]);
-    console.log(messages);
+  const fetchAnnounce = async () => {
+    try {
+      const { data } = await axios.post(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/filtered`,
+        {
+          eventID: id,
+          type: "announcement",
+        }
+      );
+
+      if (data.data.length > 0) {
+        setMessage({
+          ...data.data[0],
+          content: data.data[0].content.length ? data.data[0].content : [{ text: "" }],
+        });
+      } else {
+        setMessage({ eventID: id, _id: 0, content: [{ text: "" }] });
+      }
+    } catch (error) {
+      console.error("Error fetching message:", error);
+    }
   };
 
-  // Update a specific message segment
-  const handleUpdateMessage = (id: number, value: string) => {
-    setMessages((prevMessages) =>
-      prevMessages.map((message) =>
-        message.id === id ? { ...message, text: value } : message
-      )
+  useEffect(() => {
+    fetchAnnounce();
+  }, []);
+
+  const handleAddText = () => {
+    if (!message) return;
+    setMessage((prevMessage) =>
+      prevMessage
+        ? {
+            ...prevMessage,
+            content: [...prevMessage.content, { text: "" }],
+          }
+        : null
     );
   };
 
-  // Delete a specific message segment
-  const handleDeleteMessage = (id: number) => {
-    setMessages((prevMessages) => prevMessages.filter((message) => message.id !== id));
+  const handleUpdateText = (index: number, value: string) => {
+    if (!message) return;
+    setMessage((prevMessage) =>
+      prevMessage
+        ? {
+            ...prevMessage,
+            content: prevMessage.content.map((t, i) =>
+              i === index ? { ...t, text: value } : t
+            ),
+          }
+        : null
+    );
   };
 
-  // Handle saving announcements
+  const handleDeleteText = async (index: number) => {
+    if (!message || !message.content) return; // Ensure message exists before proceeding
+  
+    // Create a new content array without the deleted text
+    const updatedContent = message.content.filter((_, i) => i !== index);
+  
+    try {
+      if (message._id) {
+        await axios.patch(
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${message._id}`,
+          { content: updatedContent }
+        );
+        console.log("Text successfully deleted from the database!");
+      }
+    } catch (error) {
+      console.error("Error deleting text from the database:", error);
+      return;
+    }
+
+    setMessage((prevMessage) =>
+      prevMessage ? { ...prevMessage, content: updatedContent } : null
+    );
+  };
+  
+
   const handleSave = async () => {
-    console.log("Saving announcements:", { id, messages });
+    if (!message) return;
 
     try {
-      if (id) {
-        // If updating an existing announcement
-        console.log("Updating existing announcement:", id);
-
+      if (message._id) {
         await axios.patch(
-          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${id}`,
-          { content: messages.map((m) => m.text) }
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${message._id}`,
+          { content: message.content }
         );
-
         console.log("Announcement successfully updated!");
       } else {
-        // If creating a new announcement
-        console.log("Creating a new announcement...");
-
         const { data } = await axios.post(
           `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
           {
-            id,
+            eventID: message.eventID,
             type: "announcement",
-            content: messages.map((m) => m.text),
-            timeStart: {timeStart},
-            timeEnd: {timeEnd},
+            content: message.content,
+            timeStart,
+            timeEnd,
             active: true,
           }
         );
-
         console.log("New announcement created:", data);
       }
     } catch (error) {
@@ -84,28 +124,26 @@ export default function AnnouncementEditor({ id, timeStart, timeEnd }: Announcem
 
   return (
     <div>
-      <h3>Announcement Editor</h3>
-      {messages.map((message) => (
-        <div key={message.id} style={{ marginBottom: "10px" }}>
+      {message && message.content.map((textObj, index) => (
+        <div key={index} style={{ marginBottom: "10px" }}>
           <textarea
-            value={message.text}
-            onChange={(e) => handleUpdateMessage(message.id, e.target.value)}
-            placeholder={`Message segment ${message.id}`}
+            value={textObj.text}
+            onChange={(e) => handleUpdateText(index, e.target.value)}
+            placeholder="Add a message"
             rows={2}
             style={{ width: "100%", resize: "none" }}
           />
           <div style={{ marginTop: "5px" }}>
-            <button onClick={() => handleDeleteMessage(message.id)}>Delete</button>
-            <button onClick={handleAddMessage}>Add Message</button>
-            <button onClick={handleSave} style={{ marginLeft: "10px" }}>Save</button>
+            <button type="button" onClick={() => handleDeleteText(index)}>Delete</button>
           </div>
         </div>
       ))}
-      {/* <button onClick={handleAddMessage}>Add Message</button> */}
-      
+      <button type="button" onClick={handleAddText}>
+        Add Text
+      </button>
+      <button type="button" onClick={handleSave} style={{ marginLeft: "10px" }}>
+        Save
+      </button>
     </div>
   );
 }
-
-//i need to fetch the announcements and then find the announcement id, the {id} right now is currently 
-// the eventid and its checking if the eventid already exists but i want to edit the announcement

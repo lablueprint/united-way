@@ -1,5 +1,6 @@
 import React, { StyleSheet, View, Text } from 'react-native';
-import Poll from '../_components/Poll'
+// import Poll from '../_components/Poll';
+import Announcement from '../_components/Announcement';
 
 export default function TabTwoScreen() {
   return (
@@ -11,7 +12,7 @@ export default function TabTwoScreen() {
     // </View>
 
     <View style={styles.container}>
-      <Poll id="67908ee7339ea31330c3ce15" />
+      <Announcement id="67908e7a339ea31330c3ce13" />
     </View>
   );
 }
