@@ -19,11 +19,11 @@ export default function SignUpScreen() {
       Alert.alert('Email or password is incorrect.');
       return;
     }
-    await dispatch(login({
+    dispatch(login({
       userId: targetUser._id,
       authToken: signIn.accessToken,
       refreshToken: signIn.refreshToken
-    }))
+    }));
     // If password is correct, proceed to home screen
     router.push({ pathname: "/(tabs)" });
   }
@@ -39,7 +39,7 @@ export default function SignUpScreen() {
 
   const verifySignIn = async () => {
     try {
-      const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/auth/login`,
+      const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/auth/userLogin`,
         {
           email: email,
           password: password

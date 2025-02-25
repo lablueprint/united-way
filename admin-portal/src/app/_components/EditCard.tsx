@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, FormEvent } from "react";
 import axios, { AxiosResponse } from "axios";
 import QuizEditor from "./QuizEditor";
@@ -15,6 +16,12 @@ interface Question {
   answers: Answer[];
 }
 
+=======
+import React, { useState, useEffect, FormEvent, MouseEvent } from 'react';
+import axios, { AxiosResponse } from "axios";
+import { useSelector } from 'react-redux';
+import { RootState } from '../_interfaces/AuthInterfaces';
+>>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
 
 interface EditCardProps {
   id: string;
@@ -28,6 +35,7 @@ interface EditCardProps {
   ) => void;
 }
 
+<<<<<<< HEAD
 export default function EditCard({
   id,
   handleCloseClick,
@@ -53,6 +61,55 @@ export default function EditCard({
     } catch (err) {
       console.log(err);
       return err;
+=======
+export default function EditCard({ id, handleCloseClick, handleEditEvent }: EditCardProps) {
+    // Variables to store the updated event details
+    const [updatedName, setUpdatedName] = useState<string>("");
+    const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
+    const [updatedDescription, setUpdatedDescription] = useState<string>("");
+    const [updatedTags, setUpdatedTags] = useState<string[]>([]);
+    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } });
+
+    // Get the event details by ID
+    const getEventById = async () => {
+        try {
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
+                }
+            });
+            const { data } = response.data;
+            return data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    };
+
+    // Fetch the event details by ID
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await getEventById();
+            setUpdatedName(data.name);
+            setUpdatedDate(new Date(data.date));
+            setUpdatedDescription(data.description);
+            setUpdatedTags(data.tags || []);
+        };
+        fetchData();
+    }, []);
+
+    // Edit the event details
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        try {
+            e.preventDefault();
+            handleEditEvent(updatedName, updatedDate, updatedDescription, updatedTags);
+            handleCloseClick();
+        } catch (err) {
+            console.log(err);
+            handleCloseClick();
+        }
+>>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
     }
   };
 

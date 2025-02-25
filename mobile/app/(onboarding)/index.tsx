@@ -14,6 +14,7 @@ import * as SecureStore from "expo-secure-store";
 import { login } from "../_utils/redux/userSlice";
 
 export default function SignUpScreen() {
+<<<<<<< HEAD
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -32,6 +33,92 @@ export default function SignUpScreen() {
             authToken: parsedUser.authToken,
             refreshToken: parsedUser.refreshToken,
           })
+=======
+    const [id, setId] = useState("");
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState('');
+    const router = useRouter();
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const getUser = async () => {
+            const storedUser = await SecureStore.getItemAsync("user");
+            if (storedUser != null) {
+                const parsedUser = JSON.parse(storedUser);
+                setId(parsedUser.userId);
+                dispatch(login({
+                    userId: parsedUser.userId,
+                    authToken: parsedUser.authToken,
+                    refreshToken: parsedUser.refreshToken
+                }));
+            }
+        };
+        getUser();
+    }, [])
+
+    if (id) {
+        return <Redirect href="/(tabs)" />
+    }
+
+    const handleAddUser = async () => {
+        // Check if email and password are valid
+        // TODO: Backend password validation
+        if (!validateInputs()) {
+            return;
+        }
+        // Check if email is in database already
+        if (await userExists() != null) {
+            Alert.alert('This email is already associated with an account.');
+            return;
+        }
+        // Add user to database
+        try {
+            const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
+                {
+                    email: email,
+                    password: password
+                }
+            );
+
+            // Navigate to onboarding screen
+            dispatch(login({
+                userId: response.data.data._id,
+                authToken: response.data.authToken,
+                refreshToken: response.data.refreshToken
+            }))
+
+            router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken} });
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const userExists = async () => {
+        // Check if email is in database already
+        try {
+            const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`);
+            return response.data.data;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const validateInputs = () => {
+        if (!validateEmail()) {
+            Alert.alert('Enter a valid email.');
+            return false;
+        } else if (!validatePassword()) {
+            Alert.alert('Enter a valid password. Your password must contain at least 12 characters including an uppercase letter, a lowercase letter, a symbol, and a number.')
+            return false;
+        }
+        return true;
+    }
+
+    const validatePassword = () => {
+        // Require 12+ characters including uppercase and lowercase letters, a symbol, and a number
+        return password.match(
+            /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{12,}$/
+>>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
         );
       }
     };

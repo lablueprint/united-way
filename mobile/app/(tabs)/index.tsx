@@ -1,12 +1,11 @@
 import React, { useContext, useState, useEffect } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { useSelector } from "react-redux";
-import UserSignUpForm from "../Components/UserSignUpForm";
+import UserSignUpForm from "../_components/UserSignUpForm";
 
 const styles = StyleSheet.create({
   homeStyle: {
     padding: 5,
-    backgroundColor: "#ff9600",
+    backgroundColor: "cyan",
     marginTop: "30%",
   },
 });
@@ -19,13 +18,7 @@ export default function HomeScreen() {
   const [phoneNum, onChangePhoneNum] = React.useState("");
   const [community, onChangeCommunity] = React.useState("");
 
-  function onChangeUser(
-    email: string,
-    demographics: string,
-    name: string,
-    phoneNum: string,
-    community: string
-  ) {
+  function onChangeUser(email, demographics, name, phoneNum, community) {
     onChangeEmail(email);
     onChangeDemo(demographics);
     onChangeName(name);
@@ -37,8 +30,9 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.homeStyle}>
-      <UserSignUpForm />
+    <View>
+      <UserSignUpForm onChangeUser={onChangeUser} />
+      <Text style={styles.text}>Hello world!</Text>
     </View>
   );
 }

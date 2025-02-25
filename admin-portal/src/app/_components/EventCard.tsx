@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, MouseEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EditCard from "./EditCard";
+import EventModal from './EventModal';
 import { EventData } from '../_interfaces/EventInterfaces';
+<<<<<<< HEAD
 import { ActivityContent } from '../_interfaces/EventInterfaces';
+=======
+import { useSelector } from 'react-redux';
+import { RootState } from '../_interfaces/AuthInterfaces';
+>>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
 
 interface EventCardProps {
     id: string;
@@ -12,6 +18,7 @@ interface EventCardProps {
 export default function EventCard({ id, removeFromList }: EventCardProps) {
     const [showButtons, setShowButtons] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [eventData, setEventData] = useState<EventData>({
         organizerId: "",
         _id: "",
@@ -26,6 +33,7 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         registeredUsers: [],
         activities: []
     });
+<<<<<<< HEAD
     const [activityData, setActivityData] = useState<ActivityContent>({
         eventID: "",
         type: "",
@@ -34,11 +42,20 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         timeEnd: new Date(),
         active: false,
     });
+=======
+    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+>>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
 
-    const deleteEvent = async () => {
+    const deleteEvent = async (e: MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
         try {
             removeFromList(id);
-            await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`);
+            await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
+                }
+            });
         } catch (err) {
             console.log(err);
         }
@@ -52,7 +69,12 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
                     date: date,
                     description: description,
                     tags: tags
-                });
+                }, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
+                }
+            });
             const { data } = response.data;
             setEventData(data);
         } catch (err) {
@@ -62,7 +84,12 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
 
     const getEventById = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`);
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
+                }
+            });
             const { data } = response.data;
             return data;
         } catch (err) {
@@ -97,26 +124,46 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         fetchData();
     }, []);
 
-    const handleEditClick = () => {
+    const handleEditClick = (e: MouseEvent<HTMLButtonElement>) => {
         // Show EditCard modal
-        setIsEditing(true);
+        e.stopPropagation();
+        setIsEditing(!isEditing);
     };
     const handleCloseClick = () => {
         // Close EditCard modal
         setIsEditing(false);
     };
 
+    const handleCardClick = () => {
+        // Show EventModal
+        setShowModal(!showModal);
+    }
+
     return (
         // Show event name, show buttons on hover
-        <div
-            onMouseEnter={() => setShowButtons(true)}
-            onMouseLeave={() => setShowButtons(false)}
-        >
-            <p>{eventData?.name}</p>
-            {showButtons && (
+        <div>
+            <div
+                onMouseEnter={() => setShowButtons(true)}
+                onMouseLeave={() => setShowButtons(false)}
+                onClick={() => handleCardClick()}
+            >
+                <p>{eventData?.name}</p>
+                {showButtons && (
+                    <>
+                        <button onClick={deleteEvent}>Delete</button>
+                        <button onClick={handleEditClick}>Edit</button>
+                    </>
+                )}
+            </div>
+
+            {showModal && (
                 <>
-                    <button onClick={deleteEvent}>Delete</button>
-                    <button onClick={handleEditClick}>Edit</button>
+                    <EventModal
+                        _id={eventData?._id}
+                        name={eventData?.name}
+                        description={eventData?.description}
+                        organizerId={eventData?.organizerId}
+                    />
                 </>
             )}
 
@@ -124,4 +171,5 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         </div>
     );
 }
+
 
