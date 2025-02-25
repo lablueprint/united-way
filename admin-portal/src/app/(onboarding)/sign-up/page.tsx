@@ -45,6 +45,8 @@ export default function SignUp() {
       return;
     }
     // Check if org is in database already
+    console.log('orgByEmail', orgByEmail);
+    console.log('orgByEmail.data', orgByEmail.data.length);
     if (orgByEmail.data.length != 0) {
       window.alert('This email is already associated with an account.');
       return;

@@ -1,19 +1,21 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { EventTags } from "../_interfaces/EventInterfaces";
+import { useSelector } from 'react-redux';
+import { RootState } from '../_interfaces/AuthInterfaces';
 
 interface CreateEventCardProps {
     orgName: string;
     changeState: React.Dispatch<React.SetStateAction<boolean>>;
-    orgID: string;
 }
 
-export default function CreateEventCard({orgName, changeState, orgID}: CreateEventCardProps) {
+export default function CreateEventCard({orgName, changeState}: CreateEventCardProps) {
     const [updatedName, setUpdatedName] = useState<string>("");
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
     const [updatedDescription, setUpdatedDescription] = useState<string>("");
     const [updatedTags, setUpdatedTags] = useState<boolean[]>(Array(EventTags.length).fill(false));
     const [submissionStatus, setSubmissionStatus] = useState<string>("");
+    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
     // TODO: Location API state variables
 
     const clearEvent = () => {
@@ -27,7 +29,7 @@ export default function CreateEventCard({orgName, changeState, orgID}: CreateEve
     const notEmpty = () => {
         return ((updatedName != "") &&
                 (updatedDescription != "") &&
-                (!updatedTags.includes(true)))
+                (updatedTags.includes(true)))
     }
 
     const handleSubmit = async () => {
@@ -47,10 +49,16 @@ export default function CreateEventCard({orgName, changeState, orgID}: CreateEve
                             type: "Point",
                             coordinates: [0, 0]
                         },
-                        organizerID: orgID,
+                        organizerID: org.orgId,
                         tags: selectedTags,
                         registeredUsers: [],
                         activity: []
+                    },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${org.authToken}`
+                        }
                     }
                 );
                 setSubmissionStatus(`Success!: ${response.data.message}`);
