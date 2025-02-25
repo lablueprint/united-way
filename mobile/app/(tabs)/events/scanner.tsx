@@ -43,7 +43,7 @@ export default function EventScanner() {
       const eventDetailsString = JSON.stringify(eventDetails);
       // Encode the event details to ensure safe passing via URL
       const encodedDetails = encodeURIComponent(eventDetailsString);
-      router.push(`/event-details?details=${encodedDetails}`);
+      router.push(`/events/event-details?details=${encodedDetails}`);
     }
   };
 
