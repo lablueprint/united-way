@@ -16,6 +16,9 @@ const eventRouter = require('./routes/eventRoutes.js');
 const organizationRouter = require('./routes/organizationRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
 const activityRouter = require('./routes/activityRoutes.js')
+const socketRouter = require('./routes/socketRoutes.js')
+
+const socketController = require('./controllers/socketController.js');
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
@@ -63,6 +66,35 @@ app.get('/', (req, res) => { // defines a route where if we send get req to the 
   res.send('Hello World!'); //routers are groupings of endpoints
 });
 
-app.listen(port, () => {
+// const server = app.listen(port, () => {
+//   console.log(`Server started at port ${port}`);
+// });
+
+// const io = require('socket.io')(server);
+// app.set('socketio', io);
+
+// NEW CODE
+
+const { createServer } = require("http"); // you can use https as well
+const socketIo = require("socket.io");
+
+// const app = express();
+const server = createServer(app);
+const io = socketIo(server, { cors: { origin: "*" } }); // you can change the cors to your own domain
+
+io.on('connection', (socket) => {
+  socketController(socket);  // Use the controller function
+});
+
+app.use((req, res, next) => {
+  req.io = io;
+  return next();
+});
+
+// Now all routes & middleware will have access to req.io
+
+app.use('/socket', socketRouter); // this file's express.Router() will have the req.io too.
+
+server.listen(port, () => {
   console.log(`Server started at port ${port}`);
 });
