@@ -75,7 +75,9 @@ export default function Events() {
                 style={styles.eventsTitle}
                 onPress={() =>
                   router.push(
-                    "/event-details?event=${encodeURIComponent(JSON.stringify(event))}"
+                    `/explore/event-details/?event=${encodeURIComponent(
+                      JSON.stringify(event)
+                    )}`
                   )
                 }
               >

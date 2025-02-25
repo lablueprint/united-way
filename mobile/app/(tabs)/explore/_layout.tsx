@@ -4,13 +4,19 @@ export default function StackLayout() {
   return (
     <Stack>
       <Stack.Screen
+        name="events-tab"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="main"
         options={{
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="events-tab"
+        name="event-details"
         options={{
           headerShown: false,
         }}
