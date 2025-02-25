@@ -9,5 +9,6 @@ userRouter.get('/email/:email', userController.getUserByEmail);
 userRouter.delete('/:id', userController.deleteUser);
 userRouter.patch('/:id', userController.editUserDetails);
 userRouter.post('/createUser', userController.createNewUser);
-
+userRouter.patch('/:id/addEvent', userController.addEventToUser);
+userRouter.patch('/:id/removeEvent', userController.removeEventFromUser);
 module.exports = userRouter;
