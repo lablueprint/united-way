@@ -133,8 +133,8 @@ export default function SignUpScreen() {
                         secureTextEntry
                     />
                 </View>
-                <TouchableOpacity style={styles.signUpButton}>
-                    <Text style={styles.signUpButtonText} onPress={handleAddUser}>Sign up</Text>
+                <TouchableOpacity style={styles.signUpButton} onPress={handleAddUser}>
+                    <Text style={styles.signUpButtonText} >Sign up</Text>
                     {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
                 </TouchableOpacity>
                 <View style={styles.loginSection}>

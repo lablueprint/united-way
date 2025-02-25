@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "expo-secure-store": "^14.0.1",
+    "react-native-dropdown-picker": "^5.4.6",
+    "react-redux": "^9.2.0"
+  }
+}
