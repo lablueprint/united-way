@@ -14,7 +14,7 @@ export default function Settings() {
             <Text>
                 Settings
             </Text>
-            <Button title="Log-out" onPress={() => { dispatchLogout(); router.push("/(onboarding)") }} />
+            <Button title="Log out" onPress={() => { dispatchLogout(); router.push("/(onboarding)") }} />
         </View>
     );
 }
