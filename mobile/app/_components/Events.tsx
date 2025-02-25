@@ -1,6 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, Button, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import axios, { AxiosResponse } from "axios";
+import { useRouter } from "expo-router";
+
+// Define your Event interface outside the component
+interface Event {
+  id: string;
+  name: string;
+  date: string;
+}
+
+// Define your navigation parameter list
+type RootStackParamList = {
+  "event-details": { event: Event };
+};
 
 const styles = StyleSheet.create({
   titletext: {
@@ -9,14 +22,12 @@ const styles = StyleSheet.create({
     paddingLeft: "8%",
     color: "white",
   },
-
   eventsTitle: {
     fontSize: 20,
     paddingTop: 5,
     paddingLeft: "8%",
     color: "white",
   },
-
   eventsDate: {
     fontSize: 15,
     paddingTop: 5,
@@ -26,57 +37,54 @@ const styles = StyleSheet.create({
 });
 
 export default function Events() {
-  interface Event {
-    id: string;
-    name: string;
-    date: string;
-  }
-
   const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const router = useRouter();
 
   const getEvents = async () => {
     console.log("hi caroline");
     try {
-      const response: AxiosResponse = await axios.get(
+      const response: AxiosResponse<Event[]> = await axios.get<Event[]>(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/`
       );
-      return response.data;
+      const content = response.data;
+      return content;
     } catch (err) {
       console.log(err);
+      return [];
     }
   };
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      const data = await getEvents();
-      setAllEvents(data);
-    };
-
     fetchEvents();
-
     console.log("hi angela");
   }, []);
 
   const fetchEvents = async () => {
-    const data = await getEvents();
+    const { data } = await getEvents();
+    console.log(data);
     setAllEvents(data);
   };
 
-  // console.log(allEvents[0])
   return (
     <View>
       <Text style={styles.titletext}>Events</Text>
-
-      {allEvents.length !== 0 ? (
-        allEvents.map((event) => (
-          <View key={event.id}>
-            <Text style={styles.eventsTitle}>{event.name}</Text>
-            <Text style={styles.eventsDate}>{event.date}</Text>
-          </View>
-        ))
-      ) : (
-        <></>
-      )}
+      {allEvents && allEvents.length !== 0
+        ? allEvents.map((event) => (
+            <View key={event.id}>
+              <TouchableOpacity
+                style={styles.eventsTitle}
+                onPress={() =>
+                  router.push(
+                    "/event-details?event=${encodeURIComponent(JSON.stringify(event))}"
+                  )
+                }
+              >
+                <Text style={styles.eventsTitle}>{event.name}</Text>
+              </TouchableOpacity>
+              <Text style={styles.eventsDate}>{event.date}</Text>
+            </View>
+          ))
+        : null}
     </View>
   );
 }
