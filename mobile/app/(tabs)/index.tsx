@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
 });
 
 export default function HomeScreen() {
-    const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const user = useSelector((state: { auth: { userId: string, authToken: string, refreshToken: string } }) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
     return (
         <View style={styles.container} >
             <Text>
