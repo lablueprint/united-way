@@ -2,31 +2,56 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
 import axios from 'axios';
 
-interface QuizContent {
-    title: string;
-    choices: [string];
-    answers: [number];
-    singleSelect: boolean;
-}
-
-interface Activity {
-    _id: string;
-    eventID: string;
-    type: string;
-    content: unknown;
-    timeStart: Date;
-    timeEnd: Date;
-    active: boolean;
-}
-
 interface Question {
-    title: string;
-    choices: [string];
-    answers: [number];
-    singleSelect: boolean;
-  }
+  title: string;
+  choices: [string];
+  answers: [number];
+  singleSelect: boolean;
+}
 
-const getActivityById = async (activityID: string) => {
+const styles = StyleSheet.create({
+  choices: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5
+  },
+  questions: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    columnGap: 5
+  }
+})
+
+interface QuizProps {
+  activityId: string;
+}
+
+export default function Quiz({ activityId }: QuizProps) {
+  const [updatedQuestions, setUpdatedQuestions] = useState<Question[]>([]);
+  const [questionIndex, setQuestionIndex] = useState<number>(0);
+  const [singleSelect, setSingleSelect] = useState<boolean>();
+  const [title, setTitle] = useState<string>();
+  const [choices, setChoices] = useState<[string]>();
+  const [answers, setAnswers] = useState<[number]>();
+  const [userAnswers, setUserAnswers] = useState<{ [key: number]: number[] }>([]);
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const incomingActivity = await getActivityById(activityId);
+      const activityData = incomingActivity.data;
+      setUpdatedQuestions(activityData.content);
+      setQuestionIndex(0);
+      setTitle(activityData.content[0].title);
+      setChoices(activityData.content[0].choices);
+      setAnswers(activityData.content[0].answers);
+      setSingleSelect(activityData.content[0].singleSelect);
+      setUserAnswers([]);
+    };
+    fetchQuestions();
+  }, [activityId]);
+
+  const getActivityById = async (activityID: string) => {
     try {
       const { data } = await axios.get(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/${activityID}`
@@ -38,46 +63,13 @@ const getActivityById = async (activityID: string) => {
     }
   };
 
-const styles = StyleSheet.create({
-    buttonStyle: { 
-        borderRadius: 100,
-     },
-
-}) 
-
-
-export default function Quiz() {
-    const [updatedQuestions, setUpdatedQuestions] = useState<Question[]>([]);
-    const [activity, setActivity] = useState<Activity>();
-    const [questionIndex, setQuestionIndex] = useState<number>(0);
-    const [singleSelect, setSingleSelect] = useState<boolean>();
-    const [title, setTitle] = useState<string>();
-    const [choices, setChoices] = useState<[string]>();
-    const [answers, setAnswers] = useState<[number]>();
-    const [userAnswers, setUserAnswers] = useState<number[]>([]);
-    
-    useEffect(() => {
-        const fetchQuestions = async () => {
-          const incomingActivity = await getActivityById("678ecb200b5f77523854b9f6");
-          const activityData = incomingActivity.data;
-          setActivity(activityData);
-          setUpdatedQuestions(activityData.content);
-          setQuestionIndex(0);
-          setTitle(activityData.content[0].title);
-          setChoices(activityData.content[0].choices);
-          setAnswers(activityData.content[0].answers);
-          setSingleSelect(activityData.content[0].singleSelect);
-          setUserAnswers([]);
-        };
-        fetchQuestions();
-      }, [/*activityID*/]);
-
-    return (
+  return (
     <View>
+      <View style={styles.questions}>
         {updatedQuestions.map((_, index) => {
           return (
             <Button
-              title={`Question ${index + 1}`}
+              title={`${index + 1}`}
               key={`b${index}`}
               onPress={() => {
                 setQuestionIndex(index);
@@ -89,52 +81,61 @@ export default function Quiz() {
             />
           );
         })}
-        <Text>{title}</Text>
+      </View>
+      <Text>{title}</Text>
 
-        {/* EVERYTHING BELOW HERE SHOULD BE userAnswers */}
-        
-        {choices?.map((choice, choiceIndex) => (
-          <View key={`choice-${choiceIndex}`} style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
+      {/* EVERYTHING BELOW HERE SHOULD BE userAnswers */}
+
+      {
+        choices?.map((choice, choiceIndex) => (
+          <View key={`choice-${choiceIndex}`} style={styles.choices}>
             <Text style={{ marginRight: 10 }}>{choice}</Text>
             {singleSelect ? (
               <Button
-              title={userAnswers.includes(choiceIndex) ? 'Selected' : 'Select'}
-              onPress={() => {
-                // For single select, always store only one answer.
-                setUserAnswers([choiceIndex]);
-              }}
-            />
+                title={userAnswers[questionIndex] && userAnswers[questionIndex].includes(choiceIndex) ? 'Selected' : 'Select'}
+                onPress={() => {
+                  // For single select, always store only one answer.
+                  let updatedUserAnswers: { [key: number]: number[] } = JSON.parse(JSON.stringify(userAnswers));
+                  updatedUserAnswers[questionIndex] = [choiceIndex]
+                  setUserAnswers(updatedUserAnswers);
+                }}
+              />
             ) : (
               <Button
-                title={userAnswers.includes(choiceIndex) ? 'Selected' : 'Select'}
+                title={userAnswers[questionIndex] && userAnswers[questionIndex].includes(choiceIndex) ? 'Selected' : 'Select'}
                 onPress={() => {
-                  const newAnswers = [...userAnswers];
-                  if (userAnswers.includes(choiceIndex)) {
-                    const idx = newAnswers.indexOf(choiceIndex);
-                    if (idx > -1) {
-                      newAnswers.splice(idx, 1);
+                  let updatedUserAnswers: { [key: number]: number[] } = JSON.parse(JSON.stringify(userAnswers));
+
+                  // If the question index has a selection already:
+                  if (updatedUserAnswers[questionIndex]) {
+                    // If the choice has already been selected before, we will remove it (unselecting).
+                    if (updatedUserAnswers[questionIndex].includes(choiceIndex)) {
+                      updatedUserAnswers[questionIndex].splice(updatedUserAnswers[questionIndex].indexOf(choiceIndex), 1)
                     }
-                  } else {
-                    newAnswers.push(choiceIndex);
+                    // If the choice has not been selected, we will add it (selecting).
+                    else {
+                      updatedUserAnswers[questionIndex].push(choiceIndex);
+                    }
                   }
-                  setUserAnswers(newAnswers);
+                  // Else the question simply selects the option provided. 
+                  else {
+                    updatedUserAnswers[questionIndex] = [choiceIndex];
+                  }
+                  setUserAnswers(updatedUserAnswers);
                 }}
               />
             )}
           </View>
-        ))}
-        <Button
-            title="Submit"
-            onPress={() => {
-              const correctAnswers = updatedQuestions[questionIndex].answers;
-              const isCorrect = JSON.stringify(userAnswers.sort()) === JSON.stringify(correctAnswers.sort());
-              if (isCorrect) {
-                alert('Correct!');
-              } else {
-                alert('Incorrect!');
-              }
-            }}
-        />
+        ))
+      }
+      <Button
+        title='Submit'
+        onPress={
+          () => {
+            /* TODO: Submit for evaluation based on the answers provided / send to server */
+          }
+        }
+      />
     </View>
-    );
+  );
 }

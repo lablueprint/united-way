@@ -75,6 +75,13 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
       const { data } = response.data;
       setActivity(data);
       setUpdatedQuestions(data.content);
+      const idx = data.content.length - 1;
+
+      setQuestionIndex(idx);
+      setTitle(data.content[idx].title);
+      setChoices(data.content[idx].choices);
+      setAnswers(data.content[idx].answers);
+      setSingleSelect(data.content[idx].singleSelect);
     } catch (err) {
       console.log(err);
     }
@@ -108,26 +115,31 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
       console.log(err);
     }
   };
+
+  // TODO: enable deletion of particular choices and questions.
+
   if (updatedQuestions.length <= 0) {
     return <div />;
   } else {
     return (
       <div>
-        {updatedQuestions.map((_, index) => {
-          return (
-            <button
-              style={{ height: "1rem", width: "1rem" }}
-              key={`b${index}`}
-              onClick={() => {
-                setQuestionIndex(index);
-                setTitle(updatedQuestions[index].title);
-                setChoices(updatedQuestions[index].choices);
-                setAnswers(updatedQuestions[index].answers);
-                setSingleSelect(updatedQuestions[index].singleSelect);
-              }}
-            />
-          );
-        })}
+        {
+          updatedQuestions.map((_, index) => {
+            return (
+              <button
+                style={{ height: "1rem", width: "1rem" }}
+                key={`b${index}`}
+                onClick={() => {
+                  setQuestionIndex(index);
+                  setTitle(updatedQuestions[index].title);
+                  setChoices(updatedQuestions[index].choices);
+                  setAnswers(updatedQuestions[index].answers);
+                  setSingleSelect(updatedQuestions[index].singleSelect);
+                }}
+              />
+            );
+          })
+        }
         {questionIndex}
         <div>
           <label>
@@ -223,8 +235,6 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
             Cancel
           </button>
 
-          {/* Render "Add Question" button only for the last question */}
-        {questionIndex === updatedQuestions.length - 1 && (
           <button
             onClick={() =>
               addQuestion(
@@ -237,7 +247,6 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
           >
             Add Question
           </button>
-        )}
 
         </>
       </div>

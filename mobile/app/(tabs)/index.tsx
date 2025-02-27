@@ -1,7 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import UserSignUpForm from '../_components/UserSignUpForm';
-import Quiz from '../_components/Quiz';
 import { useSelector } from 'react-redux';
 
 const styles = StyleSheet.create({
