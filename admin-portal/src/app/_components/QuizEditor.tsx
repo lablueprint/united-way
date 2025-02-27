@@ -27,7 +27,6 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
       const activityData = await getActivityById(activityId);
       setActivity(activityData);
       setUpdatedQuestions(activityData.content);
-      console.log(activityData.content);
       setQuestionIndex(0);
       setTitle(activityData.content[0].title);
       setChoices(activityData.content[0].choices);
@@ -36,6 +35,10 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
     };
     fetchQuestions();
   }, [activityId]);
+
+  // useEffect(() => {
+  //   // saveQuiz()
+  // })
 
   const getActivityById = async (activityID: string) => {
     try {
@@ -65,7 +68,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
         singleSelect: singleSelect,
       });
 
-      const data: { content: Question[] } = await saveQuestion(updatedQuestionsCopy);
+      const data: { content: Question[] } = await saveQuiz(updatedQuestionsCopy);
       const idx = data.content.length - 1;
 
       setQuestionIndex(idx);
@@ -83,7 +86,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
       let newQuestions = [...updatedQuestions];
       newQuestions.splice(questionIndex, 1);
 
-      const data: { content: Question[] } = await saveQuestion(newQuestions);
+      const data: { content: Question[] } = await saveQuiz(newQuestions);
 
       const nextIndex = newQuestions.length - 1 < questionIndex ? newQuestions.length - 1 : questionIndex;
       setQuestionIndex(nextIndex);
@@ -96,22 +99,14 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
     }
   }
 
-  const saveQuestion = async (
+  const saveQuiz = async (
     content: Question[]
   ) => {
     try {
-      const updatedQuestionsCopy = [...updatedQuestions];
-      updatedQuestionsCopy[questionIndex] = {
-        title: content[questionIndex].title || "",
-        choices: content[questionIndex].choices || [],
-        answers: content[questionIndex].answers || [],
-        singleSelect: content[questionIndex].singleSelect,
-      };
-
       const response: AxiosResponse = await axios.patch(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
         {
-          content: updatedQuestionsCopy,
+          content: content,
         }
       );
       const { data } = response.data;
@@ -157,6 +152,9 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
               value={title}
               onChange={(event) => {
                 setTitle(event.target.value);
+                let newUpdatedQuestions = [...updatedQuestions];
+                newUpdatedQuestions[questionIndex].title = event.target.value;
+                saveQuiz(newUpdatedQuestions);
               }}
             />
           </label>
@@ -178,7 +176,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
               type="checkbox"
               checked={answers?.includes(choiceIndex) || false}
               onChange={(event) => {
-                const newAnswers = [...(answers || [])];
+                const newAnswers = [...answers];
                 if (event.target.checked) {
                   newAnswers.push(choiceIndex);
                 } else {
@@ -187,12 +185,13 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
                     newAnswers.splice(idx, 1);
                   }
                 }
-                setAnswers(newAnswers as [number]);
-                console.log(
-                  "this is to see newAnswers.length",
-                  newAnswers.length
-                );
+
+                setAnswers(newAnswers);
                 setSingleSelect(newAnswers.length <= 1);
+                let newUpdatedQuestions = [...updatedQuestions];
+                newUpdatedQuestions[questionIndex].singleSelect = newAnswers.length <= 1;
+                newUpdatedQuestions[questionIndex].answers = newAnswers;
+                saveQuiz(newUpdatedQuestions);
               }}
             />
 
@@ -212,6 +211,11 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
                 setChoices(newChoices);
                 setAnswers(newAnswers);
+
+                let newUpdatedQuestions = [...updatedQuestions];
+                newUpdatedQuestions[questionIndex].choices = newChoices;
+                newUpdatedQuestions[questionIndex].answers = newAnswers;
+                saveQuiz(newUpdatedQuestions);
               }}
             >
               Remove choice
@@ -224,45 +228,16 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
           onClick={() => {
             const newChoices = [...(choices || []), ""];
             setChoices(newChoices);
+
+            let newUpdatedQuestions = [...updatedQuestions];
+            newUpdatedQuestions[questionIndex].choices = choices;
+            saveQuiz(newUpdatedQuestions);
           }}
         >
           Add Choice
         </button>
 
         <>
-          <button
-            onClick={() => {
-              let newUpdatedQuestions = [...updatedQuestions];
-              newUpdatedQuestions[questionIndex].title = title;
-              newUpdatedQuestions[questionIndex].answers = answers;
-              newUpdatedQuestions[questionIndex].singleSelect = singleSelect;
-              newUpdatedQuestions[questionIndex].choices = choices;
-              saveQuestion(updatedQuestions)
-            }}
-          >
-            Save
-          </button>
-
-          <button
-            onClick={() => {
-              const content = activity?.content as QuizContent[]
-              setTitle(
-                content[questionIndex].title
-              );
-              setChoices(
-                content[questionIndex].choices
-              );
-              setAnswers(
-                content[questionIndex].answers
-              );
-              setSingleSelect(
-                content[questionIndex].singleSelect
-              );
-            }}
-          >
-            Cancel
-          </button>
-
           <button
             onClick={() =>
               addQuestion(
