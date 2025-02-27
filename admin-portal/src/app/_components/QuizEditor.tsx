@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import { Activity, QuizContent } from "../_interfaces/EventInterfaces";
-import EditCard from "./EditCard";
 
 interface Question {
   title: string;
-  choices: [string];
-  answers: [number];
+  choices: string[];
+  answers: number[];
   singleSelect: boolean;
 }
 
@@ -18,10 +17,10 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
   const [updatedQuestions, setUpdatedQuestions] = useState<Question[]>([]);
   const [activity, setActivity] = useState<Activity>();
   const [questionIndex, setQuestionIndex] = useState<number>(0);
-  const [singleSelect, setSingleSelect] = useState<boolean>();
-  const [title, setTitle] = useState<string>();
-  const [choices, setChoices] = useState<[string]>();
-  const [answers, setAnswers] = useState<[number]>();
+  const [singleSelect, setSingleSelect] = useState<boolean>(true);
+  const [title, setTitle] = useState<string>("");
+  const [choices, setChoices] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -53,8 +52,8 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
   const addQuestion = async (
     title: string,
-    choices: [string],
-    answers: [number],
+    choices: string[],
+    answers: number[],
     singleSelect: boolean
   ) => {
     try {
@@ -66,15 +65,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
         singleSelect: singleSelect,
       });
 
-      const response: AxiosResponse = await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        {
-          content: updatedQuestionsCopy,
-        }
-      );
-      const { data } = response.data;
-      setActivity(data);
-      setUpdatedQuestions(data.content);
+      const data: { content: Question[] } = await saveQuestion(updatedQuestionsCopy);
       const idx = data.content.length - 1;
 
       setQuestionIndex(idx);
@@ -87,19 +78,34 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
     }
   };
 
-  const editQuestion = async (
-    title: string,
-    choices: [string],
-    answers: [number],
-    singleSelect: boolean
+  const deleteQuestion = async (questionIndex: number) => {
+    try {
+      let newQuestions = [...updatedQuestions];
+      newQuestions.splice(questionIndex, 1);
+
+      const data: { content: Question[] } = await saveQuestion(newQuestions);
+
+      const nextIndex = newQuestions.length - 1 < questionIndex ? newQuestions.length - 1 : questionIndex;
+      setQuestionIndex(nextIndex);
+      setTitle(data.content[nextIndex].title);
+      setChoices(data.content[nextIndex].choices);
+      setAnswers(data.content[nextIndex].answers);
+      setSingleSelect(data.content[nextIndex].singleSelect);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const saveQuestion = async (
+    content: Question[]
   ) => {
     try {
       const updatedQuestionsCopy = [...updatedQuestions];
       updatedQuestionsCopy[questionIndex] = {
-        title: title,
-        choices: choices,
-        answers: answers,
-        singleSelect: singleSelect,
+        title: content[questionIndex].title || "",
+        choices: content[questionIndex].choices || [],
+        answers: content[questionIndex].answers || [],
+        singleSelect: content[questionIndex].singleSelect,
       };
 
       const response: AxiosResponse = await axios.patch(
@@ -111,12 +117,12 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
       const { data } = response.data;
       setActivity(data);
       setUpdatedQuestions(data.content);
+
+      return data;
     } catch (err) {
       console.log(err);
     }
   };
-
-  // TODO: enable deletion of particular choices and questions.
 
   if (updatedQuestions.length <= 0) {
     return <div />;
@@ -189,6 +195,27 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
                 setSingleSelect(newAnswers.length <= 1);
               }}
             />
+
+            <button
+              onClick={() => {
+                let newChoices = [...choices]
+                newChoices.splice(choiceIndex, 1);
+
+                let newAnswers = []
+                for (let answer of answers) {
+                  if (answer > choiceIndex) {
+                    newAnswers.push(answer - 1)
+                  } else if (answer < choiceIndex) {
+                    newAnswers.push(answer);
+                  }
+                }
+
+                setChoices(newChoices);
+                setAnswers(newAnswers);
+              }}
+            >
+              Remove choice
+            </button>
           </div>
         ))}
 
@@ -196,7 +223,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
         <button
           onClick={() => {
             const newChoices = [...(choices || []), ""];
-            setChoices(newChoices as [string]);
+            setChoices(newChoices);
           }}
         >
           Add Choice
@@ -204,31 +231,32 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
         <>
           <button
-            onClick={() =>
-              editQuestion(
-                title || "",
-                choices || [""],
-                answers || [0],
-                (answers?.length || 0) <= 1
-              )
-            }
+            onClick={() => {
+              let newUpdatedQuestions = [...updatedQuestions];
+              newUpdatedQuestions[questionIndex].title = title;
+              newUpdatedQuestions[questionIndex].answers = answers;
+              newUpdatedQuestions[questionIndex].singleSelect = singleSelect;
+              newUpdatedQuestions[questionIndex].choices = choices;
+              saveQuestion(updatedQuestions)
+            }}
           >
             Save
           </button>
 
           <button
             onClick={() => {
+              const content = activity?.content as QuizContent[]
               setTitle(
-                (activity?.content as QuizContent[])[questionIndex].title
+                content[questionIndex].title
               );
               setChoices(
-                (activity?.content as QuizContent[])[questionIndex].choices
+                content[questionIndex].choices
               );
               setAnswers(
-                (activity?.content as QuizContent[])[questionIndex].answers
+                content[questionIndex].answers
               );
               setSingleSelect(
-                (activity?.content as QuizContent[])[questionIndex].singleSelect
+                content[questionIndex].singleSelect
               );
             }}
           >
@@ -247,9 +275,16 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
           >
             Add Question
           </button>
+          <button
+            onClick={() =>
+              deleteQuestion(questionIndex)
+            }
+          >
+            Delete Question
+          </button>
 
         </>
-      </div>
+      </div >
     );
   }
 }

@@ -61,18 +61,29 @@ export default function EditCard({
 
     const getActivityById = async (activityId: string) => {
         try {
-            console.log(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`)
             const response: AxiosResponse = await axios.get(
                 `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`
             );
             const { data } = response.data;
-            console.log(data)
             return data;
         } catch (err) {
             console.log(err);
             return err;
         }
     };
+
+    const deleteActivityById = async (activityId: string) => {
+        try {
+            const response: AxiosResponse = await axios.delete(
+                `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`
+            );
+            const { data } = response.data;
+            return data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    }
 
     // Fetch the event details by ID
     useEffect(() => {
@@ -161,6 +172,9 @@ export default function EditCard({
                             }
                         }}>
                             Edit Activity
+                        </button>
+                        <button type="button" onClick={() => { deleteActivityById(activityId) }}>
+                            Delete Activity
                         </button>
                     </div>
                 ))}
