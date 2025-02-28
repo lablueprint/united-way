@@ -1,10 +1,15 @@
 const Event = require("../models/eventModel");
+const Organization = require("../models/organizationModel")
 
-// Example of creating a document in the database
+// Creates an event and uses the organizer id to add to the organizer's event-list.
 const createEvent = async (req, res) => {
   const event = new Event(req.body);
   try{
+    // Create the event.
     const data = await event.save(event);
+    
+    // Save the event in the list of active events for the organizer.
+    await Organization.findByIdAndUpdate({ _id: data.organizerID }, { $addToSet: { activeEvents: data._id } });
     res.status(201).json({
       status: "success",
       message: "Event successfully created.",
