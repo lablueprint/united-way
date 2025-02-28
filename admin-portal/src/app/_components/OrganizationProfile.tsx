@@ -32,8 +32,7 @@ export default function OrganizationProfile() {
             }
         }
         setOrgName("test org"); // Hardcoded, Sign-in doesn't pass down org name yet
-        setOrgID(org.orgId);  // Hardcoded, Sign-in doesn't pass down org ID yet
-        // console.log("ORG ID RAHH", org.orgId);
+        setOrgID(org.orgId);  
         fetchEvents();
     }, []);
 
@@ -48,7 +47,6 @@ export default function OrganizationProfile() {
                 <h2>Events</h2>
                 <div>
                     {eventIds.map((id: string) => {
-                        // console.log(id);
                         return <EventCard id={id} key={id} removeFromList={removeFromList} />;
                     })}
                 </div>
@@ -57,7 +55,6 @@ export default function OrganizationProfile() {
                 <button onClick={() =>setIsEditing(!isEditing)}>
                     {isEditing ? "Cancel Event" : "Create Event"}
                 </button>
-                {/* TODO: Pass down Org ID */}
                 {isEditing && <CreateEventCard orgName={orgName} changeState={setIsEditing}/>}
             </div>
         </div>

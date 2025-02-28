@@ -15,8 +15,15 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [updatedDescription, setUpdatedDescription] = useState<string>("");
     const [updatedTags, setUpdatedTags] = useState<boolean[]>(Array(EventTags.length).fill(false));
     const [submissionStatus, setSubmissionStatus] = useState<string>("");
+    const [currLatitude, setLatitude] = useState<number>(0);
+    const [currLongitude, setLongitude] = useState<number>(0);
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-    // TODO: Location API state variables
+
+    useEffect(() => {
+        return () => {
+            getUserLocation();
+        };
+    }, []);
 
     const clearEvent = () => {
         setUpdatedName("");
@@ -47,7 +54,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         description: updatedDescription,
                         location: {
                             type: "Point",
-                            coordinates: [0, 0]
+                            coordinates: [currLatitude, currLongitude]
                         },
                         organizerID: org.orgId,
                         tags: selectedTags,
@@ -80,6 +87,29 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         } catch (err) {
             console.log(err);
             setSubmissionStatus(`Failure: ${err}`);
+        }
+    }
+
+    // Use HTML GeoLocation API to get the user's location (shall their web browser permit)
+    // Updates state variables latitude, longitude if it works
+    const getUserLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                // Try to get user's location
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    console.log('coords', position.coords);
+                    console.log('lat, long', latitude, longitude);
+                    setLatitude(latitude);
+                    setLongitude(longitude);
+                },
+                (err) => {
+                    console.error("Error: Could not retrieve location", err);
+                }
+            );
+        }
+        else {
+            console.error("Geolocation API not supported on browser");
         }
     }
     
@@ -126,13 +156,12 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             <button onClick={handleSubmit}>
                 Publish!
             </button>
-{/* 
-            <button onClick={() => console.log(updatedTags)}>
-                Logging Button
-            </button> */}
             
             <button onClick={clearEvent}>
                 Clear
+            </button>
+            <button onClick={getUserLocation}>
+                Get Current Location
             </button>
             <h3>
                 {submissionStatus}
