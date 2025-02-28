@@ -12,14 +12,19 @@ export default function OrganizationProfile() {
 
     useEffect(() => {
         // Get all events
-        const fetchEvents = async () => {
+        const getOrganizerEvents = async () => {
             try {
-                const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${org.authToken}`
+                const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/filtered`,
+                    {
+                        organizerID: org.orgId
+                    },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${org.authToken}`
+                        }
                     }
-                });
+                );
                 const { data } = response.data;
                 setEventIds(data.map((event: EventData) => event._id));
             }
@@ -27,7 +32,7 @@ export default function OrganizationProfile() {
                 console.log(err);
             }
         }
-        fetchEvents();
+        getOrganizerEvents();
     }, []);
 
     const removeFromList = (id: string) => {

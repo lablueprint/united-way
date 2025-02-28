@@ -162,11 +162,11 @@ export default function EditCard({
                     <div key={activityId}>
                         {activityId}
                         <button type="button" onClick={async () => {
-                            if (editingActivityId !== null) {
+                            if (editingActivityId === activityId) {
                                 setEditingActivityId(null);
                             } else {
                                 const activity = await getActivityById(activityId);
-                                if (activity.type === "quiz") {
+                                if (activity.type === "quiz" && editingActivityId !== activityId) {
                                     setEditingActivityId(activityId); // Set the currently editing activity ID
                                 }
                             }

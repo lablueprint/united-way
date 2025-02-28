@@ -27,18 +27,26 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
       const activityData = await getActivityById(activityId);
       setActivity(activityData);
       setUpdatedQuestions(activityData.content);
-      setQuestionIndex(0);
-      setTitle(activityData.content[0].title);
-      setChoices(activityData.content[0].choices);
-      setAnswers(activityData.content[0].answers);
-      setSingleSelect(activityData.content[0].singleSelect);
+
+      // If the contents of the activity is non-empty:
+      if (!activity?.content) {
+        // Set the information from the activity into the quiz editor.
+        setQuestionIndex(0);
+        setTitle(activityData.content[0].title);
+        setChoices(activityData.content[0].choices);
+        setAnswers(activityData.content[0].answers);
+        setSingleSelect(activityData.content[0].singleSelect);
+      } else {
+        // Otherwise, we know that the quiz is empty and we provide default values.
+        setQuestionIndex(0);
+        setTitle("New Question Title");
+        setChoices(["0"]);
+        setAnswers([0]);
+        setSingleSelect(true);
+      }
     };
     fetchQuestions();
   }, [activityId]);
-
-  // useEffect(() => {
-  //   // saveQuiz()
-  // })
 
   const getActivityById = async (activityID: string) => {
     try {
@@ -161,76 +169,81 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
         </div>
 
         {/* Render the choices from the local state "choices" only */}
-        {choices?.map((choice, choiceIndex) => (
-          <div key={`choice-${choiceIndex}`}>
-            <input
-              type="text"
-              value={choice}
-              onChange={(event) => {
-                const newChoices = [...(choices || [])];
-                newChoices[choiceIndex] = event.target.value;
-                setChoices(newChoices as [string]);
-              }}
-            />
-            <input
-              type="checkbox"
-              checked={answers?.includes(choiceIndex) || false}
-              onChange={(event) => {
-                const newAnswers = [...answers];
-                if (event.target.checked) {
-                  newAnswers.push(choiceIndex);
-                } else {
-                  const idx = newAnswers.indexOf(choiceIndex);
-                  if (idx > -1) {
-                    newAnswers.splice(idx, 1);
+        {
+          choices?.map((choice, choiceIndex) => (
+            <div key={`choice-${choiceIndex}`}>
+              <input
+                type="text"
+                value={choice}
+                onChange={(event) => {
+                  const newChoices = [...choices];
+                  newChoices[choiceIndex] = event.target.value;
+                  setChoices(newChoices);
+
+                  let newUpdatedQuestions = [...updatedQuestions];
+                  newUpdatedQuestions[questionIndex].choices = newChoices;
+                  saveQuiz(newUpdatedQuestions);
+                }}
+              />
+              <input
+                type="checkbox"
+                checked={answers?.includes(choiceIndex) || false}
+                onChange={(event) => {
+                  const newAnswers = [...answers];
+                  if (event.target.checked) {
+                    newAnswers.push(choiceIndex);
+                  } else {
+                    const idx = newAnswers.indexOf(choiceIndex);
+                    if (idx > -1) {
+                      newAnswers.splice(idx, 1);
+                    }
                   }
-                }
 
-                setAnswers(newAnswers);
-                setSingleSelect(newAnswers.length <= 1);
-                let newUpdatedQuestions = [...updatedQuestions];
-                newUpdatedQuestions[questionIndex].singleSelect = newAnswers.length <= 1;
-                newUpdatedQuestions[questionIndex].answers = newAnswers;
-                saveQuiz(newUpdatedQuestions);
-              }}
-            />
+                  setAnswers(newAnswers);
+                  setSingleSelect(newAnswers.length <= 1);
+                  let newUpdatedQuestions = [...updatedQuestions];
+                  newUpdatedQuestions[questionIndex].singleSelect = newAnswers.length <= 1;
+                  newUpdatedQuestions[questionIndex].answers = newAnswers;
+                  saveQuiz(newUpdatedQuestions);
+                }}
+              />
 
-            <button
-              onClick={() => {
-                let newChoices = [...choices]
-                newChoices.splice(choiceIndex, 1);
+              <button
+                onClick={() => {
+                  let newChoices = [...choices]
+                  newChoices.splice(choiceIndex, 1);
 
-                let newAnswers = []
-                for (let answer of answers) {
-                  if (answer > choiceIndex) {
-                    newAnswers.push(answer - 1)
-                  } else if (answer < choiceIndex) {
-                    newAnswers.push(answer);
+                  let newAnswers = []
+                  for (let answer of answers) {
+                    if (answer > choiceIndex) {
+                      newAnswers.push(answer - 1)
+                    } else if (answer < choiceIndex) {
+                      newAnswers.push(answer);
+                    }
                   }
-                }
 
-                setChoices(newChoices);
-                setAnswers(newAnswers);
+                  setChoices(newChoices);
+                  setAnswers(newAnswers);
 
-                let newUpdatedQuestions = [...updatedQuestions];
-                newUpdatedQuestions[questionIndex].choices = newChoices;
-                newUpdatedQuestions[questionIndex].answers = newAnswers;
-                saveQuiz(newUpdatedQuestions);
-              }}
-            >
-              Remove choice
-            </button>
-          </div>
-        ))}
+                  let newUpdatedQuestions = [...updatedQuestions];
+                  newUpdatedQuestions[questionIndex].choices = newChoices;
+                  newUpdatedQuestions[questionIndex].answers = newAnswers;
+                  saveQuiz(newUpdatedQuestions);
+                }}
+              >
+                Remove choice
+              </button>
+            </div>
+          ))}
 
         {/* "Add Choice" Button */}
         <button
           onClick={() => {
-            const newChoices = [...(choices || []), ""];
+            const newChoices = [...choices, ""];
             setChoices(newChoices);
 
             let newUpdatedQuestions = [...updatedQuestions];
-            newUpdatedQuestions[questionIndex].choices = choices;
+            newUpdatedQuestions[questionIndex].choices = newChoices;
             saveQuiz(newUpdatedQuestions);
           }}
         >
