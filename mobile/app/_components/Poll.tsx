@@ -32,7 +32,7 @@ export default function Poll({ id }: PollCardProps) {
         try {
             console.log("Fetching polls for eventID:", id);
             const { data } = await axios.post(
-                `http://172.31.58.60/activities/filtered`,
+                `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/filtered`,
                 { eventID: id, type: "poll" }
             );
             console.log("Fetched polls:", data.data);
@@ -44,7 +44,7 @@ export default function Poll({ id }: PollCardProps) {
 
     useEffect(() => {
         fetchPolls();
-        const interval = setInterval(fetchPolls, 5000); // Refresh every 5 seconds
+        const interval = setInterval(fetchPolls, 10000); // Refresh every 10 seconds
         return () => clearInterval(interval);
     }, [id]);
 

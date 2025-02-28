@@ -1,12 +1,8 @@
 "use client"
 import axios, { AxiosResponse } from "axios";
-<<<<<<< HEAD
-// Added following line
-=======
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
->>>>>>> main
 import OrganizationProfile from '../../_components/OrganizationProfile';
 
 import { useState } from "react";

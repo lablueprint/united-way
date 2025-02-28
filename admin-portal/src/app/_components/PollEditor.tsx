@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import axios from "axios";
-
 interface Choice {
     id: number;
     text: string;
     count: number;
 }
-
 interface Question {
     id: number;
     question: string;
     answers: Choice[];
 }
+
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 interface PollProps {
@@ -22,7 +21,6 @@ interface PollProps {
     startTime: Value;
     endTime: Value;
 }
-
 
 export default function PollEditor({ eventID, idData, questionsData, onSave, startTime, endTime }: PollProps) {
     const [questions, setQuestions] = useState<Question[]>(questionsData || []);
@@ -91,13 +89,30 @@ export default function PollEditor({ eventID, idData, questionsData, onSave, sta
         );
     };
 
-    const handleDeleteQuestion = (questionId: number) => {
-        setQuestions((prevQuestions) => prevQuestions.filter((q) => q.id !== questionId));
-    };
+    const handleDeleteQuestion = async (questionId: number) => {
+        if (!questions) return;
+      
+        const updatedQuestions = questions.filter((q) => q.id !== questionId);
+      
+        try {
+          const questionToDelete = questions.find((q) => q.id === questionId);
+            if (questionToDelete) {
+                await axios.patch(
+                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`,
+                    { content: updatedQuestions }
+                );
+                console.log("Text successfully deleted from the database!");
+            }
+        } catch (error) {
+          console.error("Error deleting question from the database:", error);
+          return;
+        }
+      
+        // Update the state to reflect the deletion
+        setQuestions(updatedQuestions);
+      };      
 
     const handleSave = async () => {
-        //const now = new Date();
-        //const currentTimeISO = now.toISOString();
         console.log("Sending poll data:", { idData, eventID, questions });
     
         try {

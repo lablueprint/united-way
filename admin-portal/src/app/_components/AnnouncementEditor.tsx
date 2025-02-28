@@ -120,6 +120,7 @@ export default function AnnouncementEditor({ id, timeStart, timeEnd }: Announcem
           }
         );
         console.log("New announcement created:", data);
+        fetchAnnounce();
       }
     } catch (error) {
       console.error("Error saving announcement:", error);
