@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
 import { EventData } from '../_interfaces/EventInterfaces';
-import {RewardsSection, Reward} from './RewardsPage'
+import {RewardsSection, Reward} from './RewardsSection'
 
 
 // TODO: Make the organization profile based on each individual organization instead of all events.
@@ -36,20 +36,6 @@ export default function OrganizationProfile() {
 
     const removeFromList = (id: string) => {
         setEventIds(eventIds.filter((eventId) => eventId != id));
-    }
-
-    const OrganizationDetails: React.FC<{ org: any }> = ({ org }) => {
-        if (!org) return null;
-    
-        return (
-            <div>
-                <h2>Organization Details</h2>
-
-                {/* {org.map((reward) => (
-                    <p key={reward.id}><strong>{reward.name}:</strong> {JSON.stringify(reward.cost)}</p>
-                ))} */}
-            </div>
-        );
     }
 
     const addReward = async (newReward: Reward) => {

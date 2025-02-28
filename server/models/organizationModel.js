@@ -50,6 +50,7 @@ const organizationSchema = new mongoose.Schema({
     {
       name: { type: String, required: true }, // Reward name (e.g., "Cookie")
       cost: { type: Number, required: true }, 
+      quantity: {type: Number, required: true}
     },],
   transactions: [
     {
