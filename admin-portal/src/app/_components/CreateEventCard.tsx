@@ -14,16 +14,18 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
     const [updatedDescription, setUpdatedDescription] = useState<string>("");
     const [updatedTags, setUpdatedTags] = useState<boolean[]>(Array(EventTags.length).fill(false));
+    const [updatedAddress, setAddress] = useState<string>("");
     const [submissionStatus, setSubmissionStatus] = useState<string>("");
     const [currLatitude, setLatitude] = useState<number>(0);
     const [currLongitude, setLongitude] = useState<number>(0);
+    const [updatedInAddress, setInAddress] = useState<string>("");
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
-    useEffect(() => {
-        return () => {
-            getUserLocation();
-        };
-    }, []);
+    // useEffect(() => {
+    //     return () => {
+    //         getUserLocation();
+    //     };
+    // }, []);
 
     const clearEvent = () => {
         setUpdatedName("");
@@ -90,28 +92,60 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         }
     }
 
-    // Use HTML GeoLocation API to get the user's location (shall their web browser permit)
-    // Updates state variables latitude, longitude if it works
-    const getUserLocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                // Try to get user's location
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    console.log('coords', position.coords);
-                    console.log('lat, long', latitude, longitude);
-                    setLatitude(latitude);
-                    setLongitude(longitude);
-                },
-                (err) => {
-                    console.error("Error: Could not retrieve location", err);
+    const getLocationJSON = async (address: string) => {
+        // Convert address to url (aka add +'s in every space)
+        const convertedAddress = address.replaceAll(" ", "+");
+        const url = "https://nominatim.openstreetmap.org/search?q=" + convertedAddress + "&format=json";
+        console.log("url", url);
+        
+        try {
+            const response: AxiosResponse = await axios.get(
+                `${url}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${org.authToken}`
+                    }
                 }
             );
-        }
-        else {
-            console.error("Geolocation API not supported on browser");
+            console.log("API Success!", response);
+            const data = response.data;
+            if (data.length > 0) {
+                const internals = data[0];
+                setInAddress(internals.display_name);
+                setLatitude(internals.lat);
+                setLongitude(internals.lon);
+            }
+            else {
+                console.log("invalid address");
+            }
+        } catch (err) {
+            console.log(err);
         }
     }
+
+    // // Use HTML GeoLocation API to get the user's location (shall their web browser permit)
+    // // Updates state variables latitude, longitude if it works
+    // const getUserLocation = () => {
+    //     if (navigator.geolocation) {
+    //         navigator.geolocation.getCurrentPosition(
+    //             // Try to get user's location
+    //             (position) => {
+    //                 const { latitude, longitude } = position.coords;
+    //                 console.log('coords', position.coords);
+    //                 console.log('lat, long', latitude, longitude);
+    //                 setLatitude(latitude);
+    //                 setLongitude(longitude);
+    //             },
+    //             (err) => {
+    //                 console.error("Error: Could not retrieve location", err);
+    //             }
+    //         );
+    //     }
+    //     else {
+    //         console.error("Geolocation API not supported on browser");
+    //     }
+    // }
     
     return ( 
         <div>
@@ -131,6 +165,17 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 Description:
                 <input type="text" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} />
             </label>
+            <br/>
+            <label>
+                Location:
+                <input type="text" name="location" placeholder="Location" value={updatedAddress} onChange={(event) => { setAddress(event.target.value) }} />
+            </label>
+            <button onClick={()=>getLocationJSON(updatedAddress)}>
+                Send Location!
+            </button> 
+            <h3>{updatedInAddress}</h3>
+            <h3>{currLatitude}</h3>
+            <h3>{currLongitude}</h3>
             <br/>
             <label>
                 Tags:
@@ -160,9 +205,9 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             <button onClick={clearEvent}>
                 Clear
             </button>
-            <button onClick={getUserLocation}>
+            {/* <button onClick={getUserLocation}>
                 Get Current Location
-            </button>
+            </button> */}
             <h3>
                 {submissionStatus}
             </h3>
