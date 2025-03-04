@@ -33,8 +33,8 @@ async function connectToDatabase() {
 connectToDatabase();
 
 // Start the Node Express server
-const app = express(); //define app using express, defines handlers
-app.use(cors()); // use app.use to use router -- cross origin requests, allow retrieve req from diff ip address
+const app = express(); // Define app using express, defines handlers
+app.use(cors()); // Use app.use to use router -- cross origin requests, allow retrieve req from diff ip address
 app.use(express.json());
 
 // API Routes
@@ -75,37 +75,36 @@ app.use('/twofactor' ,twoFactorRouter);
 app.use('/twofactor' ,twoFactorRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
-  res.send('Hello World!'); //routers are groupings of endpoints
+  res.send('Hello World!'); // routers are groupings of endpoints
 });
 
-// const server = app.listen(port, () => {
-//   console.log(`Server started at port ${port}`);
-// });
-
-// const io = require('socket.io')(server);
-// app.set('socketio', io);
-
-// NEW CODE
-
-const { createServer } = require("http"); // you can use https as well
+const { createServer } = require("http");
 const socketIo = require("socket.io");
 
-// const app = express();
 const server = createServer(app);
-const io = socketIo(server, { cors: { origin: "*" } }); // you can change the cors to your own domain
+const io = socketIo(server, { cors: { origin: "*" } });
+app.set('io', io);
 
 io.on('connection', (socket) => {
-  socketController(socket);  // Use the controller function
+  console.log(`New client connected: ${socket.id}`);
+
+  // Listen for a custom event from the client
+  socket.on('message', (data) => {
+    console.log(`Message from client: ${data}`);
+    io.emit('message', `Thank you for ${data}`); // Broadcast to all clients
+    socket.emit('message', `Server received: ${data}`); // Send to specific client
+  });
+
+  // Handle client disconnection
+  socket.on('disconnect', () => {
+    console.log(`Client disconnected: ${socket.id}`);
+  });
 });
 
 app.use((req, res, next) => {
   req.io = io;
   return next();
 });
-
-// Now all routes & middleware will have access to req.io
-
-app.use('/socket', socketRouter); // this file's express.Router() will have the req.io too.
 
 server.listen(port, () => {
   console.log(`Server started at port ${port}`);

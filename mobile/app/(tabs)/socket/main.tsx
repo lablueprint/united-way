@@ -9,8 +9,10 @@ export default function SocketScreen() {
 
   // Listen for messages from the server
   socket.on('message', (data) => {
-      console.log('Server says:', data);
+    console.log('Server says:', data);
   });
+
+  
   
   return (
     <View style={styles.container}>
