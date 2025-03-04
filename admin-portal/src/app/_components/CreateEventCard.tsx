@@ -14,27 +14,39 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
     const [updatedDescription, setUpdatedDescription] = useState<string>("");
     const [updatedTags, setUpdatedTags] = useState<boolean[]>(Array(EventTags.length).fill(false));
-    const [updatedAddress, setAddress] = useState<string>("");
     const [submissionStatus, setSubmissionStatus] = useState<string>("");
     const [currLatitude, setLatitude] = useState<number>(0);
     const [currLongitude, setLongitude] = useState<number>(0);
+    // updatedAddress is the address inputted into the input box on the form
+    const [updatedAddress, setAddress] = useState<string>("");
+    // updatedInAddress stores the address from the JSON returned by the API request
     const [updatedInAddress, setInAddress] = useState<string>("");
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
+    // Make all inputtables empty on Organization page
     const clearEvent = () => {
         setUpdatedName("");
         setUpdatedDate(new Date);
         setUpdatedDescription("");
         setUpdatedTags(Array(EventTags.length).fill(false));
+        setLatitude(0);
+        setLongitude(0);
+        setInAddress("");
+        setAddress("");
         setSubmissionStatus("Cleared!");
     }
 
+    // Checks if all inputtables are non-empty
     const notEmpty = () => {
         return ((updatedName != "") &&
                 (updatedDescription != "") &&
-                (updatedTags.includes(true)))
+                (updatedTags.includes(true)) &&
+                ((currLatitude == 0) && (currLongitude == 0)))
     }
 
+    // TODO: maybe refresh to populate the event into org upon successful patch?
+    // TODO: Update schema to handle user count?
+    // Creates a JSON and attempts to patch it to DB
     const handleSubmit = async () => {
         try {
             if (notEmpty()) {
@@ -78,6 +90,9 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 if (!updatedTags.includes(true)) {
                     errs = errs + "Tags ";
                 }
+                if ((currLatitude == 0) && (currLongitude == 0)) {
+                    errs = errs + "Address "
+                }
                 setSubmissionStatus(`Error: Empty Args: ${errs}`);
             }
         } catch (err) {
@@ -91,13 +106,11 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const getUserLocation = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                // Try to get user's location
                 (position) => {
                     const { latitude, longitude } = position.coords;
-                    console.log('coords', position.coords);
-                    console.log('lat, long', latitude, longitude);
-                    setLatitude(latitude);
-                    setLongitude(longitude);
+                    const query = `${latitude}, ${longitude}`;
+                    console.log("query", query);
+                    getLocationJSON(query);
                 },
                 (err) => {
                     console.error("Error: Could not retrieve location", err);
@@ -106,8 +119,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         }
     }
 
-    // TODO: Stretch - Take user's current location and map it to an address
-    // Nominatim my beloved
+    // Send request with address to Nominatim endpoint and receive back latitude, longitude in JSON
     // https://nominatim.org/release-docs/develop/api/Search/
     const getLocationJSON = async (address: string) => {
         // Convert address to url (aka add +'s in every space)
@@ -183,14 +195,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             <button onClick={()=>getLocationJSON(updatedAddress)}>
                 Get Address Info
             </button> 
-            <button onClick={()=>
-                {
-                    getUserLocation();
-                    // TODO: Fix bug where the getLocationJSON is called before inpuAddress populates
-                    const inputAddress = `${currLatitude}, ${currLongitude}`;
-                    console.log("inputAddress", inputAddress);
-                    getLocationJSON(inputAddress);
-                }}>
+            <button onClick={()=>{getUserLocation()}}>
                 Get Address from Current Location
             </button> 
             {/*TODO: Add logic for duplicate addresses */}
