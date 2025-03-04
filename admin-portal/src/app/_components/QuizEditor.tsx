@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import { Activity, QuizContent } from "../_interfaces/EventInterfaces";
@@ -11,9 +12,11 @@ interface Question {
 
 interface QuizEditorProp {
   activityId: string;
+  timeStart: Date;
+  timeEnd: Date;
 }
 
-export default function QuizEditor({ activityId }: QuizEditorProp) {
+export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEditorProp) {
   const [updatedQuestions, setUpdatedQuestions] = useState<Question[]>([]);
   const [activity, setActivity] = useState<Activity>();
   const [questionIndex, setQuestionIndex] = useState<number>(0);
@@ -26,6 +29,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
     const fetchQuestions = async () => {
       const activityData = await getActivityById(activityId);
       setActivity(activityData);
+      console.log(activityData)
       setUpdatedQuestions(activityData.content);
 
       // If the contents of the activity is non-empty:
@@ -91,7 +95,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
   const deleteQuestion = async (questionIndex: number) => {
     try {
-      let newQuestions = [...updatedQuestions];
+      const newQuestions = [...updatedQuestions];
       newQuestions.splice(questionIndex, 1);
 
       const data: { content: Question[] } = await saveQuiz(newQuestions);
@@ -115,6 +119,8 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
         {
           content: content,
+          timeStart,
+          timeEnd,
         }
       );
       const { data } = response.data;
@@ -160,7 +166,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
               value={title}
               onChange={(event) => {
                 setTitle(event.target.value);
-                let newUpdatedQuestions = [...updatedQuestions];
+                const newUpdatedQuestions = [...updatedQuestions];
                 newUpdatedQuestions[questionIndex].title = event.target.value;
                 saveQuiz(newUpdatedQuestions);
               }}
@@ -180,7 +186,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
                   newChoices[choiceIndex] = event.target.value;
                   setChoices(newChoices);
 
-                  let newUpdatedQuestions = [...updatedQuestions];
+                  const newUpdatedQuestions = [...updatedQuestions];
                   newUpdatedQuestions[questionIndex].choices = newChoices;
                   saveQuiz(newUpdatedQuestions);
                 }}
@@ -201,7 +207,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
                   setAnswers(newAnswers);
                   setSingleSelect(newAnswers.length <= 1);
-                  let newUpdatedQuestions = [...updatedQuestions];
+                  const newUpdatedQuestions = [...updatedQuestions];
                   newUpdatedQuestions[questionIndex].singleSelect = newAnswers.length <= 1;
                   newUpdatedQuestions[questionIndex].answers = newAnswers;
                   saveQuiz(newUpdatedQuestions);
@@ -210,11 +216,11 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
               <button
                 onClick={() => {
-                  let newChoices = [...choices]
+                  const newChoices = [...choices]
                   newChoices.splice(choiceIndex, 1);
 
-                  let newAnswers = []
-                  for (let answer of answers) {
+                  const newAnswers = []
+                  for (const answer of answers) {
                     if (answer > choiceIndex) {
                       newAnswers.push(answer - 1)
                     } else if (answer < choiceIndex) {
@@ -225,7 +231,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
                   setChoices(newChoices);
                   setAnswers(newAnswers);
 
-                  let newUpdatedQuestions = [...updatedQuestions];
+                  const newUpdatedQuestions = [...updatedQuestions];
                   newUpdatedQuestions[questionIndex].choices = newChoices;
                   newUpdatedQuestions[questionIndex].answers = newAnswers;
                   saveQuiz(newUpdatedQuestions);
@@ -242,7 +248,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
             const newChoices = [...choices, ""];
             setChoices(newChoices);
 
-            let newUpdatedQuestions = [...updatedQuestions];
+            const newUpdatedQuestions = [...updatedQuestions];
             newUpdatedQuestions[questionIndex].choices = newChoices;
             saveQuiz(newUpdatedQuestions);
           }}

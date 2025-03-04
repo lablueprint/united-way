@@ -1,53 +1,53 @@
 "use client"
 import React, { useState } from 'react';
-import AnnouncementEditor from '@/app/_components/AnnouncementEditor';
-import PollCard from '@/app/_components/PollCard';
-import QuizEditor from '@/app/_components/QuizEditor';
 import DateTimePicker from 'react-datetime-picker';
+import axios from "axios";
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
-
-function RaffleEditor() {
-  return <div>Raffle Editor: Set up your raffle details here!</div>;
-}
 
 interface EventActivityProps {
   id: string;
 }
 
+
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
-export default function EventActivity({ id }: EventActivityProps) {
+export default function CreateActivity({ id }: EventActivityProps) {
   const [activityType, setActivityType] = useState("");
   const [start, setStart] = useState<Value>(new Date());
   const [end, setEnd] = useState<Value>(new Date());
 
+  const createActivity = async () => {
+    try {
+      const { data } = await axios.post(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
+        {
+            id,
+            type: activityType,
+            content: newPollContent,
+            timeStart: start,
+            timeEnd: end,
+            active: true,
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  };
+
   const renderEditor = () => {
     switch (activityType) {
       case "announcement":
-        return <AnnouncementEditor
-          id={id}
-          timeStart={start instanceof Date ? start : new Date()} 
-          timeEnd={end instanceof Date ? end : new Date()}
-        />;
+        
       case "poll":
-        return <PollCard 
-          id={id} 
-          timeStart={start instanceof Date ? start : new Date()} 
-          timeEnd={end instanceof Date ? end : new Date()} 
-        />;
+        
       case "quiz":
-        return <QuizEditor 
-          id={id} //add time to quizeditor
-          timeStart={start instanceof Date ? start : new Date()} 
-          timeEnd={end instanceof Date ? end : new Date()} 
-        />;
+        
       case "raffle":
-        return <RaffleEditor />;
-      default:
-        return <div>Select an activity to get started!</div>;
+
     }
   };
 
