@@ -4,6 +4,8 @@ const { expressjwt: jwt } = require("express-jwt");
 const authRouter = express.Router();
 const authController = require('../controllers/authController');
 
+authrouter.post('/verifyEmail', authController.verifyEmail)
+authrouter.post('/verifyCode', authController.verifyCode)
 authRouter.post('/login',authController.verifyUserLogin)
 
 authRouter.use('/refresh', 
