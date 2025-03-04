@@ -57,7 +57,15 @@ app.use('/users',
 )
 app.use('/users', userRouter);
 
+app.use('/events',
+  jwt (
+    {
+      secret: process.env.JWT_SECRET, 
+      algorithms: ["HS256"]
+    })
+)
 app.use('/events', eventRouter);
+
 app.use('/activities', activityRouter);
 
 app.use('/socket', socketRouter);

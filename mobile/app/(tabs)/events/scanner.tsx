@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import { useRouter } from 'expo-router';
+import { useSelector } from 'react-redux';
+import axios, { AxiosResponse } from "axios";
 
 interface EventDetails {
   id: string;
@@ -14,7 +16,8 @@ export default function EventScanner() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
-  const router = useRouter();
+  const [eventId, setEventId] = useState("");
+  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
   useEffect(() => {
     (async () => {
@@ -25,31 +28,105 @@ export default function EventScanner() {
 
   const handleBarCodeScanned = ({ type, data }: any) => {
     setScanned(true);
-    const eventId = data;
-
-    // Mock API response
-    const mockResponse = {
-      id: eventId,
-      name: `Event for ${eventId}`,
-      description: `This is a mock description for event ${eventId}.`,
-      org: "Mock Organization",
-    };
-
-    setEventDetails(mockResponse);
+    setEventId(data);
+    fetchEventDetails(data);
   };
 
-  const handleAccept = () => {
-    if (eventDetails) {
-      const eventDetailsString = JSON.stringify(eventDetails);
-      // Encode the event details to ensure safe passing via URL
-      const encodedDetails = encodeURIComponent(eventDetailsString);
-      router.push(`/events/event-details?details=${encodedDetails}`);
+  const fetchEventDetails = async (eventId: string) => {
+    try {
+      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`, {
+        headers: {
+          'Authorization': `Bearer ${user.authToken}`,
+          'Content-Type': "application/json"
+        },
+      });
+      const { data } = response.data;
+      setEventDetails(data);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const handleReject = () => {
-    setEventDetails(null);
-    setScanned(false);
+  const addEventToUser = async (eventId: string) => {
+    try {
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
+        {
+          newEvent: eventId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const addUserToEvent = async (userId: string) => {
+    try {
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
+        {
+          newUser: userId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+  const removeUserFromEvent = async (userId: string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
+        {
+          userId: userId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const removeEventFromUser = async (eventId: string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
+        {
+          eventId: eventId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const handleRegister = () => {
+    addEventToUser(eventId);
+    addUserToEvent(user.userId);
+  };
+
+  const handleUnregister = () => {
+    removeEventFromUser(eventId);
+    removeUserFromEvent(user.userId);
   };
 
   if (hasPermission === null) {
@@ -65,8 +142,8 @@ export default function EventScanner() {
         <Text style={styles.title}>Request to Join Event</Text>
         <Text style={styles.eventName}>{eventDetails.name}</Text>
         <View style={styles.buttonContainer}>
-          <Button title="Accept" onPress={handleAccept} />
-          <Button title="Reject" onPress={handleReject} />
+          <Button title="Accept" onPress={handleRegister} />
+          <Button title="Reject" onPress={handleUnregister} />
         </View>
       </View>
     );

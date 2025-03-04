@@ -1,10 +1,15 @@
 const Event = require("../models/eventModel");
+const Organization = require("../models/organizationModel")
 
-// Example of creating a document in the database
+// Creates an event and uses the organizer id to add to the organizer's event-list.
 const createEvent = async (req, res) => {
   const event = new Event(req.body);
   try{
+    // Create the event.
     const data = await event.save(event);
+    
+    // Save the event in the list of active events for the organizer.
+    await Organization.findByIdAndUpdate({ _id: data.organizerID }, { $addToSet: { activeEvents: data._id } });
     res.status(201).json({
       status: "success",
       message: "Event successfully created.",
@@ -19,6 +24,75 @@ const createEvent = async (req, res) => {
     });
   }
 };
+
+const addUserToEvent = async (req, res) => {
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401);
+    return;
+  }
+  
+  const origId = req.params.id;
+  const { newUser } = req.body;
+  
+  try {
+
+    const result = await Event.updateOne( { _id: origId }, { $addToSet: { registeredUsers: newUser }});
+    if (result.modifiedCount === 0) {
+        res.status(404).json({
+            status: "failure",
+            message: "Event not found or no changes made.",
+            data: result
+        });
+    } else {
+        res.status(200).json({
+            status: "success",
+            message: "Event updated successfully.",
+            data: result
+        });
+    }
+} catch (err)   {
+    res.status(500).json({
+        status: "failure",
+        message: "Server-side error: update not completed.",
+        data: {}
+    });
+}
+}
+
+const removeUserFromEvent = async (req, res) => {
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401);
+    return;
+  }
+
+  const eventId = req.params.id;
+  const userId = req.body.userId;
+
+  try {
+    const result = await Event.findOneAndUpdate(
+      { _id: eventId }, 
+      { $pull: { registeredUsers: userId}});
+    if (result.modifiedCount === 0) {
+        res.status(404).json({
+            status: "failure",
+            message: "Event not found or no changes made.",
+            data: result
+        });
+    } else {
+        res.status(200).json({
+            status: "success",
+            message: "Event updated successfully.",
+            data: result
+        });
+    }
+} catch (err) {
+    res.status(500).json({
+        status: "failure",
+        message: "Server-side error: update not completed.",
+        data: {}
+    });
+}
+}
 
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
@@ -127,9 +201,11 @@ const deleteEvent = async (req, res) => {
 
 module.exports = {
   createEvent,
+  removeUserFromEvent,
   getEventById,
   getAllEvents,
   getEventsByFilter,
   editEventDetails,
   deleteEvent,
+  addUserToEvent,
 };
