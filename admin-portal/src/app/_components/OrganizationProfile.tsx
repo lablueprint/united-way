@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
-<<<<<<< HEAD
+<<<<<<<<< Temporary merge branch 1
 import { EventData } from "../_interfaces/EventInterfaces";
 
 // TODO: Make the organization profile based on each individual organization instead of all events.
@@ -26,7 +26,7 @@ export default function OrganizationProfile() {
     };
     fetchEvents();
   }, []);
-=======
+=========
 import { EventData } from '../_interfaces/EventInterfaces';
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
@@ -38,14 +38,19 @@ export default function OrganizationProfile() {
 
     useEffect(() => {
         // Get all events
-        const fetchEvents = async () => {
+        const getOrganizerEvents = async () => {
             try {
-                const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${org.authToken}`
+                const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/filtered`,
+                    {
+                        organizerID: org.orgId
+                    },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${org.authToken}`
+                        }
                     }
-                });
+                );
                 const { data } = response.data;
                 setEventIds(data.map((event: EventData) => event._id));
             }
@@ -53,13 +58,13 @@ export default function OrganizationProfile() {
                 console.log(err);
             }
         }
-        fetchEvents();
+        getOrganizerEvents();
     }, []);
->>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
+>>>>>>>>> Temporary merge branch 2
 
-  const removeFromList = (id: string) => {
-    setEventIds(eventIds.filter((eventId) => eventId != id));
-  };
+    const removeFromList = (id: string) => {
+        setEventIds(eventIds.filter((eventId) => eventId != id));
+    };
 
   return (
     <div>
@@ -67,13 +72,13 @@ export default function OrganizationProfile() {
       <div>
         <h2>Events</h2>
         <div>
-<<<<<<< HEAD
+<<<<<<<<< Temporary merge branch 1
           {eventIds.map((id: string) => {
             return (
               <EventCard id={id} key={id} removeFromList={removeFromList} />
             );
           })}
-=======
+=========
             <h1>Organization Profile</h1>
             <div>
                 <h2>Events</h2>
@@ -84,7 +89,7 @@ export default function OrganizationProfile() {
                     })}
                 </div>
             </div>
->>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
+>>>>>>>>> Temporary merge branch 2
         </div>
       </div>
     </div>
