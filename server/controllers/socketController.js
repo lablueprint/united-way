@@ -16,22 +16,16 @@
 //     });
 // };
 
-// module.exports = {
-//     connect,
-// };
+const sendMessage = (req, res) => {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ error: "Message is required" });
 
-// socketController.js
-module.exports = (socket) => {
-    console.log(`New client connected: ${socket.id}`);
+    // Emit message via Socket.IO (needs access to io instance)
+    req.app.get("io").emit("message", message);
 
-    // Listen for a custom event from the client
-    socket.on('message', (data) => {
-        console.log(`Message from client: ${data}`);
-        socket.emit('message', `Server received: ${data}`); // Send back response
-    });
+    res.json({ success: true, message });
+};
 
-    // Handle client disconnection
-    socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
-    });
+module.exports = {
+    sendMessage
 };
