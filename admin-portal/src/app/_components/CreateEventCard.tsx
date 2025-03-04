@@ -21,12 +21,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [updatedInAddress, setInAddress] = useState<string>("");
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
-    // useEffect(() => {
-    //     return () => {
-    //         getUserLocation();
-    //     };
-    // }, []);
-
     const clearEvent = () => {
         setUpdatedName("");
         setUpdatedDate(new Date);
@@ -92,9 +86,32 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         }
     }
 
+    // Use HTML GeoLocation API to get the user's location (shall their web browser permit)
+    // Updates state variables latitude, longitude if it works
+    const getUserLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                // Try to get user's location
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    console.log('coords', position.coords);
+                    console.log('lat, long', latitude, longitude);
+                    setLatitude(latitude);
+                    setLongitude(longitude);
+                },
+                (err) => {
+                    console.error("Error: Could not retrieve location", err);
+                }
+            );
+        }
+    }
+
+    // TODO: Stretch - Take user's current location and map it to an address
+    // Nominatim my beloved
+    // https://nominatim.org/release-docs/develop/api/Search/
     const getLocationJSON = async (address: string) => {
         // Convert address to url (aka add +'s in every space)
-        const convertedAddress = address.replaceAll(" ", "+");
+        const convertedAddress = address.trim().replaceAll(" ", "+");
         const url = "https://nominatim.openstreetmap.org/search?q=" + convertedAddress + "&format=json";
         console.log("url", url);
         
@@ -108,44 +125,36 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     }
                 }
             );
-            console.log("API Success!", response);
+            console.log("Nominatim Success: ", response);
             const data = response.data;
             if (data.length > 0) {
-                const internals = data[0];
-                setInAddress(internals.display_name);
-                setLatitude(internals.lat);
-                setLongitude(internals.lon);
+                // Multiple addresses returned
+                if (data.length > 1) {
+                    // TODO: Figure this out
+                    console.log("multiple");
+                    const internals = data[0];
+                    setInAddress(internals.display_name);
+                    setLatitude(internals.lat);
+                    setLongitude(internals.lon);
+                }
+                // Single address returned
+                else {
+                    const internals = data[0];
+                    setInAddress(internals.display_name);
+                    setLatitude(internals.lat);
+                    setLongitude(internals.lon);
+                }
             }
             else {
-                console.log("invalid address");
+                console.log("Nominatim Error: Invalid Input Address");
+                setInAddress("Invalid Address");
+                setLatitude(0);
+                setLongitude(0);
             }
         } catch (err) {
             console.log(err);
         }
     }
-
-    // // Use HTML GeoLocation API to get the user's location (shall their web browser permit)
-    // // Updates state variables latitude, longitude if it works
-    // const getUserLocation = () => {
-    //     if (navigator.geolocation) {
-    //         navigator.geolocation.getCurrentPosition(
-    //             // Try to get user's location
-    //             (position) => {
-    //                 const { latitude, longitude } = position.coords;
-    //                 console.log('coords', position.coords);
-    //                 console.log('lat, long', latitude, longitude);
-    //                 setLatitude(latitude);
-    //                 setLongitude(longitude);
-    //             },
-    //             (err) => {
-    //                 console.error("Error: Could not retrieve location", err);
-    //             }
-    //         );
-    //     }
-    //     else {
-    //         console.error("Geolocation API not supported on browser");
-    //     }
-    // }
     
     return ( 
         <div>
@@ -167,16 +176,27 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             </label>
             <br/>
             <label>
-                Location:
+                Address:
                 <input type="text" name="location" placeholder="Location" value={updatedAddress} onChange={(event) => { setAddress(event.target.value) }} />
             </label>
-            <button onClick={()=>getLocationJSON(updatedAddress)}>
-                Send Location!
-            </button> 
-            <h3>{updatedInAddress}</h3>
-            <h3>{currLatitude}</h3>
-            <h3>{currLongitude}</h3>
             <br/>
+            <button onClick={()=>getLocationJSON(updatedAddress)}>
+                Get Address Info
+            </button> 
+            <button onClick={()=>
+                {
+                    getUserLocation();
+                    // TODO: Fix bug where the getLocationJSON is called before inpuAddress populates
+                    const inputAddress = `${currLatitude}, ${currLongitude}`;
+                    console.log("inputAddress", inputAddress);
+                    getLocationJSON(inputAddress);
+                }}>
+                Get Address from Current Location
+            </button> 
+            {/*TODO: Add logic for duplicate addresses */}
+            <h3>Address: {updatedInAddress}</h3>
+            <h3>Latitude: {currLatitude}</h3>
+            <h3>Longitude: {currLongitude}</h3>
             <label>
                 Tags:
                 {
@@ -205,9 +225,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             <button onClick={clearEvent}>
                 Clear
             </button>
-            {/* <button onClick={getUserLocation}>
-                Get Current Location
-            </button> */}
             <h3>
                 {submissionStatus}
             </h3>
