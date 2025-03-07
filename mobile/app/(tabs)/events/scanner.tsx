@@ -4,12 +4,16 @@ import { Camera, CameraView } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 import axios, { AxiosResponse } from "axios";
+import { io, Socket } from "socket.io-client";
+import { useRef } from 'react';
 
 interface EventDetails {
   id: string;
   name: string;
   description: string;
   org: string;
+  startDate: string;
+  endDate: string;
 }
 
 export default function EventScanner() {
@@ -17,7 +21,8 @@ export default function EventScanner() {
   const [scanned, setScanned] = useState(false);
   const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
   const [eventId, setEventId] = useState("");
-  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+  const user = useSelector((state: { auth: { userId: string, authToken: string, refreshToken: string } }) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -25,6 +30,30 @@ export default function EventScanner() {
       setHasPermission(status === 'granted');
     })();
   }, []);
+
+  useEffect(() => {
+    if (eventDetails) {
+      const startTimeDiff = new Date(eventDetails.startDate).getTime() - new Date().getTime();
+      const endTimeDiff = new Date(eventDetails.endDate).getTime() - new Date().getTime();
+      if (startTimeDiff <= 0 || endTimeDiff <= 0) {
+        Alert.alert("Event has already started or is in the past.");
+      } else if (startTimeDiff > endTimeDiff) {
+        Alert.alert("Event end time is before start time.");
+      } else {
+        setTimeout(() => {
+          socketRef.current = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
+          socketRef.current.emit('message', 'Hello, server!');
+          socketRef.current.on('message', (data) => {
+            console.log('Server says:', data);
+          });
+        }, startTimeDiff);
+        setTimeout(() => {
+          socketRef.current?.emit('message', 'Goodbye, server!');
+          socketRef.current?.disconnect();
+        }, endTimeDiff);
+      }
+    }
+  }, [eventDetails]);
 
   const handleBarCodeScanned = ({ type, data }: any) => {
     setScanned(true);
@@ -137,6 +166,9 @@ export default function EventScanner() {
   }
 
   if (eventDetails) {
+    const now = new Date();
+    const dateString = now.toISOString();
+    console.log(dateString);
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Request to Join Event</Text>

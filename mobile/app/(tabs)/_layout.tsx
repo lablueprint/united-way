@@ -31,12 +31,6 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="socket"
-                options={{
-                    title: 'Socket',
-                }}
-            />
-            <Tabs.Screen
                 name="events"
                 options={{
                     title: 'Events',
