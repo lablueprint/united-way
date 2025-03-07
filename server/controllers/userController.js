@@ -182,6 +182,7 @@ const deleteUser = async (req, res) => {
 
 const createNewUser = async (req, res) => {
   try {
+    console.log("trying to create user");
     // Salt and hash the password.
     // Note: upon creation, the user should then be signed in on the front-end, so must add refresh/access tokens to reponse
     bcrypt.hash(req.body.password, `$2b$${process.env.SALT_ROUNDS}$${process.env.HASH_SALT}`, async (err, hash) => {

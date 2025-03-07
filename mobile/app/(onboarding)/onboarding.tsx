@@ -1,6 +1,6 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Button } from 'react-native';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import DropDownPicker from 'react-native-dropdown-picker';
 
@@ -21,10 +21,17 @@ export default function OnboardingScreen() {
         {label: 'Other', value: 'other'},
     ]);
 
+    const [title, setTitle] = useState("What is your name?");
+    const [subtitle, setSubtitle] = useState("Please enter your first and last name");
+    const [placeholder, setPlaceholder]  = useState("Name");
+    const [textInput, setTextInput] = useState("");
+    const [dropDownInput, setDropDownInput] = useState(null);
+    const [state, setState] = useState(1);
+
     const handleEditUser = async () => {
         console.log(gender);
         try {
-            const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${id}`,
+            const response: AxiosResponse = await axios.patch(`http://192.168.1.114:4000/users/${id}`,
                 {
                     name: name,
                     phoneNumber: phone,
@@ -41,75 +48,174 @@ export default function OnboardingScreen() {
                     }
                 }
             );
+            console.log("trying to navigate to tabs");
             // Navigate to home screen
             router.push("/(tabs)");
         } catch (err) {
             console.log(err);
         }
     }
+    useEffect(() => {
+      console.log("Updated state:", state);
+  
+      if (state == 1) {
+          setTitle("What is your name?");
+          
+          setSubtitle("Please enter your first and last name");
+          setPlaceholder(name || "Name");
+          setTextInput(name);
+      } else if (state == 2) {
+          setTitle("Phone Number");
+          setName(textInput)
+          
+          setSubtitle("Enter your number to receive updates");
+          setPlaceholder(phone || "Phone Number");
+          setTextInput(phone);
+      } else if (state == 3) {
+          setTitle("Language");
+          
+          setPhone(textInput)
+          setSubtitle("Enter your Preferred Language");
+          setPlaceholder(ethnicity || "Language");
+          setTextInput(ethnicity);
+      } else if (state == 4) {
+          setTitle("Community");
+          setEthnicity(textInput)
+          
+          setSubtitle("Enter your Community");
+          setPlaceholder(community || "Community");
+          setTextInput(community);
+      } else if (state == 5) {
+          setTitle("Gender");
+          setCommunity(textInput)
+          setSubtitle("Enter your Gender");
+          setPlaceholder(gender || "Please select");
+          setTextInput("");
+      }else if (state == 6)
+      {
+        console.log("continue: state == 5")
+        setGender(dropDownInput)
+        handleEditUser()
+      }
+  }, [state]); // Runs when `state` changes
+
+    const handleContinue1 = async () => {
+      setState(state => state+1);   
+    }
+
+    const handleBack = async () => {
+      if (state > 1) {
+        setState(state => state - 1); // Decrease the state first
+    }
+      
+  }
 
     return (
         <View style={styles.container}>
-        <View style={styles.content}>
-            <Text style={styles.text}>
+                    <View style={styles.formContainer}>
+                    { state != 6 ?
+                    (<View style={styles.content}>
+                      {state != 1 ?
+                    (<TouchableOpacity style={styles.backButton} onPress= {handleBack}>
+                        <Text style={styles.backButtonText}>&lt; Back</Text>
+                    </TouchableOpacity>):<></>}
+                      <View style={styles.header}>
+                        <Text style={styles.title}>{title}</Text>
+                        <Text style={styles.subtitle}>
+                          {subtitle}
+                        </Text>
+                      </View>
+                      {state != 5
+  ? (<TextInput
+      style={styles.input}
+      value={textInput}
+      onChangeText={setTextInput}
+      placeholder={placeholder} />)
+  : (<DropDownPicker
+      open={open}
+      value={gender}
+      items={items}
+      setOpen={setOpen}
+      setValue={setGender}
+      setItems={setItems}
+      placeholder="Gender"
+    />)}
+                      
+            
+                      <TouchableOpacity style={styles.continueButton} onPress= {handleContinue1}>
+                        <Text style={styles.continueButtonText}>Continue</Text>
+                      </TouchableOpacity>
+                      <Text style={styles.textdd}>
                 Let's get you onboarded!
             </Text>
-            <TextInput
-                placeholder="Name"
-                onChangeText={setName}
-                value={name}
-            />
-            <TextInput
-                placeholder="Phone"
-                onChangeText={setPhone}
-                value={phone}
-            />
-            <TextInput
-                placeholder="Ethnicity"
-                onChangeText={setEthnicity}
-                value={ethnicity}
-            />
-            <TextInput
-                placeholder="Community"
-                onChangeText={setCommunity}
-                value={community}
-            />
-            <DropDownPicker
-                open={open}
-                value={gender}
-                items={items}
-                setOpen={setOpen}
-                setValue={setGender}
-                setItems={setItems}
-                placeholder={'Gender'}
-            />
-            <TouchableOpacity onPress={handleEditUser}>
-                <Text>
-                Done
-                </Text>
-            </TouchableOpacity>
-            {/* Super special dev button */}
-            {/* <Link href="/(tabs)" style={styles.text}>
-                Skip this and go home
-            </Link> */}
-        </View>
-        </View>
+                    </View>) : <Text>Loading...</Text>}
+                  </View>
+                </View>
     );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  
+  formContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
+    marginTop: 60,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
+  textdd: {
     color: 'black',
     margin: 24,
-  }
-});
+  },
+    // outerContainer: {
+    //   flex: 1,
+    //   padding: 5,
+    // },
+    container: {
+      flex: 1,
+      backgroundColor: 'white',
+      borderRadius: 40,
+    },
+    content: {
+      flex: 1,
+      padding: 20,
+      marginTop: 40,
+    },
+    header: {
+      marginBottom: 40,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 8,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: '#666',
+    },
+    input: {
+      backgroundColor: '#F5F5F5',
+      padding: 16,
+      borderRadius: 8,
+      fontSize: 18,
+      marginBottom: 24,
+      letterSpacing: 1,
+    },
+    continueButton: {
+      backgroundColor: 'black',
+      padding: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    continueButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    backButton: {
+
+    },
+    backButtonText: {
+      color: 'black',
+      fontSize: 16,
+      marginVertical: 10,
+    }
+  });

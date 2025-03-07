@@ -40,30 +40,46 @@ export default function Onboarding() {
     } catch (error) {
       console.error('Error submitting form:', error);
     }
-    router.push('/landing');
+    try {
+      const data = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/passwordReset/verifyEmail`,  "vanshikaturkar@g.ucla.edu");
+    const codeData = data.data;
+    console.log(codeData);
+    // If no valid email was found, we return -1.
+    // if (codeData === -1) {
+    //   setErrorMsg('No Account with this Email');
+    //   return;
+    // }
+    // updateHashedCode(codeData);
+    // setStep('verifyCode');
+    // setErrorMsg('');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+    router.push('/tabs'); // '/landing'
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <div className='h1'>
+      Sign-Up
+    <form onSubmit={handleSubmit} className='form'>
         <p>Name:</p>
         <input
           type="text"
-          placeholder="Organization Name"
+          // placeholder="Organization Name"
           onChange={(e) => setName(e.target.value)}
           value={name}
         />
         <p>Community:</p>
         <input
           type="text"
-          placeholder="Community Name"
+          // placeholder="Community Name"
           onChange={(e) => setCommunity(e.target.value)}
           value={community}
         />
         <p>Description:</p>
         <input
           type="text"
-          placeholder="Organization Description"
+          // placeholder="Organization Description"
           onChange={(e) => setDescription(e.target.value)}
           value={description}
         />
@@ -77,8 +93,8 @@ export default function Onboarding() {
         <button
           type="submit">Submit
         </button>
-      </div>
     </form>
+    </div>
   )
 }
 

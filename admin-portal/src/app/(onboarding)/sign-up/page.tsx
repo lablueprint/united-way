@@ -6,11 +6,13 @@ import { useDispatch } from 'react-redux';
 import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { login } from '../../_utils/redux/orgSlice';
+import "./sign-up.css";
 
 export default function SignUp() {
   const [id, setId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -44,12 +46,14 @@ export default function SignUp() {
     if (!validateInputs()) {
       return;
     }
+    console.log("Data: ", orgByEmail.data);
     // Check if org is in database already
-    if (orgByEmail.data.length != 0) {
+    if (!orgByEmail.data == null || orgByEmail.data.length != 0) {
       window.alert('This email is already associated with an account.');
       return;
     }
     // Add org to database
+    console.log("adding org to database");
     try {
       const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
         {
@@ -85,11 +89,17 @@ export default function SignUp() {
   }
 
   const validateInputs = () => {
+    console.log("validating inputs");
+    
     if (!validateEmail()) {
       window.alert('Enter a valid email.');
       return false;
     } else if (!validatePassword()) {
       window.alert('Enter a valid password. Your password must contain at least 12 characters including an uppercase letter, a lowercase letter, a symbol, and a number.')
+      return false;
+    } else if (confirmPassword != password)
+    {
+      window.alert('Passwords are not the same. Please try again.')
       return false;
     }
     return true;
@@ -110,22 +120,29 @@ export default function SignUp() {
   }
 
   return (
-    <div>
+    <div className='h1'>
       For new organizations:
       <form onSubmit={handleSubmit}>
         <p>Email:</p>
         <input
           type="email"
-          placeholder="Email"
+          // placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
           value={email}
         />
         <p>Password:</p>
         <input
           type="password"
-          placeholder="Password"
+          // placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
           value={password}
+        />
+        <p>Confirm Password:</p>
+        <input
+           type="password"
+          // placeholder="Confirm Password"
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          value={confirmPassword}
         />
         <button
           type="submit">

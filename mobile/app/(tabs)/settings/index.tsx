@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, Button } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { logout } from '@/app/_utils/redux/userSlice';
+import { logout } from '../../_utils/redux/userSlice';
 import { useRouter } from 'expo-router';
 export default function Settings() {
     const dispatch = useDispatch();
