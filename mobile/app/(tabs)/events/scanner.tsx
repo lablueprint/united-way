@@ -5,12 +5,16 @@ import { useRouter, usePathname, useFocusEffect, useLocalSearchParams } from 'ex
 import { useSelector } from 'react-redux';
 import axios, { AxiosResponse } from "axios";
 import Announcement from "../../_components/Announcement";
+import { io, Socket } from "socket.io-client";
+import { useRef } from 'react';
 
 interface EventDetails {
   id: string;
   name: string;
   description: string;
   org: string;
+  startDate: string;
+  endDate: string;
 }
 
 export default function EventScanner() {
@@ -21,7 +25,7 @@ export default function EventScanner() {
   const [hasNavigated, setHasNavigated] = useState(false);
 
 
-  const user = useSelector((state) => {
+  const user = useSelector((state: { auth: { userId: string, authToken: string, refreshToken: string } }) => {
     return {
       userId: state.auth.userId,
       authToken: state.auth.authToken,
@@ -32,6 +36,7 @@ export default function EventScanner() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useLocalSearchParams();
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -39,6 +44,30 @@ export default function EventScanner() {
       setHasPermission(status === "granted");
     })();
   }, []);
+
+  useEffect(() => {
+    if (eventDetails) {
+      const startTimeDiff = new Date(eventDetails.startDate).getTime() - new Date().getTime();
+      const endTimeDiff = new Date(eventDetails.endDate).getTime() - new Date().getTime();
+      if (startTimeDiff <= 0 || endTimeDiff <= 0) {
+        Alert.alert("Event has already started or is in the past.");
+      } else if (startTimeDiff > endTimeDiff) {
+        Alert.alert("Event end time is before start time.");
+      } else {
+        setTimeout(() => {
+          socketRef.current = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
+          socketRef.current.emit('message', 'Hello, server!');
+          socketRef.current.on('message', (data) => {
+            console.log('Server says:', data);
+          });
+        }, startTimeDiff);
+        setTimeout(() => {
+          socketRef.current?.emit('message', 'Goodbye, server!');
+          socketRef.current?.disconnect();
+        }, endTimeDiff);
+      }
+    }
+  }, [eventDetails]);
 
   useFocusEffect(
     useCallback(() => {
@@ -69,6 +98,22 @@ export default function EventScanner() {
   }
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
+  }
+
+  if (eventDetails) {
+    const now = new Date();
+    const dateString = now.toISOString();
+    console.log(dateString);
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Request to Join Event</Text>
+        <Text style={styles.eventName}>{eventDetails.name}</Text>
+        <View style={styles.buttonContainer}>
+          <Button title="Accept" onPress={handleRegister} />
+          <Button title="Reject" onPress={handleUnregister} />
+        </View>
+      </View>
+    );
   }
 
   return (
