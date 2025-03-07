@@ -76,11 +76,6 @@ export default function OrganizationProfile() {
                         return <EventCard id={id} key={id} removeFromList={removeFromList} />;
                     })}
                 </div>
-                <RewardsSection 
-                    rewards={rewards} 
-                    onAdd={addReward} 
-                    onDelete={deleteReward} 
-                />
             </div>
         </div>
     );

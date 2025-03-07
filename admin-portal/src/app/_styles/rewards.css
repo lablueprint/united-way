@@ -15,17 +15,20 @@
 .carousel {
     max-width: 100%;
     margin-bottom: 2rem; /* Space for dots */
+    align-items: flex-start;
+
 }
 
 .slick-slide {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     padding: 1rem; /* Add some padding for spacing */
 }
 
 .slick-list {
     overflow: hidden; /* Ensure no scrollbars */
+    align-items: flex-start;
 }
 
 .slick-dots {
@@ -42,13 +45,13 @@
 
 /* Individual reward cards */
 .reward-card, .add-card {
-    background-color: #fff;
+    background-color: #ffeaea;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 6rem;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 250px;
+    width: 20%;
     height: 300px;
 }
 
@@ -78,11 +81,12 @@
 
 
 .add-card:hover {
-    background-color: #f3f3f3;
+    background-color: #ffd3d3;
 }
 
 .plus-sign {
     font-size: 6rem;
+    color:#0056b3
 }
 
 /* Modal overlay */

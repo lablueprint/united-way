@@ -2,7 +2,7 @@
 // Added following line
 import { useState } from "react";
 import axios, { AxiosResponse } from "axios";
-import OrganizationProfile from "@/app/_components/OrganizationProfile";
+import RewardsSection from "@/app/_components/RewardsSection";
 
 export default function Rewards() {
   const [responseValue, setResponseValue] = useState();
@@ -26,7 +26,10 @@ export default function Rewards() {
       <div>
         Result: {responseValue}
       </div>
-      <OrganizationProfile></OrganizationProfile>
+      <div>
+        Tesating
+      </div>
+      <RewardsSection></RewardsSection>
     </div>
   );
 }

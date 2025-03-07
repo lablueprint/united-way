@@ -1,75 +1,9 @@
-// import React, { useState } from 'react';
-
-// interface RewardsSectionProps {
-//     rewards: string[];
-//     onAdd: (reward: string) => void;
-//     onDelete: (reward: string) => void;
-// }
-
-// export interface Reward {
-//     name: string;
-//     cost: number;
-//     _id: string;
-// }
-
-// export const RewardsSection: React.FC<RewardsSectionProps> = ({ rewards, onAdd, onDelete }) => {
-//     const [newRewardName, setNewRewardName] = useState("");
-//     const [newRewardCost, setNewRewardCost] = useState("");
-
-//     const handleSubmit = (e: React.FormEvent) => {
-//         e.preventDefault();
-//         if (newRewardName.trim() && newRewardCost) {
-//             onAdd({
-//                 name: newRewardName.trim(),
-//                 cost: parseFloat(r_cost),
-//             });
-//             setNewRewardName("");
-//             setNewRewardCost("");
-//         }
-//     }
-
-//     return (
-//         <div>
-//             <h2>Rewards</h2>
-//             <form onSubmit={handleSubmit}>
-//                 <input 
-//                     type="text" 
-//                     value={newRewardName} 
-//                     onChange={(e) => setNewRewardName(e.target.value)}
-//                     placeholder="Enter reward name"
-//                 />
-//                 <input 
-//                     type="number" 
-//                     value={newRewardCost} 
-//                     onChange={(e) => setNewRewardCost(e.target.value)}
-//                     placeholder="Enter reward cost"
-//                 />
-//                 <button type="submit">Add Reward</button>
-//             </form>
-//             <ul>
-//                 {rewards.map((reward) => (
-//                     <li key={reward._id}>
-//                         {reward.name} - Cost: {reward.cost}
-//                         <button onClick={() => onDelete(reward._id)}>Delete</button>
-//                     </li>
-//                 ))}
-//             </ul>
-//         </div>
-//     );
-// }
-
-// export default RewardsSection;
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
 import '../_styles/rewards.css';
-
-interface RewardsSectionProps {
-    rewards: Reward[];
-    onAdd: (reward: Reward) => void;
-    onDelete: (id: string) => void;
-}
+import axios, { AxiosResponse } from 'axios';
 
 export interface Reward {
     name: string;
@@ -78,16 +12,59 @@ export interface Reward {
     _id: string;
 }
 
-export const RewardsSection: React.FC<RewardsSectionProps> = ({ rewards, onAdd, onDelete }) => {
+export const RewardsSection = () => {
     const [newRewardName, setNewRewardName] = useState('');
     const [newRewardCost, setNewRewardCost] = useState('');
     const [newRewardQuantity, setNewRewardQuantity] = useState('');
+
+    const [rewards, setRewards] = useState<Reward[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    useEffect(() => {
+        const fetchRewards = async () => {
+        try{
+    const currOrg: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`);
+                console.log(currOrg.data.data);
+                setRewards(currOrg.data.data.rewards || []);
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+fetchRewards();
+}, [refreshTrigger]);
+
+const addReward = async (newReward: Reward) => {
+    try {
+        const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
+            rewards: [...rewards, newReward]
+        });
+        if (response.data.status === "success") {
+            setRefreshTrigger(prev => prev + 1);
+        }
+    } catch (error) {
+        console.error("Failed to add reward:", error);
+    }
+}
+const deleteReward = async (rewardId: string) => {
+    const updatedRewards = rewards.filter(reward => reward._id !== rewardId);
+    try {
+        const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
+            rewards: updatedRewards
+        });
+        if (response.data.status === "success") {
+            setRefreshTrigger(prev => prev + 1);
+        }
+    } catch (error) {
+        console.error("Failed to delete reward:", error);
+    }
+}
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (newRewardName.trim() && newRewardCost) {
-            onAdd({
+            addReward({
                 name: newRewardName.trim(),
                 cost: parseFloat(newRewardCost),
                 quantity: parseFloat(newRewardQuantity),
@@ -101,28 +78,31 @@ export const RewardsSection: React.FC<RewardsSectionProps> = ({ rewards, onAdd, 
 
     const settings = {
         dots: true,
-        infinite: true,
+        infinite: false,
         speed: 500,
-        slidesToShow: 1,
+        slidesToShow: 3,
         slidesToScroll: 1,
     };
 
     return (
         <div className="container">
             <h2 className="title">Rewards</h2>
-            <Slider {...settings} className="carousel">
+            {rewards.length != 0 ? (<Slider {...settings} className="carousel">
                 {rewards.map((reward) => (
                     <div key={reward._id} className="reward-card">
                         <h3>{reward.name}</h3>
                         <p>Cost: {reward.cost}</p>
                         <p>Quantity: {reward.quantity}</p>
-                        <button onClick={() => onDelete(reward._id)} className="delete-button">Delete</button>
+                        <button onClick={() => deleteReward(reward._id)} className="delete-button">Delete</button>
                     </div>
                 ))}
                 <div className="add-card" onClick={() => setIsModalOpen(true)}>
                     <span className="plus-sign">+</span>
                 </div>
-            </Slider>
+            </Slider>) : (<div className="add-card" onClick={() => setIsModalOpen(true)}>
+                    <span className="plus-sign">+</span>
+                </div>)}
+            
 
             {isModalOpen && (
                 <div className="modal-overlay">
