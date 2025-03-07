@@ -5,7 +5,6 @@ import EventDetails from "@/app/_components/EventDetails";
 
 const styles = StyleSheet.create({
   homeStyle: {
-    paddingTop: 10,
     backgroundColor: "#ff9600",
     height: "100%",
   },

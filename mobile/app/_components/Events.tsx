@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from "react-native";
 import axios, { AxiosResponse } from "axios";
 import { useRouter } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
 import { useSelector } from "react-redux";
+import { Picker } from "@react-native-picker/picker";
 
-// Define your Event interface outside the component
+// Define your Event interface
 interface Event {
   _id: string;
   name: string;
@@ -58,30 +59,29 @@ const styles = StyleSheet.create({
   eventsDate: {
     fontSize: 15,
     paddingTop: 5,
-    paddingLeft: "8%",
+    paddingLeft: "4%",
     color: "white",
   },
   scrollView: {
-    flex: 1,
-    backgroundColor: "#2C2C2C",
-    marginTop: 20,
-    paddingBottom: 100,
+    display: "flex",
+    flexDirection: "row",
+    height: 100,
+    alignItems: "center",
   },
 });
 
 export default function Events() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [sortOption, setSortOption] = useState<string | undefined>(undefined);
+  const [showPicker, setShowPicker] = useState(false);
   const router = useRouter();
-  const user = useSelector((state) => {
-    return {
-      userId: state.auth.userId,
-      authToken: state.auth.authToken,
-      refreshToken: state.auth.refreshToken,
-    };
-  });
+  const user = useSelector((state) => ({
+    userId: state.auth.userId,
+    authToken: state.auth.authToken,
+    refreshToken: state.auth.refreshToken,
+  }));
 
   const getEvents = async () => {
-    console.log("hi caroline");
     try {
       const response: AxiosResponse<Event[]> = await axios.get<Event[]>(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/`,
@@ -92,8 +92,7 @@ export default function Events() {
           },
         }
       );
-      const content = response.data;
-      return content;
+      return response.data;
     } catch (err) {
       console.log(err);
       return [];
@@ -102,21 +101,77 @@ export default function Events() {
 
   useEffect(() => {
     fetchEvents();
-    console.log("hi angela");
   }, []);
 
   const fetchEvents = async () => {
     const { data } = await getEvents();
-    console.log(data);
     setAllEvents(data);
   };
 
+  // Compute a sorted version of allEvents without mutating state.
+  const sortedEvents = useMemo(() => {
+    if (sortOption === "date") {
+      return [...allEvents].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+    }
+    if (sortOption === "name") {
+      return [...allEvents].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return allEvents;
+  }, [sortOption, allEvents]);
+
   return (
-    <View>
+    <View style={{ backgroundColor: "grey", height: "100%" }}>
       <Text style={styles.titletext}>Events</Text>
-      <ScrollView>
-        {allEvents && allEvents.length !== 0
-          ? allEvents.map((event) => (
+      <View>
+        <TouchableOpacity
+          onPress={() => setShowPicker(!showPicker)}
+          style={{
+            padding: 10,
+            backgroundColor: "black",
+            alignSelf: "center",
+            marginVertical: 10,
+          }}
+        >
+          <Text style={{ color: "white" }}>
+            {sortOption ? `Sorted by: ${sortOption}` : "Sort Events"}
+          </Text>
+        </TouchableOpacity>
+        {showPicker && (
+          <View>
+            <Picker
+              selectedValue={sortOption}
+              onValueChange={(itemValue) => setSortOption(itemValue)}
+              style={{
+                backgroundColor: "black",
+                color: "white",
+              }}
+              itemStyle={{
+                backgroundColor: "black",
+                color: "white",
+                fontSize: 16,
+              }}
+            >
+              <Picker.Item label="Sort by Date" value="date" />
+              <Picker.Item label="Sort by Name" value="name" />
+            </Picker>
+            <TouchableOpacity
+              onPress={() => setShowPicker(false)}
+              style={{
+                padding: 10,
+                backgroundColor: "black",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "white" }}>Confirm</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+      <ScrollView style={{ height: "100%" }}>
+        {sortedEvents && sortedEvents.length !== 0
+          ? sortedEvents.map((event) => (
               <TouchableOpacity
                 key={event._id}
                 style={styles.scrollView}
@@ -124,8 +179,16 @@ export default function Events() {
                   router.push(`/explore/event-details/?event=${event._id}`)
                 }
               >
-                <Text style={styles.eventsTitle}>{event.name}</Text>
-                <Text style={styles.eventsDate}>{event.date}</Text>
+                <Image
+                  source={{
+                    uri: "https://reactnative.dev/img/tiny_logo.png",
+                  }}
+                  style={{ width: 50, height: 50 }}
+                />
+                <View>
+                  <Text style={styles.eventsTitle}>{event.name}</Text>
+                  <Text style={styles.eventsDate}>{event.date}</Text>
+                </View>
               </TouchableOpacity>
             ))
           : null}
@@ -133,8 +196,3 @@ export default function Events() {
     </View>
   );
 }
-
-
-//add the offset from the bottom for the scroll for the first 10 items
-//scroll to an element offset and expand the total elements in the view
-//add a visible scroll bar on the right side of the screen
