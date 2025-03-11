@@ -51,6 +51,7 @@ const getUserById = async (req, res) => {
 
 
 const addEventToUser = async (req, res) => {
+  console.log("hi");
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
     res.status(401);
     return;
@@ -136,11 +137,11 @@ const getUserByEmail = async (req, res) => {
 }
 
 const editUserDetails = async (req, res) => {
+  console.log("hi");
   if (req.auth.role != 'user') {
     res.status(401);
     return;
   }
-
   try {
     const userbyID = await User.findOneAndUpdate({_id: req.params["id"]}, {$set: req.body}, {new: true}); //Doesn't catch invalid fields
     res.status(200).json({

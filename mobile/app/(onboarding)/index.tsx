@@ -46,6 +46,7 @@ export default function SignUpScreen() {
         }
         // Add user to database
         try {
+            console.log("hi");
             const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
                 {
                     email: email,
