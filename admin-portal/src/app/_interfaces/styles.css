@@ -1,0 +1,112 @@
+.box {
+    background-color: red;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.left {
+    position: relative;
+    display: flex; 
+    width: 50%;
+    background-color: green;
+}
+
+.right {
+    position: relative;
+    width: 50%;
+    background-color:rgb(255, 255, 255);
+    font-family: "Helvetica Neue";
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.titleinputbox {
+    background-color:rgb(236, 236, 236);
+    width: 100%;
+    display: flex; 
+    font-size: 2rem;
+    font-weight: bold;
+    resize: both;
+    min-height: 40px;
+}
+
+.inputbox {
+    background-color:rgb(236, 236, 236);
+    display: flex; 
+    width: 100%;
+    font-size: 1rem;
+    font-weight: bold;
+    resize: both;
+    min-height: 20px;
+}
+
+.graybox {
+    border-color: rgb(255, 255, 255);
+    padding: 0.3rem 0.3rem;
+    display: flex; 
+    flex-direction: row;
+    background-color:rgb(236, 236, 236);
+    align-items: center;
+    white-space: pre-wrap;
+}
+
+.columngraybox {
+    border-color: rgb(255, 255, 255);
+    padding: 0.3rem 0.3rem;
+    display: flex; 
+    flex-direction: column;
+    background-color:rgb(236, 236, 236);
+    position: relative;
+    z-index: 0;
+}
+
+.tagPillNotSelected {
+    border-radius: 30px;
+    display: flex;
+    background-color: white;
+    border-color:rgb(120, 120, 120);
+    border-style: solid;
+    padding: 0.3rem 0.3rem;
+}
+
+.tagPillSelected {
+    border-radius: 30px;
+    color: white;
+    display: flex;
+    background-color:rgb(54, 54, 54);
+    border-color:rgb(120, 120, 120);
+    border-style: solid;
+    padding: 0.3rem 0.3rem;
+}
+
+.searchOptions {
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+}
+
+.searchOptionsParent {
+    z-index: 0;
+    display: flex;
+    position: relative;
+}
+
+.centergraybox {
+    display: flex;
+    flex-grow: 4;
+}
+
+.goToTheRight {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+}
+
+.tagOptions {
+    display: flex;
+    flex-wrap: wrap;
+}
