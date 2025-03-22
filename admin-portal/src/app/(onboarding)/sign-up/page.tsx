@@ -159,35 +159,39 @@ export default function SignUp() {
       {phase === 0 ? (
         // Sign-up Form (phase 0)
         <>
-          <h1>For new organizations:</h1>
-          <form onSubmit={handleSubmit}>
-            <p>Email:</p>
-            <input
-              type="email"
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-            />
-            <p>Password:</p>
-            <input
-              type="password"
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-            />
-            <p>Confirm Password:</p>
-            <input
-              type="password"
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              value={confirmPassword}
-            />
-            <button type="submit">Submit</button>
-          </form>
-          <Link href="/sign-in">
-            Already have an account? Sign in
-          </Link>
-          <br />
-          <Link href="/">
-            Do not want to make an account? Continue to dashboard
-          </Link>
+          <div className='h1'>
+      For new organizations:
+      <form onSubmit={handleSubmit}>
+        <p>Email:</p>
+        <input
+          type="email"
+          // placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+          value={email}
+        />
+        <p>Password:</p>
+        <input
+          type="password"
+          // placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+          value={password}
+        />
+        <p>Confirm Password:</p>
+        <input
+           type="password"
+          // placeholder="Confirm Password"
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          value={confirmPassword}
+        />
+        <button
+          type="submit">
+            Submit
+        </button>
+      </form>
+      <Link href="/sign-in">
+        Already have an account? Sign in
+      </Link>
+    </div>
         </>
       ) : (
         // 2FA Verification Form (phase 1)
