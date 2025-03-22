@@ -40,21 +40,21 @@ export default function Onboarding() {
     } catch (error) {
       console.error('Error submitting form:', error);
     }
-    try {
-      const data = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/passwordReset/verifyEmail`,  "vanshikaturkar@g.ucla.edu");
-    const codeData = data.data;
-    console.log(codeData);
-    // If no valid email was found, we return -1.
-    // if (codeData === -1) {
-    //   setErrorMsg('No Account with this Email');
-    //   return;
+    // try {
+    //   const data = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/passwordReset/verifyEmail`,  "vanshikaturkar@g.ucla.edu");
+    // const codeData = data.data;
+    // console.log(codeData);
+    // // If no valid email was found, we return -1.
+    // // if (codeData === -1) {
+    // //   setErrorMsg('No Account with this Email');
+    // //   return;
+    // // }
+    // // updateHashedCode(codeData);
+    // // setStep('verifyCode');
+    // // setErrorMsg('');
+    // } catch (error) {
+    //   console.error('Error submitting form:', error);
     // }
-    // updateHashedCode(codeData);
-    // setStep('verifyCode');
-    // setErrorMsg('');
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    }
     router.push('/tabs'); // '/landing'
   };
 

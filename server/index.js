@@ -16,7 +16,7 @@ const eventRouter = require('./routes/eventRoutes.js');
 const organizationRouter = require('./routes/organizationRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
 const activityRouter = require('./routes/activityRoutes.js')
-
+const twoFactorRouter = require('./routes/twoFactorRoutes.js')
 // Connect to the MongoDB database
 async function connectToDatabase() {
   try {
@@ -66,6 +66,8 @@ app.use('/events',
 app.use('/events', eventRouter);
 
 app.use('/activities', activityRouter);
+
+app.use('/twofactor' ,twoFactorRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); //routers are groupings of endpoints

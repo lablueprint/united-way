@@ -31,7 +31,7 @@ export default function OnboardingScreen() {
     const handleEditUser = async () => {
         console.log(gender);
         try {
-            const response: AxiosResponse = await axios.patch(`http://192.168.1.114:4000/users/${id}`,
+            const response: AxiosResponse = await axios.patch(`http://192.168.86.24:4000/users/${id}`,
                 {
                     name: name,
                     phoneNumber: phone,
@@ -50,7 +50,8 @@ export default function OnboardingScreen() {
             );
             console.log("trying to navigate to tabs");
             // Navigate to home screen
-            router.push("/(tabs)");
+            router.push({pathname: "/interest"})
+            //router.push("/(tabs)");
         } catch (err) {
             console.log(err);
         }
