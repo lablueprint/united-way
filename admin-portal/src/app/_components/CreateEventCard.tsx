@@ -4,6 +4,7 @@ import { EventTags } from "../_interfaces/EventInterfaces";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import '../_interfaces/styles.css';
+import TestLogo from "./logo.jpeg"
 
 interface CreateEventCardProps {
     orgName: string;
@@ -191,24 +192,22 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 </h3>
             </div>
             <div className="right">
-            <div className="columngraybox">
-                    <div className="graybox goToTheRight">
-                            <button className="tagPillSelected" onClick={handleSubmit}>
-                                Publish!
-                            </button>
-                            
-                            <button className="tagPillNotSelected" onClick={clearEvent}>
-                                Clear
-                            </button>
-
-                    </div>
-
-                    <div className="graybox">
-                        <h3>
-                            {submissionStatus}
-                        </h3>
-                    </div>
+                <div className="goToTheRight">
+                        <button className="tagPillSelected" onClick={handleSubmit}>
+                            Publish
+                        </button>
+                        
+                        {/* <button className="tagPillNotSelected" onClick={clearEvent}>
+                            Clear
+                        </button> */}
                 </div>
+
+                {/* <div className="graybox">
+                    <h3>
+                        {submissionStatus}
+                    </h3>
+                </div> */}
+
 
                 <div className="graybox" onClick={()=>setIsEditingName(true)}>
                     {
@@ -224,22 +223,33 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     }
                 </div>
 
-                <div className="graybox">
-                    <h3>
-                        Hosted by <u>{orgName}</u>:
-                    </h3>
+                <div className="graybox spacing">
+                    <div className="orgLogo">
+                        <img src={TestLogo.src} />
+                    </div>
+                    <div className="flexIt">
+                        <h3>
+                            Hosted by <u>{orgName}</u>:
+                        </h3>
+                    </div>
+                    <div className="goToTheRight">
+                        <button className="tagPillNotSelected">
+                            Edit
+                        </button>
+                    </div>
                 </div>
 
                 <div className="graybox">
                     <input type="date" name="date" placeholder="Date" value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''} onChange={(event) => { setUpdatedDate(new Date((event.target as HTMLInputElement).value)) }} />
                 </div>
                 
+                <h3>
+                    <b>
+                        Description:
+                    </b>
+                </h3>
+
                 <div className="columngraybox" onClick={() => setIsEditingDescription(true)}>
-                    <h3>
-                        <b>
-                            Description:
-                        </b>
-                    </h3>
                     {
                         isEditingDescription ? 
                         <textarea onKeyDown={(e)=> {
@@ -285,6 +295,10 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     </div>
                 </div>
 
+                <div className="graybox">
+
+                </div>
+
                 {/* <button onClick={()=>getLocationJSON(updatedAddress)}>
                     Get Address Info
                 </button> 
@@ -296,7 +310,9 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 <h3>Longitude: {currLongitude}</h3> */}
 
                 <h3>
-                    Select Keywords:
+                    <b>
+                        Select Keywords:
+                    </b>
                 </h3>
                 <div className="tagOptions">
                     {

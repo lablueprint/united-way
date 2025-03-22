@@ -102,11 +102,30 @@
 
 .goToTheRight {
     display: flex;
+    margin-left: auto;
     justify-content: flex-end;
     flex-direction: row;
 }
 
 .tagOptions {
     display: flex;
+    flex-direction: row;
+    gap: 10px;
     flex-wrap: wrap;
+}
+
+.spacing {
+    gap: 10px;
+}
+
+.flexIt {
+    display: flex;
+}
+
+.orgLogo {
+    display: flex;
+    object-fit: contain;
+    clip-path: circle();
+    height: 2em;
+    width: 2em;
 }
