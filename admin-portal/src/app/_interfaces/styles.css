@@ -129,3 +129,26 @@
     height: 2em;
     width: 2em;
 }
+
+.dateRow {
+    display: flex;
+    gap: 20px;
+}
+
+.hiddenDateModal {
+    position: 'absolute';
+    top: 0;
+    left: 0; 
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.overlapInput {
+    position: relative;
+    display: inline-block;
+}

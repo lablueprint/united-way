@@ -35,8 +35,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [isEditingName, setIsEditingName] = useState<boolean>(false);
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
-
-
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
     // Make all inputtables empty on Organization page
@@ -60,6 +58,19 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 (updatedDescription != "Your Event Description") &&
                 (updatedTags.includes(true)) &&
                 ((currLatitude != 0) && (currLongitude != 0)))
+    }
+
+    const getDayOfWeek = (d: Date) => {
+        const days = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
+        return days[d.getDay()];
+    }
+
+    const getMonth = (d: Date) => {
+        const months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+          ];
+          return months[d.getMonth()];
     }
 
     // TODO: maybe refresh to populate the event into org upon successful patch?
@@ -157,6 +168,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             );
             const data = response.data;
             if (data.length > 0) {
+                // Multiple addresses returned
                 if (data.length > 1) {
                     const internals = data;
                     setInAddress(internals.display_name);
@@ -173,6 +185,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     setLongitude(internals.lon);
                 }
             }
+            // No address returned
             else {
                 setInAddress("Invalid Address");
                 setSubmissionStatus("Error: Invalid Address");
@@ -196,10 +209,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         <button className="tagPillSelected" onClick={handleSubmit}>
                             Publish
                         </button>
-                        
-                        {/* <button className="tagPillNotSelected" onClick={clearEvent}>
-                            Clear
-                        </button> */}
                 </div>
 
                 {/* <div className="graybox">
@@ -239,8 +248,29 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     </div>
                 </div>
 
-                <div className="graybox">
-                    <input type="date" name="date" placeholder="Date" value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''} onChange={(event) => { setUpdatedDate(new Date((event.target as HTMLInputElement).value)) }} />
+                <div className="graybox dateRow">
+                    <div className="graybox overlapInput">
+                        <div 
+                            className="flexIt dateRow clickable"
+                            onClick={() => (document.getElementById('hiddenDateInput') as HTMLInputElement).showPicker()}
+                        >
+                            <div>{getDayOfWeek(updatedDate)}</div>
+                            <div>{getMonth(updatedDate)}</div>
+                            <div>{ updatedDate.getDate() + 1}</div>
+                        </div>
+                    
+                        {/* Hidden Date Input Interface, only the input modal appears when clicked */}
+                        <input
+                            type="date"
+                            id="hiddenDateInput"
+                            className="hiddenDateModal flexIt"
+                            value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''}
+                            onChange={(event) => { setUpdatedDate(new Date((event.target as HTMLInputElement).value))}}
+                            />
+                    </div>
+                    <div className="flexIt">
+                        
+                    </div>
                 </div>
                 
                 <h3>
@@ -294,20 +324,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         </div>
                     </div>
                 </div>
-
-                <div className="graybox">
-
-                </div>
-
-                {/* <button onClick={()=>getLocationJSON(updatedAddress)}>
-                    Get Address Info
-                </button> 
-                <button onClick={()=>{getUserLocation()}}>
-                    Get Address from Current Location
-                </button> 
-                <h3>Address: {updatedInAddress}</h3>
-                <h3>Latitude: {currLatitude}</h3>
-                <h3>Longitude: {currLongitude}</h3> */}
 
                 <h3>
                     <b>
