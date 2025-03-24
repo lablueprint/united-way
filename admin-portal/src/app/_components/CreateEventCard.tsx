@@ -22,18 +22,17 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
     const [updatedDescription, setUpdatedDescription] = useState<string>("Your Event Description");
     const [updatedTags, setUpdatedTags] = useState<boolean[]>(Array(EventTags.length).fill(false));
-    const [submissionStatus, setSubmissionStatus] = useState<string>("");
     const [currLatitude, setLatitude] = useState<number>(0);
     const [currLongitude, setLongitude] = useState<number>(0);
     const [options, setOptions] = useState<LocationProps[]>([]);
-    // updatedAddress is the address inputted into the input box on the form
     const [updatedAddress, setAddress] = useState<string>("");
-    // updatedInAddress stores the address from the JSON returned by the API request
-    const [updatedInAddress, setInAddress] = useState<string>("");
+    // A state variable I used to debug Nominatim Issues. Can be useful for notifications
+    const [submissionStatus, setSubmissionStatus] = useState<string>("");
 
     // The CSS State Variables
     const [isEditingName, setIsEditingName] = useState<boolean>(false);
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
+    // This timer will start when the user stops typing and reset once the user starts typing again
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
@@ -45,7 +44,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         setUpdatedTags(Array(EventTags.length).fill(false));
         setLatitude(0);
         setLongitude(0);
-        setInAddress("");
         setAddress("");
         setIsEditingName(false);
         setIsEditingDescription(false);
@@ -69,8 +67,28 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         const months = [
             "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
-          ];
+        ];
           return months[d.getMonth()];
+    }
+
+    // Date object store dates under the assumption of array accesses, which means last days of the months overflow
+    // This function fixes that, aka: March 32 --> April 1, and so on
+    const parseDate = (d: Date) => {
+        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const leapYearDaysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const month = d.getMonth();
+        const year = d.getFullYear();
+        var date = d.getDate();
+        
+        // Leap Year
+        if (year % 4 == 0) {
+            ((date) >= leapYearDaysInMonth[month]) ? (date = 1) : (date += 1)
+        }
+        else {
+            ((date) >= daysInMonth[month]) ? (date = 1) : (date += 1)
+        }
+
+        return new Date(year, month, date);;
     }
 
     // TODO: maybe refresh to populate the event into org upon successful patch?
@@ -151,7 +169,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     // Send request with address to Nominatim endpoint and receive back latitude, longitude in JSON
     // https://nominatim.org/release-docs/develop/api/Search/
     const getLocationJSON = async (address: string) => {
-        console.log('called!', address);
         // Convert address to url (aka add +'s in every space)
         const convertedAddress = address.trim().replaceAll(" ", "+");
         const url = "https://nominatim.openstreetmap.org/search?q=" + convertedAddress + "&format=json";
@@ -171,7 +188,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 // Multiple addresses returned
                 if (data.length > 1) {
                     const internals = data;
-                    setInAddress(internals.display_name);
                     setLatitude(internals.lat);
                     setLongitude(internals.lon);
                     setOptions(data);
@@ -179,7 +195,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 // Single address returned
                 else {
                     const internals = data[0];
-                    setInAddress(internals.display_name);
                     setOptions([]);
                     setLatitude(internals.lat);
                     setLongitude(internals.lon);
@@ -187,7 +202,6 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             }
             // No address returned
             else {
-                setInAddress("Invalid Address");
                 setSubmissionStatus("Error: Invalid Address");
                 setLatitude(0);
                 setLongitude(0);
@@ -205,21 +219,17 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 </h3>
             </div>
             <div className="right">
+                {/* Publish Button */}
                 <div className="goToTheRight">
-                        <button className="tagPillSelected" onClick={handleSubmit}>
-                            Publish
-                        </button>
+                    <button className="tagPillSelected clickable" onClick={handleSubmit}>
+                        Publish
+                    </button>
                 </div>
 
-                {/* <div className="graybox">
-                    <h3>
-                        {submissionStatus}
-                    </h3>
-                </div> */}
-
-
-                <div className="graybox" onClick={()=>setIsEditingName(true)}>
+                {/* Event Name */}
+                <div className="graybox clickable" onClick={()=>setIsEditingName(true)}>
                     {
+                        // If is editing, then put in a textbox. If not, then its plain text
                         isEditingName ? 
                         <textarea onKeyDown={(e)=> {
                             if (e.key === "Enter") {
@@ -231,7 +241,8 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         <div className="titleinputbox">{updatedName}</div>
                     }
                 </div>
-
+                
+                {/* Organization Info */}
                 <div className="graybox spacing">
                     <div className="orgLogo">
                         <img src={TestLogo.src} />
@@ -242,12 +253,13 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         </h3>
                     </div>
                     <div className="goToTheRight">
-                        <button className="tagPillNotSelected">
+                        <button className="tagPillNotSelected clickable">
                             Edit
                         </button>
                     </div>
                 </div>
 
+                {/* Date, Time, Timezone */}
                 <div className="graybox dateRow">
                     <div className="graybox overlapInput">
                         <div 
@@ -256,7 +268,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         >
                             <div>{getDayOfWeek(updatedDate)}</div>
                             <div>{getMonth(updatedDate)}</div>
-                            <div>{ updatedDate.getDate() + 1}</div>
+                            <div>{ updatedDate.getDate()}</div>
                         </div>
                     
                         {/* Hidden Date Input Interface, only the input modal appears when clicked */}
@@ -265,7 +277,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                             id="hiddenDateInput"
                             className="hiddenDateModal flexIt"
                             value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''}
-                            onChange={(event) => { setUpdatedDate(new Date((event.target as HTMLInputElement).value))}}
+                            onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value))); console.log(updatedDate);}}
                             />
                     </div>
                     <div className="flexIt">
@@ -273,29 +285,35 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     </div>
                 </div>
                 
-                <h3>
-                    <b>
-                        Description:
-                    </b>
-                </h3>
+                {/* Description */}
+                <div className="flexIt">
+                    <div className="flexIt">
+                        <b>
+                            Description:
+                        </b>
+                    </div>
 
-                <div className="columngraybox" onClick={() => setIsEditingDescription(true)}>
-                    {
-                        isEditingDescription ? 
-                        <textarea onKeyDown={(e)=> {
-                            if (e.key === "Enter") {
-                                setIsEditingDescription(false)
-                            }
-                            }} className="inputbox" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} 
-                        />
-                        : 
-                        <div className="inputbox">{updatedDescription}</div>
-                    }
+                    <div className="columngraybox clickable flexIt" onClick={() => setIsEditingDescription(true)}>
+                        {
+                            // If is editing, then put in a textbox. If not, then its plain text
+                            isEditingDescription ? 
+                            <textarea onKeyDown={(e)=> {
+                                if (e.key === "Enter") {
+                                    setIsEditingDescription(false)
+                                }
+                                }} className="inputbox" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} 
+                            />
+                            : 
+                            <div className="inputbox">{updatedDescription}</div>
+                        }
+                    </div>
                 </div>
                 
-                <div className="columngraybox">
-                    <div className="columngraybox">
-                        <textarea className="inputbox" onChange={(e)=>{
+                {/* Location */}
+                <div className="columngraybox flexIt">
+                    <div className="columngraybox flexIt">
+                        <textarea className="inputbox clickable" onChange={(e)=>{
+                            // If an existing timeout exists, kill it (because we're going to set a new one)
                             if (timeoutID) {
                                 clearTimeout(timeoutID);
                             }
@@ -303,17 +321,17 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                             let newTimeoutID = setTimeout(() => getLocationJSON(e.target.value), 500);
                             setTimeoutID(newTimeoutID);
                         }} name="location" placeholder="Location" value={updatedAddress} 
-                        />
+                    />
                     </div>
+                    {/* If multiple results return, this is the modal that pops up */}
                     <div className="searchOptionsParent">
-                        <div className="searchOptions">
+                        <div className="searchOptions clickable">
                             {
                                 options.map((option, index) => (
                                     <button key={index}
                                     onClick={() => {
                                         setLatitude(parseFloat(option.lat));
                                         setLongitude(parseFloat(option.lon));
-                                        setInAddress(option.display_name);
                                         setAddress(option.display_name);
                                         setOptions([]);
                                     }}>
@@ -325,29 +343,32 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     </div>
                 </div>
 
-                <h3>
-                    <b>
-                        Select Keywords:
-                    </b>
-                </h3>
-                <div className="tagOptions">
-                    {
-                        EventTags.map((tagName, index) => {
-                            return (
-                                <button 
-                                className = { updatedTags[index] ? "tagPillSelected" :  "tagPillNotSelected" }
-                                key={index} 
-                                onClick={() => {
-                                    const newTags = [...updatedTags];
-                                    newTags[index] = !newTags[index];
-                                    setUpdatedTags(newTags);
-                                }}
-                                >
-                                    {tagName}
-                                </button>
-                            )
-                        })
-                    }
+                {/* Keyword Buttons */}
+                <div>
+                    <div className="flexIt">
+                        <b>
+                            Select Keywords:
+                        </b>
+                    </div>
+                    <div className="tagOptions flexIt">
+                        {
+                            EventTags.map((tagName, index) => {
+                                return (
+                                    <button 
+                                    className = { updatedTags[index] ? "tagPillSelected clickable" :  "tagPillNotSelected clickable" }
+                                    key={index} 
+                                    onClick={() => {
+                                        const newTags = [...updatedTags];
+                                        newTags[index] = !newTags[index];
+                                        setUpdatedTags(newTags);
+                                    }}
+                                    >
+                                        {tagName}
+                                    </button>
+                                )
+                            })
+                        }
+                    </div>
                 </div>
             </div> 
         </div>
