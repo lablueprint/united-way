@@ -26,6 +26,9 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [currLongitude, setLongitude] = useState<number>(0);
     const [options, setOptions] = useState<LocationProps[]>([]);
     const [updatedAddress, setAddress] = useState<string>("");
+    const [startTime, setStartTime] = useState('12:00');
+    const [endTime, setEndTime] = useState('12:01');
+    const [selectedTimeZone, setSelectedTimeZone] = useState('PT');
     // A state variable I used to debug Nominatim Issues. Can be useful for notifications
     const [submissionStatus, setSubmissionStatus] = useState<string>("");
 
@@ -36,19 +39,12 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
-    // Make all inputtables empty on Organization page
-    const clearEvent = () => {
-        setUpdatedName("Your Event Name");
-        setUpdatedDate(new Date);
-        setUpdatedDescription("Your Event Description");
-        setUpdatedTags(Array(EventTags.length).fill(false));
-        setLatitude(0);
-        setLongitude(0);
-        setAddress("");
-        setIsEditingName(false);
-        setIsEditingDescription(false);
-        setSubmissionStatus("Cleared!");
-    }
+    const timeZones = [
+        { label: "Pacific Time (PT) America/Los Angeles", value: "PT" },
+        { label: "Mountain Time (MT) America/Denver", value: "MT" },
+        { label: "Central Time (CT) America/Chicago", value: "CT" },
+        { label: "Eastern Time (ET) America/New York", value: "ET" },
+    ];
 
     // Checks if all inputtables are non-empty
     const notEmpty = () => {
@@ -69,6 +65,22 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             "July", "August", "September", "October", "November", "December"
         ];
           return months[d.getMonth()];
+    }
+
+    const getTimeString = (t:string) => {
+        const [hours, minutes] = t.split(":");
+        if (parseInt(hours) == 0) {
+            return ('12:' + minutes + ' AM');
+        }
+        else if (parseInt(hours) == 12) {
+            return ('12:' + minutes + ' PM');
+        }
+        else if (parseInt(hours) <= 11) {
+            return (hours + ':' + minutes + 'AM');
+        }
+        else {
+            return ((parseInt(hours) - 12) + ':' + minutes + 'PM');
+        }
     }
 
     // Date object store dates under the assumption of array accesses, which means last days of the months overflow
@@ -96,6 +108,10 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     // Creates a JSON and attempts to patch it to DB
     const handleSubmit = async () => {
         try {
+            console.log('date ', updatedDate);
+            console.log('starttime ', startTime);
+            console.log('tz', selectedTimeZone);
+            // TODO: Convert to GMT, figure out how things are stored
             if (notEmpty()) {
                 const selectedTags = updatedTags
                     .map((isSelected, index) => isSelected ? EventTags[index] : null)
@@ -262,26 +278,89 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 {/* Date, Time, Timezone */}
                 <div className="graybox dateRow">
                     <div className="graybox overlapInput">
+                        {/* Date */}
                         <div 
                             className="flexIt dateRow clickable"
                             onClick={() => (document.getElementById('hiddenDateInput') as HTMLInputElement).showPicker()}
                         >
-                            <div>{getDayOfWeek(updatedDate)}</div>
-                            <div>{getMonth(updatedDate)}</div>
-                            <div>{ updatedDate.getDate()}</div>
+                            <div>{ getDayOfWeek(updatedDate) }</div>
+                            <div>{ getMonth(updatedDate) }</div>
+                            <div>{ updatedDate.getDate() }</div>
                         </div>
                     
                         {/* Hidden Date Input Interface, only the input modal appears when clicked */}
                         <input
                             type="date"
                             id="hiddenDateInput"
-                            className="hiddenDateModal flexIt"
+                            className="hiddenModal flexIt"
                             value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''}
-                            onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value))); console.log(updatedDate);}}
+                            onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value)))}}
                             />
                     </div>
+
+                    {/* Start Time */}
                     <div className="flexIt">
-                        
+                        <div 
+                            className="flexIt clickable"
+                            onClick={() => (document.getElementById('hiddenStartTimeInput') as HTMLInputElement).showPicker()}
+                        >
+                            { getTimeString(startTime) }
+                        </div>
+                    
+                        {/* Hidden Time Input Interface */}
+                        <input
+                            type="time"
+                            id="hiddenStartTimeInput"
+                            className="hiddenModal"
+                            value={startTime}
+                            onChange={(event) => setStartTime(event.target.value)}
+                        />
+                    </div>
+
+                    <h3>–</h3>
+
+                    {/* End Time */}
+                    <div className="flexIt">
+                        <div 
+                            className="flexIt clickable"
+                            onClick={() => (document.getElementById('hiddenEndTimeInput') as HTMLInputElement).showPicker()}
+                        >
+                            { getTimeString(endTime) }
+                        </div>
+                    
+                        {/* Hidden Time Input Interface */}
+                        <input
+                            type="time"
+                            id="hiddenEndTimeInput"
+                            className="hiddenModal"
+                            value={endTime}
+                            onChange={(event) => setEndTime(event.target.value)}
+                        />
+                    </div>
+
+                    <h3>•</h3>
+
+                    {/* Time Zone */}
+                    <div className="flexIt">
+                        <div 
+                            className="flexIt clickable"
+                            onClick={() => (document.getElementById('hiddenTimeZoneInput') as HTMLInputElement).showPicker()}
+                        >
+                            {selectedTimeZone} 
+                        </div>
+                        {/* Hidden Time Zone Picker */}
+                        <select 
+                            id="hiddenTimeZoneInput"
+                            value={selectedTimeZone}
+                            className="hiddenModal"
+                            onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                                setSelectedTimeZone(event.target.value);
+                            }}
+                        >
+                            {timeZones.map((zone) => (
+                                <option key={zone.value} value={zone.value}>{zone.label}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
                 
