@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
 	collectedStamps: [String],
 	demographics: {
-		gender: Boolean,
+		gender: String,
 		ethnicity: String,
 		community: String
 	},
@@ -12,8 +12,11 @@ const userSchema = new mongoose.Schema({
 	experiencePoints: Number,
 	name: String,
 	numStamps: Number,
+	password: String,
 	pastEvents: [String],
 	phoneNumber: String,
+	points: Number,
+	password: String,
 	registeredEvents: [String]
 });
 
