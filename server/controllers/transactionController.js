@@ -70,3 +70,28 @@ exports.getTransactionsByOrganization = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+
+// Delete a transaction by ID
+exports.deleteTransaction = async (req, res) => {
+    try {
+      const { transactionId } = req.params;
+  
+      // Check if the transaction ID is valid
+      if (!mongoose.Types.ObjectId.isValid(transactionId)) {
+        return res.status(400).json({ message: 'Invalid transaction ID' });
+      }
+  
+      // Find and delete the transaction
+      const deletedTransaction = await Transaction.findByIdAndDelete(transactionId);
+  
+      if (!deletedTransaction) {
+        return res.status(404).json({ message: 'Transaction not found' });
+      }
+  
+      res.status(200).json({ message: 'Transaction deleted successfully', deletedTransaction });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error', error });
+    }
+  };
+  
