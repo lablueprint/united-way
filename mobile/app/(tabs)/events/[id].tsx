@@ -1,24 +1,59 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Touchable, Button, ScrollView, Pressable} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal} from 'react-native';
+import { Link } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router';
 import axios, { AxiosResponse } from 'axios';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-
+import { useRouter } from 'expo-router';
 // import { EventData } from '../_interfaces/EventInterfaces';
 
-interface EventDetailsProps {
-  id: string;
+// interface EventDetailsProps {
+//   id: string;
+//   name: string;
+//   description: string;
+//   organizerID: string;
+//   date: Date;
+// }
+interface EventData {
+  _id: string;
   name: string;
+  date: Date;
   description: string;
-  org: string;
+  location: {
+      type: string;
+      coordinates: number[];
+  };
+  organizerID: string;
+  tags: string[];
+  registeredUsers: string[];
+  // activities: Activity[];
 }
 
 export default function EventDetails() {
-  const [details, setDetails] = useState(useState<EventDetailsProps | null>(null));
+  const router = useRouter();
+  const [eventData, setEventData] = useState<EventData>({
+    organizerID: "",
+    _id: "",
+    name: "",
+    date: new Date(),
+    description: "",
+    location: {
+        type: "",
+        coordinates: [],
+    },
+    tags: [],
+    registeredUsers: [],
+    // activities: []
+  }); 
+
+  const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
+  const [organizationName, setOrganizationName] = useState("");
+
   const { id } = useLocalSearchParams();
   const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-
+  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+  
   // Getting Event (and its details)rby Event ID
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -30,51 +65,150 @@ export default function EventDetails() {
             },
           });
           const { data } = response.data;
-          setDetails(data);
-          return data;
+          setEventData({
+            ...data,
+            date: new Date(data.date)
+          });
+          setRegisteredUsers(data.registeredUsers);
         } catch (err) {
           console.error(err);
         }
       };
   fetchEventDetails();
-  console.log('details', details);
-  console.log('fetching');
-//   console.log(details);
   }, []);
-  
 
-//   const parsedEventDetails = JSON.parse(decodeURIComponent(details as string)) as EventDetailsProps;
-  // Retrieve the 'details' query parameter from the URL
-//   const [orgEvents, setOrgEvents] = useState([]);
-  
-  // Check if the details exist and parse them
+  useEffect(() => {
+    if (eventData) {
+      setRegisteredUsers(eventData.registeredUsers);
+    }
+  }, [eventData]);
+
   if (!id) {
     return <Text>No event details found.</Text>;
   }
-
-  // Decode and parse the event details
-  // const parsedEventDetails = JSON.parse(decodeURIComponent(details as string)) as EventDetailsProps;
-  // const parsedEventDetails = details;
-
-  const fetchOrganizationEvents = async () => {
+  
+  // const formatDate = (dateString: string | Date) => {
+    
+  // }
+  const addEventToUser = async (eventId: string) => {
     try {
-      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/${details.id}/events`)
-      const { data } = response.data;
-      return data;
-    } 
-    catch (err) {
-      console.log(err);
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
+        {
+          newEvent: eventId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        });
+    } catch (err) {
+      console.error(err);
     }
   }
-  
-//   useEffect(() => {
-//     const fetchData = async () => {
-//         const data = await fetchOrganizationEvents();
-//         setOrgEvents(data);
-//     };
-//     fetchData();
-// }, []);
 
+  const addUserToEvent = async (userId: string) => {
+    try { 
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventData._id}/addUser`,
+        {
+          newUser: userId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+    
+  };
+
+  
+  const removeUserFromEvent = async (userId: string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventData._id}/removeUser`,
+        {
+          userId: userId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const removeEventFromUser = async (eventId: string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
+        {
+          eventId: eventId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const handleRegister = async () => { 
+    try {
+      await addEventToUser(eventData._id);
+      await addUserToEvent(user.userId);
+
+      setRegisteredUsers([...registeredUsers, user.userId]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUnregister = async () => {
+    try {
+      await removeEventFromUser(eventData._id);
+      await removeUserFromEvent(user.userId);
+
+      setRegisteredUsers(registeredUsers.filter(id => id !== user.userId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    const getOrganizationName = async () => {
+      try {
+        console.log('orgId', eventData.organizerID);
+        const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/${eventData.organizerID}/events`, {
+          headers: {
+            'Authorization': `Bearer ${org.authToken}`,
+            'Content-Type': "application/json"
+          },
+        });
+        const { data } = response.data;
+        console.log('org name', data);
+        setOrganizationName(data.name);
+        // return data;
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getOrganizationName();
+  }, [eventData]);
+
+  const getMonthAbbreviation = (date: Date) => {
+    return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
+  };
 
   return (
     <View style={styles.container}>
@@ -84,11 +218,11 @@ export default function EventDetails() {
           <View><Text>share</Text></View>
         </View>
         <View>
-        <Text style={styles.title}>{details.name}</Text>
+        <Text style={styles.title}>{eventData.name}</Text>
           <View style={styles.pillContain}> 
             <View style={styles.infoPill}>
               <View><Text>x</Text></View>
-              <Text style={styles.pillText}>9 Jan | 5 PM</Text>
+              <Text style={styles.pillText}>{eventData.date.getDate()} | {getMonthAbbreviation(eventData.date)}</Text>
             </View>
             <View style={styles.infoPill}>
               {/* <View><Text>x</Text></View> */}
@@ -106,8 +240,23 @@ export default function EventDetails() {
           <Text>Hosted By</Text>
           <View style={styles.rowFlex}>
             <View style={styles.orgContainer}>
-              <Text style={styles.organizer}>{details.org}</Text>
-              <TouchableOpacity style={styles.infoPill}><Text style={styles.pillText}>More</Text></TouchableOpacity>
+              <Text style={styles.organizer}>{organizationName}</Text>
+              <TouchableOpacity style={styles.infoPill}
+                onPress={() => {
+                  console.log('inPress', eventData.organizerID);
+                  router.push({ 
+                    pathname: `/events/associated-events`, 
+                    params: 
+                      { 
+                        id: eventData.organizerID,
+                        // name: eventDetails.name,
+                        // description: eventDetails.description,
+                        // organization: eventDetails.org,
+                      }});
+                }}
+                  >
+                  <Text style={styles.pillText}>More</Text>
+                </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
             <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
@@ -115,8 +264,16 @@ export default function EventDetails() {
         </View>
         <View style={styles.section}>
           <Text style={styles.subheader}>Description</Text>
-          <Text style={styles.description}>{details.description}</Text>
-          <TouchableOpacity><Text style={styles.darkButton}>RSVP</Text></TouchableOpacity>
+          <Text style={styles.description}>{eventData.description}</Text>
+          {(registeredUsers).includes(user.userId) ? 
+            <TouchableOpacity onPress={handleUnregister}>
+              <Text style={styles.darkButton}>Cancel</Text>
+            </TouchableOpacity>  
+            :
+            <TouchableOpacity onPress={handleRegister}>
+              <Text style={styles.darkButton}>RSVP</Text>
+            </TouchableOpacity> 
+          }
         </View>
         <View style={styles.section}>
           <Text style={styles.subheader}>Rewards</Text>

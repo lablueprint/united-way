@@ -47,20 +47,20 @@ export default function EventScanner() {
           }});
     };
 
-  const fetchEventDetails = async (eventId: string) => {
-    try {
-      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`, {
-        headers: {
-          'Authorization': `Bearer ${user.authToken}`,
-          'Content-Type': "application/json"
-        },
-      });
-      const { data } = response.data;
-      return data;
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // const fetchEventDetails = async (eventId: string) => {
+  //   try {
+  //     const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`, {
+  //       headers: {
+  //         'Authorization': `Bearer ${user.authToken}`,
+  //         'Content-Type': "application/json"
+  //       },
+  //     });
+  //     const { data } = response.data;
+  //     return data;
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   // const addEventToUser = async (eventId: string) => {
   //   try {
