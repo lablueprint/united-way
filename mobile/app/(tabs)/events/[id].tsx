@@ -31,6 +31,11 @@ interface EventData {
 }
 
 export default function EventDetails() {
+  // Temporary Duration
+  const duration = 3;
+  // TODO: Replace static address with reverse geocoded location
+  const staticAddress = "330 De Neve Drive";
+
   const router = useRouter();
   const [eventData, setEventData] = useState<EventData>({
     organizerID: "",
@@ -48,6 +53,7 @@ export default function EventDetails() {
   }); 
 
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
+  const [registered, setRegistered] = useState()
   const [organizationName, setOrganizationName] = useState("");
 
   const { id } = useLocalSearchParams();
@@ -169,6 +175,7 @@ export default function EventDetails() {
       await addUserToEvent(user.userId);
 
       setRegisteredUsers([...registeredUsers, user.userId]);
+      setRegistered(true);
     } catch (err) {
       console.error(err);
     }
@@ -188,23 +195,21 @@ export default function EventDetails() {
   useEffect(() => {
     const getOrganizationName = async () => {
       try {
-        console.log('orgId', eventData.organizerID);
-        const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/${eventData.organizerID}/events`, {
-          headers: {
-            'Authorization': `Bearer ${org.authToken}`,
-            'Content-Type': "application/json"
-          },
+        if (!eventData.organizerID) return;
+
+        const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/filtered`, {
+          _id : eventData.organizerID,
         });
+
         const { data } = response.data;
-        console.log('org name', data);
-        setOrganizationName(data.name);
-        // return data;
+        const orgName = data[0]?.name;
+        setOrganizationName(orgName || 'Unknown Organization');
       } catch (err) {
         console.error(err);
       }
     };
     getOrganizationName();
-  }, [eventData]);
+  }, [eventData.organizerID]);
 
   const getMonthAbbreviation = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
@@ -214,7 +219,7 @@ export default function EventDetails() {
     <View style={styles.container}>
       <View style={styles.imgContain}>
         <View style={styles.iconContain}>
-          <View><Text>back</Text></View>
+          <View><TouchableOpacity onPress={() => router.push('/events/scanner')}><Text>back</Text></TouchableOpacity></View>
           <View><Text>share</Text></View>
         </View>
         <View>
@@ -226,11 +231,11 @@ export default function EventDetails() {
             </View>
             <View style={styles.infoPill}>
               {/* <View><Text>x</Text></View> */}
-              <Text style={styles.pillText}>3 hours</Text>
+              <Text style={styles.pillText}>{duration} hours</Text>
             </View>
             <View style={styles.infoPill}>
               <View><Text>o</Text></View>
-              <Text style={styles.pillText}>330 De Neve Drive</Text>
+              <Text style={styles.pillText}>{staticAddress}</Text>
             </View>
           </View>
         </View>
@@ -241,25 +246,34 @@ export default function EventDetails() {
           <View style={styles.rowFlex}>
             <View style={styles.orgContainer}>
               <Text style={styles.organizer}>{organizationName}</Text>
-              <TouchableOpacity style={styles.infoPill}
-                onPress={() => {
-                  console.log('inPress', eventData.organizerID);
-                  router.push({ 
-                    pathname: `/events/associated-events`, 
-                    params: 
-                      { 
-                        id: eventData.organizerID,
-                        // name: eventDetails.name,
-                        // description: eventDetails.description,
-                        // organization: eventDetails.org,
-                      }});
-                }}
-                  >
-                  <Text style={styles.pillText}>More</Text>
-                </TouchableOpacity>
+              <View style={styles.buttonWrap}>
+                <TouchableOpacity style={styles.infoPill}
+                  onPress={() => {
+                    console.log('inPress', eventData.organizerID);
+                    router.push({ 
+                      pathname: `/events/associated-events`, 
+                      params: 
+                        { 
+                          id: eventData.organizerID,
+                          // name: eventDetails.name,
+                          // description: eventDetails.description,
+                          // organization: eventDetails.org,
+                        }});
+                  }}
+                    >
+                    <Text style={styles.pillText}>More</Text>
+                  </TouchableOpacity>
+                </View>
             </View>
-            <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
+            {/* conditionally displayed based on registered status */}
+            {(registeredUsers).includes(user.userId) ? 
+            <></>
+            :
+            <View style={styles.rowFlex}>
+              <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
+            </View>
+          }
           </View>
         </View>
         <View style={styles.section}>
@@ -283,17 +297,22 @@ export default function EventDetails() {
             <Text style={styles.reward}>Reward Component Placeholder</Text>
           </View>
         </View>
-        <View style={styles.section}>
-          <Text style={styles.subheader}>Raffle</Text>
-          <View style={styles.raffleContain}>
-            <Text style={styles.reward}>Pic of Gift</Text>
-            <View style={styles.giftInfo}>
-              <Text style={styles.giftTitle}>Title of Gift</Text>
-              <Text style={styles.description}>Raffle Gift Details</Text>
+        {(registeredUsers).includes(user.userId) ? 
+            <View style={styles.section}>
+              <Text style={styles.subheader}>Raffle</Text>
+              <View style={styles.raffleContain}>
+                <Text style={styles.reward}>Pic of Gift</Text>
+                <View style={styles.giftInfo}>
+                  <Text style={styles.giftTitle}>Title of Gift</Text>
+                  <Text style={styles.description}>Raffle Gift Details</Text>
+                </View>
+              </View>
+              <TouchableOpacity><Text style={styles.darkButton}>Join</Text></TouchableOpacity>
             </View>
-          </View>
-          <TouchableOpacity><Text style={styles.darkButton}>Join</Text></TouchableOpacity>
-        </View>
+            :
+            <></>
+          }
+        
       </ScrollView>
       {/* <Text style={styles.description}>{parsedEventDetails.description}</Text> */}
       {/* <Text style={styles.organizer}>Organized by: {parsedEventDetails.org}</Text> */}
@@ -427,5 +446,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     gap: 6,
+  },
+  buttonWrap : {
+    flexShrink: 0,
   }
 });
