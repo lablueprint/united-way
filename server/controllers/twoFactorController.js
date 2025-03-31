@@ -34,9 +34,6 @@ const verifyCode = async (req, res) => {
 
 // Function to send OTP (Handles both verifyEmail & sendOTP)
 const sendOTP = async (req, res) => {
-  console.log("In sendOTP");
-  console.log("EMAIL:", process.env.EMAIL);
-  console.log("EMAIL_PASSWORD:", process.env.EMAIL_PASSWORD);
   try {
     const { email } = req.body;
     if (!email) {

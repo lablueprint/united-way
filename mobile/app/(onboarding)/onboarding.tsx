@@ -29,9 +29,8 @@ export default function OnboardingScreen() {
     const [state, setState] = useState(1);
 
     const handleEditUser = async () => {
-        console.log(gender);
         try {
-            const response: AxiosResponse = await axios.patch(`http://192.168.86.24:4000/users/${id}`,
+            const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${id}`,
                 {
                     name: name,
                     phoneNumber: phone,
@@ -48,7 +47,6 @@ export default function OnboardingScreen() {
                     }
                 }
             );
-            console.log("trying to navigate to tabs");
             // Navigate to home screen
             router.push({pathname: "/interest"})
             //router.push("/(tabs)");
@@ -57,7 +55,6 @@ export default function OnboardingScreen() {
         }
     }
     useEffect(() => {
-      console.log("Updated state:", state);
   
       if (state == 1) {
           setTitle("What is your name?");
@@ -94,7 +91,6 @@ export default function OnboardingScreen() {
           setTextInput("");
       }else if (state == 6)
       {
-        console.log("continue: state == 5")
         setGender(dropDownInput)
         handleEditUser()
       }

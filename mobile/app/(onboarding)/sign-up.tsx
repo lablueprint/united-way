@@ -68,7 +68,7 @@ export default function SignUpScreen() {
   // Check if email already exists in the database
   const userExists = async (): Promise<any> => {
     try {
-      const response: AxiosResponse = await axios.get(`http://192.168.86.24:4000/users/email/${email}`);
+      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`);
       return response.data.data;
     } catch (err) {
       console.error(err);
@@ -92,7 +92,7 @@ export default function SignUpScreen() {
   const sendOTP = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://192.168.86.24:4000/twofactor/sendOTP`,
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/sendOTP`,
         { email }  // sending the email to the backend
       );
       if (response.data) {
@@ -111,7 +111,7 @@ export default function SignUpScreen() {
   const verifyOTP = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://192.168.86.24:4000/twofactor/verifyCode`,
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/verifyCode`,
         { code, hashedCode }
       );
       if (response.data === true) {
@@ -130,7 +130,7 @@ export default function SignUpScreen() {
   const addUserToDatabase = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://192.168.86.24:4000/users/createUser`,
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
         { email, password }
       );
       dispatch(login({
