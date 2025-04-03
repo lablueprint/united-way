@@ -18,8 +18,6 @@ interface EventData {
   registeredUsers: string[];
 }
 
-// takes event data passed and populates list of events
-
 // Exclude ID of original one you're clicking more of 
 export default function associatedEvents() {
   const { id, exclude } = useLocalSearchParams();
@@ -41,9 +39,6 @@ export default function associatedEvents() {
         });
         const { data: eventIds } = response.data;
         const filteredEventIds = eventIds.filter((eventId: string) => eventId !== exclude);
-        console.log(filteredEventIds);
-        console.log(exclude);
-        console.log('first worked');
         const eventRequests = filteredEventIds.map((eventId: string) => 
           axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
           {
@@ -59,20 +54,14 @@ export default function associatedEvents() {
         const fullEvents = eventResponses.map((res) => res.data.data);
         setAssociatedEvents(fullEvents);
     
-        // return data;
       } catch (err) {
         console.error(err);
       }
     };
     getAssociatedEvents();
-  // console.log('details', details);
-  // console.log('fetching');
-//   console.log(details);
   }, []);
 
   // To-Do: Mobile Event Card
-  console.log('hi');
-  console.log(associatedEvents);
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Events from this organization:</Text>
@@ -91,30 +80,12 @@ export default function associatedEvents() {
         ))
       )}
     </ScrollView>
-
-    // <ScrollView contentContainerStyle={styles.container}>
-    //   <Text style={styles.title}>Events from this organization:</Text>
-    //   { associatedEvents.length === 0 ? (
-    //       <Text>No associated events yet.</Text>
-    //     ) : (
-    //       associatedEvents.map((event: any) => (
-    //       <TouchableOpacity
-    //         key={event._id}
-    //         style={styles.eventCard}
-    //         onPress={() => router.push({ pathname: '/events/[id]', params: { id: event._id} })}
-    //       >
-    //         <Text style={styles.eventName}>{event.name}</Text>
-    //         <Text style={styles.eventDescription}>{event.description}</Text>
-    //       </TouchableOpacity>)))
-    //   }
-    // </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
     paddingVertical: 64,
     padding: 16,
     gap: 12,
