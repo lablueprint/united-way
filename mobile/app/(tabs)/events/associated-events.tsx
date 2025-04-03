@@ -19,13 +19,13 @@ interface EventData {
 }
 
 // takes event data passed and populates list of events
+
+// Exclude ID of original one you're clicking more of 
 export default function associatedEvents() {
-  const { id } = useLocalSearchParams();
+  const { id, exclude } = useLocalSearchParams();
   const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   const router = useRouter();
 
-  console.log('inassociated', id);
-  console.log('token', org.authToken);
 
   const [associatedEvents, setAssociatedEvents] = useState<EventData[]>([]);
 
@@ -40,12 +40,16 @@ export default function associatedEvents() {
           },
         });
         const { data: eventIds } = response.data;
-
-        const eventRequests = eventIds.map((eventId: string) => 
+        const filteredEventIds = eventIds.filter((eventId: string) => eventId !== exclude);
+        console.log(filteredEventIds);
+        console.log(exclude);
+        console.log('first worked');
+        const eventRequests = filteredEventIds.map((eventId: string) => 
           axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
           {
             headers: {
-              Authorization: `Bearer ${org.authToken}`,
+              'Authorization': `Bearer ${org.authToken}`,
+              'Content-Type': "application/json"
             },
           }
           )
@@ -66,20 +70,44 @@ export default function associatedEvents() {
 //   console.log(details);
   }, []);
 
+  // To-Do: Mobile Event Card
+  console.log('hi');
+  console.log(associatedEvents);
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Events from this organization:</Text>
-      {associatedEvents.map((event: any) => (
-        <TouchableOpacity
-          key={event._id}
-          style={styles.eventCard}
-          onPress={() => router.push({ pathname: '/events/[id]', params: { id: event._id} })}
-        >
-          <Text style={styles.eventName}>{event.name}</Text>
-          <Text style={styles.eventDescription}>{event.description}</Text>
-        </TouchableOpacity>
-      ))}
+      {associatedEvents.length === 0 ? (
+        <Text>No associated events yet.</Text>
+      ) : (
+        associatedEvents.map((event: any) => (
+          <TouchableOpacity
+            key={event._id}
+            style={styles.eventCard}
+            onPress={() => router.push({ pathname: '/events/[id]', params: { id: event._id } })}
+          >
+            <Text style={styles.eventName}>{event.name}</Text>
+            <Text style={styles.eventDescription}>{event.description}</Text>
+          </TouchableOpacity>
+        ))
+      )}
     </ScrollView>
+
+    // <ScrollView contentContainerStyle={styles.container}>
+    //   <Text style={styles.title}>Events from this organization:</Text>
+    //   { associatedEvents.length === 0 ? (
+    //       <Text>No associated events yet.</Text>
+    //     ) : (
+    //       associatedEvents.map((event: any) => (
+    //       <TouchableOpacity
+    //         key={event._id}
+    //         style={styles.eventCard}
+    //         onPress={() => router.push({ pathname: '/events/[id]', params: { id: event._id} })}
+    //       >
+    //         <Text style={styles.eventName}>{event.name}</Text>
+    //         <Text style={styles.eventDescription}>{event.description}</Text>
+    //       </TouchableOpacity>)))
+    //   }
+    // </ScrollView>
   );
 }
 

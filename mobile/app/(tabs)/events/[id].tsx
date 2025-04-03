@@ -6,15 +6,6 @@ import axios, { AxiosResponse } from 'axios';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
-// import { EventData } from '../_interfaces/EventInterfaces';
-
-// interface EventDetailsProps {
-//   id: string;
-//   name: string;
-//   description: string;
-//   organizerID: string;
-//   date: Date;
-// }
 interface EventData {
   _id: string;
   name: string;
@@ -53,14 +44,12 @@ export default function EventDetails() {
   }); 
 
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
-  const [registered, setRegistered] = useState()
   const [organizationName, setOrganizationName] = useState("");
 
   const { id } = useLocalSearchParams();
   const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-  
-  // Getting Event (and its details)rby Event ID
+
   useEffect(() => {
     const fetchEventDetails = async () => {
         try {
@@ -80,6 +69,7 @@ export default function EventDetails() {
           console.error(err);
         }
       };
+
   fetchEventDetails();
   }, []);
 
@@ -93,9 +83,6 @@ export default function EventDetails() {
     return <Text>No event details found.</Text>;
   }
   
-  // const formatDate = (dateString: string | Date) => {
-    
-  // }
   const addEventToUser = async (eventId: string) => {
     try {
       await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
@@ -131,11 +118,10 @@ export default function EventDetails() {
     }
     
   };
-
   
   const removeUserFromEvent = async (userId: string) => {
     try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventData._id}/removeUser`,
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventData._id}/removeUser`,
         {
           userId: userId,
         },
@@ -153,7 +139,7 @@ export default function EventDetails() {
 
   const removeEventFromUser = async (eventId: string) => {
     try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
         {
           eventId: eventId,
         },
@@ -175,7 +161,6 @@ export default function EventDetails() {
       await addUserToEvent(user.userId);
 
       setRegisteredUsers([...registeredUsers, user.userId]);
-      setRegistered(true);
     } catch (err) {
       console.error(err);
     }
@@ -255,10 +240,9 @@ export default function EventDetails() {
                       params: 
                         { 
                           id: eventData.organizerID,
-                          // name: eventDetails.name,
-                          // description: eventDetails.description,
-                          // organization: eventDetails.org,
-                        }});
+                          exclude: eventData._id,
+                        },
+                      });
                   }}
                     >
                     <Text style={styles.pillText}>More</Text>
@@ -314,23 +298,18 @@ export default function EventDetails() {
           }
         
       </ScrollView>
-      {/* <Text style={styles.description}>{parsedEventDetails.description}</Text> */}
-      {/* <Text style={styles.organizer}>Organized by: {parsedEventDetails.org}</Text> */}
     </View>
   );
 }
-// Use organization Id to fetch events
-// organizationRouter.get('/:id/events', organizationController.getAssociatedEvents);
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
     paddingVertical: 64,
     padding: 16,
     gap: 12,
   },
   scroll: {
-    // flex: 1,
     gap: 12,
     paddingBottom: 64,
   },
@@ -410,7 +389,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 12,
-    // marginVertical: 8,
   },
   subheader: {
     fontWeight: 'bold',
@@ -419,7 +397,6 @@ const styles = StyleSheet.create({
   organizer: {
     fontSize: 18,
     fontWeight: 500,
-    // marginVertical: 8,
   },
   rewardsContain: {
     height: 100,
