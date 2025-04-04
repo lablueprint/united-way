@@ -17,6 +17,11 @@ const organizationRouter = require('./routes/organizationRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
 const activityRouter = require('./routes/activityRoutes.js')
 const twoFactorRouter = require('./routes/twoFactorRoutes.js')
+
+// Model Imports
+const eventModel = require('./models/eventModel.js');
+const activityModel = require('./models/activityModel.js');
+
 // Connect to the MongoDB database
 async function connectToDatabase() {
   try {
@@ -78,26 +83,89 @@ app.get('/', (req, res) => { // defines a route where if we send get req to the 
   res.send('Hello World!'); // routers are groupings of endpoints
 });
 
+// Socket.IO Setup
 const { createServer } = require("http");
 const socketIo = require("socket.io");
-
 const server = createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 app.set('io', io);
 
-io.on('connection', (socket) => {
-  console.log(`New client connected: ${socket.id}`);
-
-  // Listen for a custom event from the client
-  socket.on('message', (data) => {
-    console.log(`Message from client: ${data}`);
-    io.emit('message', `Thank you for ${data}`); // Broadcast to all clients
-    socket.emit('message', `Server received: ${data}`); // Send to specific client
+mongoose.connection.once('open', async () => {
+  // Fetch all events from the database
+  const events = await eventModel.find({});
+  events.forEach(async (event) => {
+    const roomName = event._id.toString();
+    const startTimeDiff = new Date(event.startDate).getTime() - new Date().getTime();
+    const endTimeDiff = new Date(event.endDate).getTime() - new Date().getTime();
+    if (startTimeDiff > 0) {
+      setTimeout(() => {
+        // Let all clients in the event room know the event is starting
+        io.to(roomName).emit('event start', event);
+      }, startTimeDiff);
+    }
+    if (endTimeDiff > 0) {
+      setTimeout(() => {
+        // Let all clients in the event room know the event is ending
+        io.to(roomName).emit('event end', event);
+        // Disconnect all sockets in the event room
+        io.of("/").in(roomName).fetchSockets().then((sockets) => {
+            sockets.forEach((socket) => {
+              // Disconnect each socket
+                socket.disconnect(true);
+            });
+        });
+      }, endTimeDiff);
+    }
+    // Get activities for the event
+    const eventActivities = event.activity;
+    for (const id of eventActivities) {
+      try {
+        const activity = await activityModel.findById(id);
+        if (activity) {
+          const activityStartTimeDiff = new Date(activity.timeStart).getTime() - new Date().getTime();
+          const activityEndTimeDiff = new Date(activity.timeEnd).getTime() - new Date().getTime();
+          if (activityStartTimeDiff > 0) {
+            setTimeout(() => {
+              // Let all clients in the event room know the activity is starting
+              io.to(roomName).emit('activity start', activity);
+            }, activityStartTimeDiff);
+          }
+          if (activityEndTimeDiff > 0) {
+            setTimeout(() => {
+              // Let all clients in the event room know the activity is ending
+              io.to(roomName).emit('activity end', activity);
+            }, activityEndTimeDiff);
+          }
+        } else {
+          console.log(`Activity with ID ${id} not found`);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
   });
 
-  // Handle client disconnection
-  socket.on('disconnect', () => {
-    console.log(`Client disconnected: ${socket.id}`);
+  io.on('connection', (socket) => {
+    console.log(`New client connected: ${socket.id}`);
+    // Send a message to the client upon connection
+    socket.emit('message', 'Welcome to the server!');
+
+    // Have the client join a room based on the event ID
+    socket.on('join event', (eventDetails) => {
+      const roomName = eventDetails._id.toString();
+      socket.join(roomName);
+      console.log(`Client ${socket.id} joined room: ${roomName}`);
+    });
+  
+    // Listen for messages from the client
+    socket.on('message', (data) => {
+      console.log(`Message from client: ${data}`);
+    });
+
+    // Handle client disconnection
+    socket.on('disconnect', () => {
+      console.log(`Client disconnected: ${socket.id}`);
+    });
   });
 });
 

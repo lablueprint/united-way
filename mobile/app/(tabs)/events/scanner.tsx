@@ -15,10 +15,12 @@ interface EventDetails {
   org: string;
   startDate: string;
   endDate: string;
+  registeredUsers: string[];
 }
 
 export default function EventScanner() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [registered, setRegistered] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
   const [eventId, setEventId] = useState("");
@@ -46,28 +48,36 @@ export default function EventScanner() {
   }, []);
 
   useEffect(() => {
-    if (eventDetails) {
-      const startTimeDiff = new Date(eventDetails.startDate).getTime() - new Date().getTime();
-      const endTimeDiff = new Date(eventDetails.endDate).getTime() - new Date().getTime();
-      if (startTimeDiff <= 0 || endTimeDiff <= 0) {
-        Alert.alert("Event has already started or is in the past.");
-      } else if (startTimeDiff > endTimeDiff) {
-        Alert.alert("Event end time is before start time.");
-      } else {
-        setTimeout(() => {
-          socketRef.current = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
-          socketRef.current.emit('message', 'Hello, server!');
-          socketRef.current.on('message', (data) => {
-            console.log('Server says:', data);
-          });
-        }, startTimeDiff);
-        setTimeout(() => {
-          socketRef.current?.emit('message', 'Goodbye, server!');
-          socketRef.current?.disconnect();
-        }, endTimeDiff);
-      }
+    if (eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
+      // Connect to the socket server
+      const socket = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
+      // Send a message to the server
+      socket.emit('message', `Connecting at ${new Date()}`);
+      // Join the event room
+      socket.emit('join event', eventDetails);
+      // Listen for messages from the server
+      socket.on('message', (data) => {
+        console.log('Message from server:', data);
+      });
+      // Listen for event and activity updates
+      socket.on('event start', (data) => {
+        console.log('Event started:', data.name);
+        Alert.alert('Event started', `The event ${data.name} has started!`);
+      });
+      socket.on('event end', (data) => {
+        console.log('Event ended:', data.name);
+        Alert.alert('Event ended', `The event ${data.name} has ended!`);
+      });
+      socket.on('activity start', (data) => {
+        console.log('Activity started:', data.type);
+        Alert.alert('Activity started', `An activity of type ${data.type} has started.`);
+      });
+      socket.on('activity end', (data) => {
+        console.log('Activity ended:', data.type);
+        Alert.alert('Activity ended', `An activity of type ${data.type} has ended.`);
+      });
     }
-  }, [eventDetails]);
+  }, [registered]);
 
   useFocusEffect(
     useCallback(() => {
@@ -91,6 +101,110 @@ export default function EventScanner() {
         origin: '/events/scanner'
       }
     });
+
+    setEventId(data);
+    fetchEventDetails(data);
+  };
+
+  const fetchEventDetails = async (eventId: string) => {
+    try {
+      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`, {
+        headers: {
+          'Authorization': `Bearer ${user.authToken}`,
+          'Content-Type': "application/json"
+        },
+      });
+      const { data } = response.data;
+      setEventDetails((prevDetails) => 
+        JSON.stringify(prevDetails) !== JSON.stringify(data) ? data : prevDetails
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const addEventToUser = async (eventId: string) => {
+    try {
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
+        {
+          newEvent: eventId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const addUserToEvent = async (userId: string) => {
+    try {
+      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
+        {
+          newUser: userId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+  const removeUserFromEvent = async (userId: string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
+        {
+          userId: userId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const removeEventFromUser = async (eventId: string) => {
+    try {
+      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
+        {
+          eventId: eventId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const handleRegister = () => {
+    setRegistered(true);
+    addEventToUser(eventId);
+    addUserToEvent(user.userId);
+  };
+
+  const handleUnregister = () => {
+    setRegistered(false);
+    removeEventFromUser(eventId);
+    removeUserFromEvent(user.userId);
   };
 
   if (hasPermission === null) {
