@@ -1,21 +1,26 @@
 .box {
-    background-color: red;
+    background-color: rgb(56, 203, 23);
     display: flex;
     flex-direction: row;
+    height: 100vh;
     justify-content: space-around;
     align-items: center;
 }
 
 .left {
-    position: relative;
-    display: flex; 
+    /* display: flex;  */
+    /* flex-grow: 1; */
+    background-color: blue;
     width: 50%;
-    background-color: green;
+    height: 100%;
+    /* justify-content: center; */
+    /* flex-direction: row; */
 }
 
 .right {
     position: relative;
     width: 50%;
+    height: 100%;
     background-color:rgb(255, 255, 255);
     font-family: "Helvetica Neue";
     display: flex;
@@ -152,3 +157,29 @@
     position: relative;
     display: inline-block;
 }
+
+.noborder {
+    border: none;
+}
+
+.imagebox {
+    background-color:rgb(175, 24, 24);
+    width: 80%;
+    height: 80%;
+    left: 50px;
+    position: relative;
+    
+}
+
+.penlogo {
+    justify-content: center;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background-color:rgb(236, 236, 236);
+    width: 10%;
+    height: 10%;
+}
+
+
+/* // Make absolute modal, height 100% absolute, z-index  */

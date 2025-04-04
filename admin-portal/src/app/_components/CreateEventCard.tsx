@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import '../_interfaces/styles.css';
 import TestLogo from "./logo.jpeg"
+import PenLogo from "./pen.png"
 
 interface CreateEventCardProps {
     orgName: string;
@@ -122,6 +123,8 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     {
                         name: updatedName,
                         date: updatedDate,
+                        startTime: startTime,
+                        endTime: endTime,
                         description: updatedDescription,
                         location: {
                             type: "Point",
@@ -229,11 +232,29 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     
     return ( 
         <div className="box">
+            {/* The left side */}
             <div className="left">
+                {/* Image selection */}
+                <div className="imagebox">
+                    <div className="penlogo clickable">
+                        <img src={PenLogo.src} />
+                    </div>
+                </div>
+
                 <h3>
-                    left side
+                    Customize your Event!
                 </h3>
+
+                <div className="flexIt">
+                    <button>
+                        Add Poll :)
+                    </button>
+                    <button>
+                        Add Rewards :3
+                    </button>
+                </div>
             </div>
+            {/* The right side */}
             <div className="right">
                 {/* Publish Button */}
                 <div className="goToTheRight">
@@ -369,9 +390,9 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     <div className="flexIt">
                         <b>
                             Description:
-                        </b>
+                        </b>  
                     </div>
-
+                    <br/>
                     <div className="columngraybox clickable flexIt" onClick={() => setIsEditingDescription(true)}>
                         {
                             // If is editing, then put in a textbox. If not, then its plain text
@@ -391,7 +412,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 {/* Location */}
                 <div className="columngraybox flexIt">
                     <div className="columngraybox flexIt">
-                        <textarea className="inputbox clickable" onChange={(e)=>{
+                        <textarea className="inputbox clickable noborder" onChange={(e)=>{
                             // If an existing timeout exists, kill it (because we're going to set a new one)
                             if (timeoutID) {
                                 clearTimeout(timeoutID);
