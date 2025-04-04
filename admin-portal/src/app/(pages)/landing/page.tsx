@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
 import OrganizationProfile from '../../_components/OrganizationProfile';
+import UpcomingCalendar from "@/app/_components/UpcomingCalendar";
 
 import { useState } from "react";
 export default function Landing() {
@@ -48,12 +49,14 @@ export default function Landing() {
       >
         Example HTTP Request button
       </button><br />
+      <UpcomingCalendar/>
       Org: {org.orgId}<br />
       Auth: {org.authToken}<br />
       Refresh: {org.refreshToken}<br />
-      <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
+      
+      {/* <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
         Log out
-      </button>
+      </button> */}
       <div>Result: {responseValue}</div>
     </div>
   );
