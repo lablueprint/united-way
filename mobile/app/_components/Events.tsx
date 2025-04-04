@@ -4,13 +4,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import axios, { AxiosResponse } from "axios";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
-import { Picker } from "@react-native-picker/picker";
 
 // Define your Event interface
 interface Event {
@@ -18,62 +18,72 @@ interface Event {
   name: string;
   date: Date;
   description: string;
-  location: {
-    type: string;
-    coordinates: number[];
-  };
-  organizerId: string;
-  tags: string[];
-  registeredUsers: string[];
-  activities: Activity[];
+  image: string;
+  // add other properties as needed
 }
-
-export interface Activity {
-  _id: string;
-  eventID: string;
-  type: string;
-  content: unknown;
-  timeStart: Date;
-  timeEnd: Date;
-  active: boolean;
-}
-
-// Define your navigation parameter list
-type RootStackParamList = {
-  "event-details": { event: Event };
-};
 
 const styles = StyleSheet.create({
   titletext: {
     fontSize: 40,
     paddingTop: 50,
-    paddingLeft: "8%",
-    color: "white",
+    textAlign: "center",
+    color: "black",
   },
-  eventsTitle: {
-    fontSize: 20,
-    paddingTop: 5,
-    paddingLeft: "8%",
-    color: "white",
-  },
-  eventsDate: {
-    fontSize: 15,
-    paddingTop: 5,
-    paddingLeft: "4%",
-    color: "white",
-  },
-  scrollView: {
-    display: "flex",
+  eventCard: {
+    backgroundColor: "#f5f5f5",
+    marginHorizontal: 20,
+    marginVertical: 8,
+    padding: 16,
+    borderRadius: 8,
     flexDirection: "row",
-    height: 100,
     alignItems: "center",
+  },
+  eventImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  eventContent: {
+    flex: 1,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  eventInfo: {
+    fontSize: 14,
+    color: "#666",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    gap: 10,
+    marginBottom: 10,
+  },
+  filterButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 20,
+  },
+  filterButtonActive: {
+    backgroundColor: "#333",
+  },
+  filterText: {
+    color: "#333",
+  },
+  filterTextActive: {
+    color: "#fff",
   },
 });
 
 export default function Events() {
-  const [allEvents, setAllEvents] = useState<Event[]>([]);
-  const [sortOption, setSortOption] = useState<string | undefined>(undefined);
-  const [showPicker, setShowPicker] = useState(false);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const router = useRouter();
   const user = useSelector((state) => ({
     userId: state.auth.userId,
@@ -81,9 +91,10 @@ export default function Events() {
     refreshToken: state.auth.refreshToken,
   }));
 
-  const getEvents = async () => {
+  // Fetch all events at once
+  const getEvents = async (): Promise<Event[]> => {
     try {
-      const response: AxiosResponse<Event[]> = await axios.get<Event[]>(
+      const response: AxiosResponse<{ data: Event[] }> = await axios.get(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/`,
         {
           headers: {
@@ -92,107 +103,127 @@ export default function Events() {
           },
         }
       );
-      return response.data;
+      console.log("API response:", response.data);
+      return response.data.data;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return [];
     }
   };
 
   useEffect(() => {
+    const fetchEvents = async () => {
+      const eventsData = await getEvents();
+      setEvents(eventsData);
+      setIsLoading(false);
+    };
     fetchEvents();
   }, []);
 
-  const fetchEvents = async () => {
-    const { data } = await getEvents();
-    setAllEvents(data);
-  };
-
-  // Compute a sorted version of allEvents without mutating state.
+  // Compute a sorted version of events without mutating state.
   const sortedEvents = useMemo(() => {
-    if (sortOption === "date") {
-      return [...allEvents].sort(
+    if (activeFilter === "date") {
+      return [...events].sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
     }
-    if (sortOption === "name") {
-      return [...allEvents].sort((a, b) => a.name.localeCompare(b.name));
+    if (activeFilter === "name") {
+      return [...events].sort((a, b) => a.name.localeCompare(b.name));
     }
-    return allEvents;
-  }, [sortOption, allEvents]);
+    return events;
+  }, [activeFilter, events]);
+
+  const filterOptions = [
+    { label: "Date", value: "date" },
+    { label: "Name", value: "name" },
+    { label: "Location", value: "location" },
+  ];
+
+  // Format date to show "FEB 4 | 4:30 - 7:30 PM" format
+  const formatEventDate = (date: Date) => {
+    const eventDate = new Date(date);
+    const month = eventDate
+      .toLocaleString("en-US", { month: "short" })
+      .toUpperCase();
+    const day = eventDate.getDate();
+    const time = eventDate.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    // For this example, we'll add 3 hours to create an end time
+    const endDate = new Date(eventDate.getTime() + 3 * 60 * 60 * 1000);
+    const endTime = endDate.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${month} ${day} | ${time} - ${endTime}`;
+  };
+
+  // Render each event item
+  const renderItem = ({ item }: { item: Event }) => (
+    <TouchableOpacity
+      style={styles.eventCard}
+      onPress={() => router.push(`/explore/event-details/?event=${item._id}`)}
+    >
+      <Image source={{ uri: item.image }} style={styles.eventImage} />
+      <View style={styles.eventContent}>
+        <Text style={styles.eventTitle}>{item.name}</Text>
+        <Text style={styles.eventInfo}>{formatEventDate(item.date)}</Text>
+        <Text style={styles.eventInfo}>LOS ANGELES, CA</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="black" />
+      </View>
+    );
+  }
 
   return (
-    <View style={{ backgroundColor: "grey", height: "100%" }}>
+    <View style={{ backgroundColor: "white", flex: 1 }}>
       <Text style={styles.titletext}>Events</Text>
-      <View>
-        <TouchableOpacity
-          onPress={() => setShowPicker(!showPicker)}
-          style={{
-            padding: 10,
-            backgroundColor: "black",
-            alignSelf: "center",
-            marginVertical: 10,
-          }}
-        >
-          <Text style={{ color: "white" }}>
-            {sortOption ? `Sorted by: ${sortOption}` : "Sort Events"}
-          </Text>
-        </TouchableOpacity>
-        {showPicker && (
-          <View>
-            <Picker
-              selectedValue={sortOption}
-              onValueChange={(itemValue) => setSortOption(itemValue)}
-              style={{
-                backgroundColor: "black",
-                color: "white",
-              }}
-              itemStyle={{
-                backgroundColor: "black",
-                color: "white",
-                fontSize: 16,
-              }}
+
+      <View style={styles.filterContainer}>
+        {filterOptions.map((option) => (
+          <TouchableOpacity
+            key={option.value}
+            style={[
+              styles.filterButton,
+              activeFilter === option.value && styles.filterButtonActive,
+            ]}
+            onPress={() =>
+              setActiveFilter(
+                activeFilter === option.value ? null : option.value
+              )
+            }
+          >
+            <Text
+              style={[
+                styles.filterText,
+                activeFilter === option.value && styles.filterTextActive,
+              ]}
             >
-              <Picker.Item label="Sort by Date" value="date" />
-              <Picker.Item label="Sort by Name" value="name" />
-            </Picker>
-            <TouchableOpacity
-              onPress={() => setShowPicker(false)}
-              style={{
-                padding: 10,
-                backgroundColor: "black",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: "white" }}>Confirm</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+              {option.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
-      <ScrollView style={{ height: "100%" }}>
-        {sortedEvents && sortedEvents.length !== 0
-          ? sortedEvents.map((event) => (
-              <TouchableOpacity
-                key={event._id}
-                style={styles.scrollView}
-                onPress={() =>
-                  router.push(`/explore/event-details/?event=${event._id}`)
-                }
-              >
-                <Image
-                  source={{
-                    uri: "https://reactnative.dev/img/tiny_logo.png",
-                  }}
-                  style={{ width: 50, height: 50 }}
-                />
-                <View>
-                  <Text style={styles.eventsTitle}>{event.name}</Text>
-                  <Text style={styles.eventsDate}>{event.date}</Text>
-                </View>
-              </TouchableOpacity>
-            ))
-          : null}
-      </ScrollView>
+
+      <FlatList
+        data={sortedEvents}
+        keyExtractor={(item) => item._id}
+        renderItem={renderItem}
+        contentContainerStyle={{
+          paddingTop: 0,
+          paddingBottom: 80,
+        }}
+      />
     </View>
   );
 }
