@@ -20,15 +20,6 @@ export default function Rewards() {
   return (
     <div>
      Rewards
-     <button onClick={() => { console.log("Result: ", exampleGetToRoot()) }}>
-        Example HTTP Request button
-      </button>
-      <div>
-        Result: {responseValue}
-      </div>
-      <div>
-        Tesating
-      </div>
       <RewardsSection></RewardsSection>
     </div>
   );

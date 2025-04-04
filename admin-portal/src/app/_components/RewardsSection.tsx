@@ -4,6 +4,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
 import '../_styles/rewards.css';
 import axios, { AxiosResponse } from 'axios';
+import reward_image from '../../../public/rewards.png';
 
 export interface Reward {
     name: string;
@@ -12,54 +13,52 @@ export interface Reward {
     _id: string;
 }
 
-export const RewardsSection = () => {
+const RewardsSection = () => {
+    const [rewards, setRewards] = useState<Reward[]>([]);
+    const [isSectionOpen, setIsSectionOpen] = useState<{ [key: number]: boolean }>({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [newRewardName, setNewRewardName] = useState('');
     const [newRewardCost, setNewRewardCost] = useState('');
     const [newRewardQuantity, setNewRewardQuantity] = useState('');
-
-    const [rewards, setRewards] = useState<Reward[]>([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     useEffect(() => {
         const fetchRewards = async () => {
-        try{
-    const currOrg: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`);
-                console.log(currOrg.data.data);
+            try {
+                const currOrg: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`);
                 setRewards(currOrg.data.data.rewards || []);
-    }
-    catch (err) {
-        console.log(err);
-    }
-}
-fetchRewards();
-}, [refreshTrigger]);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchRewards();
+    }, [refreshTrigger]);
 
-const addReward = async (newReward: Reward) => {
-    try {
-        const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
-            rewards: [...rewards, newReward]
-        });
-        if (response.data.status === "success") {
-            setRefreshTrigger(prev => prev + 1);
+    const deleteReward = async (rewardId: string) => {
+        try {
+            const updatedRewards = rewards.filter(reward => reward._id !== rewardId);
+            const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
+                rewards: updatedRewards
+            });
+            if (response.data.status === "success") {
+                setRefreshTrigger(prev => prev + 1);
+            }
+        } catch (error) {
+            console.error("Failed to delete reward:", error);
         }
-    } catch (error) {
-        console.error("Failed to add reward:", error);
-    }
-}
-const deleteReward = async (rewardId: string) => {
-    const updatedRewards = rewards.filter(reward => reward._id !== rewardId);
-    try {
-        const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
-            rewards: updatedRewards
-        });
-        if (response.data.status === "success") {
-            setRefreshTrigger(prev => prev + 1);
+    };
+    const addReward = async (newReward: Reward) => {
+        try {
+            const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
+                rewards: [...rewards, newReward]
+            });
+            if (response.data.status === "success") {
+                setRefreshTrigger(prev => prev + 1);
+            }
+        } catch (error) {
+            console.error("Failed to add reward:", error);
         }
-    } catch (error) {
-        console.error("Failed to delete reward:", error);
     }
-}
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -84,29 +83,61 @@ const deleteReward = async (rewardId: string) => {
         slidesToScroll: 1,
     };
 
+    const groupedRewards: { [key: number]: Reward[] } = {
+        100: [],
+        200: [],
+        300: [],
+        400: [],
+        500: []
+    };
+
+    rewards.forEach(reward => {
+        const group = Math.min(Math.floor(reward.cost / 100) * 100, 500);
+        if (group in groupedRewards) {
+            groupedRewards[group].push(reward);
+        }
+    });
+
     return (
         <div className="container">
             <h2 className="title">Rewards</h2>
-            {rewards.length != 0 ? (<Slider {...settings} className="carousel">
-                {rewards.map((reward) => (
-                    <div key={reward._id} className="reward-card">
-                        <h3>{reward.name}</h3>
-                        <p>Cost: {reward.cost}</p>
-                        <p>Quantity: {reward.quantity}</p>
-                        <button onClick={() => deleteReward(reward._id)} className="delete-button">Delete</button>
-                    </div>
-                ))}
-                <div className="add-card" onClick={() => setIsModalOpen(true)}>
-                    <span className="plus-sign">+</span>
+            <div className="rewards-left">
+                <img src={reward_image.src} alt="Rewards" className="rewards-image" />
+                {Object.entries(groupedRewards).map(([pointValue, rewardsList]) => (
+                <div key={pointValue} className="collapsible-section">
+                    <button className="collapsible sleek-collapsible" onClick={() => setIsSectionOpen(prev => ({
+                        ...prev,
+                        [pointValue]: !prev[pointValue]
+                    }))}>
+                        {pointValue} Points
+                    </button>
+                    {isSectionOpen[parseInt(pointValue)] && (
+                        <div className="content sleek-content">
+                            <Slider {...settings} className="carousel">
+                                {rewardsList.map(reward => (
+                                    <div key={reward._id} className="reward-card sleek-card">
+                                        <h3>{reward.name}</h3>
+                                        <p>Cost: {reward.cost}</p>
+                                        <p>Quantity: {reward.quantity}</p>
+                                        <button onClick={() => deleteReward(reward._id)} className="delete-button sleek-delete">Delete</button>
+                                    </div>
+                                ))}
+                                <div className="add-card sleek-add" onClick={() => setIsModalOpen(true)}>
+                                    <span className="plus-sign">+</span>
+                                </div>
+                            </Slider>
+                        </div>
+                    )}
                 </div>
-            </Slider>) : (<div className="add-card" onClick={() => setIsModalOpen(true)}>
-                    <span className="plus-sign">+</span>
-                </div>)}
+            ))}
+            </div>
             
+
+            <button className="floating-add-button sleek-add-button" onClick={() => setIsModalOpen(true)}>+ Add Reward</button>
 
             {isModalOpen && (
                 <div className="modal-overlay">
-                    <div className="modal">
+                    <div className="modal sleek-modal">
                         <h3>Add New Reward</h3>
                         <form onSubmit={handleSubmit}>
                             <label>Reward Name</label>
@@ -128,7 +159,7 @@ const deleteReward = async (rewardId: string) => {
                                 type="number" 
                                 value={newRewardQuantity} 
                                 onChange={(e) => setNewRewardQuantity(e.target.value)} 
-                                placeholder="Enter reward cost"
+                                placeholder="Enter reward quantity"
                             />
                             <div className="modal-buttons">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="cancel-button">Cancel</button>
