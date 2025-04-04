@@ -4,20 +4,26 @@ import { Camera, CameraView } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 import axios, { AxiosResponse } from "axios";
+import { io, Socket } from "socket.io-client";
+import { useRef } from 'react';
 
 interface EventDetails {
   id: string;
   name: string;
   description: string;
   org: string;
+  startDate: string;
+  endDate: string;
+  registeredUsers: string[];
 }
 
 export default function EventScanner() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [registered, setRegistered] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
   const [eventId, setEventId] = useState("");
-  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+  const user = useSelector((state: { auth: { userId: string, authToken: string, refreshToken: string } }) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } });
 
   useEffect(() => {
     (async () => {
@@ -25,6 +31,38 @@ export default function EventScanner() {
       setHasPermission(status === 'granted');
     })();
   }, []);
+
+  useEffect(() => {
+    if (registered && eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
+      // Connect to the socket server
+      const socket = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
+      // Send a message to the server
+      socket.emit('message', `Connecting at ${new Date()}`);
+      // Join the event room
+      socket.emit('join event', eventDetails);
+      // Listen for messages from the server
+      socket.on('message', (data) => {
+        console.log('Message from server:', data);
+      });
+      // Listen for event and activity updates
+      socket.on('event start', (data) => {
+        console.log('Event started:', data.name);
+        Alert.alert('Event started', `The event ${data.name} has started!`);
+      });
+      socket.on('event end', (data) => {
+        console.log('Event ended:', data.name);
+        Alert.alert('Event ended', `The event ${data.name} has ended!`);
+      });
+      socket.on('activity start', (data) => {
+        console.log('Activity started:', data.type);
+        Alert.alert('Activity started', `An activity of type ${data.type} has started.`);
+      });
+      socket.on('activity end', (data) => {
+        console.log('Activity ended:', data.type);
+        Alert.alert('Activity ended', `An activity of type ${data.type} has ended.`);
+      });
+    }
+  }, [registered]);
 
   const handleBarCodeScanned = ({ type, data }: any) => {
     setScanned(true);
@@ -41,7 +79,9 @@ export default function EventScanner() {
         },
       });
       const { data } = response.data;
-      setEventDetails(data);
+      setEventDetails((prevDetails) => 
+        JSON.stringify(prevDetails) !== JSON.stringify(data) ? data : prevDetails
+      );
     } catch (err) {
       console.error(err);
     }
@@ -120,13 +160,19 @@ export default function EventScanner() {
   }
 
   const handleRegister = () => {
-    addEventToUser(eventId);
-    addUserToEvent(user.userId);
+    setRegistered(true);
+    if (eventDetails && !eventDetails.registeredUsers.includes(user.userId)) {
+      addEventToUser(eventId);
+      addUserToEvent(user.userId);
+    }
   };
 
   const handleUnregister = () => {
-    removeEventFromUser(eventId);
-    removeUserFromEvent(user.userId);
+    setRegistered(false);
+    if (eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
+      removeEventFromUser(eventId);
+      removeUserFromEvent(user.userId);
+    }
   };
 
   if (hasPermission === null) {
