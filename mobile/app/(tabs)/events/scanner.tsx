@@ -197,14 +197,18 @@ export default function EventScanner() {
 
   const handleRegister = () => {
     setRegistered(true);
-    addEventToUser(eventId);
-    addUserToEvent(user.userId);
+    if (eventDetails && !eventDetails.registeredUsers.includes(user.userId)) {
+      addEventToUser(eventId);
+      addUserToEvent(user.userId);
+    }
   };
 
   const handleUnregister = () => {
     setRegistered(false);
-    removeEventFromUser(eventId);
-    removeUserFromEvent(user.userId);
+    if (eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
+      removeEventFromUser(eventId);
+      removeUserFromEvent(user.userId);
+    }
   };
 
   if (hasPermission === null) {
@@ -215,9 +219,6 @@ export default function EventScanner() {
   }
 
   if (eventDetails) {
-    const now = new Date();
-    const dateString = now.toISOString();
-    console.log(dateString);
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Request to Join Event</Text>
