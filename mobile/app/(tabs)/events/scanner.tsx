@@ -33,7 +33,7 @@ export default function EventScanner() {
   }, []);
 
   useEffect(() => {
-    if (eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
+    if (registered && eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
       // Connect to the socket server
       const socket = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
       // Send a message to the server
