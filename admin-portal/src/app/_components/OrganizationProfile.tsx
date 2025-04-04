@@ -44,10 +44,8 @@ export default function OrganizationProfile() {
                 console.log(err);
             }
         }
-        fetchEvents();
-    }, [refreshTrigger]);
-        getOrganizerEvents();
-    }, []);
+        getOrganizerEvents()
+    }, );
 
     const removeFromList = (id: string) => {
         setEventIds(eventIds.filter((eventId) => eventId != id));
@@ -79,22 +77,20 @@ export default function OrganizationProfile() {
             console.error("Failed to delete reward:", error);
         }
     }
-    };
-
-    return (
-        <div>
-            <h1>Organization Profile</h1>
-            {/* {orgData && <OrganizationDetails org={orgData} />} */}
+        return (
             <div>
-                <h2>Events</h2>
+                <h1>Organization Profile</h1>
+                {/* {orgData && <OrganizationDetails org={orgData} />} */}
                 <div>
-                    {eventIds.map((id: string) => {
-                        return (
-                            <EventCard id={id} key={id} removeFromList={removeFromList} />
-                        );
-                    })}
+                    <h2>Events</h2>
+                    <div>
+                        {eventIds.map((id: string) => {
+                            return (
+                                <EventCard id={id} key={id} removeFromList={removeFromList} />
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
