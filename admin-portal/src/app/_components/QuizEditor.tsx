@@ -142,6 +142,7 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
           updatedQuestions.map((_, index) => {
             return (
               <button
+                type="button"
                 style={{ height: "1rem", width: "1rem" }}
                 key={`b${index}`}
                 onClick={() => {
@@ -215,6 +216,7 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
               />
 
               <button
+                type="button"
                 onClick={() => {
                   const newChoices = [...choices]
                   newChoices.splice(choiceIndex, 1);
@@ -244,6 +246,7 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
 
         {/* "Add Choice" Button */}
         <button
+          type="button"
           onClick={() => {
             const newChoices = [...choices, ""];
             setChoices(newChoices);
@@ -258,6 +261,7 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
 
         <>
           <button
+            type="button"
             onClick={() =>
               addQuestion(
                 "New Question Title", // Default title for the new question
@@ -270,6 +274,7 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
             Add Question
           </button>
           <button
+            type="button"
             onClick={() =>
               deleteQuestion(questionIndex)
             }

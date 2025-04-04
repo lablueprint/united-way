@@ -1,230 +1,195 @@
-import React, { useState } from "react";
-import axios from "axios";
+"use client";
+import React, { useState, useEffect } from "react";
+import axios, { AxiosResponse } from "axios";
+import { Activity } from "../_interfaces/EventInterfaces";
+
 interface Choice {
-    id: number;
-    text: string;
-    count: number;
+  id: number;
+  text: string;
+  count: number;
 }
+
 interface Question {
-    id: number;
-    question: string;
-    answers: Choice[];
+  question: string;
+  options: Choice[];
 }
 
-type ValuePiece = Date | null;
-type Value = ValuePiece | [ValuePiece, ValuePiece];
-interface PollProps {
-    eventID: string;
-    idData: number | null;
-    questionsData: Question[];
-    onSave: () => void;
-    startTime: Value;
-    endTime: Value;
+interface PollEditorProps {
+  activityId: string;
+  timeStart: Date;
+  timeEnd: Date;
 }
 
-export default function PollEditor({ eventID, idData, questionsData, onSave, startTime, endTime }: PollProps) {
-    const [questions, setQuestions] = useState<Question[]>(questionsData || []);
+export default function PollEditor({ activityId, timeStart, timeEnd }: PollEditorProps) {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [activity, setActivity] = useState<Activity>();
+  const [questionIndex, setQuestionIndex] = useState<number>(0);
+  const [questionText, setQuestionText] = useState<string>("");
+  const [choices, setChoices] = useState<Choice[]>([]);
 
-    const handleQuestionChange = (id: number, value: string) => {
-        setQuestions((prevQuestions) =>
-            prevQuestions.map((q) => (q.id === id ? { ...q, question: value } : q))
-        );
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const activityData = await getActivityById(activityId);
+      setActivity(activityData);
+      setQuestions(activityData.content);
+
+      if (!activityData.content || activityData.content.length === 0) {
+        setQuestionText("New Poll Question");
+        setChoices([{ id: 1, text: "", count: 0 }]);
+        setQuestionIndex(0);
+      } else {
+        const firstQuestion = activityData.content[0];
+        setQuestionText(firstQuestion.question);
+        setChoices(firstQuestion.options);
+        setQuestionIndex(0);
+      }
     };
+    fetchQuestions();
+  }, [activityId]);
 
-    const handleAnswerChange = (questionId: number, answerId: number, value: string) => {
-        setQuestions((prevQuestions) =>
-            prevQuestions.map((q) =>
-                q.id === questionId
-                    ? {
-                          ...q,
-                          answers: q.answers.map((a) =>
-                              a.id === answerId ? { ...a, text: value } : a
-                          ),
-                      }
-                    : q
-            )
-        );
-    };
+  const getActivityById = async (activityID: string) => {
+    try {
+      const response: AxiosResponse = await axios.get(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID}`
+      );
+      return response.data.data;
+    } catch (err) {
+      console.error(err);
+      return { content: [] };
+    }
+  };
 
-    const handleAddQuestion = () => {
-        setQuestions((prevQuestions) => [
-            ...prevQuestions,
-            {
-                id: prevQuestions.length ? Math.max(...prevQuestions.map((q) => q.id)) + 1 : 1,
-                question: "",
-                answers: [{ id: 1, text: "", count: 0 }],
-            },
-        ]);
-    };
-
-    const handleAddAnswer = (questionId: number) => {
-        setQuestions((prevQuestions) =>
-            prevQuestions.map((q) =>
-                q.id === questionId
-                    ? {
-                          ...q,
-                          answers: [
-                              ...q.answers,
-                              {
-                                  id: q.answers.length
-                                      ? Math.max(...q.answers.map((a) => a.id)) + 1
-                                      : 1,
-                                  text: "",
-                                  count: 0,
-                              },
-                          ],
-                      }
-                    : q
-            )
-        );
-    };
-
-    const handleDeleteAnswer = (questionId: number, answerId: number) => {
-        setQuestions((prevQuestions) =>
-            prevQuestions.map((q) =>
-                q.id === questionId
-                    ? { ...q, answers: q.answers.filter((a) => a.id !== answerId) }
-                    : q
-            )
-        );
-    };
-
-    const handleDeleteQuestion = async (questionId: number) => {
-        if (!questions) return;
-      
-        const updatedQuestions = questions.filter((q) => q.id !== questionId);
-      
-        try {
-          const questionToDelete = questions.find((q) => q.id === questionId);
-            if (questionToDelete) {
-                await axios.patch(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`,
-                    { content: updatedQuestions }
-                );
-                console.log("Text successfully deleted from the database!");
-            }
-        } catch (error) {
-          console.error("Error deleting question from the database:", error);
-          return;
+  const savePoll = async (updatedQuestions: Question[]) => {
+    try {
+      const response: AxiosResponse = await axios.patch(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
+        {
+          content: updatedQuestions,
+          timeStart,
+          timeEnd,
         }
-      
-        // Update the state to reflect the deletion
-        setQuestions(updatedQuestions);
-      };      
+      );
+      const data = response.data.data;
+      setActivity(data);
+      setQuestions(data.content);
+      return data;
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const handleSave = async () => {
-        console.log("Sending poll data:", { idData, eventID, questions });
-    
-        try {
-            // Prepare the new poll data to be added
-            const newPollContent = questions.map((q) => ({
-                question: q.question,
-                options: q.answers,
-            }));
-            
-            if (idData) {
-                console.log("Updating existing poll with ID:", idData);
-
-                console.log("Existing activity content:", questionsData);
-                console.log("newPollContent" + newPollContent);
-    
-                const updatedContent = [
-                    ...newPollContent, // Add new ones
-                ];
-
-                console.log("Updated Content ", updatedContent);
-
-                // Update the existing poll with the merged content
-                await axios.patch(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${idData}`,
-                    { 
-                        content: updatedContent,
-                        timeStart: startTime,
-                        timeEnd: endTime,
-                    }
-                );
-
-                console.log("New question data", questionsData);
-
-                console.log("Poll successfully updated with new questions!");
-            } else {
-                console.log("Creating a new poll activity");
-                console.log("Start time: " + startTime + "End time" + endTime);
-                // Create a new poll activity
-                const { data } = await axios.post(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
-                    {
-                        eventID,
-                        type: "poll",
-                        content: newPollContent,
-                        timeStart: startTime,
-                        timeEnd: endTime,
-                        active: true,
-                    }
-                );
-    
-                console.log("New poll activity created:", data);
-            }
-    
-            onSave(); // Fetch updated polls after saving
-        } catch (error) {
-            console.error("Error saving activity:", error);
-        }
+  const addQuestion = async () => {
+    const newQuestion: Question = {
+      question: "New Poll Question",
+      options: [{ id: 1, text: "", count: 0 }],
     };
+    const updatedQuestions = [...questions, newQuestion];
+    const data = await savePoll(updatedQuestions);
+    const idx = data.content.length - 1;
+    setQuestionIndex(idx);
+    setQuestionText(data.content[idx].question);
+    setChoices(data.content[idx].options);
+  };
 
-    return (
-        <div>
-            {questions.map((question) => (
-                <div key={question.id} className="question-block">
-                    <p>Question:</p>
-                    <h1>{question.id}</h1>
-                    <input
-                        type="text"
-                        value={question.question}
-                        onChange={(event) => handleQuestionChange(question.id, event.target.value)}
-                        placeholder="Enter a question"
-                    />
-                    <p>Answers:</p>
-                    {question.answers.map((answer) => (
-                        <div key={answer.id}>
-                            <input
-                                type="text"
-                                value={answer.text}
-                                 onChange={(event) =>
-                                    handleAnswerChange(question.id, answer.id, event.target.value)
-                                }
-                                placeholder="Enter an answer"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => handleDeleteAnswer(question.id, answer.id)}
-                            >
-                                x
-                            </button>
-                        </div>
-                    ))}
-                    <button type="button" onClick={() => handleAddAnswer(question.id)}>
-                        Add Answer
-                    </button>
-                    <button type="button" onClick={() => handleDeleteQuestion(question.id)}>
-                        Delete Question
-                    </button>
-                </div>
-            ))}
-            <button
-                type="button"
-                onClick={handleAddQuestion}
-                style={{ marginTop: "20px", backgroundColor: "#28a745", color: "white" }}
-            >
-                Add Question
-            </button>
-            <button
-                type="button"
-                onClick={handleSave}
-                style={{ marginTop: "20px", backgroundColor: "#007BFF", color: "white" }}
-            >
-                Save Poll
-            </button>
+  const deleteQuestion = async (index: number) => {
+    const updatedQuestions = [...questions];
+    updatedQuestions.splice(index, 1);
+    const data = await savePoll(updatedQuestions);
+    const nextIndex = updatedQuestions.length - 1 < index ? updatedQuestions.length - 1 : index;
+    if (data.content.length > 0) {
+      setQuestionIndex(nextIndex);
+      setQuestionText(data.content[nextIndex].question);
+      setChoices(data.content[nextIndex].options);
+    } else {
+      setQuestionText("New Poll Question");
+      setChoices([{ id: 1, text: "", count: 0 }]);
+    }
+  };
+
+  const handleUpdateQuestionText = async (text: string) => {
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].question = text;
+    setQuestionText(text);
+    await savePoll(newQuestions);
+  };
+
+  const handleUpdateChoice = async (choiceIndex: number, value: string) => {
+    const newChoices = [...choices];
+    newChoices[choiceIndex].text = value;
+    setChoices(newChoices);
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].options = newChoices;
+    await savePoll(newQuestions);
+  };
+
+  const handleAddChoice = async () => {
+    const newChoice: Choice = {
+      id: choices.length ? Math.max(...choices.map((c) => c.id)) + 1 : 1,
+      text: "",
+      count: 0,
+    };
+    const newChoices = [...choices, newChoice];
+    setChoices(newChoices);
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].options = newChoices;
+    await savePoll(newQuestions);
+  };
+
+  const handleDeleteChoice = async (choiceIndex: number) => {
+    const newChoices = [...choices];
+    newChoices.splice(choiceIndex, 1);
+    setChoices(newChoices);
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].options = newChoices;
+    await savePoll(newQuestions);
+  };
+
+  if (questions.length === 0) return <div />;
+
+  return (
+    <div>
+      {questions.map((_, index) => (
+        <button
+          type="button"
+          key={`nav-${index}`}
+          onClick={() => {
+            setQuestionIndex(index);
+            setQuestionText(questions[index].question);
+            setChoices(questions[index].options);
+          }}
+        >
+          {index + 1}
+        </button>
+      ))}
+
+      <div>
+        <label>
+          Question:
+          <input
+            type="text"
+            value={questionText}
+            onChange={(e) => handleUpdateQuestionText(e.target.value)}
+          />
+        </label>
+      </div>
+
+      {choices.map((choice, i) => (
+        <div key={`choice-${i}`}>
+          <input
+            type="text"
+            value={choice.text}
+            onChange={(e) => handleUpdateChoice(i, e.target.value)}
+          />
+          <button type="button" onClick={() => handleDeleteChoice(i)}>
+            Remove choice
+          </button>
         </div>
-    );
+      ))}
+
+      <button type="button" onClick={handleAddChoice}>Add Choice</button>
+
+      <button type="button" onClick={addQuestion}>Add Question</button>
+      <button type="button" onClick={() => deleteQuestion(questionIndex)}>Delete Question</button>
+    </div>
+  );
 }
