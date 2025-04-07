@@ -24,7 +24,7 @@ export default function EditProfilePictures() {
                         },
                 }
             );
-            const { data } = response.data.profilePicture;
+            const { data } = response.data.data.profilePicture;
             setPictureLink(data);
             console.log('PFP updated successfully', data);
         } catch (err) {
@@ -59,12 +59,6 @@ export default function EditProfilePictures() {
                 color="#999999"
             />
         </View>
-        <View style={styles.container}>
-        <Image
-            source={{uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtkMqOpMkcZwttYv-z-Rxh6u0zRMPEk5_VVg&s"}}
-            style={styles.profilePicture}
-        />
-        </View>
     </View>
 )
 }
@@ -97,13 +91,5 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         gap: 12,
-    },
-    profilePicture: {
-        width: 150, // Size of the profile picture
-        height: 150, // Size of the profile picture
-        borderRadius: 75, // Half of the width/height to make it circular
-        marginBottom: 20, // Spacing below the profile picture
-        borderWidth: 3, // Optional: Add a border
-        borderColor: '#A9A9A9', // Optional: Border color
     },
 });

@@ -36,6 +36,7 @@ export default function SignUpScreen() {
     const handleAddUser = async () => {
         // Check if email and password are valid
         // TODO: Backend password validation
+        console.log("hi");
         if (!validateInputs()) {
             return;
         }
@@ -44,13 +45,27 @@ export default function SignUpScreen() {
             Alert.alert('This email is already associated with an account.');
             return;
         }
+
+        const timestamp = Date.now(); // Get the current timestamp in milliseconds
+        const date = new Date(timestamp); // Convert timestamp to a Date object
+
+        // Extract year, month, and day
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so add 1
+        const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits for day
+
+        // Format as YYYY-MM-DD
+        const formattedDate = `${year}-${month}-${day}`;  
+
         // Add user to database
         try {
             console.log("hi");
             const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
                 {
                     email: email,
-                    password: password
+                    password: password,
+                    dateJoined: formattedDate,
+                    profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
                 }
             );
 

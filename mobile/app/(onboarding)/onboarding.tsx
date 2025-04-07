@@ -12,7 +12,6 @@ export default function OnboardingScreen() {
     const [phone, setPhone] = useState('');
     const [ethnicity, setEthnicity] = useState('');
     const [community, setCommunity] = useState('');
-    // Gender selector
     const [open, setOpen] = useState(false);
     const [gender, setGender] = useState(null);
     const [items, setItems] = useState([
@@ -32,7 +31,7 @@ export default function OnboardingScreen() {
                         ethnicity: ethnicity,
                         community: community,
                         gender: gender
-                    }
+                    },
                 },
                 {
                     headers: {
