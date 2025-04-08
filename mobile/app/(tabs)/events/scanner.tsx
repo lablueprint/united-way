@@ -76,6 +76,9 @@ export default function EventScanner() {
         console.log('Activity ended:', data.type);
         Alert.alert('Activity ended', `An activity of type ${data.type} has ended.`);
       });
+      socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+      });
     }
   }, [registered]);
 
@@ -203,7 +206,7 @@ export default function EventScanner() {
     }
   };
 
-  const handleUnregister = () => {
+  const handleDeregister = () => {
     setRegistered(false);
     if (eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
       removeEventFromUser(eventId);
@@ -224,8 +227,8 @@ export default function EventScanner() {
         <Text style={styles.title}>Request to Join Event</Text>
         <Text style={styles.eventName}>{eventDetails.name}</Text>
         <View style={styles.buttonContainer}>
-          <Button title="Accept" onPress={handleRegister} />
-          <Button title="Reject" onPress={handleUnregister} />
+          <Button title="Register" onPress={handleRegister} />
+          <Button title="Deregister" onPress={handleDeregister} />
         </View>
       </View>
     );

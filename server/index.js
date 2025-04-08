@@ -94,21 +94,21 @@ mongoose.connection.once('open', async () => {
   // Fetch all events from the database
   const events = await eventModel.find({});
   events.forEach(async (event) => {
-    const roomName = event._id.toString();
+    const eventRoom = event._id.toString();
     const startTimeDiff = new Date(event.startDate).getTime() - new Date().getTime();
     const endTimeDiff = new Date(event.endDate).getTime() - new Date().getTime();
     if (startTimeDiff > 0) {
       setTimeout(() => {
         // Let all clients in the event room know the event is starting
-        io.to(roomName).emit('event start', event);
+        io.to(eventRoom).emit('event start', event);
       }, startTimeDiff);
     }
     if (endTimeDiff > 0) {
       setTimeout(() => {
         // Let all clients in the event room know the event is ending
-        io.to(roomName).emit('event end', event);
+        io.to(eventRoom).emit('event end', event);
         // Disconnect all sockets in the event room
-        io.of("/").in(roomName).fetchSockets().then((sockets) => {
+        io.of("/").in(eventRoom).fetchSockets().then((sockets) => {
             sockets.forEach((socket) => {
               // Disconnect each socket
                 socket.disconnect(true);
@@ -124,16 +124,42 @@ mongoose.connection.once('open', async () => {
         if (activity) {
           const activityStartTimeDiff = new Date(activity.timeStart).getTime() - new Date().getTime();
           const activityEndTimeDiff = new Date(activity.timeEnd).getTime() - new Date().getTime();
+          if (activity.type === "raffle") {
+            const raffleRoom = `${eventRoom}-raffle-${activity._id}`;
+            if (activityStartTimeDiff > 0) {
+              setTimeout(() => {
+                // Let all clients in the raffle room know the raffle is occurring
+                io.to(raffleRoom).emit('raffle start', activity);
+                const sockets = io.sockets.clients(raffleRoom);
+                const raffleRoomSize = sockets.length;
+                if (raffleRoomSize > 0) {
+                  const randomIndex = Math.floor(Math.random() * raffleRoomSize);
+                  const randomRaffleNumber = eventRooms[eventRoom].usedRaffleNumbers[randomIndex];
+                  sockets.forEach((socket) => {
+                    if (socket.raffleNumber === randomRaffleNumber) {
+                      socket.emit('raffle winner', { raffleNumber: randomRaffleNumber });
+                    }
+                    else {
+                      socket.emit('raffle loser', { raffleNumber: randomRaffleNumber });
+                    }
+                  });
+                }
+                else {
+                  console.log(`No clients in raffle room ${raffleRoom}`);
+                }
+              }, activityStartTimeDiff);
+            }
+          }
           if (activityStartTimeDiff > 0) {
             setTimeout(() => {
               // Let all clients in the event room know the activity is starting
-              io.to(roomName).emit('activity start', activity);
+              io.to(eventRoom).emit('activity start', activity);
             }, activityStartTimeDiff);
           }
           if (activityEndTimeDiff > 0) {
             setTimeout(() => {
               // Let all clients in the event room know the activity is ending
-              io.to(roomName).emit('activity end', activity);
+              io.to(eventRoom).emit('activity end', activity);
             }, activityEndTimeDiff);
           }
         } else {
@@ -145,6 +171,8 @@ mongoose.connection.once('open', async () => {
     }
   });
 
+  const eventRooms = {};
+
   io.on('connection', (socket) => {
     console.log(`New client connected: ${socket.id}`);
     // Send a message to the client upon connection
@@ -152,9 +180,9 @@ mongoose.connection.once('open', async () => {
 
     // Have the client join a room based on the event ID
     socket.on('join event', (eventDetails) => {
-      const roomName = eventDetails._id.toString();
-      socket.join(roomName);
-      console.log(`Client ${socket.id} joined room: ${roomName}`);
+      const eventRoom = eventDetails._id.toString();
+      socket.join(eventRoom);
+      console.log(`Client ${socket.id} joined room: ${eventRoom}`);
     });
   
     // Listen for messages from the client
@@ -165,6 +193,27 @@ mongoose.connection.once('open', async () => {
     // Handle client disconnection
     socket.on('disconnect', () => {
       console.log(`Client disconnected: ${socket.id}`);
+    });
+
+    // Listen for raffle join requests
+    socket.on('join raffle', (raffleDetails) => {
+      const eventRoom = raffleDetails.eventID.toString();
+      const id = raffleDetails._id.toString();
+      const raffleRoom = `${eventRoom}-raffle-${id}`;
+      socket.join(raffleRoom);
+      console.log(`Client ${socket.id} joined raffle room: ${raffleRoom}`);
+
+      if (!eventRooms[eventRoom]) {
+        eventRooms[eventRoom].usedRaffleNumbers = new Set();
+      }
+      // TODO: Decide if there is a limit to the number of people who can join a raffle
+      let raffleNumber;
+      do {
+        raffleNumber = Math.floor(100000 + Math.random() * 900000);
+        console.log(`Generated raffle number: ${raffleNumber}`);
+      } while (eventRooms[eventRoom].usedRaffleNumbers.has(raffleNumber));
+      eventRooms[eventRoom].usedRaffleNumbers.add(raffleNumber);
+      socket.raffleNumber = raffleNumber;
     });
   });
 });
