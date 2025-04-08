@@ -92,33 +92,51 @@ useFocusEffect (() => {
   fetchUserDetails();
 });
 
-    const handleSubmit = async () => {
-      console.log(user.authToken);
-        try {
-            const response: AxiosResponse = await axios.patch(
-              `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`, 
-              {
-                name: name,
-                phoneNumber: phoneNumber,
-                email: email,
-                password: password,
-                demographics : {
-                community: community,
-                }
-              },
-              {
-                headers: {
-                      'Authorization': `Bearer ${user.authToken}`,
-                      'Content-Type': "application/json"
-                    },
-              }
-            );
-              // Store updated user details if necessary
-            console.log('User updated successfully');
-          } catch (err) {
-            console.error('Error updating user:', err);
-          }
-    };
+const handleSubmit = async () => {
+  try {
+    interface UserUpdate {
+      name?: string;
+      phoneNumber?: string;
+      email?: string;
+      password?: string;
+      demographics?: {
+        community: string;
+      };
+    }
+    const updateData: UserUpdate = {};
+    
+    if (name.trim() !== '') updateData.name = name;
+    if (phoneNumber.trim() !== '') updateData.phoneNumber = phoneNumber;
+    if (email.trim() !== '') updateData.email = email;
+    if (password.trim() !== '') updateData.password = password;
+    
+    if (community.trim() !== '') {
+      updateData.demographics = {
+        community: community
+      };
+    }
+    
+    if (Object.keys(updateData).length > 0) {
+      const response = await axios.patch(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
+        updateData,
+        {
+          headers: {
+            'Authorization': `Bearer ${user.authToken}`,
+            'Content-Type': "application/json"
+          },
+        }
+      );
+      console.log('User updated successfully');
+
+      fetchUserDetails();
+    } else {
+      console.log('No changes to update');
+    }
+  } catch (err) {
+    console.error('Error updating user:', err);
+  }
+};
 
     const handleDeleteStamp = (stampToDelete: string) => {
       Alert.alert(
@@ -196,7 +214,7 @@ useFocusEffect (() => {
                             <TextInput
                                 style={styles.input}
                                 placeholder={userDetails.name}
-                                onChangeText={(text) => setName(text)}
+                                onChangeText={(text) => {setName(text)}}
                                 value={name}
                             />
                             <Text style={styles.label}>    Phone Number:</Text>
@@ -268,7 +286,6 @@ useFocusEffect (() => {
                   <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                       <Text style={styles.buttonText}>Submit</Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
                       <Text style={styles.buttonText}>Back to Profile</Text>
                   </TouchableOpacity>
@@ -343,18 +360,26 @@ useFocusEffect (() => {
             marginBottom: 7,
             backgroundColor: '#FAFAFA', // Light gray background for inputs
         },
+        buttonContainer: {
+          position: 'absolute',
+          alignItems: 'center', 
+          bottom: 50,
+          width: '100%',
+        },
         submitButton: {
             backgroundColor: '#6C757D', // Primary color
             padding: 10,
             borderRadius: 5,
             alignItems: 'center',
             marginBottom: 5,
+            width: '100%',
         },
         backButton: {
             backgroundColor: '#CCCCCC', // Gray color for the back button
             padding: 10,
             borderRadius: 5,
             alignItems: 'center',
+            width: '100%',
         },
         buttonText: {
             color: '#FFFFFF', // White text
