@@ -10,7 +10,6 @@ interface EventActivityProps {
   id: string;
 }
 
-
 export default function CreateActivity({ id }: EventActivityProps) {
   const [message, setMessage] = useState("");
   const [refresh, setRefresh] = useState(0);
