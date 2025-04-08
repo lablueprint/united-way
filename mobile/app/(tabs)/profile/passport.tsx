@@ -19,7 +19,7 @@ export default function FilterPassport() {
   const [isEventsFetched, setIsEventsFetched] = useState(false);
   const [items, setItems] = useState([
     {label: 'Most Recent', value: 'mostRecent'},
-    {label: 'Least Recent', value: 'lestRecent'},
+    {label: 'Least Recent', value: 'leastRecent'},
 ]);
   const [sortOrder, setSortOrder] = useState<'mostRecent' | 'leastRecent'>('mostRecent');
 
