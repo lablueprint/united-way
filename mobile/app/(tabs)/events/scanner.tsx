@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
-import { Camera, CameraView } from 'expo-camera';
-import { useRouter } from 'expo-router';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from "react";
+import { View, Text, Button, StyleSheet, Alert } from "react-native";
+import { Camera, CameraView } from "expo-camera";
+import { useRouter } from "expo-router";
+import { useSelector } from "react-redux";
 import axios, { AxiosResponse } from "axios";
 
 interface EventDetails {
@@ -17,12 +17,18 @@ export default function EventScanner() {
   const [scanned, setScanned] = useState(false);
   const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
   const [eventId, setEventId] = useState("");
-  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+  const user = useSelector((state) => {
+    return {
+      userId: state.auth.userId,
+      authToken: state.auth.authToken,
+      refreshToken: state.auth.refreshToken,
+    };
+  });
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
+      setHasPermission(status === "granted");
     })();
   }, []);
 
@@ -34,12 +40,15 @@ export default function EventScanner() {
 
   const fetchEventDetails = async (eventId: string) => {
     try {
-      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`, {
-        headers: {
-          'Authorization': `Bearer ${user.authToken}`,
-          'Content-Type': "application/json"
-        },
-      });
+      const response: AxiosResponse = await axios.get(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       const { data } = response.data;
       setEventDetails(data);
     } catch (err) {
@@ -49,31 +58,15 @@ export default function EventScanner() {
 
   const addEventToUser = async (eventId: string) => {
     try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
+      await axios.patch(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
         {
           newEvent: eventId,
         },
         {
           headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
-          },
-        });
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  const addUserToEvent = async (userId: string) => {
-    try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
-        {
-          newUser: userId,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
+            Authorization: `Bearer ${user.authToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -82,42 +75,62 @@ export default function EventScanner() {
     }
   };
 
+  const addUserToEvent = async (userId: string) => {
+    try {
+      await axios.patch(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
+        {
+          newUser: userId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user.authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const removeUserFromEvent = async (userId: string) => {
     try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
+      const response: AxiosResponse = await axios.patch(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
         {
           userId: userId,
         },
         {
           headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
+            Authorization: `Bearer ${user.authToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 
   const removeEventFromUser = async (eventId: string) => {
     try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
+      const response: AxiosResponse = await axios.patch(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
         {
           eventId: eventId,
         },
         {
           headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
+            Authorization: `Bearer ${user.authToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 
   const handleRegister = () => {
     addEventToUser(eventId);
@@ -157,7 +170,7 @@ export default function EventScanner() {
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
       />
       {scanned && (
-        <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
+        <Button title={"Tap to Scan Again"} onPress={() => setScanned(false)} />
       )}
     </View>
   );
@@ -166,13 +179,13 @@ export default function EventScanner() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 16,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   eventName: {
@@ -180,14 +193,14 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
     marginTop: 20,
   },
   instruction: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginVertical: 10,
   },
 });

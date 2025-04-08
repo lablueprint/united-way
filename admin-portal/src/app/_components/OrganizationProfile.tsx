@@ -1,6 +1,32 @@
 import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
+<<<<<<<<< Temporary merge branch 1
+import { EventData } from "../_interfaces/EventInterfaces";
+
+// TODO: Make the organization profile based on each individual organization instead of all events.
+export default function OrganizationProfile() {
+  const [eventIds, setEventIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Get all events
+    const fetchEvents = async () => {
+      try {
+        console.log(
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`
+        );
+        const response: AxiosResponse = await axios.get(
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`
+        );
+        const { data } = response.data;
+        setEventIds(data.map((event: EventData) => event._id));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchEvents();
+  }, []);
+=========
 import { EventData } from '../_interfaces/EventInterfaces';
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
@@ -34,24 +60,38 @@ export default function OrganizationProfile() {
         }
         getOrganizerEvents();
     }, []);
+>>>>>>>>> Temporary merge branch 2
 
     const removeFromList = (id: string) => {
         setEventIds(eventIds.filter((eventId) => eventId != id));
     };
 
-    return (
+  return (
+    <div>
+      <h1>Organization Profile</h1>
+      <div>
+        <h2>Events</h2>
         <div>
+<<<<<<<<< Temporary merge branch 1
+          {eventIds.map((id: string) => {
+            return (
+              <EventCard id={id} key={id} removeFromList={removeFromList} />
+            );
+          })}
+=========
             <h1>Organization Profile</h1>
             <div>
                 <h2>Events</h2>
                 <div>
                     {eventIds.map((id: string) => {
-                        return (
-                            <EventCard id={id} key={id} removeFromList={removeFromList} />
-                        );
+                        console.log(id);
+                        return <EventCard id={id} key={id} removeFromList={removeFromList} />;
                     })}
                 </div>
             </div>
+>>>>>>>>> Temporary merge branch 2
         </div>
-    );
+      </div>
+    </div>
+  );
 }
