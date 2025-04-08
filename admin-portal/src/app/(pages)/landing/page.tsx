@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import OrganizationProfile from '../../_components/OrganizationProfile';
 
 import { useState } from "react";
+//import PollCard from "@/app/_components/PollCard";
 export default function Landing() {
   const [responseValue, setResponseValue] = useState();
   const dispatch = useDispatch();
