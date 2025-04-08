@@ -1,10 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import axios, { AxiosResponse } from "axios";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
+// Required interfaces from schema
 interface EventDetails {
   _id: string;
   name: string;
@@ -18,6 +19,8 @@ interface EventDetails {
   tags: string[];
   registeredUsers: string[];
   activities: Activity[];
+  image: string;
+  duration: number;
 }
 export interface Activity {
   _id: string;
@@ -28,14 +31,10 @@ export interface Activity {
   timeEnd: Date;
   active: boolean;
 }
-interface Organization {
-  name: string;
-}
 
 export default function EventsDetails() {
   // Retrieve the 'details' query parameter from the URL
   const { event } = useLocalSearchParams();
-  const params = useLocalSearchParams();
   const user = useSelector((state) => {
     return {
       userId: state.auth.userId,
@@ -43,6 +42,7 @@ export default function EventsDetails() {
       refreshToken: state.auth.refreshToken,
     };
   });
+  // Set event data to null states
   const [eventData, setEventData] = useState<EventDetails>({
     organizerId: "",
     _id: "",
@@ -56,6 +56,8 @@ export default function EventsDetails() {
     tags: [],
     registeredUsers: [],
     activities: [],
+    image: "",
+    duration: 0,
   });
   const router = useRouter();
   const [organizerName, setOrganizerName] = useState<string>("");
@@ -67,10 +69,6 @@ export default function EventsDetails() {
   }
   const getEventById = async () => {
     try {
-      console.log(event);
-      console.log(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${event}`
-      );
       const response: AxiosResponse = await axios.get(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${event}`,
         {
@@ -83,18 +81,13 @@ export default function EventsDetails() {
       // If the event is returned directly, just return response.data:
       return response.data;
     } catch (err) {
-      console.error("Error fetching event:", err);
       return undefined;
     }
   };
 
   const getOrganizer = async (organizerId: string) => {
     try {
-      console.log("Hi, I'm the organizer ID: ", organizerId);
-      console.log(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/${organizerId}`
-      );
-      console.log("Making request to get organizer...");
+      // Fetch the organizer details using the organizerId
       const response: AxiosResponse = await axios.get(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/${organizerId}`,
         {
@@ -105,17 +98,15 @@ export default function EventsDetails() {
         }
       );
       if (!response || !response.data) {
-        console.log("No response or empty response data");
         return undefined;
       }
-      console.log("Received response:", response.data);
       return response.data;
     } catch (err) {
-      console.error("Error fetching organizer:", err);
       return undefined;
     }
   };
 
+  // Used when a user registers for an event
   const addUser = async (eventID: string) => {
     try {
       await axios.patch(
@@ -128,11 +119,10 @@ export default function EventsDetails() {
           },
         }
       );
-    } catch (err) {
-      console.error("Failed to add user to event:", err);
-    }
+    } catch (err) {}
   };
 
+  // Used when a user unregisters from an event
   const removeUserFromEvent = async (eventID: string) => {
     try {
       await axios.patch(
@@ -145,25 +135,16 @@ export default function EventsDetails() {
           },
         }
       );
-    } catch (err) {
-      console.error("Failed to remove user from event:", err);
-    }
+    } catch (err) {}
   };
 
   // Decode and parse the event details
-  // const parsedEventDetails = JSON.parse(
-  //   decodeURIComponent(event as string)
-  // ) as EventDetails;
-  // 67bd5498a6c2df7326a4be2c
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await getEventById();
       setEventData(data);
-      console.log(data);
       const organizer = await getOrganizer(data.organizerID);
-      console.log("Check the organizer: ", organizer);
       setOrganizerName(organizer.data.name);
-      console.log("Check the organizer name: ", organizer.data.name);
     };
     fetchData();
   }, []);
@@ -171,10 +152,13 @@ export default function EventsDetails() {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={styles.triangleButton}
+        style={styles.buttonContainer}
         onPress={() => router.back()}
-      />
+      >
+        <View style={styles.triangleButton} />
+      </TouchableOpacity>
       <Text style={styles.title}>{eventData.name}</Text>
+      <Image source={{ uri: eventData.image }} style={styles.eventImage} />
       <Text style={styles.description}>{eventData.description}</Text>
       <Text style={styles.organizer}>
         Organized by: {organizerName ? organizerName : "Loading..."}
@@ -204,27 +188,38 @@ export default function EventsDetails() {
   );
 }
 
+// Styles for the component
+
 const styles = StyleSheet.create({
-  triangleButton: {
+  buttonContainer: {
     position: "absolute",
-    top: 60, // Added padding from top to account for status bar
+    top: 60, // Adjust as needed for status bar
     left: 20,
+    padding: 10,
+  },
+  triangleButton: {
     width: 0,
     height: 0,
     borderStyle: "solid",
-    borderLeftWidth: 15,
-    borderRightWidth: 15,
-    borderBottomWidth: 25,
+    borderLeftWidth: 0,
+    borderRightWidth: 25, // Adjust size
+    borderTopWidth: 15,
+    borderBottomWidth: 15,
     borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "blue",
-    transform: [{ rotate: "90deg" }],
+    borderRightColor: "black", // Change to preferred color
+    borderTopColor: "transparent",
+    borderBottomColor: "transparent",
   },
   registerButton: {
     backgroundColor: "blue",
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
+  },
+  eventImage: {
+    height: 200,
+    width: 200,
+    borderRadius: 100,
   },
   buttonText: {
     color: "white",

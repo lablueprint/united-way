@@ -12,16 +12,17 @@ import axios, { AxiosResponse } from "axios";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 
-// Define your Event interface
+// Event interface from schema
 interface Event {
   _id: string;
   name: string;
   date: Date;
   description: string;
   image: string;
-  // add other properties as needed
+  duration: number;
 }
 
+//Stylesheet
 const styles = StyleSheet.create({
   titletext: {
     fontSize: 40,
@@ -81,8 +82,9 @@ const styles = StyleSheet.create({
 });
 
 export default function Events() {
+  //gather all the different events
   const [events, setEvents] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  //for filtering events
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const router = useRouter();
   const user = useSelector((state) => ({
@@ -103,10 +105,8 @@ export default function Events() {
           },
         }
       );
-      console.log("API response:", response.data);
       return response.data.data;
     } catch (err) {
-      console.error(err);
       return [];
     }
   };
@@ -115,7 +115,6 @@ export default function Events() {
     const fetchEvents = async () => {
       const eventsData = await getEvents();
       setEvents(eventsData);
-      setIsLoading(false);
     };
     fetchEvents();
   }, []);
@@ -140,7 +139,7 @@ export default function Events() {
   ];
 
   // Format date to show "FEB 4 | 4:30 - 7:30 PM" format
-  const formatEventDate = (date: Date) => {
+  const formatEventDate = (date: Date, duration: number) => {
     const eventDate = new Date(date);
     const month = eventDate
       .toLocaleString("en-US", { month: "short" })
@@ -151,8 +150,9 @@ export default function Events() {
       minute: "2-digit",
       hour12: true,
     });
-    // For this example, we'll add 3 hours to create an end time
-    const endDate = new Date(eventDate.getTime() + 3 * 60 * 60 * 1000);
+
+    // Added duration to the event date assuming duration is in hours
+    const endDate = new Date(eventDate.getTime() + duration * 60 * 60 * 1000);
     const endTime = endDate.toLocaleString("en-US", {
       hour: "numeric",
       minute: "2-digit",
@@ -163,6 +163,7 @@ export default function Events() {
   };
 
   // Render each event item
+  // The location is hardcoded to "LOS ANGELES, CA" for now
   const renderItem = ({ item }: { item: Event }) => (
     <TouchableOpacity
       style={styles.eventCard}
@@ -171,24 +172,17 @@ export default function Events() {
       <Image source={{ uri: item.image }} style={styles.eventImage} />
       <View style={styles.eventContent}>
         <Text style={styles.eventTitle}>{item.name}</Text>
-        <Text style={styles.eventInfo}>{formatEventDate(item.date)}</Text>
+        <Text style={styles.eventInfo}>
+          {formatEventDate(item.date, item.duration)}
+        </Text>
         <Text style={styles.eventInfo}>LOS ANGELES, CA</Text>
       </View>
     </TouchableOpacity>
   );
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="black" />
-      </View>
-    );
-  }
-
   return (
     <View style={{ backgroundColor: "white", flex: 1 }}>
       <Text style={styles.titletext}>Events</Text>
-
       <View style={styles.filterContainer}>
         {filterOptions.map((option) => (
           <TouchableOpacity
@@ -214,7 +208,6 @@ export default function Events() {
           </TouchableOpacity>
         ))}
       </View>
-
       <FlatList
         data={sortedEvents}
         keyExtractor={(item) => item._id}
