@@ -1,24 +1,28 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import axios, { AxiosResponse } from "axios";
+import { useSelector } from 'react-redux';
+import { RootState } from '../_interfaces/AuthInterfaces';
 
-interface Event {
-    name: string; // required field of type String
-    date: Date; // required field of type Date
-    description: string; // required field of type String
-    location: {
-      type: 'Point'; // type must be 'Point'
-      coordinates: [number, number]; // array of numbers (longitude and latitude)
-    };
-    organizerID: string; // required field of type String
-    tags: string[]; // array of strings
-    registeredUsers: string[]; // array of strings
-    activity: string[]; // array of strings
-  }
-
+interface Event{
+  organizerId: "",
+  _id: "",
+  name: "",
+  date: Date | null,
+  description: "",
+  location: {
+      type: "",
+      coordinates: [],
+  },
+  tags: [],
+  registeredUsers: [],
+  activities: []
+}
 const UpcomingCalendar = () => {
     const [calendarState, setCalendarState] = useState(0); // 0 - calendar view, 1 - list view
     const [selectedWeek, setSelectedWeek] = useState('');
-    const [events, setEvents] = useState<Event[]>([]);
+    const [eventData, setEventData] = useState<{ [date: string]: Event[] }>({});
+    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    
     
     
     const changeState = async () => {
@@ -48,55 +52,85 @@ const UpcomingCalendar = () => {
                 label: `${formatDate(start)} – ${formatDate(end)}`,
                 value: `${start.toISOString()}_${end.toISOString()}`,
             });
+            console.log("Date: " + start.toISOString())
         }
-        
+        console.log(selectedWeek);
         return weeks;
     }
     const weekOptions = getUpcomingWeeks();
-
+    
     const getEventsForWeek = async () => {
-        console.log("Week options: " + selectedWeek);
-        const [startISO, endISO] = weekOptions[0].value.split("_");
-        // Format the start and end dates as YYYY-MM-DD for backend
-        const startDate = new Date(startISO).toISOString(); // This will preserve the timezone offset in ISO format
-        const endDate = new Date(endISO).toISOString();
-      
-        try {
-            console.log(startDate + "  ---  " + endDate);
-          const response = await axios.post(
-            `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/filtered/`, // Update the endpoint as needed
-            { startDate }, // Send the start and end dates for filtering
-            { headers: { 'Content-Type': 'application/json' } }
-          );
-      
-          console.log("Events for the week:", response.data);
-          return response.data; // Return the filtered events
-        } catch (err) {
-          console.log("Error fetching events:", err);
-          return [];
+      if (!selectedWeek) return; // Exit if no week is selected
+    
+      const [startDateString, endDateString] = selectedWeek.split("_");
+      const startDate = new Date(startDateString);
+      const endDate = new Date(endDateString);
+    
+      try {
+        // Loop through each day in the selected week
+        for (let current = new Date(startDate); current <= endDate; current.setDate(current.getDate() + 1)) {
+          const formattedDate = formatDate(current);
+    
+          try {
+            // Fetch events for the current date using the new endpoint
+            const response: AxiosResponse = await axios.post(
+              `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/byDay`, 
+              {
+                date: formattedDate, // Send the date in the body of the request
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${org.authToken}`, // Authorization token
+                }
+              }
+            );
+    
+            // Update state with the response data for the specific date
+            setEventData((prevData) => ({
+              ...prevData,
+              [formattedDate]: response.data, // Directly assign the response data to the specific date
+            }));
+          } catch (error) {
+            // Handle errors specific to the axios request
+            console.error(`Error fetching events for ${formattedDate}:`, error);
+            // Optionally, you can store an empty array for that date or handle the error differently
+            setEventData((prevData) => ({
+              ...prevData,
+              [formattedDate]: [], // Optionally set an empty array for that date
+            }));
+          }
+          console.log (eventData[formattedDate]);
         }
-      };
-      
+      } catch (error) {
+        // Handle any general errors that might occur during the process
+        console.error("Error fetching events for the week:", error);
+      }
+    };
+    
 
   return (
     <>
     <h1>Your Upcoming Events</h1>
     <p>Filter By Date</p>
-    <button onClick = {getEventsForWeek}>Get Event For The Week</button>
     <select
-        id="week-select"
-        value={selectedWeek}
-        onChange={(e) => setSelectedWeek(e.target.value)}
-      >
-        <option value="">-- Choose a week --</option>
-        {weekOptions.map((week, index) => (
-          <option key={index} value={week.value}>
-            {week.label}
-          </option>
-        ))}
-      </select>
+      id="week-select"
+      value={selectedWeek}
+      onChange={(e) => setSelectedWeek(e.target.value)}
+    >
+      <option value="" disabled>
+        -- Choose a week --
+      </option>
+      {weekOptions.map((week, index) => (
+        <option key={index} value={week.value}>
+          {week.label}
+        </option>
+      ))}
+    </select>
       <p>View</p>
-      
+    <button onClick = {getEventsForWeek}>
+    Get Events for this Week
+    </button>
     <button onClick = {changeState}>
     {calendarState == 0?'Calender':'List'}
     </button>

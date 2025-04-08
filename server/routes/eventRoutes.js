@@ -10,6 +10,7 @@ eventRouter.post('/createEvent', eventController.createEvent);
 eventRouter.get('/:id', eventController.getEventById);
 eventRouter.get('/', eventController.getAllEvents);
 eventRouter.post('/filtered', eventController.getEventsByFilter);
+eventRouter.get('/byDay', eventController.getEventsByDay);
 
 // Update and delete routes
 eventRouter.patch('/:id', eventController.editEventDetails);

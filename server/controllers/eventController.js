@@ -199,6 +199,36 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const getEventsByDay = async (req, res) => {
+  console.log("In getEventsByDay");
+  try {
+    const { date } = req.body;
+
+    // Ensure the date is provided
+    if (!date) {
+      return res.status(400).json({ error: "A date is required." });
+    }
+
+    // Parse the date and calculate the start and end of the day
+    const startOfDay = new Date(date);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Query the database for events on the specific day, sorted by date
+    const events = await Event.find({
+      date: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    }).sort({ date: 1 }); // Sort by the date field in ascending order
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 module.exports = {
   createEvent,
   removeUserFromEvent,
@@ -208,4 +238,5 @@ module.exports = {
   editEventDetails,
   deleteEvent,
   addUserToEvent,
+  getEventsByDay,
 };

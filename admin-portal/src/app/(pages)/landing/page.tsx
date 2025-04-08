@@ -54,9 +54,9 @@ export default function Landing() {
       Auth: {org.authToken}<br />
       Refresh: {org.refreshToken}<br />
       
-      {/* <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
+      <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
         Log out
-      </button> */}
+      </button>
       <div>Result: {responseValue}</div>
     </div>
   );
