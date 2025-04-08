@@ -8,8 +8,7 @@ interface PollCardProps {
 
 export default function Poll({ id }: PollCardProps) {
     const [polls, setPolls] = useState<PollInterface[]>([]);
-    const [currentPollIndex, setCurrentPollIndex] = useState(0);
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [questionIndexes, setQuestionIndexes] = useState<{ [pollId: string]: number }>({}); // tracking question index for each poll
 
     interface Choices {
         id: number;
@@ -35,7 +34,7 @@ export default function Poll({ id }: PollCardProps) {
                 `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/filtered`,
                 { eventID: id, type: "poll" }
             );
-            console.log("Fetched polls:", data.data);
+            console.log("Fetched polls:", data.data[0]);
             setPolls(data.data);
         } catch (error) {
             console.error("Error fetching polls:", error);
@@ -44,7 +43,7 @@ export default function Poll({ id }: PollCardProps) {
 
     useEffect(() => {
         fetchPolls();
-        const interval = setInterval(fetchPolls, 10000); // Refresh every 10 seconds
+        const interval = setInterval(fetchPolls, 10000);
         return () => clearInterval(interval);
     }, [id]);
 
@@ -57,7 +56,7 @@ export default function Poll({ id }: PollCardProps) {
                     ? {
                           ...poll,
                           content: poll.content.map((questionObj, index) =>
-                              index === currentQuestionIndex
+                              index === (questionIndexes[pollId] || 0)
                                   ? {
                                         ...questionObj,
                                         options: questionObj.options.map((option) =>
@@ -74,6 +73,20 @@ export default function Poll({ id }: PollCardProps) {
         );
     };
 
+    const handlePrevious = (pollId: string) => {
+        setQuestionIndexes((prevIndexes) => ({
+            ...prevIndexes,
+            [pollId]: Math.max(0, (prevIndexes[pollId] || 0) - 1),
+        }));
+    };
+
+    const handleNext = (pollId: string, totalQuestions: number) => {
+        setQuestionIndexes((prevIndexes) => ({
+            ...prevIndexes,
+            [pollId]: Math.min(totalQuestions - 1, (prevIndexes[pollId] || 0) + 1),
+        }));
+    };
+
     return (
         <ScrollView style={styles.container}>
             {polls.length > 0 ? (
@@ -82,30 +95,41 @@ export default function Poll({ id }: PollCardProps) {
                         const now = new Date();
                         return new Date(poll.timeStart) <= now && now <= new Date(poll.timeEnd);
                     })
-                    .map((poll, index) => (
+                    .map((poll) => (
                         <View key={poll._id} style={styles.pollCard}>
                             <Text style={styles.questionText}>
-                                {poll.content[currentQuestionIndex].question}
+                                {poll.content[questionIndexes[poll._id] || 0]?.question || 'No question available'}
                             </Text>
-    
-                            {poll.content[currentQuestionIndex].options.map((option) => (
+
+                            {poll.content[questionIndexes[poll._id] || 0]?.options.map((option) => (
                                 <View key={option.id} style={styles.optionContainer}>
-                                    <Text style={styles.optionText}>{option.text} ({option.count} votes)</Text>
+                                    <Text style={styles.optionText}>
+                                        {option.text} ({option.count} votes)
+                                    </Text>
                                     <Button title={option.text} onPress={() => handleVote(poll._id, option.id)} />
                                 </View>
                             ))}
-    
+
                             <View style={styles.navButtons}>
-                                <Button title="Previous" onPress={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))} disabled={currentPollIndex === 0 && currentQuestionIndex === 0} />
-                                <Button title="Next" onPress={() => setCurrentQuestionIndex(prev => prev + 1)} disabled={currentPollIndex === polls.length - 1 && currentQuestionIndex === polls[currentPollIndex].content.length - 1} />
+                                <Button
+                                    title="Previous"
+                                    onPress={() => handlePrevious(poll._id)}
+                                    disabled={questionIndexes[poll._id] === 0}
+                                />
+
+                                <Button
+                                    title="Next"
+                                    onPress={() => handleNext(poll._id, poll.content.length)}
+                                    disabled={questionIndexes[poll._id] === poll.content.length - 1}
+                                />
                             </View>
-    
+
                             <View style={styles.progressBarContainer}>
                                 <View
                                     style={[
                                         styles.progressBar,
                                         {
-                                            width: `${((currentQuestionIndex + 1) / poll.content.length) * 100}%`,
+                                            width: `${((questionIndexes[poll._id] || 0) + 1) / poll.content.length * 100}%`,
                                         },
                                     ]}
                                 />
@@ -115,7 +139,7 @@ export default function Poll({ id }: PollCardProps) {
             ) : (
                 <Text style={styles.loadingText}>Loading polls...</Text>
             )}
-    
+
             {polls.filter((poll) => {
                 const now = new Date();
                 return new Date(poll.timeStart) <= now && now <= new Date(poll.timeEnd);

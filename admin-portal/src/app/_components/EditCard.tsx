@@ -3,7 +3,7 @@ import axios, { AxiosResponse } from "axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import CreateActivity from './CreateActivity';
-import DisplayActivity from './DisplayActivity';
+// import DisplayActivity from './DisplayActivity';
 // import EventActivity from './EventActivity';
 
 interface EditCardProps {
