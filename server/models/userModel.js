@@ -17,7 +17,9 @@ const userSchema = new mongoose.Schema({
 	phoneNumber: String,
 	points: Number,
 	password: String,
-	registeredEvents: [String]
+	registeredEvents: [String],
+	profilePicture: String,
+	dateJoined: Date
 });
 
 module.exports = mongoose.model('User', userSchema);

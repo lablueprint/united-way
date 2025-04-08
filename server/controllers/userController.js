@@ -27,8 +27,13 @@ const getAllUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
-  if (req.auth.role != 'admin') {
-    res.status(401);
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401).json(
+    {
+      status: "failure",
+      message: "Unauthorized access to retreive user by ID",
+      data: {}
+    });
     return;
   }
 
@@ -51,6 +56,7 @@ const getUserById = async (req, res) => {
 
 
 const addEventToUser = async (req, res) => {
+  console.log("hi");
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
     res.status(401);
     return;
@@ -136,11 +142,11 @@ const getUserByEmail = async (req, res) => {
 }
 
 const editUserDetails = async (req, res) => {
+  console.log("hi");
   if (req.auth.role != 'user') {
     res.status(401);
     return;
   }
-
   try {
     const userbyID = await User.findOneAndUpdate({_id: req.params["id"]}, {$set: req.body}, {new: true}); //Doesn't catch invalid fields
     res.status(200).json({
