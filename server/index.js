@@ -125,23 +125,35 @@ mongoose.connection.once('open', async () => {
           const activityStartTimeDiff = new Date(activity.timeStart).getTime() - new Date().getTime();
           const activityEndTimeDiff = new Date(activity.timeEnd).getTime() - new Date().getTime();
           if (activity.type === "raffle") {
-            const raffleRoom = `${eventRoom}-raffle-${activity._id}`;
+            const raffleRoom = `${eventRoom}-raffle`;
             if (activityStartTimeDiff > 0) {
-              setTimeout(() => {
-                // Let all clients in the raffle room know the raffle is occurring
-                io.to(raffleRoom).emit('raffle start', activity);
-                const sockets = io.sockets.clients(raffleRoom);
-                const raffleRoomSize = sockets.length;
+              setTimeout(async () => {
+                const sockets = await io.in(raffleRoom).allSockets();
+                const raffleRoomSize = sockets.size;
                 if (raffleRoomSize > 0) {
                   const randomIndex = Math.floor(Math.random() * raffleRoomSize);
-                  const randomRaffleNumber = eventRooms[eventRoom].usedRaffleNumbers[randomIndex];
-                  sockets.forEach((socket) => {
+                  const raffleNumbers = Array.from(eventRooms[eventRoom].usedRaffleNumbers);
+                  const randomRaffleNumber = raffleNumbers[randomIndex];
+                  console.log(`Drew raffle number: ${randomRaffleNumber}`);
+                  sockets.forEach((socketId) => {
+                    const socket = io.sockets.sockets.get(socketId);
                     if (socket.raffleNumber === randomRaffleNumber) {
                       socket.emit('raffle winner', { raffleNumber: randomRaffleNumber });
                     }
                     else {
                       socket.emit('raffle loser', { raffleNumber: randomRaffleNumber });
                     }
+                  });
+                  // Reassign raffle numbers to clients
+                  eventRooms[eventRoom].usedRaffleNumbers = new Set();
+                  sockets.forEach((socket) => {
+                    let raffleNumber;
+                    do {
+                      raffleNumber = Math.floor(100000 + Math.random() * 900000);
+                    } while (eventRooms[eventRoom].usedRaffleNumbers.has(raffleNumber));
+                    eventRooms[eventRoom].usedRaffleNumbers.add(raffleNumber);
+                    socket.raffleNumber = raffleNumber;
+                    console.log(`Generated raffle number: ${raffleNumber}`);
                   });
                 }
                 else {
@@ -196,24 +208,24 @@ mongoose.connection.once('open', async () => {
     });
 
     // Listen for raffle join requests
-    socket.on('join raffle', (raffleDetails) => {
-      const eventRoom = raffleDetails.eventID.toString();
-      const id = raffleDetails._id.toString();
-      const raffleRoom = `${eventRoom}-raffle-${id}`;
+    socket.on('join raffle', (eventDetails) => {
+      const eventRoom = eventDetails._id.toString();
+      const raffleRoom = `${eventRoom}-raffle`;
       socket.join(raffleRoom);
       console.log(`Client ${socket.id} joined raffle room: ${raffleRoom}`);
 
       if (!eventRooms[eventRoom]) {
+        eventRooms[eventRoom] = {};
         eventRooms[eventRoom].usedRaffleNumbers = new Set();
       }
       // TODO: Decide if there is a limit to the number of people who can join a raffle
       let raffleNumber;
       do {
         raffleNumber = Math.floor(100000 + Math.random() * 900000);
-        console.log(`Generated raffle number: ${raffleNumber}`);
       } while (eventRooms[eventRoom].usedRaffleNumbers.has(raffleNumber));
       eventRooms[eventRoom].usedRaffleNumbers.add(raffleNumber);
       socket.raffleNumber = raffleNumber;
+      console.log(`Generated raffle number: ${raffleNumber}`);
     });
   });
 });
@@ -226,3 +238,6 @@ app.use((req, res, next) => {
 server.listen(port, () => {
   console.log(`Server started at port ${port}`);
 });
+
+const date = new Date();
+console.log(date);
