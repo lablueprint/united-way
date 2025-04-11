@@ -5,13 +5,11 @@ const express = require("express"); //define route thru express
 const { expressjwt: jwt } = require("express-jwt");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const fileUpload = require("express-fileupload");
 
 const uri = process.env.MONGODB_URI;
 const port = process.env.PORT;
 
 // Route Imports
-const imageRouter = require("./routes/imageRoutes.js"); // import image router from routes folder
 const exampleRouter = require("./routes/exampleRoute.js");
 const authRouter = require("./routes/authRoutes.js");
 const eventRouter = require("./routes/eventRoutes.js");
@@ -43,7 +41,6 @@ app.use(express.json());
 app.use("/test", exampleRouter); // given ip address, /test is where example router logic will be handle
 app.use("/auth", authRouter);
 
-app.use("/images;", imageRouter);
 app.use(
   "/orgs",
   jwt({
