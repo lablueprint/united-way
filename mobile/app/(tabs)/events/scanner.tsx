@@ -40,6 +40,8 @@ export default function EventScanner() {
       socket.emit('message', `Connecting at ${new Date()}`);
       // Join the event room
       socket.emit('join event', eventDetails);
+      // Join raffle
+      socket.emit('join raffle', eventDetails);
       // Listen for messages from the server
       socket.on('message', (data) => {
         console.log('Message from server:', data);
@@ -60,6 +62,12 @@ export default function EventScanner() {
       socket.on('activity end', (data) => {
         console.log('Activity ended:', data.type);
         Alert.alert('Activity ended', `An activity of type ${data.type} has ended.`);
+      });
+      socket.on('raffle winner', (data) => {
+        Alert.alert(`Raffle result: ${data.raffleNumber}`, 'You won the raffle!');
+      });
+      socket.on('raffle loser', (data) => {
+        Alert.alert(`Raffle result: ${data.raffleNumber}`, 'You did not win the raffle. Better luck next time!');
       });
       socket.on('disconnect', () => {
         console.log('Disconnected from server');
@@ -124,7 +132,6 @@ export default function EventScanner() {
       console.error(err);
     }
   };
-
 
   const removeUserFromEvent = async (userId: string) => {
     try {
