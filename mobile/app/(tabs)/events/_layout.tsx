@@ -2,15 +2,21 @@ import { Stack } from "expo-router";
 
 export default function StackLayout() {
     return (
-        <Stack>
+        <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen
-                name="scanner"
+                name="events/scanner"
                 options={{
                     headerShown: false,
                 }}
             />
             <Stack.Screen
-                name="event-details"
+                name='events/[id]'
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name='events/associated-events'
                 options={{
                     headerShown: false,
                 }}

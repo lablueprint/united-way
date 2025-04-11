@@ -56,6 +56,7 @@ const getAllOrganizations = async (req, res) => {
 // for async functions must use await -- so you can resolve content later
 // pass in parameter of curly braces == no filter 
 const getOrganizationById = async (req, res) => {
+    console.log(req.auth.role);
     if (req.auth.role != 'admin') {
         res.status(401).json({
       status: "failure",
