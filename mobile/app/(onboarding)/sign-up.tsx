@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  Alert, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
   StyleSheet,
 } from 'react-native';
 import { useRouter, Redirect, Link } from 'expo-router';
@@ -13,6 +13,11 @@ import * as SecureStore from 'expo-secure-store';
 import { useDispatch } from 'react-redux';
 import { login } from '../_utils/redux/userSlice';
 
+enum SignUpState {
+  SignUpForm, // 0
+  TwoFactor   // 1
+}
+
 export default function SignUpScreen() {
   // Signup form fields
   const [email, setEmail] = useState('');
@@ -20,8 +25,9 @@ export default function SignUpScreen() {
   // 2FA fields
   const [code, setCode] = useState('');
   const [hashedCode, setHashedCode] = useState('');
+
   // State to control the flow: 0 = Signup form; 1 = Two-Factor Verification
-  const [state, setState] = useState(0);
+  const [state, setState] = useState(SignUpState.SignUpForm);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -97,7 +103,7 @@ export default function SignUpScreen() {
       );
       if (response.data) {
         setHashedCode(response.data);  // store hashed OTP returned from backend
-        setState(1);  // move to OTP verification step
+        setState(SignUpState.TwoFactor);  // move to OTP verification step
       } else {
         Alert.alert("Error: OTP not received.");
       }
@@ -138,7 +144,7 @@ export default function SignUpScreen() {
         authToken: response.data.authToken,
         refreshToken: response.data.refreshToken
       }));
-      router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken} });
+      router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken } });
     } catch (err) {
       console.error(err);
       Alert.alert("Error creating user.");
@@ -149,57 +155,57 @@ export default function SignUpScreen() {
     <View style={styles.container}>
       {state === 0 ? (
         // Signup Form
-        <>
-          <View style={styles.formContainer}>
-                <Text style={styles.title}>
-                    Sign up
-                </Text>
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>EMAIL</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Email"
-                        onChangeText={setEmail}
-                        value={email}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-                </View>
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>PASSWORD</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Password"
-                        onChangeText={setPassword}
-                        value={password}
-                        secureTextEntry
-                    />
-                </View>
-                <TouchableOpacity style={styles.signUpButton} onPress={handleSignup}>
-                    <Text style={styles.signUpButtonText} >Sign up</Text>
-                    {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
-                </TouchableOpacity>
-                <View style={styles.loginSection}>
-                    <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
-                    <Link style={styles.loginLink} href="/sign-in">
-                        Already have an account? Sign in
-                    </Link>
-                </View>
-                <View style={styles.skipSection}>
-                          <Text style={styles.skipLabel}>DON'T WANNA MAKE AN ACCOUNT?</Text>
-                          <Link style={styles.skipLink} href="/">
-                          Continue to dashboard </Link>
-                        </View>
-                
-                {/* Super special dev button */}
-                {/* <Link href="/(tabs)" style={styles.text}>
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>
+            Sign up
+          </Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>EMAIL</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              onChangeText={setEmail}
+              value={email}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>PASSWORD</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              onChangeText={setPassword}
+              value={password}
+              secureTextEntry
+            />
+          </View>
+          <TouchableOpacity style={styles.signUpButton} onPress={handleSignup}>
+            <Text style={styles.signUpButtonText} >Sign up</Text>
+            {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
+          </TouchableOpacity>
+          <View style={styles.loginSection}>
+            <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
+            <Link style={styles.loginLink} href="/sign-in">
+              Already have an account? Sign in
+            </Link>
+          </View>
+          <View style={styles.skipSection}>
+            <Text style={styles.skipLabel}>DON'T WANNA MAKE AN ACCOUNT?</Text>
+            <Link style={styles.skipLink} href="/">
+              Continue to dashboard </Link>
+          </View>
+
+          {/* Super special dev button */}
+          {/* <Link href="/(tabs)" style={styles.text}>
                     Skip this and go home
                 </Link> */}
-            </View>
-        </>
+        </View>
       ) : (
         // Two-Factor Verification Form
-        <>
+        <View style={{
+          marginHorizontal: 50,
+        }}>
           <Text style={styles.title}>2-Step Verification</Text>
           <TextInput
             style={styles.input}
@@ -211,7 +217,7 @@ export default function SignUpScreen() {
           <TouchableOpacity style={styles.button} onPress={verifyOTP}>
             <Text style={styles.buttonText}>Verify</Text>
           </TouchableOpacity>
-        </>
+        </View>
       )}
     </View>
   );
@@ -220,7 +226,6 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: 'white',
     justifyContent: 'center',
   },
@@ -249,7 +254,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  
+
   formContainer: {
     flex: 1,
     padding: 20,

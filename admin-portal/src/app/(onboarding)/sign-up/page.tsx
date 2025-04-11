@@ -85,7 +85,7 @@ export default function SignUp() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateInputs()) return;
-    
+
     const orgByEmail = await getOrgByEmail();
     // If org exists, alert the user.
     if (orgByEmail && orgByEmail.data && orgByEmail.data.length !== 0) {
@@ -136,7 +136,7 @@ export default function SignUp() {
 
   // Add organization to database via orgs/createOrg endpoint
   const addOrgToDatabase = async () => {
-    
+
     try {
       const response: AxiosResponse = await axios.post(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
@@ -148,7 +148,7 @@ export default function SignUp() {
         refreshToken: response.data.refreshToken
       }));
       router.push('/onboarding');
-      
+
     } catch (err) {
       console.log(err);
     }
@@ -160,53 +160,53 @@ export default function SignUp() {
         // Sign-up Form (phase 0)
         <>
           <div className='h1'>
-      For new organizations:
-      <form onSubmit={handleSubmit}>
-        <p>Email:</p>
-        <input
-          type="email"
-          // placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
-        />
-        <p>Password:</p>
-        <input
-          type="password"
-          // placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
-        />
-        <p>Confirm Password:</p>
-        <input
-           type="password"
-          // placeholder="Confirm Password"
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          value={confirmPassword}
-        />
-        <button
-          type="submit">
-            Submit
-        </button>
-      </form>
-      <Link href="/sign-in">
-        Already have an account? Sign in
-      </Link>
-    </div>
+            For new organizations:
+            <form onSubmit={handleSubmit}>
+              <p>Email:</p>
+              <input
+                type="email"
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+              />
+              <p>Password:</p>
+              <input
+                type="password"
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+              />
+              <p>Confirm Password:</p>
+              <input
+                type="password"
+                // placeholder="Confirm Password"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={confirmPassword}
+              />
+              <button
+                type="submit">
+                Submit
+              </button>
+            </form>
+            <Link href="/sign-in">
+              Already have an account? Sign in
+            </Link>
+          </div>
         </>
       ) : (
         // 2FA Verification Form (phase 1)
-        <>
-          <h1>2-Step Verification</h1>
-          <p>Please enter the verification code sent to your email.</p>
-          <input
-            type="text"
-            placeholder="Enter verification code"
-            value={otpCode}
-            onChange={(e) => setOtpCode(e.target.value)}
-          />
-          <button onClick={verifyOTP}>Verify</button>
-        </>
+        <div className="h1">
+          <div>2-Step Verification</div>
+          <div>
+            <p>Please enter the verification code sent to your email.</p>
+            <input
+              type="text"
+              placeholder="Enter verification code"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value)}
+            />
+            <button onClick={verifyOTP}>Verify</button>
+          </div>
+        </div>
       )}
     </div>)
- 
+
 }

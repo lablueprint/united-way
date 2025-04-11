@@ -87,7 +87,7 @@ export default function SignUpScreen() {
           </Pressable>
         </View>
         <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
-          <Text style={styles.createAccountLink}>
+          <Text style={styles.signInButtonText}>
             Sign in
           </Text>
         </TouchableOpacity>
@@ -97,10 +97,10 @@ export default function SignUpScreen() {
           <Link style={styles.createAccountLink} href="/sign-up"> Create your account now </Link>
         </View>
 
-         <View style={styles.skipSection}>
-            <Text style={styles.skipLabel}>DON'T WANNA MAKE AN ACCOUNT?</Text>
-            <Link style={styles.skipLink} href="/"> Continue to dashboard </Link>
-         </View>
+        <View style={styles.skipSection}>
+          <Text style={styles.skipLabel}>DON'T WANNA MAKE AN ACCOUNT?</Text>
+          <Link style={styles.skipLink} href="/"> Continue to dashboard </Link>
+        </View>
         {/* Super special dev button */}
         {/* <Link href="/(tabs)" style={styles.text}>
           Skip this and go home
@@ -115,20 +115,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  headerTop: {
-    fontSize: 16,
-    marginTop: 60,
-    marginLeft: 20,
-  },
   formContainer: {
     flex: 1,
     padding: 20,
-    marginTop: 40,
+    marginTop: 60,
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 40,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   inputGroup: {
     marginBottom: 24,

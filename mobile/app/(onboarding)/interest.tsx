@@ -39,7 +39,7 @@ export default function InterestsScreen() {
           This will help us surface the events most relevant to you.
         </Text>
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.interestsContainer}
           showsVerticalScrollIndicator={false}
@@ -67,7 +67,7 @@ export default function InterestsScreen() {
           </View>
         </ScrollView>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.continueButton}
           onPress={handleContinue}
         >
@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+    paddingVertical: 40,
   },
   content: {
     flex: 1,
