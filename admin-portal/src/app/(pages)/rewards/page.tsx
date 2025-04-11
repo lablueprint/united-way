@@ -3,6 +3,8 @@
 import { useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import RewardsSection from "@/app/_components/RewardsSection";
+import TransactionsCard from "@/app/_components/TransactionCard";
+import "../../_styles/rewardsPage.css";
 
 export default function Rewards() {
   const [responseValue, setResponseValue] = useState();
@@ -19,8 +21,13 @@ export default function Rewards() {
 
   return (
     <div>
-     Rewards
-      <RewardsSection></RewardsSection>
+      <div className="page-container"> 
+        <div className="column-1"> <RewardsSection></RewardsSection> </div>
+        <div className="column-2"> 
+          <TransactionsCard></TransactionsCard>
+        </div>
+      </div>
+      
     </div>
   );
 }

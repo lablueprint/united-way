@@ -1,0 +1,17 @@
+/* Parent container using Flexbox */
+.page-container {
+    display: flex; /* Creates a flexbox container */
+    width: 100%; /* Full width of the page */
+    gap: 20px; /* Optional space between columns */
+  }
+  
+  /* The first column (70% width) */
+  .column-1 {
+    width: 60%;
+  }
+  
+  /* The second column (30% width) */
+  .column-2 {
+    width: 40%;
+  }
+  

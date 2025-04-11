@@ -5,7 +5,7 @@ const Organization = require('../models/organizationModel');
 // Create a new transaction
 exports.createTransaction = async (req, res) => {
   try {
-    const { user, organization, reward, isRedeemed } = req.body;
+    const { user, organization, reward, isRedeemed, event, } = req.body;
 
     // Validate required fields
     if (!user || !organization || !reward || isRedeemed === undefined) {
@@ -25,6 +25,7 @@ exports.createTransaction = async (req, res) => {
       organization,
       reward,
       isRedeemed,
+      event,
     });
 
     await newTransaction.save();

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
-import '../_styles/rewards.css';
+import '../_styles/rewardsComponent.css';
 import axios, { AxiosResponse } from 'axios';
 import reward_image from '../../../public/rewards.png';
 
@@ -24,6 +24,7 @@ const RewardsSection = () => {
 
     useEffect(() => {
         const fetchRewards = async () => {
+            // TODO: Replace hard-coded organization with current signed in organization
             try {
                 const currOrg: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`);
                 setRewards(currOrg.data.data.rewards || []);
@@ -100,7 +101,6 @@ const RewardsSection = () => {
 
     return (
         <div className="container">
-            <h2 className="title">Rewards</h2>
             <div className="rewards-left">
                 <img src={reward_image.src} alt="Rewards" className="rewards-image" />
                 {Object.entries(groupedRewards).map(([pointValue, rewardsList]) => (

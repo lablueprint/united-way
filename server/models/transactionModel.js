@@ -19,6 +19,11 @@ const transactionSchema = new mongoose.Schema({
     type: Boolean, // Type of transaction (e.g., earning or redeeming points)
     required: true,
   },
+  event: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event',
+    required: true,
+  },
   timestamp: {
     type: Date,
     default: Date.now, // Auto-generate timestamp when transaction is created
