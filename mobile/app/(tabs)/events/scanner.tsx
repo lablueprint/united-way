@@ -240,9 +240,12 @@ export default function EventScanner() {
 
   const handleDeregister = () => {
     setRegistered(false);
+    setJoinedRaffles(false);
+    setRaffleNumber(null);
     if (eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
       removeEventFromUser(eventId);
       removeUserFromEvent(user.userId);
+      socketRef.current?.emit('leave event', eventDetails);
       socketRef.current?.disconnect();
       socketRef.current = null;
     }

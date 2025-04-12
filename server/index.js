@@ -196,11 +196,24 @@ mongoose.connection.once('open', async () => {
     // Send a message to the client upon connection
     socket.emit('message', 'Welcome to the server!');
 
-    // Have the client join a room based on the event ID
+    // Handle client joining a room based on the event ID
     socket.on('join event', (eventDetails) => {
       const eventRoom = eventDetails._id.toString();
       socket.join(eventRoom);
       console.log(`Client ${socket.id} joined room: ${eventRoom}`);
+    });
+
+    // Handle client leaving an event room
+    socket.on('leave event', (eventDetails) => {
+      const eventRoom = eventDetails._id.toString();
+      socket.leave(eventRoom);
+      console.log(`Client ${socket.id} left room: ${eventRoom}`);
+      socket.leave(`${eventRoom}-raffle`);
+      console.log(`Client ${socket.id} left room: ${eventRoom}-raffle`);
+      // Remove the raffle number from the usedRaffleNumbers set
+      if (socket.raffleNumber && eventRooms[eventRoom]) {
+        eventRooms[eventRoom].usedRaffleNumbers.delete(socket.raffleNumber);
+      }
     });
   
     // Listen for messages from the client
