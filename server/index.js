@@ -15,7 +15,7 @@ const authRouter = require('./routes/authRoutes.js')
 const eventRouter = require('./routes/eventRoutes.js');
 const organizationRouter = require('./routes/organizationRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
-const activityRouter = require('./routes/activityRoutes.js')
+const activityRouter = require('./routes/activityRoutes.js');
 
 // Model Imports
 const eventModel = require('./models/eventModel.js');
@@ -35,6 +35,14 @@ connectToDatabase();
 
 // Start the Node Express server
 const app = express(); // Define app using express, defines handlers
+
+// Socket.IO Setup
+const { createServer } = require("http");
+const socketIo = require("socket.io");
+const server = createServer(app);
+const io = socketIo(server, { cors: { origin: "*" } });
+
+app.set('io', io);
 app.use(cors()); // Use app.use to use router -- cross origin requests, allow retrieve req from diff ip address
 app.use(express.json());
 
@@ -42,7 +50,7 @@ app.use(express.json());
 app.use('/test', exampleRouter); // given ip address, /test is where example router logic will be handle
 app.use('/auth', authRouter);
 
-app.use('/orgs', 
+app.use('/orgs',
   jwt(
   {
     secret: process.env.JWT_SECRET, 
@@ -65,8 +73,10 @@ app.use('/events',
     {
       secret: process.env.JWT_SECRET, 
       algorithms: ["HS256"]
-    })
-)
+    }
+  )
+);
+
 app.use('/events', eventRouter);
 
 app.use('/activities', activityRouter);
@@ -75,12 +85,10 @@ app.get('/', (req, res) => { // defines a route where if we send get req to the 
   res.send('Hello World!'); // routers are groupings of endpoints
 });
 
-// Socket.IO Setup
-const { createServer } = require("http");
-const socketIo = require("socket.io");
-const server = createServer(app);
-const io = socketIo(server, { cors: { origin: "*" } });
-app.set('io', io);
+app.use((req, res, next) => {
+  req.io = io;
+  return next();
+});
 
 mongoose.connection.once('open', async () => {
   // Fetch all events from the database
@@ -101,10 +109,10 @@ mongoose.connection.once('open', async () => {
         io.to(eventRoom).emit('event end', event);
         // Disconnect all sockets in the event room
         io.of("/").in(eventRoom).fetchSockets().then((sockets) => {
-            sockets.forEach((socket) => {
-              // Disconnect each socket
-                socket.disconnect(true);
-            });
+          sockets.forEach((socket) => {
+            // Disconnect each socket
+              socket.disconnect(true);
+          });
         });
       }, endTimeDiff);
     }
@@ -241,11 +249,6 @@ mongoose.connection.once('open', async () => {
       console.log(`Generated raffle number: ${raffleNumber}`);
     });
   });
-});
-
-app.use((req, res, next) => {
-  req.io = io;
-  return next();
 });
 
 server.listen(port, () => {
