@@ -41,7 +41,7 @@ export default function OrganizationProfile() {
     }
 
     return (
-        <div>
+        <div style={{backgroundColor: `green`}}>
             <h1>Organization Profile</h1>
             <div>
                 <h2>Events</h2>
@@ -51,12 +51,12 @@ export default function OrganizationProfile() {
                     })}
                 </div>
             </div>
-            <div>
+            {/* <div> */}
                 <button onClick={() =>setIsEditing(!isEditing)}>
                     {isEditing ? "Cancel Event" : "Create Event"}
                 </button>
                 {isEditing && <CreateEventCard orgName={orgName} changeState={setIsEditing}/>}
-            </div>
+            {/* </div> */}
         </div>
     );
 }

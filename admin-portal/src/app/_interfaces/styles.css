@@ -1,18 +1,50 @@
+@font-face {
+    font-family: "Lausanne";
+    src: url("../_fonts/TWKLausanne-400.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Lausanne";
+    src: url("../_fonts/TWKLausanne-700.otf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Lausanne";
+    src: url("/fonts/TWLausanne-400Italic.otf") format("opentype");
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Lausanne";
+    src: url("/fonts/TWKLausanne-700Italic.otf") format("opentype");
+    font-weight: bold;
+    font-style: italic;
+}
+
 .box {
-    background-color: rgb(56, 203, 23);
     display: flex;
     flex-direction: row;
     height: 100vh;
+    width: 100%;
     justify-content: space-around;
     align-items: center;
+    z-index: 1;
+    position: absolute;
+    top: 0;
 }
 
 .left {
     /* display: flex;  */
     /* flex-grow: 1; */
-    background-color: blue;
+    background-color: white;
     width: 50%;
     height: 100%;
+    font-family: "Lausanne"
     /* justify-content: center; */
     /* flex-direction: row; */
 }
@@ -26,6 +58,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    font-family: "Lausanne"
 }
 
 .titleinputbox {
@@ -163,23 +196,39 @@
 }
 
 .imagebox {
-    background-color:rgb(175, 24, 24);
+    background-color:rgb(236, 236, 236);
     width: 80%;
     height: 80%;
-    left: 50px;
+    margin-top: 50px;
     position: relative;
-    
 }
 
 .penlogo {
     justify-content: center;
     position: absolute;
-    right: 0;
-    bottom: 0;
+    right: 1em;
+    bottom: 1em;
     background-color:rgb(236, 236, 236);
-    width: 10%;
-    height: 10%;
+    width: 2em;
+    height: 2em;
 }
 
+.leftOffset {
+    left: 50px;
+}
+
+.squareButton {
+    border-radius: 3px;
+    color: white;
+    display: flex;
+    background-color:rgb(0, 0, 0);
+    border-style: hidden;
+    padding: 0.5rem 1rem;
+}
+
+.popUpModal {
+    height: "100vh";
+    width: "100vw";
+}
 
 /* // Make absolute modal, height 100% absolute, z-index  */

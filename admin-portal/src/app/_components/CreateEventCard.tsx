@@ -235,23 +235,27 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             {/* The left side */}
             <div className="left">
                 {/* Image selection */}
-                <div className="imagebox">
-                    <div className="penlogo clickable">
-                        <img src={PenLogo.src} />
+                <div style={{display: 'flex', flexDirection: 'column', width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+                    <div className="imagebox">
+                        <img className="penlogo clickable" src={PenLogo.src} />
                     </div>
-                </div>
 
-                <h3>
-                    Customize your Event!
-                </h3>
-
-                <div className="flexIt">
-                    <button>
-                        Add Poll :)
-                    </button>
-                    <button>
-                        Add Rewards :3
-                    </button>
+                    <div style={{display: 'flex', flexDirection: 'column', width: "80%", backgroundColor: "red"}}>
+                        <h3>
+                            <b>
+                                Customize your Event!
+                            </b>
+                        </h3>
+                        {/* row-gap, col-gap */}
+                        <div className="flexIt"> 
+                            <button className="squareButton clickable">
+                                Add Poll
+                            </button>
+                            <button className="squareButton clickable">
+                                Add Rewards
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
             {/* The right side */}
