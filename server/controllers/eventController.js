@@ -202,17 +202,23 @@ const deleteEvent = async (req, res) => {
 const getEventsByDay = async (req, res) => {
   console.log("In getEventsByDay");
   try {
-    const { date } = req.body;
+    const date = req.params.date;
+    console.log("The date you are looking at: " + date);
 
     // Ensure the date is provided
     if (!date) {
+      console.log("No date");
       return res.status(400).json({ error: "A date is required." });
     }
 
     // Parse the date and calculate the start and end of the day
     const startOfDay = new Date(date);
     const endOfDay = new Date(date);
+  
     endOfDay.setHours(23, 59, 59, 999);
+
+    console.log("Start of Date: " + startOfDay.toISOString());
+    console.log("End of Date: " + endOfDay.toISOString());
 
     // Query the database for events on the specific day, sorted by date
     const events = await Event.find({
@@ -221,7 +227,7 @@ const getEventsByDay = async (req, res) => {
         $lte: endOfDay,
       },
     }).sort({ date: 1 }); // Sort by the date field in ascending order
-
+    
     res.status(200).json(events);
   } catch (error) {
     console.error("Error fetching events:", error);

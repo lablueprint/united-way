@@ -1,0 +1,96 @@
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  width: 100%;
+  text-align: center;
+  background-color: #f0f0f0;
+  padding: 10px;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  width: 100%;
+  text-align: center;
+  background-color: #f0f0f0;
+  padding: 10px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px;
+  width: 100%;
+}
+
+.calendar-day {
+  font-weight: bold;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  padding: 10px;
+  width: 100%;
+}
+
+.calendar-cell {
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  border-radius: 4px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.calendar-cell h3 {
+  margin-top: 0;
+}
+
+.calendar-cell ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.calendar-cell ul li {
+  margin-bottom: 5px;
+}
+
+.calendar-cell.day-0 {
+  background-color: #fbfbfb;
+}
+
+.calendar-cell.day-1 {
+  background-color: #fbfbfb;
+}
+
+.calendar-cell.day-2 {
+  background-color: #fbfbfb;
+}
+
+.calendar-cell.day-3 {
+  background-color: #fbfbfb;
+}
+
+.calendar-cell.day-4 {
+  background-color: #fbfbfb;
+}
+
+.calendar-cell.day-5 {
+  background-color: #fbfbfb;
+}
+
+.calendar-cell.day-6 {
+  background-color: #fbfbfb;
+}
