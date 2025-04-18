@@ -235,23 +235,25 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             {/* The left side */}
             <div className="left">
                 {/* Image selection */}
-                <div style={{display: 'flex', flexDirection: 'column', width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+                <div style={{display: 'flex', flexDirection: 'column', width: "90%", height: "90%", justifyContent: "center", alignItems: "center"}}>
                     <div className="imagebox">
                         <img className="penlogo clickable" src={PenLogo.src} />
                     </div>
 
-                    <div style={{display: 'flex', flexDirection: 'column', width: "80%", backgroundColor: "red"}}>
-                        <h3>
-                            <b>
-                                Customize your Event!
-                            </b>
-                        </h3>
+                    <div style={{display: 'flex', flexDirection: 'column', width: "80%", rowGap:"0.7em", marginTop: "1.4em"}}>
+                        <div className="flexIt">
+                            <h3>
+                                <b>
+                                    Customize your Event!
+                                </b>
+                            </h3>
+                        </div>
                         {/* row-gap, col-gap */}
-                        <div className="flexIt"> 
-                            <button className="squareButton clickable">
+                        <div style={{display: 'flex', columnGap: "5%"}}> 
+                            <button style={{color:"white", fontSize:"0.8em", fontWeight:"bold", borderStyle:"hidden", borderRadius:"3px", backgroundColor: "black", height:"3em", width:"10em"}}>
                                 Add Poll
                             </button>
-                            <button className="squareButton clickable">
+                            <button style={{color:"white", fontSize:"0.8em", fontWeight:"bold", borderStyle:"hidden", borderRadius:"3px", backgroundColor: "black", height:"3em", width:"10em"}}>
                                 Add Rewards
                             </button>
                         </div>
@@ -260,8 +262,11 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             </div>
             {/* The right side */}
             <div className="right">
-                {/* Publish Button */}
+                {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
+                    <button className="tagPillSelected clickable" onClick={() =>changeState(false)}>
+                        Cancel
+                    </button>
                     <button className="tagPillSelected clickable" onClick={handleSubmit}>
                         Publish
                     </button>
