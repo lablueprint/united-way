@@ -31,8 +31,9 @@ const getAllUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
-  if (req.auth.role != 'admin') {
-    res.status(401).json({
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401).json(
+    {
       status: "failure",
       message: "Invalid authorization token for request.",
       data: {}
@@ -160,7 +161,6 @@ const editUserDetails = async (req, res) => {
     });
     return;
   }
-
   try {
     const userbyID = await User.findOneAndUpdate({_id: req.params["id"]}, {$set: req.body}, {new: true}); //Doesn't catch invalid fields
     res.status(200).json({
