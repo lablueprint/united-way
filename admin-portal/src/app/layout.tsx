@@ -13,8 +13,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ReduxProvider>
-      {children}
-    </ReduxProvider>
+    <html>
+      <body>
+        <ReduxProvider>
+          {children}
+        </ReduxProvider>
+      </body>
+    </html>
   );
 }

@@ -1,5 +1,5 @@
 /* Center the form on the page */
-.h1 {
+.formContainer {
     display: flex;
     row-gap: 1em;
     flex-direction: column;
@@ -12,7 +12,7 @@
 }
 
 /* Style the form container */
-form {
+.formContent {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -20,15 +20,8 @@ form {
     background: white;
 }
 
-/* Sign in text */
-h1 {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
 /* Label styling */
-p {
+.inputLabel {
     width: 100%;
     font-size: 12px;
     font-weight: bold;
@@ -37,7 +30,7 @@ p {
 }
 
 /* Input fields */
-input {
+.inputField {
     width: 100%;
     padding: 12px;
     font-size: 14px;
@@ -62,7 +55,7 @@ input {
 }
 
 /* Sign in button */
-button {
+.signUpButton {
     width: 100%;
     background-color: #000;
     color: white;
@@ -75,28 +68,28 @@ button {
     margin: 1em 0em;
 }
 
-button:hover {
+.signUpButton:hover {
     background-color: #222;
 }
 
 /* Bottom text */
-.signup-text {
+.signUpText {
     font-size: 12px;
     color: #333;
     margin-top: 15px;
 }
 
 /* Link for new account */
-.signup-text a {
+.signUpText a {
     color: #000;
     text-decoration: none;
     font-weight: bold;
 }
 
-.signup-text a:hover {
+.signUpText a:hover {
     text-decoration: underline;
 }
 
-.signup-container {
+.signUpContainer {
     background-color: #fff;
 }

@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { login } from '../../_utils/redux/orgSlice';
-import "./sign-up.css";
+import styles from "./page.module.css"
 
 export default function SignUp() {
   // phase: 0 = sign-up form; 1 = 2FA verification form.
@@ -155,33 +155,45 @@ export default function SignUp() {
   };
 
   return (
-    <div className="signup-container">
+    <div className={styles.signUpContainer}>
       {phase === 0 ? (
         // Sign-up Form (phase 0)
         <>
-          <div className='h1'>
+          <div className={styles.formContainer}>
             For new organizations:
-            <form onSubmit={handleSubmit}>
-              <p>Email:</p>
+            <form
+              className={styles.formContent}
+              onSubmit={handleSubmit}
+            >
+              <p
+                className={styles.inputLabel}
+              >Email:</p>
               <input
+                className={styles.inputField}
                 type="email"
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
               />
-              <p>Password:</p>
+              <p
+                className={styles.inputLabel}
+              >Password:</p>
               <input
+                className={styles.inputField}
                 type="password"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
               />
-              <p>Confirm Password:</p>
+              <p
+                className={styles.inputLabel}
+              >Confirm Password:</p>
               <input
+                className={styles.inputField}
                 type="password"
-                // placeholder="Confirm Password"
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 value={confirmPassword}
               />
               <button
+                className={styles.signUpButton}
                 type="submit">
                 Submit
               </button>
@@ -193,7 +205,7 @@ export default function SignUp() {
         </>
       ) : (
         // 2FA Verification Form (phase 1)
-        <div className="h1">
+        <div className={styles.signUpText}>
           <div>2-Step Verification</div>
           <div>
             <p>Please enter the verification code sent to your email.</p>

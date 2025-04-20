@@ -145,7 +145,7 @@ export default function EventScanner() {
     return (
       <View style={styles.container}>
         {/* <Poll id={eventId}/> */}
-        <Announcement id={eventId} />
+        <Announcement activityId={eventId} />
         <Text style={styles.title}>Request to Join Event</Text>
         <Text style={styles.eventName}>{eventDetails.name}</Text>
         <View style={styles.buttonContainer}>
