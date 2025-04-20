@@ -1,10 +1,10 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
-import EditCard from "./EditCard";
 import EventModal from './EventModal';
 import { EventData } from '../_interfaces/EventInterfaces';
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
+import EventEditor from './EventEditor';
 
 interface EventCardProps {
     id: string;
@@ -134,7 +134,7 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
                 </>
             )}
 
-            {isEditing && <EditCard id={id} handleCloseClick={handleCloseClick} handleEditEvent={editEvent} />}
+            {isEditing && <EventEditor id={id} handleCloseClick={handleCloseClick} handleEditEvent={editEvent} />}
         </div>
     );
 }

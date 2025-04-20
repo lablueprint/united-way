@@ -4,6 +4,7 @@ import { Camera, CameraView } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 import axios, { AxiosResponse } from "axios";
+import Announcement from "../../_components/Announcement";
 
 interface EventDetails {
   id: string;
@@ -49,7 +50,7 @@ export default function EventScanner() {
 
   const addEventToUser = async (eventId: string) => {
     try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
+      const res = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
         {
           newEvent: eventId,
         },
@@ -59,14 +60,16 @@ export default function EventScanner() {
             'Content-Type': "application/json"
           },
         });
+      console.log("addEventToUser", res);
     } catch (err) {
       console.error(err);
+      // console.log("addevent error")
     }
   }
 
   const addUserToEvent = async (userId: string) => {
     try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
+      const res = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
         {
           newUser: userId,
         },
@@ -77,8 +80,10 @@ export default function EventScanner() {
           },
         }
       );
+      console.log("addUsertoEvent", res)
     } catch (err) {
       console.error(err);
+      // console.log("adduser error")
     }
   };
 
@@ -139,6 +144,8 @@ export default function EventScanner() {
   if (eventDetails) {
     return (
       <View style={styles.container}>
+        {/* <Poll id={eventId}/> */}
+        <Announcement activityId={eventId} />
         <Text style={styles.title}>Request to Join Event</Text>
         <Text style={styles.eventName}>{eventDetails.name}</Text>
         <View style={styles.buttonContainer}>

@@ -1,13 +1,13 @@
-import React from 'react';
+import {useState} from 'react';
 import { View, Button, TextInput } from 'react-native';
 import axios from 'axios';
 
 export default function UserSignUpForm() {
-  const [email, onChangeEmail] = React.useState('');
-  const [demographics, onChangeDemo] = React.useState('');
-  const [name, onChangeName] = React.useState('');
-  const [phoneNum, onChangePhoneNum] = React.useState('');
-  const [community, onChangeCommunity] = React.useState('');
+  const [email, onChangeEmail] = useState('');
+  const [demographics, onChangeDemo] = useState('');
+  const [name, onChangeName] = useState('');
+  const [phoneNum, onChangePhoneNum] = useState('');
+  const [community, onChangeCommunity] = useState('');
 
   const handleAddUser = async () => {
     onChangeEmail('');

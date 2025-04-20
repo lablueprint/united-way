@@ -13,19 +13,11 @@ const styles = StyleSheet.create({
 
 export default function HomeScreen() {
   const user = useSelector((state: { auth: { userId: string, authToken: string, refreshToken: string } }) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+  console.log(`\nuser: ${user.userId}\nauth: ${user.authToken}\nrefresh: ${user.refreshToken}`)
   return (
     <View style={styles.container} >
       <Text>
-        Main home screen test.
-        {
-          `\nuser: ${user.userId}`
-        }
-        {
-          `\nauth: ${user.authToken}`
-        }
-        {
-          `\nrefresh: ${user.refreshToken}`
-        }
+        Main home screen test. Tokens in console.
       </Text>
     </ View>
   );
