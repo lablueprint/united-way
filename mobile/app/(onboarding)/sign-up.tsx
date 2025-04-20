@@ -135,10 +135,27 @@ export default function SignUpScreen() {
   // STEP 4: Add user to the database after OTP verification succeeds
   const addUserToDatabase = async () => {
     try {
+      const timestamp = Date.now(); // Get the current timestamp in milliseconds
+      const date = new Date(timestamp); // Convert timestamp to a Date object
+
+      // Extract year, month, and day
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so add 1
+      const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits for day
+
+      // Format as YYYY-MM-DD
+      const formattedDate = `${year}-${month}-${day}`;
+
       const response: AxiosResponse = await axios.post(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
-        { email, password }
+        {
+          email: email,
+          password: password,
+          dateJoined: formattedDate,
+          profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
+        }
       );
+
       dispatch(login({
         userId: response.data.data._id,
         authToken: response.data.authToken,
