@@ -138,5 +138,3 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         </div>
     );
 }
-
-
