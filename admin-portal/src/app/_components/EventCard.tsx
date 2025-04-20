@@ -3,12 +3,8 @@ import axios, { AxiosResponse } from "axios";
 import EditCard from "./EditCard";
 import EventModal from './EventModal';
 import { EventData } from '../_interfaces/EventInterfaces';
-<<<<<<< HEAD
-import { ActivityContent } from '../_interfaces/EventInterfaces';
-=======
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
->>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
 
 interface EventCardProps {
     id: string;
@@ -33,18 +29,7 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         registeredUsers: [],
         activities: []
     });
-<<<<<<< HEAD
-    const [activityData, setActivityData] = useState<ActivityContent>({
-        eventID: "",
-        type: "",
-        content: "",
-        timeStart: new Date(),
-        timeEnd: new Date(),
-        active: false,
-    });
-=======
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
->>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
 
     const deleteEvent = async (e: MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
@@ -98,28 +83,10 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         }
     };
 
-    const getActivityById = async (activityID :string) => {
-        try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID}`);
-            // console.log("EventCard ActivityID", `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID[0]}`);
-            // console.log("EventCard [0]", activityID[0]);
-            const { data } = response.data;
-            // console.log("EventCard getActivityById", data);
-            return data;
-        } catch (err) {
-            console.log(err);
-            return err;
-        }
-    };
-
     useEffect(() => {
         const fetchData = async () => {
             const data = await getEventById();
-            // console.log("EventCard getEventById", data);
-            // const activityResponse = await getActivityById(data.activity);
-            // console.log("useEffect getActivityById", data.activity);
             setEventData(data);
-            // setActivityData(activityResponse);
         };
         fetchData();
     }, []);
@@ -171,5 +138,3 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         </div>
     );
 }
-
-

@@ -1,15 +1,9 @@
 "use client";
 import axios, { AxiosResponse } from "axios";
-<<<<<<< HEAD
-
-// Added following line
-import OrganizationProfile from "../../_components/OrganizationProfile";
-=======
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
 import OrganizationProfile from '../../_components/OrganizationProfile';
->>>>>>> 687867c14dbc138acdba1ede9ada38afa32e66d0
 
 import { useState } from "react";
 export default function Landing() {
