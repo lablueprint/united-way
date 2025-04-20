@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal} from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import axios, { AxiosResponse } from 'axios';
 import { useState, useEffect } from 'react';
@@ -12,8 +11,8 @@ interface EventData {
   date: Date;
   description: string;
   location: {
-      type: string;
-      coordinates: number[];
+    type: string;
+    coordinates: number[];
   };
   organizerID: string;
   tags: string[];
@@ -35,13 +34,12 @@ export default function EventDetails() {
     date: new Date(),
     description: "",
     location: {
-        type: "",
-        coordinates: [],
+      type: "",
+      coordinates: [],
     },
     tags: [],
     registeredUsers: [],
-    // activities: []
-  }); 
+  });
 
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
   const [organizationName, setOrganizationName] = useState("");
@@ -52,25 +50,25 @@ export default function EventDetails() {
 
   useEffect(() => {
     const fetchEventDetails = async () => {
-        try {
-          const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${id}`, {
-            headers: {
-              'Authorization': `Bearer ${org.authToken}`,
-              'Content-Type': "application/json"
-            },
-          });
-          const { data } = response.data;
-          setEventData({
-            ...data,
-            date: new Date(data.date)
-          });
-          setRegisteredUsers(data.registeredUsers);
-        } catch (err) {
-          console.error(err);
-        }
-      };
+      try {
+        const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${org.authToken}`,
+            'Content-Type': "application/json"
+          },
+        });
+        const { data } = response.data;
+        setEventData({
+          ...data,
+          date: new Date(data.date)
+        });
+        setRegisteredUsers(data.registeredUsers);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  fetchEventDetails();
+    fetchEventDetails();
   }, []);
 
   useEffect(() => {
@@ -82,7 +80,7 @@ export default function EventDetails() {
   if (!id) {
     return <Text>No event details found.</Text>;
   }
-  
+
   const addEventToUser = async (eventId: string) => {
     try {
       await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
@@ -101,7 +99,7 @@ export default function EventDetails() {
   }
 
   const addUserToEvent = async (userId: string) => {
-    try { 
+    try {
       await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventData._id}/addUser`,
         {
           newUser: userId,
@@ -116,9 +114,9 @@ export default function EventDetails() {
     } catch (err) {
       console.error(err);
     }
-    
+
   };
-  
+
   const removeUserFromEvent = async (userId: string) => {
     try {
       await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventData._id}/removeUser`,
@@ -155,7 +153,7 @@ export default function EventDetails() {
     }
   }
 
-  const handleRegister = async () => { 
+  const handleRegister = async () => {
     try {
       await addEventToUser(eventData._id);
       await addUserToEvent(user.userId);
@@ -183,7 +181,7 @@ export default function EventDetails() {
         if (!eventData.organizerID) return;
 
         const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/filtered`, {
-          _id : eventData.organizerID,
+          _id: eventData.organizerID,
         });
 
         const { data } = response.data;
@@ -204,12 +202,12 @@ export default function EventDetails() {
     <View style={styles.container}>
       <View style={styles.imgContain}>
         <View style={styles.iconContain}>
-          <View><TouchableOpacity onPress={() => router.push('/events/scanner')}><Text>back</Text></TouchableOpacity></View>
+          <View><TouchableOpacity onPress={() => router.back()}><Text>back</Text></TouchableOpacity></View>
           <View><Text>share</Text></View>
         </View>
         <View>
-        <Text style={styles.title}>{eventData.name}</Text>
-          <View style={styles.pillContain}> 
+          <Text style={styles.title}>{eventData.name}</Text>
+          <View style={styles.pillContain}>
             <View style={styles.infoPill}>
               <View><Text>x</Text></View>
               <Text style={styles.pillText}>{eventData.date.getDate()} | {getMonthAbbreviation(eventData.date)}</Text>
@@ -235,42 +233,42 @@ export default function EventDetails() {
                 <TouchableOpacity style={styles.infoPill}
                   onPress={() => {
                     console.log('inPress', eventData.organizerID);
-                    router.push({ 
-                      pathname: `/events/associated-events`, 
-                      params: 
-                        { 
-                          id: eventData.organizerID,
-                          exclude: eventData._id,
-                        },
-                      });
+                    router.push({
+                      pathname: `/events/associated-events`,
+                      params:
+                      {
+                        id: eventData.organizerID,
+                        exclude: eventData._id,
+                      },
+                    });
                   }}
-                    >
-                    <Text style={styles.pillText}>More</Text>
-                  </TouchableOpacity>
-                </View>
+                >
+                  <Text style={styles.pillText}>More</Text>
+                </TouchableOpacity>
+              </View>
             </View>
             {/* conditionally displayed based on registered status */}
-            {(registeredUsers).includes(user.userId) ? 
-            <></>
-            :
-            <View style={styles.rowFlex}>
-              <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
-            </View>
-          }
+            {(registeredUsers).includes(user.userId) ?
+              <></>
+              :
+              <View style={styles.rowFlex}>
+                <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.orgButton}><Text>x</Text></TouchableOpacity>
+              </View>
+            }
           </View>
         </View>
         <View style={styles.section}>
           <Text style={styles.subheader}>Description</Text>
           <Text style={styles.description}>{eventData.description}</Text>
-          {(registeredUsers).includes(user.userId) ? 
+          {(registeredUsers).includes(user.userId) ?
             <TouchableOpacity onPress={handleUnregister}>
               <Text style={styles.darkButton}>Cancel</Text>
-            </TouchableOpacity>  
+            </TouchableOpacity>
             :
             <TouchableOpacity onPress={handleRegister}>
               <Text style={styles.darkButton}>RSVP</Text>
-            </TouchableOpacity> 
+            </TouchableOpacity>
           }
         </View>
         <View style={styles.section}>
@@ -281,22 +279,22 @@ export default function EventDetails() {
             <Text style={styles.reward}>Reward Component Placeholder</Text>
           </View>
         </View>
-        {(registeredUsers).includes(user.userId) ? 
-            <View style={styles.section}>
-              <Text style={styles.subheader}>Raffle</Text>
-              <View style={styles.raffleContain}>
-                <Text style={styles.reward}>Pic of Gift</Text>
-                <View style={styles.giftInfo}>
-                  <Text style={styles.giftTitle}>Title of Gift</Text>
-                  <Text style={styles.description}>Raffle Gift Details</Text>
-                </View>
+        {(registeredUsers).includes(user.userId) ?
+          <View style={styles.section}>
+            <Text style={styles.subheader}>Raffle</Text>
+            <View style={styles.raffleContain}>
+              <Text style={styles.reward}>Pic of Gift</Text>
+              <View style={styles.giftInfo}>
+                <Text style={styles.giftTitle}>Title of Gift</Text>
+                <Text style={styles.description}>Raffle Gift Details</Text>
               </View>
-              <TouchableOpacity><Text style={styles.darkButton}>Join</Text></TouchableOpacity>
             </View>
-            :
-            <></>
-          }
-        
+            <TouchableOpacity><Text style={styles.darkButton}>Join</Text></TouchableOpacity>
+          </View>
+          :
+          <></>
+        }
+
       </ScrollView>
     </View>
   );
@@ -424,7 +422,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
   },
-  buttonWrap : {
+  buttonWrap: {
     flexShrink: 0,
   }
 });

@@ -3,16 +3,6 @@ import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import { useRouter, usePathname, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSelector } from 'react-redux';
-import axios, { AxiosResponse } from "axios";
-import { EventData } from '@/app/_interfaces/EventInterfaces';
-// import { useSearchParams } from 'next/navigation';
-
-interface EventDetails {
-  id: string;
-  name: string;
-  description: string;
-  org: string;
-}
 
 export default function EventScanner() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -20,11 +10,13 @@ export default function EventScanner() {
   const [hasNavigated, setHasNavigated] = useState(false);
 
 
-  const user = useSelector((state) => { return { 
-    userId: state.auth.userId, 
-    authToken: state.auth.authToken, 
-    refreshToken: state.auth.refreshToken 
-  } });
+  const user = useSelector((state) => {
+    return {
+      userId: state.auth.userId,
+      authToken: state.auth.authToken,
+      refreshToken: state.auth.refreshToken
+    }
+  });
 
   const router = useRouter();
   const pathname = usePathname();
@@ -51,13 +43,14 @@ export default function EventScanner() {
 
     if (pathname === '/events/[id]' && params.id === data) return;
 
-    router.push({ 
-      pathname: `/events/[id]`, 
-      params: 
-        { 
-          id: data,
-        }});
-    };
+    router.push({
+      pathname: `/events/[id]`,
+      params:
+      {
+        id: data,
+      }
+    });
+  };
 
   if (hasPermission === null) {
     return <Text>Requesting for camera permission...</Text>;

@@ -30,7 +30,6 @@ export default function associatedEvents() {
   useEffect(() => {
     const getAssociatedEvents = async () => {
       try {
-        // console.log('orgId', organizerId);
         const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/${id}/events`, {
           headers: {
             'Authorization': `Bearer ${org.authToken}`,
@@ -39,21 +38,21 @@ export default function associatedEvents() {
         });
         const { data: eventIds } = response.data;
         const filteredEventIds = eventIds.filter((eventId: string) => eventId !== exclude);
-        const eventRequests = filteredEventIds.map((eventId: string) => 
+        const eventRequests = filteredEventIds.map((eventId: string) =>
           axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${org.authToken}`,
-              'Content-Type': "application/json"
-            },
-          }
+            {
+              headers: {
+                'Authorization': `Bearer ${org.authToken}`,
+                'Content-Type': "application/json"
+              },
+            }
           )
         );
 
         const eventResponses = await Promise.all(eventRequests);
         const fullEvents = eventResponses.map((res) => res.data.data);
         setAssociatedEvents(fullEvents);
-    
+
       } catch (err) {
         console.error(err);
       }
