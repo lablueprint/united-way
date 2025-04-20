@@ -22,7 +22,11 @@ const createEvent = async (req, res) => {
 
 const addUserToEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   
@@ -56,7 +60,11 @@ const addUserToEvent = async (req, res) => {
 
 const removeUserFromEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -194,6 +202,43 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const addActivity = async (req, res) => {
+  try {
+      const { id } = req.params; 
+      const { activity } = req.body; 
+
+      const event = await Event.findById(id);
+      
+      event.activity.push(activity);
+
+      await event.save();
+
+      res.status(200).json({ message: "Activity added successfully.", event });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "An error occurred while adding the activity.", error });
+  }
+};
+
+const getPolls = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    const polls = event.activity.filter(a => a.type === 'poll' );
+    
+    res.status(200).json({
+      polls: polls
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: event could not be received.",
+    });
+  }
+}
+
 module.exports = {
   createEvent,
   removeUserFromEvent,
@@ -203,4 +248,6 @@ module.exports = {
   editEventDetails,
   deleteEvent,
   addUserToEvent,
+  addActivity,
+  getPolls,
 };

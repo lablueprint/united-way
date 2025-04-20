@@ -5,7 +5,11 @@ const { generateToken } = require("../controllers/authController")
 
 const getAllUsers = async (req, res) => {
   if (req.auth.role != 'admin') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -31,7 +35,7 @@ const getUserById = async (req, res) => {
     res.status(401).json(
     {
       status: "failure",
-      message: "Unauthorized access to retreive user by ID",
+      message: "Invalid authorization token for request.",
       data: {}
     });
     return;
@@ -57,7 +61,11 @@ const getUserById = async (req, res) => {
 
 const addEventToUser = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -90,7 +98,11 @@ const addEventToUser = async (req, res) => {
 
 const removeEventFromUser = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   
@@ -142,7 +154,11 @@ const getUserByEmail = async (req, res) => {
 
 const editUserDetails = async (req, res) => {
   if (req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   try {
@@ -163,7 +179,11 @@ const editUserDetails = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   if (req.auth.role != 'user' && req.auth.role != 'admin') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
