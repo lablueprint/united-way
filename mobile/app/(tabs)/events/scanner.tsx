@@ -3,6 +3,9 @@ import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import { useRouter, usePathname, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSelector } from 'react-redux';
+import axios, { AxiosResponse } from "axios";
+import Announcement from "../../_components/Announcement";
+
 interface EventDetails {
   id: string;
   name: string;

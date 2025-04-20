@@ -7,6 +7,8 @@ import axios, { AxiosResponse } from "axios";
 import { login } from '../../_utils/redux/orgSlice';
 import { useDispatch } from 'react-redux';
 
+import styles from './page.module.css'
+
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -61,26 +63,35 @@ export default function SignIn() {
   }
 
   return (
-    <div className='h1'>
+    <div className={styles.formContainer}>
       For returning organizations:
-      <form onSubmit={handleSubmit}>
-        <p>Email:</p>
+      <form
+        className={styles.formContent}
+        onSubmit={handleSubmit}>
+        <p
+          className={styles.inputLabel}
+        >Email:</p>
         <input
+          className={styles.inputField}
           type="email"
           // placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
           value={email}
         />
-        <p>Password:</p>
+        <p
+          className={styles.inputLabel}
+        >Password:</p>
         <input
+          className={styles.inputField}
           type="password"
           // placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
           value={password}
         />
         <button
+          className={styles.signInButton}
           type="submit">
-            Submit
+          Submit
         </button>
       </form>
       <Link href="/sign-up">

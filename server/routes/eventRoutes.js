@@ -17,4 +17,7 @@ eventRouter.patch('/:id/addUser', eventController.addUserToEvent);
 eventRouter.patch('/:id/removeUser', eventController.removeUserFromEvent);
 eventRouter.delete('/:id', eventController.deleteEvent);
 
+eventRouter.post('/:id/addActivity', eventController.addActivity)
+eventRouter.get('/:id/getPolls', eventController.getPolls)
+
 module.exports = eventRouter;
