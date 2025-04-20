@@ -25,6 +25,7 @@ export default function OrganizationProfile() {
                         }
                     }
                 );
+                console.log(response);
                 const { data } = response.data;
                 setEventIds(data.map((event: EventData) => event._id));
             }

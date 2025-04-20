@@ -3,11 +3,11 @@ import { View, Text, ScrollView, StyleSheet } from "react-native";
 import axios from "axios";
 
 interface AnnouncementProps {
-  id: string;
+  activityId: string;
 }
 
-export default function Announcement({ id }: AnnouncementProps) {
-  const [announcements, setAnnouncements] = useState<AnnouncementData[]>([]);
+export default function Announcement({ activityId }: AnnouncementProps) {
+  const [announcement, setAnnouncement] = useState<AnnouncementData>();
 
   interface AnnouncementData {
     eventID: string;
@@ -17,45 +17,22 @@ export default function Announcement({ id }: AnnouncementProps) {
     timeEnd: string;
   }
 
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncement = async () => {
     try {
-      console.log("Fetching announcements for eventID:", id);
-      const { data } = await axios.post(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/filtered`,
-        { eventID: id, type: "announcement" }
+      const { data } = await axios.get(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/${activityId}`,
       );
-
-      console.log("Fetched announcements:", data.data);
-
-      if (data.data.length > 0) {
-        const activeAnnouncements = data.data.filter((announcement: AnnouncementData) => {
-          const now = new Date();
-          const startTime = new Date(announcement.timeStart);
-          const endTime = new Date(announcement.timeEnd);
-
-          return now >= startTime && now <= endTime;
-        });
-
-        setAnnouncements(activeAnnouncements);
-      } else {
-        setAnnouncements([]);
-      }
+      setAnnouncement(data.data);
     } catch (error) {
       console.error("Error fetching announcements:", error);
-      setAnnouncements([]);
     }
   };
 
   useEffect(() => {
-    fetchAnnouncements();
-  }, [id]);
+    fetchAnnouncement();
+  }, [activityId]);
 
-  useEffect(() => {
-    const interval = setInterval(() => fetchAnnouncements(), 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (announcements.length === 0) {
+  if (!announcement) {
     return (
       <ScrollView>
         <Text style={styles.loadingText}>No active announcements at this time.</Text>
@@ -65,19 +42,17 @@ export default function Announcement({ id }: AnnouncementProps) {
 
   return (
     <ScrollView>
-      {announcements.map((announcement) => (
-        <View key={announcement._id} style={styles.card}>
-          <Text style={styles.timeText}>
-            Aired on: {new Date(announcement.timeStart).toLocaleString()}
-          </Text>
+      <View key={announcement._id} style={styles.card}>
+        <Text style={styles.timeText}>
+          Aired on: {new Date(announcement.timeStart).toLocaleString()}
+        </Text>
 
-          {announcement.content.map((textObj, index) => (
-            <Text key={index} style={styles.announcementText}>
-              {textObj.text}
-            </Text>
-          ))}
-        </View>
-      ))}
+        {announcement.content.map((textObj, index) => (
+          <Text key={index} style={styles.announcementText}>
+            {textObj.text}
+          </Text>
+        ))}
+      </View>
     </ScrollView>
   );
 }

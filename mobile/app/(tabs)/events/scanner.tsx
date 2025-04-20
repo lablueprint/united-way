@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 import axios, { AxiosResponse } from "axios";
 import Announcement from "../../_components/Announcement";
-import Poll from "../../_components/Poll";
 
 interface EventDetails {
   id: string;
@@ -61,7 +60,7 @@ export default function EventScanner() {
             'Content-Type': "application/json"
           },
         });
-        console.log("addEventToUser", res);
+      console.log("addEventToUser", res);
     } catch (err) {
       console.error(err);
       // console.log("addevent error")
@@ -146,7 +145,7 @@ export default function EventScanner() {
     return (
       <View style={styles.container}>
         {/* <Poll id={eventId}/> */}
-        <Announcement id={eventId}/>
+        <Announcement id={eventId} />
         <Text style={styles.title}>Request to Join Event</Text>
         <Text style={styles.eventName}>{eventDetails.name}</Text>
         <View style={styles.buttonContainer}>

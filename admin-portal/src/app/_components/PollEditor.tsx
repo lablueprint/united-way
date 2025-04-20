@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
-import { Activity } from "../_interfaces/EventInterfaces";
 
 interface Choice {
   id: number;
@@ -22,7 +21,6 @@ interface PollEditorProps {
 
 export default function PollEditor({ activityId, timeStart, timeEnd }: PollEditorProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [activity, setActivity] = useState<Activity>();
   const [questionIndex, setQuestionIndex] = useState<number>(0);
   const [questionText, setQuestionText] = useState<string>("");
   const [choices, setChoices] = useState<Choice[]>([]);
@@ -30,7 +28,6 @@ export default function PollEditor({ activityId, timeStart, timeEnd }: PollEdito
   useEffect(() => {
     const fetchQuestions = async () => {
       const activityData = await getActivityById(activityId);
-      setActivity(activityData);
       setQuestions(activityData.content);
 
       if (!activityData.content || activityData.content.length === 0) {

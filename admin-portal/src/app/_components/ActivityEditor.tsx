@@ -10,12 +10,12 @@ import DateTimePicker from "react-datetime-picker";
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
-interface DisplayActivityProps {
+interface ActivityEditorProps {
   id: string;
   refresh?: number;
 }
 
-export default function DisplayActivity({ id, refresh }: DisplayActivityProps) {
+export default function ActivityEditor({ id, refresh }: ActivityEditorProps) {
   const [start, setStart] = useState<Value>(new Date());
   const [end, setEnd] = useState<Value>(new Date());
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -52,8 +52,8 @@ export default function DisplayActivity({ id, refresh }: DisplayActivityProps) {
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${selectedActivity._id}`,
         { timeStart: newStart, timeEnd: newEnd }
       );
-      
-      fetchActivities(); 
+
+      fetchActivities();
       setSelectedActivity({
         ...selectedActivity,
         timeStart: newStart,
