@@ -39,7 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-next.config.ts
+admin-portal/next.config.ts
 
 ##################################################
 

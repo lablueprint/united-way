@@ -31,93 +31,101 @@
     flex-direction: row;
     height: 100vh;
     width: 100%;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 1;
     position: absolute;
     top: 0;
 }
 
 .left {
-    /* display: flex;  */
-    /* flex-grow: 1; */
     background-color: white;
-    width: 50%;
+    width: 60%;
     height: 100%;
-    font-family: "Lausanne"
-    /* justify-content: center; */
-    /* flex-direction: row; */
+    font-family: "Lausanne";
+    padding-left: 1em;
 }
 
 .right {
-    position: relative;
     width: 50%;
     height: 100%;
     background-color:rgb(255, 255, 255);
-    font-family: "Helvetica Neue";
     display: flex;
     flex-direction: column;
     gap: 10px;
-    font-family: "Lausanne"
+    font-family: "Lausanne";
+    padding-right: 5em;
 }
 
 .titleinputbox {
     background-color:rgb(236, 236, 236);
     width: 100%;
-    display: flex; 
     font-size: 2rem;
     font-weight: bold;
-    resize: both;
-    min-height: 40px;
+    padding: 0.1em 0.1em;
+    font-family: "Lausanne";
 }
 
-.inputbox {
+.descriptionInputBox {
+    padding: 0.7em 0.5em;
     background-color:rgb(236, 236, 236);
     display: flex; 
     width: 100%;
     font-size: 1rem;
+    font-family: "Lausanne";
+    border: none;
+    overflow: scroll;
+    height: 5em;
+    max-width: 100%;
+    min-width: 100%;
+    word-wrap: break-word; 
+    overflow-x: hidden;
+}
+
+.locationInputbox {
+    margin-top: 0.5em;
+    background-color:rgb(236, 236, 236);
+    padding: 0.7em 0.5em;
+    display: flex; 
+    width: 100%;
+    font-size: 1rem;
     font-weight: bold;
-    resize: both;
-    min-height: 20px;
+    font-family: "Lausanne";
+    border: none;
+    height: 2.5em;
+    max-height: 4em;
+    max-width: 100%;
+    min-width: 100%;
+    cursor: pointer;
 }
 
 .graybox {
-    border-color: rgb(255, 255, 255);
     padding: 0.3rem 0.3rem;
     display: flex; 
     flex-direction: row;
+    column-gap: 10px;
     background-color:rgb(236, 236, 236);
     align-items: center;
-    white-space: pre-wrap;
-}
-
-.columngraybox {
-    border-color: rgb(255, 255, 255);
-    padding: 0.3rem 0.3rem;
-    display: flex; 
-    flex-direction: column;
-    background-color:rgb(236, 236, 236);
-    position: relative;
-    z-index: 0;
 }
 
 .tagPillNotSelected {
     border-radius: 30px;
     display: flex;
-    background-color: white;
+    background-color: rgb(236, 236, 236);;
     border-color:rgb(120, 120, 120);
     border-style: solid;
     padding: 0.3rem 0.3rem;
+    border-width: 1.5px;
+    cursor: pointer;
 }
 
 .tagPillSelected {
+    border-width: 1.5px;
     border-radius: 30px;
     color: white;
     display: flex;
     background-color:rgb(54, 54, 54);
-    border-color:rgb(120, 120, 120);
+    border-color:rgb(54, 54, 54);
     border-style: solid;
     padding: 0.3rem 0.3rem;
+    cursor: pointer;
 }
 
 .searchOptions {
@@ -125,6 +133,7 @@
     display: flex;
     flex-direction: column;
     position: absolute;
+    cursor: pointer;
 }
 
 .searchOptionsParent {
@@ -133,16 +142,13 @@
     position: relative;
 }
 
-.centergraybox {
-    display: flex;
-    flex-grow: 4;
-}
-
 .goToTheRight {
     display: flex;
     margin-left: auto;
     justify-content: flex-end;
     flex-direction: row;
+    column-gap: 1em;
+    margin-top: 0.8em;
 }
 
 .tagOptions {
@@ -150,10 +156,6 @@
     flex-direction: row;
     gap: 10px;
     flex-wrap: wrap;
-}
-
-.spacing {
-    gap: 10px;
 }
 
 .flexIt {
@@ -164,13 +166,43 @@
     display: flex;
     object-fit: contain;
     clip-path: circle();
-    height: 2em;
-    width: 2em;
+    height: 1.5em;
+    width: 1.5em;
 }
 
 .dateRow {
+    padding: 0.1rem 0.3rem;
+    flex-direction: row;
+    background-color:rgb(236, 236, 236);
+    align-items: center;
     display: flex;
-    gap: 20px;
+    gap: 5px;
+    margin-top: 1.5em;
+}
+
+.date {
+    flex-direction: row;
+    column-gap: 10px;
+    font-weight: bold;
+    display: flex;
+    cursor: pointer;
+}
+
+.timebox {
+    display: flex;
+    flex-direction: row;
+    column-gap: 6px;
+    align-items: 'center';
+}
+
+.time {
+    display: flex;
+    align-items: 'center';
+    border-style: hidden;
+    background-color:rgb(236, 236, 236);
+    font-family: "Lausanne";
+    font-weight: bold;
+    position: 'relative';
 }
 
 .hiddenModal {
@@ -189,10 +221,8 @@
 .overlapInput {
     position: relative;
     display: inline-block;
-}
-
-.noborder {
-    border: none;
+    display: flex;
+    alignItems: center;
 }
 
 .imagebox {
@@ -211,10 +241,7 @@
     background-color:rgb(236, 236, 236);
     width: 2em;
     height: 2em;
-}
-
-.leftOffset {
-    left: 50px;
+    cursor: pointer;
 }
 
 .squareButton {
@@ -231,4 +258,134 @@
     width: "100vw";
 }
 
-/* // Make absolute modal, height 100% absolute, z-index  */
+.bigPillButton {
+    color: white;
+    font-weight: bold;
+    font-size: 0.8em;
+    background-color:rgb(0, 0, 0);
+    border-style: hidden;
+    border-radius: 40px;
+    height: 3em;
+    width: 7em;
+    cursor: pointer;
+}
+
+.editButton {
+    color: rgb(149, 149, 149);
+    border-radius: 30px;
+    background-color: rgb(236, 236, 236);
+    border-color:rgb(189, 189, 189);
+    border-style: solid;
+    border-width: 1.5px;
+    font-weight: bold;
+    padding: 0.3rem 0.5rem;
+    display: flex;
+    margin-left: auto;
+    justify-content: flex-end;
+    flex-direction: row;
+    column-gap: 1em;
+    cursor: pointer;
+}
+
+.descriptionTitle {
+    margin-top: 1em;
+    font-weight: bold;
+    display: flex;
+    font-size: 1.2rem;
+}
+
+.selectKeywordText {
+    font-weight: bold;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.blankImage {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    height: 90%;
+    justify-content: center;
+    align-items: center;
+}
+
+.leftBottom {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    rowGap: 0.7em;
+    margin-top: 1.4em;
+}
+
+.customizeText {
+    font-weight: bold;
+    display: flex;
+    font-size: 1.3em;
+    margin-bottom: 0.7em;
+}
+
+.customizeButtonFormat {
+    display: flex;
+    column-gap: 5%;
+}
+
+.customizeButton {
+    color: white;
+    font-size: 0.8em;
+    font-weight: bold;
+    border-style: hidden;
+    border-radius: 3px;
+    background-color: black;
+    height: 3em;
+    width: 10em;
+    cursor: pointer;
+}
+
+.timezone {
+    opacity: 0;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    cursor: pointer;
+}
+
+.eventBox {
+    padding: 0.3rem 0.3rem;
+    display: flex; 
+    flex-direction: row;
+    column-gap: 10px;
+    background-color:rgb(236, 236, 236);
+    align-items: center;
+    cursor: pointer;
+}
+
+.orgInfoBox {
+    padding: 0.3rem 0.3rem;
+    display: flex; 
+    flex-direction: row;
+    column-gap: 10px;
+    background-color:rgb(236, 236, 236);
+    align-items: center;
+    cursor: pointer;
+}
+
+.dateTimeZoneBox {
+    padding: 0.3rem 0.3rem;
+    display: flex; 
+    flex-direction: row;
+    column-gap: 10px;
+    background-color:rgb(236, 236, 236);
+    align-items: center;
+    position: relative;
+    display: inline-block;
+    display: flex;
+    alignItems: center;
+}
+
+.timeParent {
+    display: flex;
+    flex-direction: row;
+    column-gap: 6px;
+    align-items: 'center';
+    position: 'relative'
+}

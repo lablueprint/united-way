@@ -235,25 +235,20 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             {/* The left side */}
             <div className="left">
                 {/* Image selection */}
-                <div style={{display: 'flex', flexDirection: 'column', width: "90%", height: "90%", justifyContent: "center", alignItems: "center"}}>
+                <div className="blankImage">
                     <div className="imagebox">
-                        <img className="penlogo clickable" src={PenLogo.src} />
+                        <img className="penlogo" src={PenLogo.src} />
                     </div>
 
-                    <div style={{display: 'flex', flexDirection: 'column', width: "80%", rowGap:"0.7em", marginTop: "1.4em"}}>
-                        <div className="flexIt">
-                            <h3>
-                                <b>
-                                    Customize your Event!
-                                </b>
-                            </h3>
+                    <div className="leftBottom">
+                        <div className="customizeText">
+                            Customize your Event
                         </div>
-                        {/* row-gap, col-gap */}
-                        <div style={{display: 'flex', columnGap: "5%"}}> 
-                            <button style={{color:"white", fontSize:"0.8em", fontWeight:"bold", borderStyle:"hidden", borderRadius:"3px", backgroundColor: "black", height:"3em", width:"10em"}}>
+                        <div className="customizeButtonFormat"> 
+                            <button className="customizeButton">
                                 Add Poll
                             </button>
-                            <button style={{color:"white", fontSize:"0.8em", fontWeight:"bold", borderStyle:"hidden", borderRadius:"3px", backgroundColor: "black", height:"3em", width:"10em"}}>
+                            <button className="customizeButton">
                                 Add Rewards
                             </button>
                         </div>
@@ -262,18 +257,19 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             </div>
             {/* The right side */}
             <div className="right">
+
                 {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
-                    <button className="tagPillSelected clickable" onClick={() =>changeState(false)}>
-                        Cancel
+                    <button className="bigPillButton" onClick={() =>changeState(false)}>
+                        CANCEL
                     </button>
-                    <button className="tagPillSelected clickable" onClick={handleSubmit}>
-                        Publish
+                    <button className="bigPillButton" onClick={handleSubmit}>
+                        PUBLISH
                     </button>
                 </div>
 
                 {/* Event Name */}
-                <div className="graybox clickable" onClick={()=>setIsEditingName(true)}>
+                <div className="eventBox" onClick={()=>setIsEditingName(true)}>
                     {
                         // If is editing, then put in a textbox. If not, then its plain text
                         isEditingName ? 
@@ -289,28 +285,26 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 </div>
                 
                 {/* Organization Info */}
-                <div className="graybox spacing">
+                <div className="orgInfoBox">
                     <div className="orgLogo">
                         <img src={TestLogo.src} />
                     </div>
                     <div className="flexIt">
-                        <h3>
-                            Hosted by <u>{orgName}</u>:
-                        </h3>
+                        <h4>
+                            Hosted by <u style={{color: '#696969'}}>{orgName}</u>:
+                        </h4>
                     </div>
-                    <div className="goToTheRight">
-                        <button className="tagPillNotSelected clickable">
-                            Edit
-                        </button>
-                    </div>
+                    <button className="editButton">
+                        EDIT
+                    </button>
                 </div>
 
                 {/* Date, Time, Timezone */}
-                <div className="graybox dateRow">
-                    <div className="graybox overlapInput">
+                <div className="dateRow">
+                    <div className="dateTimeZoneBox">
                         {/* Date */}
                         <div 
-                            className="flexIt dateRow clickable"
+                            className="date"
                             onClick={() => (document.getElementById('hiddenDateInput') as HTMLInputElement).showPicker()}
                         >
                             <div>{ getDayOfWeek(updatedDate) }</div>
@@ -325,103 +319,74 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                             className="hiddenModal flexIt"
                             value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''}
                             onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value)))}}
-                            />
+                        />
                     </div>
 
-                    {/* Start Time */}
-                    <div className="flexIt">
-                        <div 
-                            className="flexIt clickable"
-                            onClick={() => (document.getElementById('hiddenStartTimeInput') as HTMLInputElement).showPicker()}
-                        >
-                            { getTimeString(startTime) }
-                        </div>
-                    
-                        {/* Hidden Time Input Interface */}
+                    <div className="timebox">
                         <input
                             type="time"
-                            id="hiddenStartTimeInput"
-                            className="hiddenModal"
+                            className="time"
                             value={startTime}
                             onChange={(event) => setStartTime(event.target.value)}
                         />
-                    </div>
 
-                    <h3>–</h3>
+                        <div className="time">–</div>
 
-                    {/* End Time */}
-                    <div className="flexIt">
-                        <div 
-                            className="flexIt clickable"
-                            onClick={() => (document.getElementById('hiddenEndTimeInput') as HTMLInputElement).showPicker()}
-                        >
-                            { getTimeString(endTime) }
-                        </div>
-                    
-                        {/* Hidden Time Input Interface */}
                         <input
                             type="time"
-                            id="hiddenEndTimeInput"
-                            className="hiddenModal"
+                            className="time"
                             value={endTime}
                             onChange={(event) => setEndTime(event.target.value)}
                         />
-                    </div>
+                    
 
-                    <h3>•</h3>
-
-                    {/* Time Zone */}
-                    <div className="flexIt">
-                        <div 
-                            className="flexIt clickable"
-                            onClick={() => (document.getElementById('hiddenTimeZoneInput') as HTMLInputElement).showPicker()}
-                        >
-                            {selectedTimeZone} 
+                        <div>•</div>
+                    
+                        {/* Time Zone */}
+                        {/* For whatever reason, the code breaks if you remove the position: relative in-place design */}
+                        <div className="time" style={{ position: 'relative' }}>
+                            <select 
+                                className="timezone"
+                                value={selectedTimeZone}
+                                onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                                    setSelectedTimeZone(event.target.value);
+                                }}
+                            >
+                                {timeZones.map((zone) => (
+                                    <option key={zone.value} value={zone.value}>{zone.label}</option>
+                                ))}
+                            </select>
+                            <div className="clickable">
+                                {selectedTimeZone}
+                            </div>
                         </div>
-                        {/* Hidden Time Zone Picker */}
-                        <select 
-                            id="hiddenTimeZoneInput"
-                            value={selectedTimeZone}
-                            className="hiddenModal"
-                            onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
-                                setSelectedTimeZone(event.target.value);
-                            }}
-                        >
-                            {timeZones.map((zone) => (
-                                <option key={zone.value} value={zone.value}>{zone.label}</option>
-                            ))}
-                        </select>
                     </div>
                 </div>
-                
+
                 {/* Description */}
-                <div className="flexIt">
-                    <div className="flexIt">
-                        <b>
-                            Description:
-                        </b>  
-                    </div>
-                    <br/>
-                    <div className="columngraybox clickable flexIt" onClick={() => setIsEditingDescription(true)}>
-                        {
-                            // If is editing, then put in a textbox. If not, then its plain text
-                            isEditingDescription ? 
-                            <textarea onKeyDown={(e)=> {
-                                if (e.key === "Enter") {
-                                    setIsEditingDescription(false)
-                                }
-                                }} className="inputbox" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} 
-                            />
-                            : 
-                            <div className="inputbox">{updatedDescription}</div>
-                        }
-                    </div>
+                <div className="descriptionTitle">
+                    Description:
+                </div>  
+            
+                <div className="clickable" onClick={() => setIsEditingDescription(true)}>
+                    {
+                        // If is editing, then put in a textbox. If not, then its plain text
+                        isEditingDescription ? 
+                        <textarea onKeyDown={(e)=> {
+                            if (e.key === "Enter") {
+                                setIsEditingDescription(false)
+                            }
+                            }} className="descriptionInputBox" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} 
+                        />
+                        : 
+                        <div className="descriptionInputBox">{updatedDescription}</div>
+                    }
                 </div>
                 
                 {/* Location */}
-                <div className="columngraybox flexIt">
-                    <div className="columngraybox flexIt">
-                        <textarea className="inputbox clickable noborder" onChange={(e)=>{
+                <div>
+                    <div className="flexIt">
+                        <textarea className="locationInputbox" onChange={(e)=>{
                             // If an existing timeout exists, kill it (because we're going to set a new one)
                             if (timeoutID) {
                                 clearTimeout(timeoutID);
@@ -430,11 +395,11 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                             let newTimeoutID = setTimeout(() => getLocationJSON(e.target.value), 500);
                             setTimeoutID(newTimeoutID);
                         }} name="location" placeholder="Location" value={updatedAddress} 
-                    />
+                        />
                     </div>
                     {/* If multiple results return, this is the modal that pops up */}
                     <div className="searchOptionsParent">
-                        <div className="searchOptions clickable">
+                        <div className="searchOptions">
                             {
                                 options.map((option, index) => (
                                     <button key={index}
@@ -452,32 +417,29 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     </div>
                 </div>
 
+                <div className="selectKeywordText">
+                    Select Keywords:
+                </div>
+
                 {/* Keyword Buttons */}
-                <div>
-                    <div className="flexIt">
-                        <b>
-                            Select Keywords:
-                        </b>
-                    </div>
-                    <div className="tagOptions flexIt">
-                        {
-                            EventTags.map((tagName, index) => {
-                                return (
-                                    <button 
-                                    className = { updatedTags[index] ? "tagPillSelected clickable" :  "tagPillNotSelected clickable" }
-                                    key={index} 
-                                    onClick={() => {
-                                        const newTags = [...updatedTags];
-                                        newTags[index] = !newTags[index];
-                                        setUpdatedTags(newTags);
-                                    }}
-                                    >
-                                        {tagName}
-                                    </button>
-                                )
-                            })
-                        }
-                    </div>
+                <div className="tagOptions flexIt">
+                    {
+                        EventTags.map((tagName, index) => {
+                            return (
+                                <button 
+                                className = { updatedTags[index] ? "tagPillSelected" :  "tagPillNotSelected" }
+                                key={index} 
+                                onClick={() => {
+                                    const newTags = [...updatedTags];
+                                    newTags[index] = !newTags[index];
+                                    setUpdatedTags(newTags);
+                                }}
+                                >
+                                    {tagName}
+                                </button>
+                            )
+                        })
+                    }
                 </div>
             </div> 
         </div>
