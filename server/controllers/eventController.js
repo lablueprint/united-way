@@ -22,7 +22,11 @@ const createEvent = async (req, res) => {
 
 const addUserToEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   
@@ -56,7 +60,11 @@ const addUserToEvent = async (req, res) => {
 
 const removeUserFromEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
