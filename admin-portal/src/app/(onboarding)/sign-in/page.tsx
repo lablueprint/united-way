@@ -61,20 +61,20 @@ export default function SignIn() {
   }
 
   return (
-    <div>
+    <div className='h1'>
       For returning organizations:
       <form onSubmit={handleSubmit}>
         <p>Email:</p>
         <input
           type="email"
-          placeholder="Email"
+          // placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
           value={email}
         />
         <p>Password:</p>
         <input
           type="password"
-          placeholder="Password"
+          // placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
           value={password}
         />

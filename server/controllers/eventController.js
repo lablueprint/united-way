@@ -27,7 +27,11 @@ const createEvent = async (req, res) => {
 
 const addUserToEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   
@@ -61,7 +65,11 @@ const addUserToEvent = async (req, res) => {
 
 const removeUserFromEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -235,31 +243,6 @@ const getPolls = async (req, res) => {
     });
   }
 }
-
-
-// const editPolls = async (req, res) => {
-//   const {id, pollId } = req.params;
-//   try {
-//     const event = await Event.findByIdAndUpdate(id, req.body, {
-//       new: true,
-//       const poll = await Event.activity.findByIdAndUpdate(pollId, req.body, {
-//         new: true,
-//       })
-//     });
-//     res.status(200).json({
-//       status: "success",
-//       message: "Event successfully edited.",
-//       data: event
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       status: "failure",
-//       message: "Server-side error: event could not be edited.",
-//       data: {}
-//     });
-//   }
-// };
 
 module.exports = {
   createEvent,

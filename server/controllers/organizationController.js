@@ -30,7 +30,11 @@ const createOrganization = async (req, res) => {
 // only using req when we apply filters
 const getAllOrganizations = async (req, res) => {
     if (req.auth.role != 'admin') {
-        res.status(401);
+        res.status(401).json({
+            status: "failure",
+            message: "Invalid authorization token for request.",
+            data: {}
+        });
         return;
     }
     try {
@@ -53,7 +57,11 @@ const getAllOrganizations = async (req, res) => {
 // pass in parameter of curly braces == no filter 
 const getOrganizationById = async (req, res) => {
     if (req.auth.role != 'admin') {
-        res.status(401);
+        res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
         return;
     }
     const organizationId = req.params.id;
@@ -110,7 +118,11 @@ const getOrganizationsByFilter = async (req, res) => {
 
 const editOrganizationDetails = async (req, res) => {
     if (req.auth.role != 'organization') {
-        res.status(401);
+        res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
         return;
     }
     const orgId = req.params.id;
@@ -170,7 +182,11 @@ const getAssociatedEvents = async (req, res) => {
 
 const deleteOrganization = async (req, res) => {
     if (req.auth.role != 'organization' && req.auth.role != 'admin') {
-        res.status(401);
+        res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
         return;
     }
     const orgId = req.params.id;

@@ -66,10 +66,6 @@ export default function EventEditor({ id, handleCloseClick, handleEditEvent }: E
                 Name:
                 <input type="text" name="name" placeholder="Name" value={updatedName} onChange={(event) => { setUpdatedName(event.target.value) }} />
             </label>
-            {/* <label>
-                Date:
-                <input type="date" name="date" placeholder="Date" value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''} onChange={(event) => { setUpdatedDate(new Date((event.target as HTMLInputElement).value)) }} />
-            </label> */}
             <label>
                 Description:
                 <input type="text" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} />
