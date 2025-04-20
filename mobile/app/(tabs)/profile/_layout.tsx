@@ -1,3 +1,4 @@
+import React from "react";
 import { Stack } from "expo-router";
 
 export default function StackLayout() {
@@ -10,13 +11,13 @@ export default function StackLayout() {
                 }}
             />
             <Stack.Screen
-                name="changePic"
+                name="pictureChanger"
                 options={{
                     headerShown: false,
                 }}
             />
             <Stack.Screen
-                name="editing"
+                name="profileEditor"
                 options={{
                     headerShown: false,
                 }}

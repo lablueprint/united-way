@@ -36,7 +36,6 @@ export default function SignUpScreen() {
     const handleAddUser = async () => {
         // Check if email and password are valid
         // TODO: Backend password validation
-        console.log("hi");
         if (!validateInputs()) {
             return;
         }
@@ -55,11 +54,10 @@ export default function SignUpScreen() {
         const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits for day
 
         // Format as YYYY-MM-DD
-        const formattedDate = `${year}-${month}-${day}`;  
+        const formattedDate = `${year}-${month}-${day}`;
 
         // Add user to database
         try {
-            console.log("hi");
             const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
                 {
                     email: email,
@@ -76,7 +74,7 @@ export default function SignUpScreen() {
                 refreshToken: response.data.refreshToken
             }))
 
-            router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken} });
+            router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken } });
         } catch (err) {
             console.log(err);
         }
@@ -138,7 +136,7 @@ export default function SignUpScreen() {
                 />
                 <TouchableOpacity onPress={handleAddUser}>
                     <Text>
-                    Sign up
+                        Sign up
                     </Text>
                 </TouchableOpacity>
                 <Link href="/sign-in">
@@ -149,7 +147,7 @@ export default function SignUpScreen() {
                     Skip this and go home
                 </Link> */}
             </View>
-            
+
         </View>
     );
 }

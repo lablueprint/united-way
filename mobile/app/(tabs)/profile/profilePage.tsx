@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios, { AxiosResponse } from "axios";
-import { View, Text, Image, Button , TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,8 +14,8 @@ interface UserDetails {
     dateJoined: string,
 }
 
-export default function UserPage() {
-    const [userDetails, setUserDetails] = useState<UserDetails>({name: "Subaru", phoneNumber: "", email: "", password: "", profilePicture: "", dateJoined: ""});
+export default function Profile() {
+    const [userDetails, setUserDetails] = useState<UserDetails>({ name: "Subaru", phoneNumber: "", email: "", password: "", profilePicture: "", dateJoined: "" });
     const router = useRouter();
 
     const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
@@ -23,12 +23,12 @@ export default function UserPage() {
     const fetchUserDetails = async () => {
         try {
             const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-            {
-                headers: {
-                      'Authorization': `Bearer ${user.authToken}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${user.authToken}`,
                     },
-            }
-        );
+                }
+            );
             const { data } = response.data;
             setUserDetails(data);
         } catch (err) {
@@ -36,9 +36,9 @@ export default function UserPage() {
             return err;
         }
     }
-    useFocusEffect (() => {
+    useFocusEffect(useCallback(() => {
         fetchUserDetails();
-    });
+    }, []));
 
     console.log(user.authToken);
 
@@ -57,7 +57,7 @@ export default function UserPage() {
             </View>
             <Text style={styles.title}>Profile</Text>
             <Image
-                source={{uri: userDetails.profilePicture}}
+                source={{ uri: userDetails.profilePicture }}
                 style={styles.profilePicture}
             />
             <Text style={styles.title}>{userDetails.name}</Text>
@@ -67,9 +67,9 @@ export default function UserPage() {
                 {/* My Account Block */}
                 <TouchableOpacity
                     style={styles.block}
-                    onPress={() => navigateTo('/profile/editing')}
+                    onPress={() => navigateTo('/profile/profileEditor')}
                 >
-                    <Image source={{uri: "https://static.thenounproject.com/png/4188546-200.png" }} style={styles.icon} />
+                    <Image source={{ uri: "https://static.thenounproject.com/png/4188546-200.png" }} style={styles.icon} />
                     <Text style={styles.blockText}>My Account</Text>
                     <Text style={styles.blockHeading}>Lets Personalize!</Text>
                 </TouchableOpacity>
@@ -79,7 +79,7 @@ export default function UserPage() {
                     style={styles.block}
                     onPress={() => console.log('Language selection pressed')}
                 >
-                    <Image source={{uri: "https://cdn-icons-png.flaticon.com/512/546/546310.png" }} style={styles.icon} />
+                    <Image source={{ uri: "https://cdn-icons-png.flaticon.com/512/546/546310.png" }} style={styles.icon} />
                     <Text style={styles.blockText}>Language</Text>
                     <Text style={styles.blockHeading}>English or Espanol</Text>
                 </TouchableOpacity>
@@ -88,7 +88,7 @@ export default function UserPage() {
                 <TouchableOpacity
                     style={styles.block}
                 >
-                    <Image source={{uri: "https://cdn-icons-png.flaticon.com/512/3596/3596115.png" }} style={styles.icon} />
+                    <Image source={{ uri: "https://cdn-icons-png.flaticon.com/512/3596/3596115.png" }} style={styles.icon} />
                     <Text style={styles.blockText}>Privacy</Text>
                     <Text style={styles.blockHeading}>Protect your information!</Text>
                 </TouchableOpacity>
@@ -98,7 +98,7 @@ export default function UserPage() {
                     style={styles.block}
                     onPress={() => navigateTo('/profile/passport')}
                 >
-                    <Image source={{uri: "https://static.thenounproject.com/png/1689194-200.png" }} style={styles.icon} />
+                    <Image source={{ uri: "https://static.thenounproject.com/png/1689194-200.png" }} style={styles.icon} />
                     <Text style={styles.blockText}>Passport</Text>
                     <Text style={styles.blockHeading}>See your past events!</Text>
                 </TouchableOpacity>

@@ -56,7 +56,6 @@ const getUserById = async (req, res) => {
 
 
 const addEventToUser = async (req, res) => {
-  console.log("hi");
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
     res.status(401);
     return;
@@ -142,7 +141,6 @@ const getUserByEmail = async (req, res) => {
 }
 
 const editUserDetails = async (req, res) => {
-  console.log("hi");
   if (req.auth.role != 'user') {
     res.status(401);
     return;

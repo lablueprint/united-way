@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
 
 
-export default function EditProfilePictures() {
+export default function ProfilePictureEditor() {
     const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
     const [pictureLink, setPictureLink] = useState<string>(""); //find blank pfp pic link
     const router = useRouter();
@@ -19,9 +19,9 @@ export default function EditProfilePictures() {
                 },
                 {
                     headers: {
-                          'Authorization': `Bearer ${user.authToken}`,
-                          'Content-Type': "application/json"
-                        },
+                        'Authorization': `Bearer ${user.authToken}`,
+                        'Content-Type': "application/json"
+                    },
                 }
             );
             const { data } = response.data.data.profilePicture;
@@ -29,38 +29,38 @@ export default function EditProfilePictures() {
             console.log('PFP updated successfully', data);
         } catch (err) {
             console.error('Error updating PFP:', err);
-          }
+        }
     }
 
     const navigateToEditing = () => {
         router.push(`/profile/editing`);
-  }
+    }
 
-  return (
-    <View style={styles.container}>
-        <Text style={styles.label}>
-            Profile Picture URL
-        </Text>
-        <TextInput
-            placeholder="Enter image URL"
-            onChangeText={(text) => setPictureLink(text)}
-            value={pictureLink}
-            style={styles.input}
-        />
-        <View style={styles.buttonContainer}>
-            <Button 
-                title="Submit" 
-                onPress={() => handleSubmit(pictureLink)} 
-                color="#666666"
+    return (
+        <View style={styles.container}>
+            <Text style={styles.label}>
+                Profile Picture URL
+            </Text>
+            <TextInput
+                placeholder="Enter image URL"
+                onChangeText={(text) => setPictureLink(text)}
+                value={pictureLink}
+                style={styles.input}
             />
-            <Button 
-                title="Back to Editing" 
-                onPress={navigateToEditing} 
-                color="#999999"
-            />
+            <View style={styles.buttonContainer}>
+                <Button
+                    title="Submit"
+                    onPress={() => handleSubmit(pictureLink)}
+                    color="#666666"
+                />
+                <Button
+                    title="Back to Editing"
+                    onPress={navigateToEditing}
+                    color="#999999"
+                />
+            </View>
         </View>
-    </View>
-)
+    )
 }
 
 const styles = StyleSheet.create({
