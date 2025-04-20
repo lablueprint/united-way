@@ -169,7 +169,7 @@ export default function Events() {
       style={styles.eventCard}
       onPress={() => router.push(`/explore/event-details/?event=${item._id}`)}
     >
-      <Image source={{ uri: item.image }} style={styles.eventImage} />
+      <Image source={{ uri: item.imageURL }} style={styles.eventImage} />
       <View style={styles.eventContent}>
         <Text style={styles.eventTitle}>{item.name}</Text>
         <Text style={styles.eventInfo}>

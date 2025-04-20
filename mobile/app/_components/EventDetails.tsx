@@ -20,6 +20,7 @@ interface EventDetails {
   registeredUsers: string[];
   activities: Activity[];
   image: string;
+  imageURL: string;
   duration: number;
 }
 export interface Activity {
@@ -57,6 +58,7 @@ export default function EventsDetails() {
     registeredUsers: [],
     activities: [],
     image: "",
+    imageURL: "",
     duration: 0,
   });
   const router = useRouter();
@@ -158,7 +160,7 @@ export default function EventsDetails() {
         <View style={styles.triangleButton} />
       </TouchableOpacity>
       <Text style={styles.title}>{eventData.name}</Text>
-      <Image source={{ uri: eventData.image }} style={styles.eventImage} />
+      <Image source={{ uri: eventData.imageURL }} style={styles.eventImage} />
       <Text style={styles.description}>{eventData.description}</Text>
       <Text style={styles.organizer}>
         Organized by: {organizerName ? organizerName : "Loading..."}

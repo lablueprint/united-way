@@ -1,7 +1,7 @@
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3")
 const { s3Client } = require('./s3-credentials')
 
-exports.deleteObject = async(key) => {
+const deleteObject = async(key) => {
     try {
         const params = {
             Bucket: process.env.AWS_S3_BUCKET,
@@ -18,3 +18,5 @@ exports.deleteObject = async(key) => {
         return {status:500,data:err};
     }
 }
+
+module.exports = { deleteObject };
