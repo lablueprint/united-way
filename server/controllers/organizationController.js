@@ -60,36 +60,39 @@ const getAllOrganizations = async (req, res) => {
 // for async functions must use await -- so you can resolve content later
 // pass in parameter of curly braces == no filter
 const getOrganizationById = async (req, res) => {
-  if (req.auth.role != "admin" && req.auth.role != "user") {
-    console.log("find me this damn error");
-    res.status(401);
-    return;
-  }
-  const organizationId = req.params.id;
-  try {
-    const organizationByID = await Organization.findOne({
-      _id: organizationId,
-    });
-    if (organizationByID) {
-      res.status(200).json({
-        status: "success",
-        message: "Organization successfully retrieved.",
-        data: organizationByID,
+    console.log(req.auth.role);
+    if (req.auth.role != "admin" && req.auth.role != "user") {
+        res.status(401).json({
+          status: "failure",
+          message: "Invalid permissions for request.",
+          data: organizationByID
       });
-    } else {
-      res.status(404).json({
-        status: "failure",
-        message: "Error: organization not found.",
-        data: {},
-      });
+        return;
     }
-  } catch (err) {
-    res.status(500).json({
-      status: "failure",
-      message: "Server-side error: could not find organization.",
-      data: {},
-    });
-  }
+    const organizationId = req.params.id;
+    try {
+        const organizationByID = await Organization.findOne({  _id: organizationId });
+        if (organizationByID) {
+            res.status(200).json({
+                status: "success",
+                message: "Organization successfully retrieved.",
+                data: organizationByID
+            });
+        }
+        else {
+            res.status(404).json({
+                status: "failure",
+                message: "Error: organization not found.",
+                data: {}
+            });
+        }
+    } catch (err) {
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: could not find organization.",
+            data: {}
+        });
+    }
 };
 
 const getOrganizationsByFilter = async (req, res) => {

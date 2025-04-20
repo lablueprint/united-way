@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Events() {
+export default function EventsFeed() {
   //gather all the different events
   const [events, setEvents] = useState<Event[]>([]);
   //for filtering events
@@ -167,7 +167,14 @@ export default function Events() {
   const renderItem = ({ item }: { item: Event }) => (
     <TouchableOpacity
       style={styles.eventCard}
-      onPress={() => router.push(`/explore/event-details/?event=${item._id}`)}
+      onPress={() => router.push({
+        pathname: `/events/[id]`,
+        params:
+        {
+          id: item._id,
+          origin: 'explore/events-tab'
+        }
+      })}
     >
       <Image source={{ uri: item.image }} style={styles.eventImage} />
       <View style={styles.eventContent}>
@@ -177,7 +184,7 @@ export default function Events() {
         </Text>
         <Text style={styles.eventInfo}>LOS ANGELES, CA</Text>
       </View>
-    </TouchableOpacity>
+    </TouchableOpacity >
   );
 
   return (
