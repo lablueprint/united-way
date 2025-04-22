@@ -20,7 +20,6 @@ const twoFactorRouter = require('./routes/twoFactorRoutes.js')
 
 // Model Imports
 const eventModel = require('./models/eventModel.js');
-const activityModel = require('./models/activityModel.js');
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
@@ -43,6 +42,8 @@ const app = express(); // Define app using express, defines handlers
 // Socket.IO Setup
 const { createServer } = require("http");
 const socketIo = require("socket.io");
+const { joinEvent, leaveEvent, joinRaffle } = require('./_utils/listeners.js');
+const { emitEvent } = require('./_utils/emitters.js');
 const server = createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
@@ -100,99 +101,8 @@ mongoose.connection.once('open', async () => {
   // Fetch all events from the database
   const events = await eventModel.find({});
   events.forEach(async (event) => {
-    const eventRoom = event._id.toString();
-    const startTimeDiff = new Date(event.startDate).getTime() - new Date().getTime();
-    const endTimeDiff = new Date(event.endDate).getTime() - new Date().getTime();
-    if (startTimeDiff > 0) {
-      setTimeout(() => {
-        // Let all clients in the event room know the event is starting
-        io.to(eventRoom).emit('event start', event);
-      }, startTimeDiff);
-    }
-    if (endTimeDiff > 0) {
-      setTimeout(() => {
-        // Let all clients in the event room know the event is ending
-        io.to(eventRoom).emit('event end', event);
-        // Disconnect all sockets in the event room
-        io.of("/").in(eventRoom).fetchSockets().then((sockets) => {
-          sockets.forEach((socket) => {
-            // Disconnect each socket
-              socket.disconnect(true);
-          });
-        });
-      }, endTimeDiff);
-    }
-    // Get activities for the event
-    const eventActivities = event.activity;
-    for (const id of eventActivities) {
-      try {
-        const activity = await activityModel.findById(id);
-        if (activity) {
-          const activityStartTimeDiff = new Date(activity.timeStart).getTime() - new Date().getTime();
-          const activityEndTimeDiff = new Date(activity.timeEnd).getTime() - new Date().getTime();
-          if (activity.type === "raffle") {
-            // Create a raffle room for the event
-            const raffleRoom = `${eventRoom}-raffle`;
-            if (activityStartTimeDiff > 0) {
-              setTimeout(async () => {
-                const sockets = await io.in(raffleRoom).allSockets();
-                const raffleRoomSize = sockets.size;
-                if (raffleRoomSize > 0) {
-                  // Draw a random raffle number
-                  const randomIndex = Math.floor(Math.random() * raffleRoomSize);
-                  const raffleNumbers = Array.from(eventRooms[eventRoom].usedRaffleNumbers);
-                  const randomRaffleNumber = raffleNumbers[randomIndex];
-                  console.log(`Drew raffle number: ${randomRaffleNumber}`);
-                  // Tell all clients in the raffle room if they won or lost
-                  sockets.forEach((socketId) => {
-                    const socket = io.sockets.sockets.get(socketId);
-                    if (socket.raffleNumber === randomRaffleNumber) {
-                      socket.emit('raffle winner', { randomRaffleNumber });
-                    }
-                    else {
-                      socket.emit('raffle loser', { randomRaffleNumber });
-                    }
-                  });
-                  // Regenerate random raffle numbers for all clients in the raffle room
-                  eventRooms[eventRoom].usedRaffleNumbers = new Set();
-                  sockets.forEach((socketId) => {
-                    const socket = io.sockets.sockets.get(socketId);
-                    let raffleNumber;
-                    do {
-                      raffleNumber = Math.floor(100000 + Math.random() * 900000);
-                    } while (eventRooms[eventRoom].usedRaffleNumbers.has(raffleNumber));
-                    eventRooms[eventRoom].usedRaffleNumbers.add(raffleNumber);
-                    socket.raffleNumber = raffleNumber;
-                    socket.emit('new raffle number', { raffleNumber });
-                    console.log(`Generated raffle number: ${raffleNumber}`);
-                  });
-                }
-                else {
-                  console.log(`No clients in raffle room ${raffleRoom}`);
-                }
-              }, activityStartTimeDiff);
-            }
-          } else {
-            if (activityStartTimeDiff > 0) {
-              setTimeout(() => {
-                // Let all clients in the event room know the activity is starting
-                io.to(eventRoom).emit('activity start', activity);
-              }, activityStartTimeDiff);
-            }
-            if (activityEndTimeDiff > 0) {
-              setTimeout(() => {
-                // Let all clients in the event room know the activity is ending
-                io.to(eventRoom).emit('activity end', activity);
-              }, activityEndTimeDiff);
-            }
-          }
-        } else {
-          console.log(`Activity with ID ${id} not found`);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
+    // Emit events to all clients
+    emitEvent(event, io);
   });
 
   const eventRooms = {};
@@ -204,22 +114,12 @@ mongoose.connection.once('open', async () => {
 
     // Handle client joining a room based on the event ID
     socket.on('join event', (eventDetails) => {
-      const eventRoom = eventDetails._id.toString();
-      socket.join(eventRoom);
-      console.log(`Client ${socket.id} joined room: ${eventRoom}`);
+      joinEvent(socket, eventDetails);
     });
 
     // Handle client leaving an event room
     socket.on('leave event', (eventDetails) => {
-      const eventRoom = eventDetails._id.toString();
-      socket.leave(eventRoom);
-      console.log(`Client ${socket.id} left room: ${eventRoom}`);
-      socket.leave(`${eventRoom}-raffle`);
-      console.log(`Client ${socket.id} left room: ${eventRoom}-raffle`);
-      // Remove the raffle number from the usedRaffleNumbers set
-      if (socket.raffleNumber && eventRooms[eventRoom]) {
-        eventRooms[eventRoom].usedRaffleNumbers.delete(socket.raffleNumber);
-      }
+      leaveEvent(socket, eventDetails, eventRooms);
     });
   
     // Listen for messages from the client
@@ -234,25 +134,7 @@ mongoose.connection.once('open', async () => {
 
     // Listen for raffle join requests
     socket.on('join raffle', (eventDetails) => {
-      const eventRoom = eventDetails._id.toString();
-      const raffleRoom = `${eventRoom}-raffle`;
-      socket.join(raffleRoom);
-      console.log(`Client ${socket.id} joined raffle room: ${raffleRoom}`);
-      // Add entry in eventRooms data structure if it doesn't exist
-      if (!eventRooms[eventRoom]) {
-        eventRooms[eventRoom] = {};
-        eventRooms[eventRoom].usedRaffleNumbers = new Set();
-      }
-      // TODO: Decide if there is a limit to the number of people who can join a raffle
-      // Generate a random raffle number for the client
-      let raffleNumber;
-      do {
-        raffleNumber = Math.floor(100000 + Math.random() * 900000);
-      } while (eventRooms[eventRoom].usedRaffleNumbers.has(raffleNumber));
-      eventRooms[eventRoom].usedRaffleNumbers.add(raffleNumber);
-      socket.raffleNumber = raffleNumber;
-      socket.emit('new raffle number', { raffleNumber });
-      console.log(`Generated raffle number: ${raffleNumber}`);
+      joinRaffle(socket, eventDetails, eventRooms);
     });
   });
 });
