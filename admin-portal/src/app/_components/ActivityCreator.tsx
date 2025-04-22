@@ -1,16 +1,16 @@
 "use client";
 import React, { useState } from "react";
 import axios from "axios";
-import DisplayActivity from "./DisplayActivity";
 import "react-datetime-picker/dist/DateTimePicker.css";
 import "react-calendar/dist/Calendar.css";
 import "react-clock/dist/Clock.css";
+import ActivityEditor from "./ActivityEditor";
 
 interface EventActivityProps {
-  id: string;
+  eventId: string;
 }
 
-export default function CreateActivity({ id }: EventActivityProps) {
+export default function ActivityCreator({ eventId }: EventActivityProps) {
   const [message, setMessage] = useState("");
   const [refresh, setRefresh] = useState(0);
   const start = new Date()
@@ -22,7 +22,7 @@ export default function CreateActivity({ id }: EventActivityProps) {
         type === "announcement"
           ? [{ text: "New Announcement" }]
           : type === "quiz"
-          ? [
+            ? [
               {
                 title: "New Question Title",
                 choices: ["0"],
@@ -30,22 +30,22 @@ export default function CreateActivity({ id }: EventActivityProps) {
                 singleSelect: true,
               },
             ]
-          : type === "poll"
-          ?
-            [
-              {
-                question: "New Poll Question",
-                options: [
-                  { id: 0, text: "Option 1", count: 0 },
-                ]
-              },
-            ]
-          : "";
+            : type === "poll"
+              ?
+              [
+                {
+                  question: "New Poll Question",
+                  options: [
+                    { id: 0, text: "Option 1", count: 0 },
+                  ]
+                },
+              ]
+              : "";
 
-      const { data } = await axios.post(
+      await axios.post(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
         {
-          eventID: id,
+          eventID: eventId,
           type,
           content: defaultContent,
           timeStart: start,
@@ -86,7 +86,7 @@ export default function CreateActivity({ id }: EventActivityProps) {
 
       {message && <p>{message}</p>}
 
-      <DisplayActivity id={id} refresh={refresh}/>
+      <ActivityEditor id={eventId} refresh={refresh} />
     </div>
   );
 }

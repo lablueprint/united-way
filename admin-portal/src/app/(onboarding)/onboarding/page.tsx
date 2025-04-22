@@ -9,7 +9,6 @@ export default function Onboarding() {
   const router = useRouter();
   const [community, setCommunity] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  // const [location, setLocation] = useState<string>('');
   const [name, setName] = useState<string>('');
 
   interface RootState {
@@ -32,53 +31,45 @@ export default function Onboarding() {
       await axios.patch(apiEndpoint, formData,
         {
           headers: {
-              'Authorization': `Bearer ${org.authToken}`,
-              'Content-Type': "application/json"
+            'Authorization': `Bearer ${org.authToken}`,
+            'Content-Type': "application/json"
           }
-      }
+        }
       );
     } catch (error) {
       console.error('Error submitting form:', error);
     }
-    router.push('/landing');
+
+    router.push('/tabs'); // '/landing'
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <div className='h1'>
+      Introduce your community
+      <form onSubmit={handleSubmit} className='form'>
         <p>Name:</p>
         <input
           type="text"
-          placeholder="Organization Name"
           onChange={(e) => setName(e.target.value)}
           value={name}
         />
         <p>Community:</p>
         <input
           type="text"
-          placeholder="Community Name"
           onChange={(e) => setCommunity(e.target.value)}
           value={community}
         />
         <p>Description:</p>
         <input
           type="text"
-          placeholder="Organization Description"
           onChange={(e) => setDescription(e.target.value)}
           value={description}
         />
-        {/* <p>Location:</p>
-        <input
-          type="text"
-          placeholder="Organization Location"
-          onChange={(e) => setLocation(e.target.value)}
-          value={location}
-        /> */}
         <button
           type="submit">Submit
         </button>
-      </div>
-    </form>
+      </form>
+    </div>
   )
 }
 

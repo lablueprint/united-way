@@ -1,15 +1,10 @@
 const Event = require("../models/eventModel");
-const Organization = require("../models/organizationModel")
 
-// Creates an event and uses the organizer id to add to the organizer's event-list.
+// Example of creating a document in the database
 const createEvent = async (req, res) => {
   const event = new Event(req.body);
   try{
-    // Create the event.
     const data = await event.save(event);
-    
-    // Save the event in the list of active events for the organizer.
-    await Organization.findByIdAndUpdate({ _id: data.organizerID }, { $addToSet: { activeEvents: data._id } });
     res.status(201).json({
       status: "success",
       message: "Event successfully created.",
@@ -27,7 +22,11 @@ const createEvent = async (req, res) => {
 
 const addUserToEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   
@@ -61,7 +60,11 @@ const addUserToEvent = async (req, res) => {
 
 const removeUserFromEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -235,31 +238,6 @@ const getPolls = async (req, res) => {
     });
   }
 }
-
-
-// const editPolls = async (req, res) => {
-//   const {id, pollId } = req.params;
-//   try {
-//     const event = await Event.findByIdAndUpdate(id, req.body, {
-//       new: true,
-//       const poll = await Event.activity.findByIdAndUpdate(pollId, req.body, {
-//         new: true,
-//       })
-//     });
-//     res.status(200).json({
-//       status: "success",
-//       message: "Event successfully edited.",
-//       data: event
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       status: "failure",
-//       message: "Server-side error: event could not be edited.",
-//       data: {}
-//     });
-//   }
-// };
 
 module.exports = {
   createEvent,
