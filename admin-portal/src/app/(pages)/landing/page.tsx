@@ -51,8 +51,8 @@ export default function Landing() {
       </button><br />
       <UpcomingCalendar/>
       Org: {org.orgId}<br />
-      Auth: {org.authToken}<br />
-      Refresh: {org.refreshToken}<br />
+      {/* Auth: {org.authToken}<br />
+      Refresh: {org.refreshToken}<br /> */}
       
       <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
         Log out
