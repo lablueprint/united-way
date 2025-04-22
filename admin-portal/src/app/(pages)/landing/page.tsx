@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import axios, { AxiosResponse } from "axios";
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
@@ -27,7 +27,10 @@ export default function Landing() {
   // Example of requesting data from the database/backend and making use of the data.
   const exampleGetToRoot = async () => {
     try {
-      const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/`)
+      console.log(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/`);
+      const response: AxiosResponse = await axios.get(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/`
+      );
       setResponseValue(response.data);
     } catch (error) {
       console.log(error);
@@ -38,7 +41,11 @@ export default function Landing() {
     <div>
       Welcome to the test landing page.
       <OrganizationProfile></OrganizationProfile>
-      <button onClick={() => { console.log("Result: ", exampleGetToRoot()) }}>
+      <button
+        onClick={() => {
+          console.log("Result: ", exampleGetToRoot());
+        }}
+      >
         Example HTTP Request button
       </button><br />
       Org: {org.orgId}<br />
@@ -47,9 +54,7 @@ export default function Landing() {
       <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
         Log out
       </button>
-      <div>
-        Result: {responseValue}
-      </div>
+      <div>Result: {responseValue}</div>
     </div>
   );
 }

@@ -13,13 +13,10 @@ import 'react-native-reanimated';
 
 import store from './_utils/redux/reduxStore'
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -35,7 +32,6 @@ export default function RootLayout() {
   }
 
   return (
-    // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
     <Provider store={store}>
       <Stack>
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
@@ -43,7 +39,5 @@ export default function RootLayout() {
         <Stack.Screen name="+not-found" />
       </Stack>
     </Provider>
-    // {/* <StatusBar style="auto" /> */ }
-    // {/* </ThemeProvider> */ }
   );
 }

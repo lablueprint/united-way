@@ -1,15 +1,16 @@
-import React, { useState, useEffect, FormEvent, MouseEvent } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
+import ActivityCreator from './ActivityCreator';
 
-interface EditCardProps {
+interface EventEditorProps {
     id: string;
     handleCloseClick: () => void;
     handleEditEvent: (name: string, date: Date, description: string, tags: string[]) => void;
 }
 
-export default function EditCard({ id, handleCloseClick, handleEditEvent }: EditCardProps) {
+export default function EventEditor({ id, handleCloseClick, handleEditEvent }: EventEditorProps) {
     // Variables to store the updated event details
     const [updatedName, setUpdatedName] = useState<string>("");
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
@@ -66,10 +67,6 @@ export default function EditCard({ id, handleCloseClick, handleEditEvent }: Edit
                 <input type="text" name="name" placeholder="Name" value={updatedName} onChange={(event) => { setUpdatedName(event.target.value) }} />
             </label>
             <label>
-                Date:
-                <input type="date" name="date" placeholder="Date" value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''} onChange={(event) => { setUpdatedDate(new Date((event.target as HTMLInputElement).value)) }} />
-            </label>
-            <label>
                 Description:
                 <input type="text" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} />
             </label>
@@ -84,6 +81,7 @@ export default function EditCard({ id, handleCloseClick, handleEditEvent }: Edit
                 />
             </label>
             <input type="submit" value="Submit" />
+            <ActivityCreator eventId={id} />
         </form>
     );
 }

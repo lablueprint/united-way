@@ -2,6 +2,7 @@ const Activity = require("../models/activityModel");
 const Event = require("../models/eventModel");
 
 // Example of creating a document in the database
+
 const createActivity = async (req, res) => {
   const activity = new Activity(req.body);
   try{
@@ -63,21 +64,50 @@ const getAllActivities = async (req, res) =>
 
 const getActivitiesByFilter = async (req, res) => {
   try {
-    const activities = await Activity.find(req.body);
+    const { eventID, type } = req.body; // Extract type and id from request body
+    // Build the filter object
+    const filter = {};
+    if (type) filter.type = type; // If 'type' is provided, filter by 'type'
+    if (eventID) filter.eventID = eventID; // If 'id' is provided, filter by 'id'
+    
+    // Fetch activities using the filter
+    const activities = await Activity.find(filter);
+
+    // const {type } = req.body; // Extract type from request body
+    // const activities = await Activity.find({ type }); // Filter activities by type
     res.status(200).json({
       status: "success",
-      message: "Activity successfully received.",
-      data: activities
+      message: "Activities successfully retrieved.",
+      data: activities,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error retrieving activities:", err);
     res.status(500).json({
       status: "failure",
-      message: "Server-side error: could not receive activities.",
-      data: {}
+      message: "Server-side error: could not retrieve activities.",
+      data: [],
     });
   }
 };
+
+
+// const getActivitiesByFilter = async (req, res) => {
+//   try {
+//     const activities = await Activity.find(req.body);
+//     res.status(200).json({
+//       status: "success",
+//       message: "Activity successfully received.",
+//       data: activities
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       status: "failure",
+//       message: "Server-side error: could not receive activities.",
+//       data: {}
+//     });
+//   }
+// };
 
 const editActivityDetails = async (req, res) => {
   const activityId = req.params.id;
