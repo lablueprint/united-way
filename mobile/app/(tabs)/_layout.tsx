@@ -1,7 +1,7 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs, Navigator, Stack } from "expo-router";
+import React from "react";
+import { Platform } from "react-native";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -13,37 +13,34 @@ export default function TabLayout() {
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
+            position: "absolute",
           },
           default: {},
         }),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <></>,
+          title: "Home",
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <></>,
+          title: "Explore",
         }}
       />
       <Tabs.Screen
-        name="scanner"
+        name="events"
         options={{
-          title: 'Scanner',
-          tabBarIcon: ({ color }) => <></>,
+          title: "Events",
         }}
       />
       <Tabs.Screen
-        name="event-details"
+        name="settings"
         options={{
-          title: 'Event Details',
-          tabBarButton: () => null, // Hide from the tab bar
+          title: "Settings",
         }}
       />
     </Tabs>

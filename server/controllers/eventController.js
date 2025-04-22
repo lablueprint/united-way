@@ -20,6 +20,83 @@ const createEvent = async (req, res) => {
   }
 };
 
+const addUserToEvent = async (req, res) => {
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
+    return;
+  }
+  
+  const origId = req.params.id;
+  const { newUser } = req.body;
+  
+  try {
+
+    const result = await Event.updateOne( { _id: origId }, { $addToSet: { registeredUsers: newUser }});
+    if (result.modifiedCount === 0) {
+        res.status(404).json({
+            status: "failure",
+            message: "Event not found or no changes made.",
+            data: result
+        });
+    } else {
+        res.status(200).json({
+            status: "success",
+            message: "Event updated successfully.",
+            data: result
+        });
+    }
+} catch (err)   {
+    res.status(500).json({
+        status: "failure",
+        message: "Server-side error: update not completed.",
+        data: {}
+    });
+}
+}
+
+const removeUserFromEvent = async (req, res) => {
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
+    return;
+  }
+
+  const eventId = req.params.id;
+  const userId = req.body.userId;
+
+  try {
+    const result = await Event.findOneAndUpdate(
+      { _id: eventId }, 
+      { $pull: { registeredUsers: userId}});
+    if (result.modifiedCount === 0) {
+        res.status(404).json({
+            status: "failure",
+            message: "Event not found or no changes made.",
+            data: result
+        });
+    } else {
+        res.status(200).json({
+            status: "success",
+            message: "Event updated successfully.",
+            data: result
+        });
+    }
+} catch (err) {
+    res.status(500).json({
+        status: "failure",
+        message: "Server-side error: update not completed.",
+        data: {}
+    });
+}
+}
+
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
   try {
@@ -125,11 +202,52 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const addActivity = async (req, res) => {
+  try {
+      const { id } = req.params; 
+      const { activity } = req.body; 
+
+      const event = await Event.findById(id);
+      
+      event.activity.push(activity);
+
+      await event.save();
+
+      res.status(200).json({ message: "Activity added successfully.", event });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "An error occurred while adding the activity.", error });
+  }
+};
+
+const getPolls = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    const polls = event.activity.filter(a => a.type === 'poll' );
+    
+    res.status(200).json({
+      polls: polls
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: event could not be received.",
+    });
+  }
+}
+
 module.exports = {
   createEvent,
+  removeUserFromEvent,
   getEventById,
   getAllEvents,
   getEventsByFilter,
   editEventDetails,
   deleteEvent,
+  addUserToEvent,
+  addActivity,
+  getPolls,
 };
