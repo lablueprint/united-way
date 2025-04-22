@@ -73,6 +73,10 @@ export default function EventScanner() {
         setEventEnded(true);
         Alert.alert('Event ended', `The event ${data.name} has ended!`);
       });
+      socket.on('announcement', (data) => {
+        console.log('Announcement:', data.content[0].text);
+        Alert.alert('Announcement', data.content[0].text);
+      })
       socket.on('activity start', (data) => {
         console.log('Activity started:', data.type);
         Alert.alert('Activity started', `An activity of type ${data.type} has started.`);
@@ -222,12 +226,12 @@ export default function EventScanner() {
     }
   }
 
-  if (hasPermission === null) {
-    return <Text>Requesting for camera permission...</Text>;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
+  // if (hasPermission === null) {
+  //   return <Text>Requesting for camera permission...</Text>;
+  // }
+  // if (hasPermission === false) {
+  //   return <Text>No access to camera</Text>;
+  // }
 
   if (eventDetails) {
     return (
@@ -260,6 +264,11 @@ export default function EventScanner() {
       {scanned && (
         <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
       )}
+      <Button title={'Tap to scan'} onPress={() => {
+        setScanned(true);
+        setEventId('67e97896bc526b5f26311365');
+        fetchEventDetails('67e97896bc526b5f26311365');
+      }} />
     </View>
   );
 }

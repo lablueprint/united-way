@@ -44,6 +44,13 @@ const emitActivity = async (activity, eventRoom, io) => {
                 }
             }, activityStartTimeDiff);
         }
+    } else if (activity.type === "announcement") {
+        if (activityStartTimeDiff > 0) {
+            setTimeout(() => {
+                // Let all clients in the event room know the activity is starting
+                io.to(eventRoom).emit('announcement', activity);
+            }, activityStartTimeDiff);
+        }
     } else {
         if (activityStartTimeDiff > 0) {
             setTimeout(() => {
