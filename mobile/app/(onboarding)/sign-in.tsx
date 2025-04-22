@@ -52,6 +52,7 @@ export default function SignUpScreen() {
     }
   }
 
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
