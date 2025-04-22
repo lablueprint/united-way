@@ -123,17 +123,19 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     {
                         name: updatedName,
                         date: updatedDate,
+                        duration: 0, // Hardcoded for now
+                        description: updatedDescription,
                         startTime: startTime,
                         endTime: endTime,
-                        description: updatedDescription,
                         location: {
                             type: "Point",
                             coordinates: [currLongitude, currLatitude]
                         },
                         organizerID: org.orgId,
                         tags: selectedTags,
-                        registeredUsers: [],
-                        activity: []
+                        registeredUsers: [], // Hardcoded for now
+                        activity: [], // Hardcoded for now
+                        image: "placeholder" // Hardcoded for now
                     },
                     {
                         headers: {
