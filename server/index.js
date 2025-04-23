@@ -10,13 +10,13 @@ const uri = process.env.MONGODB_URI;
 const port = process.env.PORT;
 
 // Route Imports
-const exampleRouter = require("./routes/exampleRoute.js");
-const authRouter = require("./routes/authRoutes.js");
-const eventRouter = require("./routes/eventRoutes.js");
-const organizationRouter = require("./routes/organizationRoutes.js");
-const userRouter = require("./routes/userRoutes.js");
-const activityRouter = require("./routes/activityRoutes.js");
-
+const exampleRouter = require('./routes/exampleRoute.js');
+const authRouter = require('./routes/authRoutes.js')
+const eventRouter = require('./routes/eventRoutes.js');
+const organizationRouter = require('./routes/organizationRoutes.js');
+const userRouter = require('./routes/userRoutes.js');
+const activityRouter = require('./routes/activityRoutes.js')
+const twoFactorRouter = require('./routes/twoFactorRoutes.js')
 // Connect to the MongoDB database
 async function connectToDatabase() {
   try {
@@ -70,9 +70,10 @@ app.use("/events", eventRouter);
 
 app.use("/activities", activityRouter);
 
-app.get("/", (req, res) => {
-  // defines a route where if we send get req to the route, will send back resp
-  res.send("Hello World!"); //routers are groupings of endpoints
+app.use('/twofactor' ,twoFactorRouter);
+
+app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
+  res.send('Hello World!'); //routers are groupings of endpoints
 });
 
 app.listen(port, () => {

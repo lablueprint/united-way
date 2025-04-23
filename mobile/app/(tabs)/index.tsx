@@ -23,14 +23,12 @@ export default function HomeScreen() {
       };
     }
   );
+  console.log(`\nuser: ${user.userId}\nauth: ${user.authToken}\nrefresh: ${user.refreshToken}`)
   return (
     <View style={styles.container}>
       <Text>
-        Main home screen test.
-        {`\nuser: ${user.userId}`}
-        {`\nauth: ${user.authToken}`}
-        {`\nrefresh: ${user.refreshToken}`}
-      </Text>
-    </View>
+        Main home screen test. Tokens in console.
+      </Text >
+    </View >
   );
 }

@@ -25,8 +25,8 @@ eventRouter.post("/filtered", eventController.getEventsByFilter);
 eventRouter.patch("/:id", eventController.editEventDetails);
 eventRouter.patch("/:id/addImage", eventController.addImageToEvent);
 eventRouter.patch("/:id/removeImage", eventController.removeImageFromEvent);
-eventRouter.patch("/:id/addImage", eventController.addImageToEvent);
-eventRouter.patch("/:id/removeImage", eventController.removeImageFromEvent);
 eventRouter.delete("/:id", eventController.deleteEvent);
+eventRouter.post('/:id/addActivity', eventController.addActivity)
+eventRouter.get('/:id/getPolls', eventController.getPolls)
 
 module.exports = eventRouter;

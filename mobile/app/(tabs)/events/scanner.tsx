@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Button, StyleSheet, Alert } from "react-native";
-import { Camera, CameraView } from "expo-camera";
-import { useRouter } from "expo-router";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { Camera, CameraView } from 'expo-camera';
+import { useRouter, usePathname, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useSelector } from 'react-redux';
 import axios, { AxiosResponse } from "axios";
+import Announcement from "../../_components/Announcement";
 
 interface EventDetails {
   id: string;
@@ -17,13 +18,20 @@ export default function EventScanner() {
   const [scanned, setScanned] = useState(false);
   const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
   const [eventId, setEventId] = useState("");
+  const [hasNavigated, setHasNavigated] = useState(false);
+
+
   const user = useSelector((state) => {
     return {
       userId: state.auth.userId,
       authToken: state.auth.authToken,
-      refreshToken: state.auth.refreshToken,
-    };
+      refreshToken: state.auth.refreshToken
+    }
   });
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useLocalSearchParams();
 
   useEffect(() => {
     (async () => {
@@ -32,114 +40,28 @@ export default function EventScanner() {
     })();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (scanned) setScanned(false);
+      setHasNavigated(false);
+    }, [scanned])
+  );
+
   const handleBarCodeScanned = ({ type, data }: any) => {
+    if (scanned || hasNavigated) return;
     setScanned(true);
-    setEventId(data);
-    fetchEventDetails(data);
-  };
+    setHasNavigated(true); // LOCK so you don’t scan again until reset
 
-  const fetchEventDetails = async (eventId: string) => {
-    try {
-      const response: AxiosResponse = await axios.get(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${user.authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const { data } = response.data;
-      setEventDetails(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    if (pathname === '/events/[id]' && params.id === data) return;
 
-  const addEventToUser = async (eventId: string) => {
-    try {
-      await axios.patch(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
-        {
-          newEvent: eventId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${user.authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const addUserToEvent = async (userId: string) => {
-    try {
-      await axios.patch(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/addUser`,
-        {
-          newUser: userId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${user.authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const removeUserFromEvent = async (userId: string) => {
-    try {
-      const response: AxiosResponse = await axios.patch(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}/removeUser`,
-        {
-          userId: userId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${user.authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const removeEventFromUser = async (eventId: string) => {
-    try {
-      const response: AxiosResponse = await axios.patch(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
-        {
-          eventId: eventId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${user.authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRegister = () => {
-    addEventToUser(eventId);
-    addUserToEvent(user.userId);
-  };
-
-  const handleUnregister = () => {
-    removeEventFromUser(eventId);
-    removeUserFromEvent(user.userId);
+    router.push({
+      pathname: `/events/[id]`,
+      params:
+      {
+        id: data,
+        origin: '/events/scanner'
+      }
+    });
   };
 
   if (hasPermission === null) {
@@ -149,28 +71,18 @@ export default function EventScanner() {
     return <Text>No access to camera</Text>;
   }
 
-  if (eventDetails) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Request to Join Event</Text>
-        <Text style={styles.eventName}>{eventDetails.name}</Text>
-        <View style={styles.buttonContainer}>
-          <Button title="Accept" onPress={handleRegister} />
-          <Button title="Reject" onPress={handleUnregister} />
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <Text style={styles.instruction}>Scan the event QR code to proceed.</Text>
       <CameraView
         style={StyleSheet.absoluteFillObject}
-        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        onBarcodeScanned={scanned || hasNavigated ? undefined : handleBarCodeScanned}
       />
       {scanned && (
-        <Button title={"Tap to Scan Again"} onPress={() => setScanned(false)} />
+        <Button title={'Tap to Scan Again'} onPress={() => {
+          setScanned(false);
+          setHasNavigated(false);
+        }} />
       )}
     </View>
   );

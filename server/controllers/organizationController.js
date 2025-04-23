@@ -37,59 +37,65 @@ const createOrganization = async (req, res) => {
 
 // only using req when we apply filters
 const getAllOrganizations = async (req, res) => {
-  if (req.auth.role != "admin") {
-    res.status(401);
-    return;
-  }
-  try {
-    const organizations = await Organization.find();
-    res.status(200).json({
-      status: "success",
-      message: "Organization(s) successfully retrieved.",
-      data: organizations,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: "failure",
-      message: "Server-side error: could not retrieve all organizations.",
-      data: {},
-    });
-  }
+    if (req.auth.role != 'admin') {
+        res.status(401).json({
+            status: "failure",
+            message: "Invalid authorization token for request.",
+            data: {}
+        });
+        return;
+    }
+    try {
+        const organizations = await Organization.find();
+        res.status(200).json({
+            status: "success",
+            message: "Organization(s) successfully retrieved.",
+            data: organizations
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: could not retrieve all organizations.",
+            data: {}
+        });
+    }
 };
 
 // for async functions must use await -- so you can resolve content later
 // pass in parameter of curly braces == no filter
 const getOrganizationById = async (req, res) => {
-  if (req.auth.role != "admin" && req.auth.role != "user") {
-    console.log("find me this damn error");
-    res.status(401);
-    return;
-  }
-  const organizationId = req.params.id;
-  try {
-    const organizationByID = await Organization.findOne({
-      _id: organizationId,
-    });
-    if (organizationByID) {
-      res.status(200).json({
-        status: "success",
-        message: "Organization successfully retrieved.",
-        data: organizationByID,
-      });
-    } else {
-      res.status(404).json({
-        status: "failure",
-        message: "Error: organization not found.",
-        data: {},
-      });
-    }
-  } catch (err) {
-    res.status(500).json({
+    if (req.auth.role != 'admin' && req.auth.role != "user") {
+        res.status(401).json({
       status: "failure",
-      message: "Server-side error: could not find organization.",
-      data: {},
+      message: "Invalid authorization token for request.",
+      data: {}
     });
-  }
+        return;
+    }
+    const organizationId = req.params.id;
+    try {
+        const organizationByID = await Organization.findOne({  _id: organizationId });
+        if (organizationByID) {
+            res.status(200).json({
+                status: "success",
+                message: "Organization successfully retrieved.",
+                data: organizationByID
+            });
+        }
+        else {
+            res.status(404).json({
+                status: "failure",
+                message: "Error: organization not found.",
+                data: {}
+            });
+        }
+    } catch (err) {
+        res.status(500).json({
+            status: "failure",
+            message: "Server-side error: could not find organization.",
+            data: {}
+        });
+    }
 };
 
 const getOrganizationsByFilter = async (req, res) => {
@@ -118,10 +124,15 @@ const getOrganizationsByFilter = async (req, res) => {
 };
 
 const editOrganizationDetails = async (req, res) => {
-  if (req.auth.role != "organization") {
-    res.status(401);
+  if (req.auth.role != 'organization') {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
+
   const orgId = req.params.id;
   const updateInput = req.body;
   try {
@@ -181,7 +192,11 @@ const getAssociatedEvents = async (req, res) => {
 
 const deleteOrganization = async (req, res) => {
   if (req.auth.role != "organization" && req.auth.role != "admin") {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   const orgId = req.params.id;

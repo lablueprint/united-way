@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import Events from "../../_components/Events";
+import EventsFeed from "../../_components/EventsFeed";
 
 const styles = StyleSheet.create({
   homeStyle: {
@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
 export default function EventsTab() {
   return (
     <View style={styles.homeStyle}>
-      <Events />
+      <EventsFeed />
     </View>
   );
 }

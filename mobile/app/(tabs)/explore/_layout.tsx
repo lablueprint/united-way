@@ -7,18 +7,7 @@ export default function StackLayout() {
         name="events-tab"
         options={{
           headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="main"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="event-details"
-        options={{
-          headerShown: false,
+          animation: "slide_from_left"
         }}
       />
     </Stack>

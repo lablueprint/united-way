@@ -1,7 +1,5 @@
 const Event = require("../models/eventModel");
-const { putObject } = require("../utils/putObject");
-const { s3Client } = require("../utils/s3-credentials");
-const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 
 // Example of creating a document in the database
 const createEvent = async (req, res) => {
@@ -23,11 +21,18 @@ const createEvent = async (req, res) => {
   }
 };
 
+// Note: to use this route, you need to provide multi-part form data
+// where one key-value pair is image with the associated file.
 const addImageToEvent = async (req, res) => {
-  // if (req.auth.role != "admin") {
-  //   res.status(401);
-  //   return;
-  // }
+  if (req.auth.role != "admin" && req.auth.role != "organization") {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
+    return;
+  }
+
   if (!req.files || !req.files.image) {
     return res.status(400).json({
       status: "failure",
@@ -74,10 +79,14 @@ const addImageToEvent = async (req, res) => {
 };
 
 const removeImageFromEvent = async (req, res) => {
-  // if (req.auth.role != "admin") {
-  //   res.status(401);
-  //   return;
-  // }
+  if (req.auth.role != "admin" && req.auth.role != "organization") {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
+    return;
+  }
   const eventId = req.params.id;
 
   try {
@@ -122,8 +131,12 @@ const removeImageFromEvent = async (req, res) => {
 };
 
 const addUserToEvent = async (req, res) => {
-  if (req.auth.role != "admin" && req.auth.role != "user") {
-    res.status(401);
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -158,8 +171,12 @@ const addUserToEvent = async (req, res) => {
 };
 
 const removeUserFromEvent = async (req, res) => {
-  if (req.auth.role != "admin" && req.auth.role != "user") {
-    res.status(401);
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -297,6 +314,43 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const addActivity = async (req, res) => {
+  try {
+      const { id } = req.params; 
+      const { activity } = req.body; 
+
+      const event = await Event.findById(id);
+      
+      event.activity.push(activity);
+
+      await event.save();
+
+      res.status(200).json({ message: "Activity added successfully.", event });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "An error occurred while adding the activity.", error });
+  }
+};
+
+const getPolls = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    const polls = event.activity.filter(a => a.type === 'poll' );
+    
+    res.status(200).json({
+      polls: polls
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: event could not be received.",
+    });
+  }
+}
+
 module.exports = {
   createEvent,
   removeUserFromEvent,
@@ -308,4 +362,6 @@ module.exports = {
   addUserToEvent,
   addImageToEvent,
   removeImageFromEvent,
+  addActivity,
+  getPolls,
 };
