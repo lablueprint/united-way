@@ -72,6 +72,8 @@ app.use("/activities", activityRouter);
 
 app.use('/twofactor' ,twoFactorRouter);
 
+app.use('/twofactor' ,twoFactorRouter);
+
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); //routers are groupings of endpoints
 });

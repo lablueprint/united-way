@@ -360,8 +360,6 @@ module.exports = {
   editEventDetails,
   deleteEvent,
   addUserToEvent,
-  addImageToEvent,
-  removeImageFromEvent,
   addActivity,
   getPolls,
 };
