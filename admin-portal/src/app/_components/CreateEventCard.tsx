@@ -84,6 +84,30 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         }
     }
 
+    // When creating draft, create array of flags of "TODOs" for a given event
+    // true --> not draft/complete, false --> draft
+    const generateDraftList = () => {
+        const currDraftList = [];
+        
+        // Event Name: 0
+        currDraftList.push(updatedName !== "Your Event Name" && updatedName !== "");
+
+        // Start time, end time, time zone have default vals (they aren't in draft list)
+        
+        // Description: 1
+        currDraftList.push(updatedDescription !== "Your Event Description" && updatedDescription !== "");
+
+        // Location: 2
+        currDraftList.push(((currLatitude != 0) && (currLongitude != 0)));
+
+        // Tags: 3
+        currDraftList.push((updatedTags.includes(true)));
+
+        // TODO: When implemented, add flag for event photo
+
+        return currDraftList
+    }
+
     // Date object store dates under the assumption of array accesses, which means last days of the months overflow
     // This function fixes that, aka: March 32 --> April 1, and so on
     const parseDate = (d: Date) => {
@@ -124,6 +148,70 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         name: updatedName,
                         date: updatedDate,
                         duration: 0, // Hardcoded for now
+                        draft: false,
+                        description: updatedDescription,
+                        startTime: startTime,
+                        endTime: endTime,
+                        location: {
+                            type: "Point",
+                            coordinates: [currLongitude, currLatitude]
+                        },
+                        organizerID: org.orgId,
+                        tags: selectedTags,
+                        registeredUsers: [], // Hardcoded for now
+                        activity: [], // Hardcoded for now
+                        image: "placeholder" // Hardcoded for now
+                    },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${org.authToken}`
+                        }
+                    }
+                );
+                setSubmissionStatus(`Success!: ${response.data.message}`);
+                changeState(false);
+            }
+            else {
+                var errs = "";
+                if (updatedName == "Your Event Name") {
+                    errs = errs + "Name ";
+                }
+                if (updatedDescription == "Your Event Description") {
+                    errs = errs + "Description ";
+                }
+                if (!updatedTags.includes(true)) {
+                    errs = errs + "Tags ";
+                }
+                if ((currLatitude == 0) && (currLongitude == 0)) {
+                    errs = errs + "Address "
+                }
+                setSubmissionStatus(`Error: Empty Args: ${errs}`);
+            }
+        } catch (err) {
+            console.log(err);
+            setSubmissionStatus(`Failure: ${err}`);
+        }
+    }
+
+
+    const handleSave = async () => {
+        try {
+            if (notEmpty()) {
+                const selectedTags = updatedTags
+                    .map((isSelected, index) => isSelected ? EventTags[index] : null)
+                    .filter(tag => tag !== null);
+
+                const draftList = generateDraftList();
+                
+                const response: AxiosResponse = await axios.post(
+                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
+                    {
+                        name: updatedName,
+                        date: updatedDate,
+                        duration: 0, // Hardcoded for now
+                        draft: false,
+                        draftList: draftList,
                         description: updatedDescription,
                         startTime: startTime,
                         endTime: endTime,
@@ -262,6 +350,9 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
 
                 {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
+                    <button className="saveButton" onClick={handleSave}>
+                        SAVE
+                    </button>
                     <button className="bigPillButton" onClick={() =>changeState(false)}>
                         CANCEL
                     </button>

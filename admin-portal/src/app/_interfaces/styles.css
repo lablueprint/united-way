@@ -270,6 +270,18 @@
     cursor: pointer;
 }
 
+.saveButton {
+    color: rgb(81, 81, 81);;
+    font-weight: bold;
+    font-size: 0.8em;
+    background-color:rgb(236, 236, 236);
+    border-style: hidden;
+    border-radius: 40px;
+    height: 3em;
+    width: 7em;
+    cursor: pointer;
+}
+
 .editButton {
     color: rgb(149, 149, 149);
     border-radius: 30px;
