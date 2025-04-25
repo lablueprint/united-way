@@ -108,6 +108,3 @@ mongoose.connection.once('open', async () => {
 server.listen(port, () => {
   console.log(`Server started at port ${port}`);
 });
-
-date = new Date();
-console.log(date);

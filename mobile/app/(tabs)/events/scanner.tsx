@@ -226,12 +226,12 @@ export default function EventScanner() {
     }
   }
 
-  // if (hasPermission === null) {
-  //   return <Text>Requesting for camera permission...</Text>;
-  // }
-  // if (hasPermission === false) {
-  //   return <Text>No access to camera</Text>;
-  // }
+  if (hasPermission === null) {
+    return <Text>Requesting for camera permission...</Text>;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
 
   if (eventDetails) {
     return (
@@ -264,11 +264,6 @@ export default function EventScanner() {
       {scanned && (
         <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
       )}
-      <Button title={'Tap to scan'} onPress={() => {
-        setScanned(true);
-        setEventId('67e97896bc526b5f26311365');
-        fetchEventDetails('67e97896bc526b5f26311365');
-      }} />
     </View>
   );
 }
