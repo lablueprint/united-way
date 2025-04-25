@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Button, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, Touchable, Image} from 'react-native';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
@@ -119,69 +119,68 @@ interface EventData {
     registeredUsers: string[];
 }
   
-const getMonthAbbreviation = (date: Date) => {
-    console.log('date', date);
+const getMonthAbbreviation = (date: Date) => {  
     return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
 };
 
 // start on Sunday
-const getWeek = () => {
-    const todayDate = new Date();
-    const startDate = new Date(todayDate);
-    startDate.setDate(todayDate.getDate() - todayDate.getDay());
-    return Array.from({ length: 7 }, (_, i) => {
-        const dateNode = new Date(startDate);
-        dateNode.setDate(startDate.getDate() + i);
-        return dateNode;
-    });
-};
-
-const getWeekRange = () => {
-    const week = getWeek(); // array of date objects
-    const sunday = week[0]; // first of week
-    const saturday = week[week.length-1]; // last of week
-
-    const first = getMonthAbbreviation(sunday) + ' ' + sunday.getDate();
-    const last = getMonthAbbreviation(saturday)+ ' ' + saturday.getDate();
-    return {first, last};
-}
-
 export default function WeekCalendar () {
     const user = useSelector((state: { auth: { userId: string, authToken: string, refreshToken: string } }) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
     const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
     
     const [registeredEvents, setRegisteredEvents] = useState<EventData[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>("");
+    const [weekOffset, setWeekOffset] = useState(0);
     const router = useRouter();
     const flatListRef = useRef<FlatList>(null);
 
+    const week = useMemo(() => {
+        const todayDate = new Date();
+        const startDate = new Date(todayDate);
+        startDate.setDate(todayDate.getDate() - todayDate.getDay() + (weekOffset * 7));
+        return Array.from({ length: 7 }, (_, i) => {
+          const dateNode = new Date(startDate);
+          dateNode.setDate(startDate.getDate() + i);
+          return dateNode;
+        });
+      }, [weekOffset]);
+      
+    const weekRange = useMemo(() => {
+        const sunday = week[0];
+        const saturday = week[week.length - 1];
+      
+        const first = getMonthAbbreviation(sunday) + ' ' + sunday.getDate();
+        const last = getMonthAbbreviation(saturday) + ' ' + saturday.getDate();
+      
+        return { first, last };
+      }, [week]);
+    
     // gets list of registered Event id
     useEffect(() => {
     const getRegisteredEvents = async () => {
         try {
-        console.log()
-        const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`, {
-            headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
-            },
-        });
-        // ^ gives event ids
+            const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`, {
+                headers: {
+                'Authorization': `Bearer ${user.authToken}`,
+                'Content-Type': "application/json"
+                },
+            });
+            // ^ gives event ids
+            console.log('event ids', response.data);
+            const eventRequests = response.data.data.registeredEvents.map((eventId: string) => axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
+            {
+                headers: {
+                'Authorization': `Bearer ${org.authToken}`,
+                'Content-Type': "application/json"
+                },
+            }
+            )
+            );
 
-        const eventRequests = response.data.data.registeredEvents.map((eventId: string) => axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
-        {
-            headers: {
-            'Authorization': `Bearer ${org.authToken}`,
-            'Content-Type': "application/json"
-            },
-        }
-        )
-        );
-
-        const eventResponses = await Promise.all(eventRequests);
-        const fullEvents = eventResponses.map((res) => res.data.data).filter(Boolean);
-        setRegisteredEvents(fullEvents);
-        console.log(registeredEvents);
+            const eventResponses = await Promise.all(eventRequests);
+            const fullEvents = eventResponses.map((res) => res.data.data).filter(Boolean);
+            setRegisteredEvents(fullEvents);
+            console.log(registeredEvents);
         } catch (err) {
         console.error(err);
         }
@@ -196,8 +195,6 @@ export default function WeekCalendar () {
       minute: '2-digit'
     });
   };
-  
- 
 
   const getDate = (date: Date) => {
     const eventDate = new Date(date);
@@ -205,23 +202,24 @@ export default function WeekCalendar () {
 
     //temp utc string instead of date string bc of 1 day off formatting
     const isToday = todayDate.toISOString().split('T')[0] === eventDate.toISOString().split('T')[0];
-//    console.log('is it today?', isToday);
-//    console.log('today date', todayDate.toISOString());
-//    console.log('eventdate', eventDate.toISOString())
+    //    console.log('is it today?', isToday);
+   console.log('today date', todayDate.toLocaleDateString());
+   console.log('eventdate', eventDate.toLocaleDateString())
 
     if (isToday) { 
       return (<Text>Today</Text>);
     } else {
-      const day = eventDate.getUTCDate();      
+      const day = eventDate.getDate();    
       const month = getMonthAbbreviation(eventDate);
+
       return (
         <Text>{month} {day}</Text>
       );
     }
   };
 
-  // used for date comparisons
-  const getDateStr = (date: Date) => new Date(date).toISOString().split('T')[0];
+  // used for date comparLocalens
+  const getDateStr = (date: Date) => new Date(date).toLocaleDateString().split('T')[0];
 
   const handleDatePress = (dateString: string) => {
     setSelectedDate(dateString);
@@ -235,19 +233,21 @@ export default function WeekCalendar () {
     }
   };
 
-  const weekRange = getWeekRange();
-
   return (
     <View style={styles.container} >
         <View style={styles.weekScroll}>
-            <Text style={styles.icon}>{'<'}</Text>
+            <TouchableOpacity onPress={() => setWeekOffset(weekOffset-1)}>
+                <Text style={styles.icon}>{'<'}</Text>
+            </TouchableOpacity>
             <Text style={styles.weekRange}>{weekRange.first} - {weekRange.last}</Text>
-            <Text style={styles.icon}>{'>'}</Text>
+            <TouchableOpacity onPress={() => setWeekOffset(weekOffset+1)}>
+                <Text style={styles.icon}>{'>'}</Text>
+            </TouchableOpacity>
         </View>
         <FlatList
             horizontal
-            data={getWeek()}
-            keyExtractor={(item) => item.toISOString()}
+            data={week}
+            keyExtractor={(item) => item.toLocaleDateString()}
             contentContainerStyle={styles.weekCalendarContainer}
             style={styles.weekCalendarContents}
             renderItem={({ item }) => {
