@@ -7,7 +7,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 export default function OnboardingScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { id, authToken } = params;
+  const { id, authToken, verificationMethod } = useLocalSearchParams();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [ethnicity, setEthnicity] = useState('');
@@ -26,7 +26,11 @@ export default function OnboardingScreen() {
   const [placeholder, setPlaceholder] = useState("Name");
   const [textInput, setTextInput] = useState("");
   const [dropDownInput, setDropDownInput] = useState(null);
-  const [state, setState] = useState(1);
+  const [state, setState] = useState(
+    verificationMethod === 'sms' ? 2 : 1
+  );
+  
+  
 
   const handleEditUser = async () => {
     try {
@@ -57,18 +61,18 @@ export default function OnboardingScreen() {
   useEffect(() => {
 
     if (state == 1) {
-      setTitle("What is your name?");
-
-      setSubtitle("Please enter your first and last name");
-      setPlaceholder(name || "Name");
-      setTextInput(name);
-    } else if (state == 2) {
       setTitle("Phone Number");
       setName(textInput)
 
       setSubtitle("Enter your number to receive updates");
       setPlaceholder(phone || "Phone Number");
       setTextInput(phone);
+    } else if (state == 2) {
+      setTitle("What is your name?");
+
+      setSubtitle("Please enter your first and last name");
+      setPlaceholder(name || "Name");
+      setTextInput(name);
     } else if (state == 3) {
       setTitle("Language");
 

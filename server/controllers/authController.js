@@ -158,59 +158,59 @@ const verifyOrgLogin = async (req, res) => {
   }
 }
 
-//added this
+// //added this
 
-async function sendVerificationCode(req, res) {
-  const { phoneNumber } = req.body;
-  try {
-    const verification = await client.verify.v2
-      .services(verifyServiceSid)
-      .verifications.create({ to: phoneNumber, channel: "sms" });
+// async function sendVerificationCode(req, res) {
+//   const { phoneNumber } = req.body;
+//   try {
+//     const verification = await client.verify.v2
+//       .services(verifyServiceSid)
+//       .verifications.create({ to: phoneNumber, channel: "sms" });
 
-    res.status(200).json({
-      status: "success",
-      message: "Verification code sent.",
-      data: { sid: verification.sid }
-    });
-  } catch (error) {
-    console.error("Error sending code:", error);
-    res.status(500).json({
-      status: "failure",
-      message: "Failed to send verification code.",
-      data: {}
-    });
-  }
-}
+//     res.status(200).json({
+//       status: "success",
+//       message: "Verification code sent.",
+//       data: { sid: verification.sid }
+//     });
+//   } catch (error) {
+//     console.error("Error sending code:", error);
+//     res.status(500).json({
+//       status: "failure",
+//       message: "Failed to send verification code.",
+//       data: {}
+//     });
+//   }
+// }
 
-async function confirmVerificationCode(req, res) {
-  const { phoneNumber, code } = req.body;
-  try {
-    const verificationCheck = await client.verify.v2
-      .services(verifyServiceSid)
-      .verificationChecks.create({ to: phoneNumber, code });
+// async function confirmVerificationCode(req, res) {
+//   const { phoneNumber, code } = req.body;
+//   try {
+//     const verificationCheck = await client.verify.v2
+//       .services(verifyServiceSid)
+//       .verificationChecks.create({ to: phoneNumber, code });
 
-    if (verificationCheck.status === "approved") {
-      res.status(200).json({
-        status: "success",
-        message: "Phone number verified successfully.",
-        data: {}
-      });
-    } else {
-      res.status(401).json({
-        status: "failure",
-        message: "Invalid verification code.",
-        data: {}
-      });
-    }
-  } catch (error) {
-    console.error("Verification failed:", error);
-    res.status(500).json({
-      status: "failure",
-      message: "Verification process failed.",
-      data: {}
-    });
-  }
-}
+//     if (verificationCheck.status === "approved") {
+//       res.status(200).json({
+//         status: "success",
+//         message: "Phone number verified successfully.",
+//         data: {}
+//       });
+//     } else {
+//       res.status(401).json({
+//         status: "failure",
+//         message: "Invalid verification code.",
+//         data: {}
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Verification failed:", error);
+//     res.status(500).json({
+//       status: "failure",
+//       message: "Verification process failed.",
+//       data: {}
+//     });
+//   }
+// }
 
 
-module.exports = { generateToken, verifyUserLogin, refreshUserAccessToken, verifyOrgLogin, refreshOrgAccessToken, sendVerificationCode, confirmVerificationCode }
+module.exports = { generateToken, verifyUserLogin, refreshUserAccessToken, verifyOrgLogin, refreshOrgAccessToken }
