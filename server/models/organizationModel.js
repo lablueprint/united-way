@@ -15,11 +15,11 @@ const organizationSchema = new mongoose.Schema({
     },
   },
   name : {
-    required: true,
+    required: false,
     type: String,
   },
   pastEvents : {
-    required: true,
+    required: false,
     type: [String],
   },
   password : {

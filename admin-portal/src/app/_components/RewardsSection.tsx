@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { UseSelector } from 'react-redux';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
@@ -21,6 +22,16 @@ const RewardsSection = () => {
     const [newRewardCost, setNewRewardCost] = useState('');
     const [newRewardQuantity, setNewRewardQuantity] = useState('');
     const [refreshTrigger, setRefreshTrigger] = useState(0);
+    
+    interface RootState {
+        auth: {
+          orgId: string;
+          authToken: string;
+          refreshToken: string;
+        };
+      }
+    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+
 
     useEffect(() => {
         const fetchRewards = async () => {
@@ -40,6 +51,11 @@ const RewardsSection = () => {
             const updatedRewards = rewards.filter(reward => reward._id !== rewardId);
             const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
                 rewards: updatedRewards
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${org.authToken}`,
+                    'Content-Type': "application/json"
+                }
             });
             if (response.data.status === "success") {
                 setRefreshTrigger(prev => prev + 1);
@@ -52,6 +68,11 @@ const RewardsSection = () => {
         try {
             const response = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`, {
                 rewards: [...rewards, newReward]
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${org.authToken}`,
+                    'Content-Type': "application/json"
+                }
             });
             if (response.data.status === "success") {
                 setRefreshTrigger(prev => prev + 1);
