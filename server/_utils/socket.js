@@ -105,3 +105,74 @@ export const emitEvent = async (event, io) => {
         }
     }
 }
+
+const joinEvent = (socket, eventDetails) => {
+    const eventRoom = eventDetails._id.toString();
+    socket.join(eventRoom);
+    console.log(`Client ${socket.id} joined room: ${eventRoom}`);
+}
+
+const leaveEvent = (socket, eventDetails, eventRooms) => {
+    const eventRoom = eventDetails._id.toString();
+    socket.leave(eventRoom);
+    console.log(`Client ${socket.id} left room: ${eventRoom}`);
+    socket.leave(`${eventRoom}-raffle`);
+    console.log(`Client ${socket.id} left room: ${eventRoom}-raffle`);
+    // Remove the raffle number from the usedRaffleNumbers set
+    if (socket.raffleNumber && eventRooms[eventRoom]) {
+        eventRooms[eventRoom].usedRaffleNumbers.delete(socket.raffleNumber);
+    }
+}
+
+const joinRaffle = (socket, eventDetails, eventRooms) => {
+    const eventRoom = eventDetails._id.toString();
+    const raffleRoom = `${eventRoom}-raffle`;
+    socket.join(raffleRoom);
+    console.log(`Client ${socket.id} joined raffle room: ${raffleRoom}`);
+    // Add entry in eventRooms data structure if it doesn't exist
+    if (!eventRooms[eventRoom]) {
+        eventRooms[eventRoom] = {};
+        eventRooms[eventRoom].usedRaffleNumbers = new Set();
+    }
+    // TODO: Decide if there is a limit to the number of people who can join a raffle
+    // Generate a random raffle number for the client
+    let raffleNumber;
+    do {
+        raffleNumber = Math.floor(100000 + Math.random() * 900000);
+    } while (eventRooms[eventRoom].usedRaffleNumbers.has(raffleNumber));
+    eventRooms[eventRoom].usedRaffleNumbers.add(raffleNumber);
+    socket.raffleNumber = raffleNumber;
+    socket.emit('new raffle number', { raffleNumber });
+    console.log(`Generated raffle number: ${raffleNumber}`);
+}
+
+export const interactWithAttendee = (socket, eventRooms) => {
+    console.log(`New client connected: ${socket.id}`);
+    // Send a message to the client upon connection
+    socket.emit('message', 'Welcome to the server!');
+
+    // Listen for messages from the client
+    socket.on('message', (data) => {
+        console.log(`Message from client: ${data}`);
+    });
+
+    // Handle client disconnection
+    socket.on('disconnect', () => {
+        console.log(`Client disconnected: ${socket.id}`);
+    });
+
+    // Handle client joining a room based on the event ID
+    socket.on('join event', (eventDetails) => {
+        joinEvent(socket, eventDetails);
+    });
+
+    // Handle client leaving an event room
+    socket.on('leave event', (eventDetails) => {
+        leaveEvent(socket, eventDetails, eventRooms);
+    });
+
+    // Listen for raffle join requests
+    socket.on('join raffle', (eventDetails) => {
+        joinRaffle(socket, eventDetails, eventRooms);
+    });
+}

@@ -42,8 +42,7 @@ const app = express(); // Define app using express, defines handlers
 // Socket.IO Setup
 const { createServer } = require("http");
 const socketIo = require("socket.io");
-const { joinEvent, leaveEvent, joinRaffle } = require('./_utils/listeners.js');
-const { emitEvent } = require('./_utils/emitters.js');
+const { emitEvent, interactWithAttendee } = require('./_utils/socket.js');
 const server = createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
@@ -108,37 +107,13 @@ mongoose.connection.once('open', async () => {
   const eventRooms = {};
 
   io.on('connection', (socket) => {
-    console.log(`New client connected: ${socket.id}`);
-    // Send a message to the client upon connection
-    socket.emit('message', 'Welcome to the server!');
-
-    // Handle client joining a room based on the event ID
-    socket.on('join event', (eventDetails) => {
-      joinEvent(socket, eventDetails);
-    });
-
-    // Handle client leaving an event room
-    socket.on('leave event', (eventDetails) => {
-      leaveEvent(socket, eventDetails, eventRooms);
-    });
-  
-    // Listen for messages from the client
-    socket.on('message', (data) => {
-      console.log(`Message from client: ${data}`);
-    });
-
-    // Handle client disconnection
-    socket.on('disconnect', () => {
-      console.log(`Client disconnected: ${socket.id}`);
-    });
-
-    // Listen for raffle join requests
-    socket.on('join raffle', (eventDetails) => {
-      joinRaffle(socket, eventDetails, eventRooms);
-    });
+    interactWithAttendee(socket, eventRooms);
   });
 });
 
 server.listen(port, () => {
   console.log(`Server started at port ${port}`);
 });
+
+date = new Date();
+console.log(date);
