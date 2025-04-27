@@ -1,27 +1,27 @@
 @font-face {
     font-family: "Lausanne";
-    src: url("../_fonts/TWKLausanne-400.otf") format("opentype");
+    src: url("./_fonts/TWKLausanne-400.otf") format("opentype");
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
     font-family: "Lausanne";
-    src: url("../_fonts/TWKLausanne-700.otf") format("opentype");
+    src: url("./_fonts/TWKLausanne-700.otf") format("opentype");
     font-weight: bold;
     font-style: normal;
 }
 
 @font-face {
     font-family: "Lausanne";
-    src: url("/fonts/TWLausanne-400Italic.otf") format("opentype");
+    src: url("./_fonts/TWKLausanne-400Italic.otf") format("opentype");
     font-weight: normal;
     font-style: italic;
 }
 
 @font-face {
     font-family: "Lausanne";
-    src: url("/fonts/TWKLausanne-700Italic.otf") format("opentype");
+    src: url("./_fonts/TWKLausanne-700Italic.otf") format("opentype");
     font-weight: bold;
     font-style: italic;
 }
@@ -33,6 +33,7 @@
     width: 100%;
     position: absolute;
     top: 0;
+    color: black;
 }
 
 .left {
@@ -46,7 +47,7 @@
 .right {
     width: 50%;
     height: 100%;
-    background-color:rgb(255, 255, 255);
+    background-color: rgb(255, 255, 255);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -55,61 +56,75 @@
 }
 
 .titleinputbox {
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
+    color: black;
     width: 100%;
     font-size: 2rem;
     font-weight: bold;
     padding: 0.1em 0.1em;
     font-family: "Lausanne";
+    resize: none;
+    overflow-wrap: anywhere;
 }
 
 .descriptionInputBox {
     padding: 0.7em 0.5em;
-    background-color:rgb(236, 236, 236);
-    display: flex; 
+    color: black;
+    background-color: rgb(236, 236, 236);
+    display: flex;
     width: 100%;
     font-size: 1rem;
     font-family: "Lausanne";
     border: none;
-    overflow: scroll;
-    height: 5em;
+    min-height: 5em;
     max-width: 100%;
     min-width: 100%;
-    word-wrap: break-word; 
-    overflow-x: hidden;
+    overflow-wrap: anywhere;
+    resize: none;
+}
+
+.descriptionInputBox:focus {
+    resize: none;
+    overflow-wrap: anywhere;
+    overflow: visible;
 }
 
 .locationInputbox {
+    color: black;
     margin-top: 0.5em;
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     padding: 0.7em 0.5em;
-    display: flex; 
+    display: flex;
     width: 100%;
     font-size: 1rem;
     font-weight: bold;
     font-family: "Lausanne";
     border: none;
-    height: 2.5em;
-    max-height: 4em;
     max-width: 100%;
     min-width: 100%;
     cursor: pointer;
+    color: "black";
+    overflow-wrap: anywhere;
+    min-height: 2rem;
+    resize: none;
 }
 
 .graybox {
     padding: 0.3rem 0.3rem;
-    display: flex; 
+    display: flex;
     flex-direction: row;
     column-gap: 10px;
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     align-items: center;
 }
 
 .tagPillNotSelected {
     border-radius: 30px;
     display: flex;
-    background-color: rgb(236, 236, 236);;
-    border-color:rgb(120, 120, 120);
+    color: black;
+    background-color: rgb(236, 236, 236);
+    ;
+    border-color: rgb(120, 120, 120);
     border-style: solid;
     padding: 0.3rem 0.3rem;
     border-width: 1.5px;
@@ -121,8 +136,8 @@
     border-radius: 30px;
     color: white;
     display: flex;
-    background-color:rgb(54, 54, 54);
-    border-color:rgb(54, 54, 54);
+    background-color: rgb(54, 54, 54);
+    border-color: rgb(54, 54, 54);
     border-style: solid;
     padding: 0.3rem 0.3rem;
     cursor: pointer;
@@ -173,7 +188,7 @@
 .dateRow {
     padding: 0.1rem 0.3rem;
     flex-direction: row;
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     align-items: center;
     display: flex;
     gap: 5px;
@@ -199,16 +214,17 @@
     display: flex;
     align-items: 'center';
     border-style: hidden;
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     font-family: "Lausanne";
     font-weight: bold;
     position: 'relative';
+    color: black;
 }
 
 .hiddenModal {
     position: 'absolute';
     top: 0;
-    left: 0; 
+    left: 0;
     width: 0;
     height: 0;
     opacity: 0;
@@ -226,7 +242,7 @@
 }
 
 .imagebox {
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     width: 80%;
     height: 80%;
     margin-top: 50px;
@@ -238,7 +254,7 @@
     position: absolute;
     right: 1em;
     bottom: 1em;
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     width: 2em;
     height: 2em;
     cursor: pointer;
@@ -248,7 +264,7 @@
     border-radius: 3px;
     color: white;
     display: flex;
-    background-color:rgb(0, 0, 0);
+    background-color: rgb(0, 0, 0);
     border-style: hidden;
     padding: 0.5rem 1rem;
 }
@@ -262,7 +278,7 @@
     color: white;
     font-weight: bold;
     font-size: 0.8em;
-    background-color:rgb(0, 0, 0);
+    background-color: rgb(0, 0, 0);
     border-style: hidden;
     border-radius: 40px;
     height: 3em;
@@ -274,7 +290,7 @@
     color: rgb(149, 149, 149);
     border-radius: 30px;
     background-color: rgb(236, 236, 236);
-    border-color:rgb(189, 189, 189);
+    border-color: rgb(189, 189, 189);
     border-style: solid;
     border-width: 1.5px;
     font-weight: bold;
@@ -313,7 +329,7 @@
     display: flex;
     flex-direction: column;
     width: 80%;
-    rowGap: 0.7em;
+    row-gap: 0.7em;
     margin-top: 1.4em;
 }
 
@@ -351,30 +367,30 @@
 
 .eventBox {
     padding: 0.3rem 0.3rem;
-    display: flex; 
+    display: flex;
     flex-direction: row;
     column-gap: 10px;
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     align-items: center;
     cursor: pointer;
 }
 
 .orgInfoBox {
     padding: 0.3rem 0.3rem;
-    display: flex; 
+    display: flex;
     flex-direction: row;
     column-gap: 10px;
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     align-items: center;
     cursor: pointer;
 }
 
 .dateTimeZoneBox {
     padding: 0.3rem 0.3rem;
-    display: flex; 
+    display: flex;
     flex-direction: row;
     column-gap: 10px;
-    background-color:rgb(236, 236, 236);
+    background-color: rgb(236, 236, 236);
     align-items: center;
     position: relative;
     display: inline-block;

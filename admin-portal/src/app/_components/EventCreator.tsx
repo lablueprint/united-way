@@ -1,13 +1,13 @@
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { EventTags } from "../_interfaces/EventInterfaces";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
-import '../_interfaces/styles.css';
-import TestLogo from "./logo.jpeg"
-import PenLogo from "./pen.png"
+import '../_styles/EventCreator.css';
+import TestLogo from "@/../public/images/logo.jpeg"
+import PenLogo from "@/../public/images/pen.png"
 
-interface CreateEventCardProps {
+interface EventCreatorProps {
     orgName: string;
     changeState: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -18,7 +18,8 @@ interface LocationProps {
     lon: string;
 }
 
-export default function CreateEventCard({orgName, changeState}: CreateEventCardProps) {
+// TODO: Update the organization profile after creating this event to showcase.
+export default function EventCreator({ orgName, changeState }: EventCreatorProps) {
     const [updatedName, setUpdatedName] = useState<string>("Your Event Name");
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
     const [updatedDescription, setUpdatedDescription] = useState<string>("Your Event Description");
@@ -26,7 +27,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
     const [currLatitude, setLatitude] = useState<number>(0);
     const [currLongitude, setLongitude] = useState<number>(0);
     const [options, setOptions] = useState<LocationProps[]>([]);
-    const [updatedAddress, setAddress] = useState<string>("");
+    const address = useRef<string>("");
     const [startTime, setStartTime] = useState('12:00');
     const [endTime, setEndTime] = useState('12:01');
     const [selectedTimeZone, setSelectedTimeZone] = useState('PT');
@@ -47,12 +48,18 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         { label: "Eastern Time (ET) America/New York", value: "ET" },
     ];
 
+    useEffect(() => {
+        if (isEditingDescription) {
+            document.getElementById("description")?.focus();
+        }
+    }, [isEditingDescription])
+
     // Checks if all inputtables are non-empty
     const notEmpty = () => {
         return ((updatedName != "Your Event Name") &&
-                (updatedDescription != "Your Event Description") &&
-                (updatedTags.includes(true)) &&
-                ((currLatitude != 0) && (currLongitude != 0)))
+            (updatedDescription != "Your Event Description") &&
+            (updatedTags.includes(true)) &&
+            ((currLatitude != 0) && (currLongitude != 0)))
     }
 
     const getDayOfWeek = (d: Date) => {
@@ -65,10 +72,10 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ];
-          return months[d.getMonth()];
+        return months[d.getMonth()];
     }
 
-    const getTimeString = (t:string) => {
+    const getTimeString = (t: string) => {
         const [hours, minutes] = t.split(":");
         if (parseInt(hours) == 0) {
             return ('12:' + minutes + ' AM');
@@ -91,14 +98,14 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         const leapYearDaysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         const month = d.getMonth();
         const year = d.getFullYear();
-        var date = d.getDate();
-        
+        let date = d.getDate();
+
         // Leap Year
         if (year % 4 == 0) {
-            ((date) >= leapYearDaysInMonth[month]) ? (date = 1) : (date += 1)
+            date = ((date) >= leapYearDaysInMonth[month]) ? 1 : date + 1;
         }
         else {
-            ((date) >= daysInMonth[month]) ? (date = 1) : (date += 1)
+            date = ((date) >= daysInMonth[month]) ? 1 : date + 1;
         }
 
         return new Date(year, month, date);;
@@ -117,7 +124,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 const selectedTags = updatedTags
                     .map((isSelected, index) => isSelected ? EventTags[index] : null)
                     .filter(tag => tag !== null);
-                
+
                 const response: AxiosResponse = await axios.post(
                     `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
                     {
@@ -146,9 +153,10 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 );
                 setSubmissionStatus(`Success!: ${response.data.message}`);
                 changeState(false);
+                console.log(submissionStatus);
             }
             else {
-                var errs = "";
+                let errs = "";
                 if (updatedName == "Your Event Name") {
                     errs = errs + "Name ";
                 }
@@ -193,7 +201,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
         // Convert address to url (aka add +'s in every space)
         const convertedAddress = address.trim().replaceAll(" ", "+");
         const url = "https://nominatim.openstreetmap.org/search?q=" + convertedAddress + "&format=json";
-        
+
         try {
             const response: AxiosResponse = await axios.get(
                 `${url}`,
@@ -231,8 +239,8 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
             console.log(err);
         }
     }
-    
-    return ( 
+
+    return (
         <div className="box">
             {/* The left side */}
             <div className="left">
@@ -246,7 +254,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         <div className="customizeText">
                             Customize your Event
                         </div>
-                        <div className="customizeButtonFormat"> 
+                        <div className="customizeButtonFormat">
                             <button className="customizeButton">
                                 Add Poll
                             </button>
@@ -262,7 +270,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
 
                 {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
-                    <button className="bigPillButton" onClick={() =>changeState(false)}>
+                    <button className="bigPillButton" onClick={() => changeState(false)}>
                         CANCEL
                     </button>
                     <button className="bigPillButton" onClick={handleSubmit}>
@@ -271,21 +279,24 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 </div>
 
                 {/* Event Name */}
-                <div className="eventBox" onClick={()=>setIsEditingName(true)}>
+                <div className="eventBox" onClick={() => setIsEditingName(true)}>
                     {
                         // If is editing, then put in a textbox. If not, then its plain text
-                        isEditingName ? 
-                        <textarea onKeyDown={(e)=> {
-                            if (e.key === "Enter") {
-                                setIsEditingName(false)
-                            }
-                            }} className="titleinputbox" name="name" placeholder="Name" value={updatedName} onChange={(event) => { setUpdatedName(event.target.value) }} 
-                        />
-                        : 
-                        <div className="titleinputbox">{updatedName}</div>
+                        isEditingName ?
+                            <textarea
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        setIsEditingName(false)
+                                    }
+                                }}
+                                onBlur={() => { setIsEditingName(false); }}
+                                className="titleinputbox" name="name" placeholder="Name" value={updatedName} onChange={(event) => { setUpdatedName(event.target.value) }}
+                            />
+                            :
+                            <div className="titleinputbox">{updatedName}</div>
                     }
                 </div>
-                
+
                 {/* Organization Info */}
                 <div className="orgInfoBox">
                     <div className="orgLogo">
@@ -293,7 +304,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     </div>
                     <div className="flexIt">
                         <h4>
-                            Hosted by <u style={{color: '#696969'}}>{orgName}</u>:
+                            Hosted by <u style={{ color: '#696969' }}>{orgName}</u>:
                         </h4>
                     </div>
                     <button className="editButton">
@@ -305,22 +316,22 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 <div className="dateRow">
                     <div className="dateTimeZoneBox">
                         {/* Date */}
-                        <div 
+                        <div
                             className="date"
                             onClick={() => (document.getElementById('hiddenDateInput') as HTMLInputElement).showPicker()}
                         >
-                            <div>{ getDayOfWeek(updatedDate) }</div>
-                            <div>{ getMonth(updatedDate) }</div>
-                            <div>{ updatedDate.getDate() }</div>
+                            <div>{getDayOfWeek(updatedDate)}</div>
+                            <div>{getMonth(updatedDate)}</div>
+                            <div>{updatedDate.getDate()}</div>
                         </div>
-                    
+
                         {/* Hidden Date Input Interface, only the input modal appears when clicked */}
                         <input
                             type="date"
                             id="hiddenDateInput"
                             className="hiddenModal flexIt"
                             value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''}
-                            onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value)))}}
+                            onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value))) }}
                         />
                     </div>
 
@@ -340,14 +351,14 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                             value={endTime}
                             onChange={(event) => setEndTime(event.target.value)}
                         />
-                    
+
 
                         <div>•</div>
-                    
+
                         {/* Time Zone */}
                         {/* For whatever reason, the code breaks if you remove the position: relative in-place design */}
                         <div className="time" style={{ position: 'relative' }}>
-                            <select 
+                            <select
                                 className="timezone"
                                 value={selectedTimeZone}
                                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -368,35 +379,35 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                 {/* Description */}
                 <div className="descriptionTitle">
                     Description:
-                </div>  
-            
-                <div className="clickable" onClick={() => setIsEditingDescription(true)}>
+                </div>
+
+                <div className="clickable" onClick={() => { setIsEditingDescription(true) }} onBlur={() => setIsEditingDescription(false)}>
                     {
                         // If is editing, then put in a textbox. If not, then its plain text
-                        isEditingDescription ? 
-                        <textarea onKeyDown={(e)=> {
-                            if (e.key === "Enter") {
-                                setIsEditingDescription(false)
-                            }
-                            }} className="descriptionInputBox" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }} 
-                        />
-                        : 
-                        <div className="descriptionInputBox">{updatedDescription}</div>
+                        isEditingDescription ?
+                            <textarea id="description" onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    setIsEditingDescription(false)
+                                }
+                            }} className="descriptionInputBox" name="description" placeholder="Description" value={updatedDescription} onChange={(event) => { setUpdatedDescription(event.target.value) }}
+                            />
+                            :
+                            <div className="descriptionInputBox">{updatedDescription}</div>
                     }
                 </div>
-                
+
                 {/* Location */}
                 <div>
                     <div className="flexIt">
-                        <textarea className="locationInputbox" onChange={(e)=>{
+                        <textarea className="locationInputbox" onChange={(e) => {
                             // If an existing timeout exists, kill it (because we're going to set a new one)
                             if (timeoutID) {
                                 clearTimeout(timeoutID);
                             }
-                            setAddress(e.target.value);
-                            let newTimeoutID = setTimeout(() => getLocationJSON(e.target.value), 500);
+                            address.current = e.target.value;
+                            const newTimeoutID = setTimeout(() => getLocationJSON(e.target.value), 500);
                             setTimeoutID(newTimeoutID);
-                        }} name="location" placeholder="Location" value={updatedAddress} 
+                        }} name="location" placeholder="Location" value={address.current}
                         />
                     </div>
                     {/* If multiple results return, this is the modal that pops up */}
@@ -405,13 +416,13 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                             {
                                 options.map((option, index) => (
                                     <button key={index}
-                                    onClick={() => {
-                                        setLatitude(parseFloat(option.lat));
-                                        setLongitude(parseFloat(option.lon));
-                                        setAddress(option.display_name);
-                                        setOptions([]);
-                                    }}>
-                                        { option.display_name }
+                                        onClick={() => {
+                                            setLatitude(parseFloat(option.lat));
+                                            setLongitude(parseFloat(option.lon));
+                                            address.current = option.display_name;
+                                            setOptions([]);
+                                        }}>
+                                        {option.display_name}
                                     </button>
                                 ))
                             }
@@ -428,14 +439,14 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                     {
                         EventTags.map((tagName, index) => {
                             return (
-                                <button 
-                                className = { updatedTags[index] ? "tagPillSelected" :  "tagPillNotSelected" }
-                                key={index} 
-                                onClick={() => {
-                                    const newTags = [...updatedTags];
-                                    newTags[index] = !newTags[index];
-                                    setUpdatedTags(newTags);
-                                }}
+                                <button
+                                    className={updatedTags[index] ? "tagPillSelected" : "tagPillNotSelected"}
+                                    key={index}
+                                    onClick={() => {
+                                        const newTags = [...updatedTags];
+                                        newTags[index] = !newTags[index];
+                                        setUpdatedTags(newTags);
+                                    }}
                                 >
                                     {tagName}
                                 </button>
@@ -443,7 +454,7 @@ export default function CreateEventCard({orgName, changeState}: CreateEventCardP
                         })
                     }
                 </div>
-            </div> 
+            </div>
         </div>
     );
 }
