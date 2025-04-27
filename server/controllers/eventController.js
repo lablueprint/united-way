@@ -362,4 +362,6 @@ module.exports = {
   addUserToEvent,
   addActivity,
   getPolls,
+  addImageToEvent,
+  removeImageFromEvent
 };
