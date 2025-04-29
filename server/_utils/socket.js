@@ -1,6 +1,6 @@
 import activityModel from '../models/activityModel.js';
 
-const emitActivity = async (activity, eventRoom, io) => {
+const emitActivity = async (activity, eventRoom, eventRooms, io) => {
     const activityStartTimeDiff = new Date(activity.timeStart).getTime() - new Date().getTime();
     const activityEndTimeDiff = new Date(activity.timeEnd).getTime() - new Date().getTime();
     if (activity.type === "raffle") {
@@ -67,7 +67,7 @@ const emitActivity = async (activity, eventRoom, io) => {
     }
 }
 
-export const emitEvent = async (event, io) => {
+export const emitEvent = async (event, eventRooms, io) => {
     const eventRoom = event._id.toString();
     const startTimeDiff = new Date(event.startDate).getTime() - new Date().getTime();
     const endTimeDiff = new Date(event.endDate).getTime() - new Date().getTime();
@@ -96,7 +96,7 @@ export const emitEvent = async (event, io) => {
         try {
             const activity = await activityModel.findById(id);
             if (activity) {
-                emitActivity(activity, eventRoom, io);
+                emitActivity(activity, eventRoom, eventRooms, io);
             } else {
                 console.log(`Activity with ID ${id} not found`);
             }

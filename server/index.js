@@ -36,19 +36,6 @@ async function connectToDatabase() {
 
 connectToDatabase();
 
-// Start the Node Express server
-const app = express(); // Define app using express, defines handlers
-
-// Socket.IO Setup
-const { createServer } = require("http");
-const socketIo = require("socket.io");
-const { emitEvent, interactWithAttendee } = require('./_utils/socket.js');
-const server = createServer(app);
-const io = socketIo(server, { cors: { origin: "*" } });
-
-app.set('io', io);
-app.use(cors()); // Use app.use to use router -- cross origin requests, allow retrieve req from diff ip address
-app.use(express.json());
 const app = express(); // Define app using express, defines handlers
 
 // Socket.IO Setup
@@ -95,13 +82,10 @@ app.use("/events", eventRouter);
 
 app.use("/activities", activityRouter);
 
-app.use('/twofactor' ,twoFactorRouter);
-
-app.use('/twofactor' ,twoFactorRouter);
+app.use('/twofactor',twoFactorRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); // routers are groupings of endpoints
-  res.send('Hello World!'); // routers are groupings of endpoints
 });
 
 app.use((req, res, next) => {
@@ -112,33 +96,11 @@ app.use((req, res, next) => {
 mongoose.connection.once('open', async () => {
   // Fetch all events from the database
   const events = await eventModel.find({});
+  const eventRooms = {};
   events.forEach(async (event) => {
     // Emit events to all clients
-    emitEvent(event, io);
+    emitEvent(event, eventRooms, io);
   });
-
-  const eventRooms = {};
-
-  io.on('connection', (socket) => {
-    interactWithAttendee(socket, eventRooms);
-  });
-});
-
-server.listen(port, () => {
-app.use((req, res, next) => {
-  req.io = io;
-  return next();
-});
-
-mongoose.connection.once('open', async () => {
-  // Fetch all events from the database
-  const events = await eventModel.find({});
-  events.forEach(async (event) => {
-    // Emit events to all clients
-    emitEvent(event, io);
-  });
-
-  const eventRooms = {};
 
   io.on('connection', (socket) => {
     interactWithAttendee(socket, eventRooms);
@@ -148,3 +110,6 @@ mongoose.connection.once('open', async () => {
 server.listen(port, () => {
   console.log(`Server started at port ${port}`);
 });
+
+const date = new Date();
+console.log(date);
