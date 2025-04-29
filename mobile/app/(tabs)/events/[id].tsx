@@ -1,10 +1,13 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Alert } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import axios, { AxiosResponse } from 'axios';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
+import { io, Socket } from "socket.io-client";
+import { useRef } from 'react';
+
 interface EventData {
   _id: string;
   name: string;
@@ -44,10 +47,26 @@ export default function EventDetails() {
 
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
   const [organizationName, setOrganizationName] = useState("");
+  const [joinedRaffles, setJoinedRaffles] = useState(false);
+  const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
 
   const { id, origin } = useLocalSearchParams();
   const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+
+  const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    if ((registeredUsers).includes(user.userId)) {
+      socketRef.current = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
+      const socket = socketRef.current;
+      // Send a message to the server
+      socket.emit('message', `Connecting at ${new Date()}`);
+      // Join the event room
+      socket.emit('join event', eventData);
+      listenForEventUpdates();
+    }
+  }, [registeredUsers]);
 
   const getEventDetails = async () => {
     try {
@@ -182,10 +201,67 @@ export default function EventDetails() {
       await removeUserFromEvent(user.userId);
 
       setRegisteredUsers(registeredUsers.filter(id => id !== user.userId));
+      setJoinedRaffles(false);
+      setRaffleNumber(null);
+      socketRef.current?.emit('leave event', eventData);
+      socketRef.current?.disconnect();
+      socketRef.current = null;
     } catch (err) {
       console.error(err);
     }
   };
+
+  const listenForEventUpdates = () => {
+    const socket = socketRef.current;
+    // Listen for messages from the server
+    socket?.on('message', (data) => {
+      console.log('Message from server:', data);
+    });
+    // Listen for event and activity updates
+    socket?.on('event start', (data) => {
+      console.log('Event started:', data.name);
+      Alert.alert('Event started', `The event ${data.name} has started!`);
+    });
+    socket?.on('event end', (data) => {
+      console.log('Event ended:', data.name);
+      Alert.alert('Event ended', `The event ${data.name} has ended!`);
+    });
+    socket?.on('announcement', (data) => {
+      console.log('Announcement:', data.content[0].text);
+      Alert.alert('Announcement', data.content[0].text);
+    })
+    socket?.on('activity start', (data) => {
+      console.log('Activity started:', data.type);
+      Alert.alert('Activity started', `An activity of type ${data.type} has started.`);
+    });
+    socket?.on('activity end', (data) => {
+      console.log('Activity ended:', data.type);
+      Alert.alert('Activity ended', `An activity of type ${data.type} has ended.`);
+    });
+    // Listen for raffle updates
+    socket?.on('new raffle number', (data) => {
+      console.log('New raffle number:', data.raffleNumber);
+      setRaffleNumber(data.raffleNumber);
+    });
+    socket?.on('raffle winner', (data) => {
+      Alert.alert(`Raffle result: ${data.randomRaffleNumber}`, 'You won the raffle!');
+    });
+    socket?.on('raffle loser', (data) => {
+      Alert.alert(`Raffle result: ${data.randomRaffleNumber}`, 'You did not win the raffle. Better luck next time!');
+    });
+    // Listen for disconnection
+    socket?.on('disconnect', () => {
+      socketRef.current = null;
+      console.log('Disconnected from server');
+    });
+  }
+
+  const handleJoinRaffles = () => {
+    if (!joinedRaffles && eventData && eventData.registeredUsers.includes(user.userId)) {
+      setJoinedRaffles(true);
+      socketRef.current?.emit('join raffle', eventData);
+    }
+  }
 
   useEffect(() => {
     const getOrganizationName = async () => {
@@ -307,7 +383,14 @@ export default function EventDetails() {
                 <Text style={styles.description}>Raffle Gift Details</Text>
               </View>
             </View>
-            <TouchableOpacity><Text style={styles.darkButton}>Join</Text></TouchableOpacity>
+            {!joinedRaffles &&
+              <TouchableOpacity onPress={handleJoinRaffles}>
+                <Text style={styles.darkButton}>Join</Text>
+              </TouchableOpacity>
+            }
+            {joinedRaffles && raffleNumber &&
+              <Text>Your raffle number is {raffleNumber}.</Text>
+            }
           </View>
           :
           <></>

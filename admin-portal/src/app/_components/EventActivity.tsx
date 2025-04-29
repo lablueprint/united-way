@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import AnnouncementEditor from '@/app/_components/AnnouncementEditor';
-import PollCard from '@/app/_components/PollCard';
+import PollEditor from '@/app/_components/PollEditor';
 import QuizEditor from '@/app/_components/QuizEditor';
 import DateTimePicker from 'react-datetime-picker';
 import 'react-datetime-picker/dist/DateTimePicker.css';
@@ -33,7 +33,7 @@ export default function EventActivity({ id }: EventActivityProps) {
           timeEnd={end instanceof Date ? end : new Date()}
         />;
       case "poll":
-        return <PollCard 
+        return <PollEditor
           id={id} 
           timeStart={start instanceof Date ? start : new Date()} 
           timeEnd={end instanceof Date ? end : new Date()} 
