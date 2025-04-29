@@ -49,6 +49,18 @@ const io = socketIo(server, { cors: { origin: "*" } });
 app.set('io', io);
 app.use(cors()); // Use app.use to use router -- cross origin requests, allow retrieve req from diff ip address
 app.use(express.json());
+const app = express(); // Define app using express, defines handlers
+
+// Socket.IO Setup
+const { createServer } = require("http");
+const socketIo = require("socket.io");
+const { emitEvent, interactWithAttendee } = require('./_utils/socket.js');
+const server = createServer(app);
+const io = socketIo(server, { cors: { origin: "*" } });
+
+app.set('io', io);
+app.use(cors()); // Use app.use to use router -- cross origin requests, allow retrieve req from diff ip address
+app.use(express.json());
 
 // API Routes
 app.use("/test", exampleRouter); // given ip address, /test is where example router logic will be handle
@@ -89,8 +101,30 @@ app.use('/twofactor' ,twoFactorRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); // routers are groupings of endpoints
+  res.send('Hello World!'); // routers are groupings of endpoints
 });
 
+app.use((req, res, next) => {
+  req.io = io;
+  return next();
+});
+
+mongoose.connection.once('open', async () => {
+  // Fetch all events from the database
+  const events = await eventModel.find({});
+  events.forEach(async (event) => {
+    // Emit events to all clients
+    emitEvent(event, io);
+  });
+
+  const eventRooms = {};
+
+  io.on('connection', (socket) => {
+    interactWithAttendee(socket, eventRooms);
+  });
+});
+
+server.listen(port, () => {
 app.use((req, res, next) => {
   req.io = io;
   return next();

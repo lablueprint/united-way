@@ -16,6 +16,9 @@ interface EventDetails {
   startDate: string;
   endDate: string;
   registeredUsers: string[];
+  startDate: string;
+  endDate: string;
+  registeredUsers: string[];
 }
 
 export default function EventScanner() {
@@ -42,7 +45,6 @@ export default function EventScanner() {
   const pathname = usePathname();
   const params = useLocalSearchParams();
   const socketRef = useRef<Socket | null>(null);
-  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -50,6 +52,81 @@ export default function EventScanner() {
       setHasPermission(status === "granted");
     })();
   }, []);
+
+  useEffect(() => {
+    // Indicate that the event has ended if the end date is in the past
+    if (eventDetails) {
+      const endTimeDiff = new Date(eventDetails.endDate).getTime() - new Date().getTime();
+      if (endTimeDiff <= 0) {
+        setEventEnded(true);
+      } else {
+        setTimeout(() => {
+          setEventEnded(true);
+        }, endTimeDiff);
+      }
+    }
+  }, [eventDetails]);
+
+  useEffect(() => {
+    if (registered && eventDetails && eventDetails.registeredUsers.includes(user.userId)) {
+      // Connect to the socket server
+      socketRef.current = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
+      const socket = socketRef.current;
+      // Send a message to the server
+      socket.emit('message', `Connecting at ${new Date()}`);
+      // Join the event room
+      socket.emit('join event', eventDetails);
+      // Listen for messages from the server
+      socket.on('message', (data) => {
+        console.log('Message from server:', data);
+      });
+      // Listen for event and activity updates
+      socket.on('event start', (data) => {
+        console.log('Event started:', data.name);
+        Alert.alert('Event started', `The event ${data.name} has started!`);
+      });
+      socket.on('event end', (data) => {
+        console.log('Event ended:', data.name);
+        setEventEnded(true);
+        Alert.alert('Event ended', `The event ${data.name} has ended!`);
+      });
+      socket.on('announcement', (data) => {
+        console.log('Announcement:', data.content[0].text);
+        Alert.alert('Announcement', data.content[0].text);
+      })
+      socket.on('activity start', (data) => {
+        console.log('Activity started:', data.type);
+        Alert.alert('Activity started', `An activity of type ${data.type} has started.`);
+      });
+      socket.on('activity end', (data) => {
+        console.log('Activity ended:', data.type);
+        Alert.alert('Activity ended', `An activity of type ${data.type} has ended.`);
+      });
+      // Listen for raffle updates
+      socket.on('new raffle number', (data) => {
+        console.log('New raffle number:', data.raffleNumber);
+        setRaffleNumber(data.raffleNumber);
+      });
+      socket.on('raffle winner', (data) => {
+        Alert.alert(`Raffle result: ${data.randomRaffleNumber}`, 'You won the raffle!');
+      });
+      socket.on('raffle loser', (data) => {
+        Alert.alert(`Raffle result: ${data.randomRaffleNumber}`, 'You did not win the raffle. Better luck next time!');
+      });
+      // Listen for disconnection
+      socket.on('disconnect', () => {
+        socketRef.current = null;
+        console.log('Disconnected from server');
+      });
+    }
+  }, [registered]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (scanned) setScanned(false);
+      setHasNavigated(false);
+    }, [scanned])
+  );
 
   useEffect(() => {
     // Indicate that the event has ended if the end date is in the past
@@ -155,6 +232,9 @@ export default function EventScanner() {
         },
       });
       const { data } = response.data;
+      setEventDetails((prevDetails) => 
+        JSON.stringify(prevDetails) !== JSON.stringify(data) ? data : prevDetails
+      );
       setEventDetails((prevDetails) => 
         JSON.stringify(prevDetails) !== JSON.stringify(data) ? data : prevDetails
       );
