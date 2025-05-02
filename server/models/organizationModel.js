@@ -26,6 +26,14 @@ const organizationSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
+  users: [String], // Array of user IDs
+  rewards: [
+    {
+      name: { type: String, required: true }, 
+      cost: { type: Number, required: true }, 
+      quantity: {type: Number, required: true}
+    },],
+  transactions: [String], // Array of transaction IDs
 });
 
 module.exports = mongoose.model('Organization', organizationSchema);
