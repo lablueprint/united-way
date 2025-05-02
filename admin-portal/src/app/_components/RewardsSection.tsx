@@ -53,7 +53,7 @@ const RewardsSection = () => {
       }
     };
     fetchRewards();
-  }, [refreshTrigger, org.authToken]);
+  }, [refreshTrigger]);
 
   const deleteReward = async (rewardId: string) => {
     try {

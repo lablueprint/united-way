@@ -15,22 +15,18 @@ export default function OrganizationProfile() {
 
     useEffect(() => {
         // Get all events
-        const fetchEvents = async () => {
-            try {
-                const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`);
-                const { data } = response.data;
-                setEventIds(data.map((event: EventData) => event._id));
-            }
+      const fetchEvents = async () => {
+          try {
+              const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/`);
+              const { data } = response.data;
+              setEventIds(data.map((event: EventData) => event._id));
+              setOrgName("test org"); // Hardcoded, Sign-in doesn't pass down org name yet
+          } catch (err) {
+              console.log(err);
           }
-        );
-        const { data } = response.data;
-        setEventIds(data.map((event: EventData) => event._id));
-        setOrgName("test org"); // Hardcoded, Sign-in doesn't pass down org name yet
       }
-      catch (err) {
-        console.log(err);
-      }
-    }
+      fetchEvents();
+    }, []);
 
     return (
         <div>
@@ -38,17 +34,15 @@ export default function OrganizationProfile() {
             <div>
                 <h2>Events</h2>
                 <div>
-                    {eventIds.map((id: string) => {
-                        return <EventCard id={id} key={id} removeFromList={removeFromList} />;
-                    })}
+                    {eventIds.map((id: string) => (
+                        <EventCard id={id} key={id} />
+                    ))}
                 </div>
             </div>
+            <button onClick={() => setIsEditing(!isEditing)}>
+                {isEditing ? "Cancel Event" : "Create Event"}
+            </button>
+            {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} />}
         </div>
-      </div>
-      <button onClick={() => setIsEditing(!isEditing)}>
-        {isEditing ? "Cancel Event" : "Create Event"}
-      </button>
-      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} />}
-    </div>
   );
 }
