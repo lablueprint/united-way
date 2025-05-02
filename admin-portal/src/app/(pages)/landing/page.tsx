@@ -45,9 +45,15 @@ export default function Landing() {
         onClick={() => {
           console.log("Result: ", exampleGetToRoot());
         }}
-      >
+      > 
         Example HTTP Request button
       </button><br />
+      <button 
+        onClick={() => {
+          router.push('/rewards');
+        }}
+        
+      >Rewards Button</button>
       Org: {org.orgId}<br />
       Auth: {org.authToken}<br />
       Refresh: {org.refreshToken}<br />

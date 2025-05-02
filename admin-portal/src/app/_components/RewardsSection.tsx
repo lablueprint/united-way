@@ -6,6 +6,7 @@ import Slider from "react-slick";
 import "../_styles/rewardsComponent.css";
 import axios, { AxiosResponse } from "axios";
 import reward_image from "../../../public/rewards.png";
+import { RootState } from "../_interfaces/AuthInterfaces";
 
 export interface Reward {
   name: string;
@@ -25,13 +26,6 @@ const RewardsSection = () => {
   const [newRewardQuantity, setNewRewardQuantity] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  interface RootState {
-    auth: {
-      orgId: string;
-      authToken: string;
-      refreshToken: string;
-    };
-  }
   const org = useSelector((state: RootState) => {
     return {
       orgId: state.auth.orgId,
@@ -45,7 +39,13 @@ const RewardsSection = () => {
       // TODO: Replace hard-coded organization with current signed in organization
       try {
         const currOrg: AxiosResponse = await axios.get(
-          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${org.authToken}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
         setRewards(currOrg.data.data.rewards || []);
       } catch (err) {
@@ -53,7 +53,7 @@ const RewardsSection = () => {
       }
     };
     fetchRewards();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, org.authToken]);
 
   const deleteReward = async (rewardId: string) => {
     try {
@@ -61,7 +61,7 @@ const RewardsSection = () => {
         (reward) => reward._id !== rewardId
       );
       const response = await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/679c716717aa28c4bef0ef9c`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`,
         {
           rewards: updatedRewards,
         },
@@ -79,16 +79,25 @@ const RewardsSection = () => {
       console.error("Failed to delete reward:", error);
     }
   };
+
+
   const addReward = async (newReward: Reward) => {
     try {
+      console.log(
+        "Redux auth state:",
+        org.orgId,
+        org.authToken,
+        org.refreshToken
+      );
+      console.log("Auth token:", org.authToken);
       const response = await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${orgId}`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`,
         {
           rewards: [...rewards, newReward],
         },
         {
           headers: {
-            Authorization: `Bearer ${org.authToken}`,
+            "Authorization": `Bearer ${org.authToken}`,
             "Content-Type": "application/json",
           },
         }

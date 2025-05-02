@@ -2,16 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import { useSelector } from "react-redux";
 import "../_styles/transactions.css";
+import { RootState } from "../_interfaces/AuthInterfaces";
 
 const TransactionsCard = () => {
   const [transactions, setTransactions] = useState([]);
-  interface RootState {
-    auth: {
-      orgId: string;
-      authToken: string;
-      refreshToken: string;
-    };
-  }
+
   const org = useSelector((state: RootState) => {
     return {
       orgId: state.auth.orgId,
