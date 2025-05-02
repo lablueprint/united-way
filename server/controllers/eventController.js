@@ -1,21 +1,131 @@
 const Event = require("../models/eventModel");
+const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 
 // Example of creating a document in the database
 const createEvent = async (req, res) => {
   const event = new Event(req.body);
-  try{
+  try {
     const data = await event.save(event);
     res.status(201).json({
       status: "success",
       message: "Event successfully created.",
-      data: data
+      data: data,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       status: "failure",
       message: "Server-side error: event could not be created.",
+      data: {},
+    });
+  }
+};
+
+// Note: to use this route, you need to provide multi-part form data
+// where one key-value pair is image with the associated file.
+const addImageToEvent = async (req, res) => {
+  if (req.auth.role != "admin" && req.auth.role != "organization") {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
       data: {}
+    });
+    return;
+  }
+
+  if (!req.files || !req.files.image) {
+    return res.status(400).json({
+      status: "failure",
+      message: "No image file provided",
+      data: {},
+    });
+  }
+
+  const eventId = req.params.id;
+  const image = req.files.image;
+  const fileName = `events/${eventId}/${Date.now()}-${image.name}`;
+
+  try {
+    // Upload to S3
+    const result = await putObject(image.data, fileName);
+
+    if (!result) {
+      throw new Error("Failed to upload to S3");
+    }
+
+    // Update event with image URL and key
+    const event = await Event.findByIdAndUpdate(
+      eventId,
+      {
+        imageURL: result.url,
+        key: result.key,
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "Image successfully uploaded",
+      data: event,
+    });
+  } catch (err) {
+    console.error("Error in addImageToEvent:", err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: image could not be uploaded",
+      data: {},
+    });
+  }
+};
+
+const removeImageFromEvent = async (req, res) => {
+  if (req.auth.role != "admin" && req.auth.role != "organization") {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
+    return;
+  }
+  const eventId = req.params.id;
+
+  try {
+    // Get event to find the S3 key
+    const event = await Event.findById(eventId);
+    if (!event || !event.key) {
+      return res.status(404).json({
+        status: "failure",
+        message: "Event or image not found",
+        data: {},
+      });
+    }
+
+    // Delete from S3
+    await deleteObject(event.key);
+
+    // Update event to remove image info
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      {
+        $unset: {
+          imageURL: 1,
+          key: 1,
+        },
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "Image successfully removed",
+      data: updatedEvent,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: image could not be removed",
+      data: {},
     });
   }
 };
@@ -29,34 +139,36 @@ const addUserToEvent = async (req, res) => {
     });
     return;
   }
-  
+
   const origId = req.params.id;
   const { newUser } = req.body;
-  
-  try {
 
-    const result = await Event.updateOne( { _id: origId }, { $addToSet: { registeredUsers: newUser }});
+  try {
+    const result = await Event.updateOne(
+      { _id: origId },
+      { $addToSet: { registeredUsers: newUser } }
+    );
     if (result.modifiedCount === 0) {
-        res.status(404).json({
-            status: "failure",
-            message: "Event not found or no changes made.",
-            data: result
-        });
-    } else {
-        res.status(200).json({
-            status: "success",
-            message: "Event updated successfully.",
-            data: result
-        });
-    }
-} catch (err)   {
-    res.status(500).json({
+      res.status(404).json({
         status: "failure",
-        message: "Server-side error: update not completed.",
-        data: {}
+        message: "Event not found or no changes made.",
+        data: result,
+      });
+    } else {
+      res.status(200).json({
+        status: "success",
+        message: "Event updated successfully.",
+        data: result,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: update not completed.",
+      data: {},
     });
-}
-}
+  }
+};
 
 const removeUserFromEvent = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
@@ -73,29 +185,30 @@ const removeUserFromEvent = async (req, res) => {
 
   try {
     const result = await Event.findOneAndUpdate(
-      { _id: eventId }, 
-      { $pull: { registeredUsers: userId}});
+      { _id: eventId },
+      { $pull: { registeredUsers: userId } }
+    );
     if (result.modifiedCount === 0) {
-        res.status(404).json({
-            status: "failure",
-            message: "Event not found or no changes made.",
-            data: result
-        });
-    } else {
-        res.status(200).json({
-            status: "success",
-            message: "Event updated successfully.",
-            data: result
-        });
-    }
-} catch (err) {
-    res.status(500).json({
+      res.status(404).json({
         status: "failure",
-        message: "Server-side error: update not completed.",
-        data: {}
+        message: "Event not found or no changes made.",
+        data: result,
+      });
+    } else {
+      res.status(200).json({
+        status: "success",
+        message: "Event updated successfully.",
+        data: result,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: update not completed.",
+      data: {},
     });
-}
-}
+  }
+};
 
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
@@ -104,40 +217,39 @@ const getEventById = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Event successfully received.",
-      data: event
+      data: event,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       status: "failure",
       message: "Server-side error: event could not be received.",
-      data: {}
+      data: {},
     });
   }
 };
 
-const getAllEvents = async (req, res) =>
-{
+const getAllEvents = async (req, res) => {
   try {
     const events = await Event.find();
     res.status(200).json({
       status: "success",
       message: "Event(s) successfully received.",
-      data: events
+      data: events,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       status: "failure",
       message: "Server-side error: events could not be retrieved.",
-      data: {}
+      data: {},
     });
   }
-}
+};
 
 //
 // TODO: filter by including sub-element matches as well
-// and not just hard equality (i.e. matching those that 
+// and not just hard equality (i.e. matching those that
 // include certain tags instead of all of the tags)
 //
 // ex. [tag1, tag2] search should result in all events that INCLUDE
@@ -151,14 +263,14 @@ const getEventsByFilter = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Event successfully received.",
-      data: events
+      data: events,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       status: "failure",
       message: "Server-side error: could not receive events.",
-      data: {}
+      data: {},
     });
   }
 };
@@ -172,14 +284,14 @@ const editEventDetails = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Event successfully edited.",
-      data: event
+      data: event,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       status: "failure",
       message: "Server-side error: event could not be edited.",
-      data: {}
+      data: {},
     });
   }
 };
@@ -190,14 +302,14 @@ const deleteEvent = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Event successfully deleted.",
-      data: data
+      data: data,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       status: "failure",
       message: "Server-side error: event could not be deleted.",
-      data: {}
+      data: {},
     });
   }
 };
@@ -250,4 +362,6 @@ module.exports = {
   addUserToEvent,
   addActivity,
   getPolls,
+  addImageToEvent,
+  removeImageFromEvent
 };

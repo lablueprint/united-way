@@ -19,6 +19,21 @@ export interface Activity {
     active: boolean;
 }
 
+export const EventTags: string[] = [
+    'Sports',
+    'Entertainment',
+    'Food',
+    'Technology',
+    'Wellness',
+    'Music',
+    'Pets',
+    'Shopping',
+    'Reading',
+    'Travel',
+    'Home',
+    'Vehicles'
+];
+
 export interface EventData {
     _id: string;
     name: string;
