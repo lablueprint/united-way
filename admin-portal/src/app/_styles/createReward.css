@@ -1,0 +1,214 @@
+.create-reward-page {
+  display: flex;
+  flex-direction: row;
+  min-height: 80vh;
+  background: #fff;
+  padding: 0;
+  margin-top: 0;
+}
+
+.create-reward-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 0 48px;
+  height: 88px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  position: relative;
+  z-index: 2;
+}
+
+.create-reward-header .header-left {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 18px;
+}
+
+.create-reward-header .header-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a4b;
+  letter-spacing: 0.02em;
+  margin-right: 18px;
+}
+
+.create-reward-header .header-nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: 18px;
+}
+
+.create-reward-header .header-nav-btn {
+  background: none;
+  border: none;
+  color: #1a1a4b;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px 18px;
+  border-radius: 20px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.create-reward-header .header-nav-btn.active,
+.create-reward-header .header-nav-btn:hover {
+  background: #1a1a4b;
+  color: #fff;
+}
+
+.create-reward-left {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 48px;
+  margin-top: 0;
+}
+
+.image-upload-area {
+  width: 380px;
+  height: 380px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 0;
+}
+
+.image-upload-area input[type="file"] {
+  display: none;
+}
+
+.image-upload-btn {
+  background: #fff;
+  color: #1a1a4b;
+  border: 2px solid #1a1a4b;
+  border-radius: 20px;
+  padding: 8px 32px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.image-upload-btn:hover {
+  background: #1a1a4b;
+  color: #fff;
+}
+
+.create-reward-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 48px 80px 0 0;
+  margin-top: 0;
+}
+
+.create-reward-form {
+  width: 100%;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  padding: 36px 32px 32px 32px;
+  margin-top: 0;
+}
+
+.create-reward-form label {
+  font-weight: 600;
+  color: #1a1a4b;
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.create-reward-form input,
+.create-reward-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fafbfc;
+  margin-bottom: 8px;
+  resize: none;
+}
+
+.create-reward-form textarea {
+  min-height: 70px;
+}
+
+.create-reward-form .quantity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.create-reward-form .quantity-label {
+  font-weight: 500;
+  color: #1a1a4b;
+}
+
+.create-reward-form .quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.create-reward-form .quantity-btn {
+  background: #f0f0f7;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+  color: #1a1a4b;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.create-reward-form .quantity-btn:hover {
+  background: #e0e7ff;
+}
+
+.create-reward-form .save-btn {
+  align-self: flex-end;
+  background: #fff;
+  color: #1a1a4b;
+  border: 2px solid #1a1a4b;
+  border-radius: 20px;
+  padding: 8px 32px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.create-reward-form .save-btn:hover {
+  background: #1a1a4b;
+  color: #fff;
+}
+
+.create-reward-header img {
+  height: 40px;
+  width: auto;
+  max-height: 40px;
+  max-width: 120px;
+  object-fit: contain;
+  display: block;
+}

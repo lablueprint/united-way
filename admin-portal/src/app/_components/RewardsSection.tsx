@@ -7,6 +7,8 @@ import "../_styles/rewardsComponent.css";
 import axios, { AxiosResponse } from "axios";
 import reward_image from "../../../public/rewards.png";
 import { RootState } from "../_interfaces/AuthInterfaces";
+//new changes for the CreateReward.tsx
+import { useRouter } from "next/navigation";
 
 export interface Reward {
   name: string;
@@ -25,6 +27,8 @@ const RewardsSection = () => {
   const [newRewardCost, setNewRewardCost] = useState("");
   const [newRewardQuantity, setNewRewardQuantity] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  //add the router
+  const router = useRouter();
 
   const org = useSelector((state: RootState) => {
     return {
@@ -80,7 +84,6 @@ const RewardsSection = () => {
     }
   };
 
-
   const addReward = async (newReward: Reward) => {
     try {
       console.log(
@@ -97,7 +100,7 @@ const RewardsSection = () => {
         },
         {
           headers: {
-            "Authorization": `Bearer ${org.authToken}`,
+            Authorization: `Bearer ${org.authToken}`,
             "Content-Type": "application/json",
           },
         }
@@ -196,7 +199,7 @@ const RewardsSection = () => {
 
       <button
         className="floating-add-button sleek-add-button"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => router.push("/rewards/create")}
       >
         + Add Reward
       </button>
