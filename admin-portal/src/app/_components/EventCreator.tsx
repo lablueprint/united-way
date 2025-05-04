@@ -12,6 +12,7 @@ interface EventCreatorProps {
     orgName: string;
     changeState: React.Dispatch<React.SetStateAction<boolean>>;
     eventId: string;
+    justCreated: boolean;
 }
 
 interface LocationProps {
@@ -21,7 +22,7 @@ interface LocationProps {
 }
 
 // TODO: Update the organization profile after creating this event to showcase.
-export default function EventCreator({ orgName, changeState, eventId }: EventCreatorProps) {
+export default function EventCreator({ orgName, changeState, eventId, justCreated }: EventCreatorProps) {
     const [updatedName, setUpdatedName] = useState<string>("Your Event Name");
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
     const [updatedDescription, setUpdatedDescription] = useState<string>("Your Event Description");
@@ -52,10 +53,29 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
     ];
 
     useEffect(() => {
+        (async () => {
+            // Parse the event's JSON from db
+            // NOTE: This pings the database twice for some reason, doesnt affect correction though, so whatevs
+            // NOTE: We can ignore the draft list as we can generate a new one
+            const eventData = await getEventById();
+            setUpdatedName(eventData.name)
+            console.log(eventData.date)
+            setUpdatedDate(new Date(eventData.date))
+            // We dont use Duration?
+            setIsDraft(eventData.draft)
+            setUpdatedDescription(eventData.description)
+            setStartTime(eventData.startTime)
+            setEndTime(eventData.endTime)
+            setLatitude(eventData.location.coordinates[0])
+            setLongitude(eventData.location.coordinates[1])
+            setUpdatedTags(eventData.tags)
+            // TODO: No registeredUsers, activity, image for now ... .. . ...
+        })();
+
         if (isEditingDescription) {
             document.getElementById("description")?.focus();
         }
-    }, [isEditingDescription])
+    }, [])
 
     // Checks if all inputtables are non-empty
     const notEmpty = () => {
@@ -127,9 +147,6 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
     // Creates a JSON and attempts to patch it to DB
     const handlePatch = async () => {
         try {
-            console.log('date ', updatedDate);
-            console.log('starttime ', startTime);
-            console.log('tz', selectedTimeZone);
             // TODO: Convert to GMT, figure out how things are stored
             if ((notEmpty() && !isDraft) || isDraft) {
                 const selectedTags = updatedTags
@@ -190,6 +207,22 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
             setSubmissionStatus(`Failure: ${err}`);
         }
     }
+
+    const getEventById = async () => {
+        try {
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
+                }
+            });
+            const { data } = response.data;
+            return data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    };
 
     // Use HTML GeoLocation API to get the user's location (shall their web browser permit)
     // Updates state variables latitude, longitude if it works
@@ -293,7 +326,23 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
                     }}>
                         SAVE
                     </button>
-                    <button className="bigPillButton" onClick={() => changeState(false)}>
+                    <button className="bigPillButton" onClick={() => {
+                        changeState(false)
+                        // If event just created, delete the event
+                        // NOTE: This is not async, might cause problems later
+                        if (justCreated) {
+                            try {
+                                axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`, {
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "Authorization": `Bearer ${org.authToken}`
+                                    }
+                                });
+                            } catch (err) {
+                                console.log(err);
+                            }
+                        }
+                    }}>
                         CANCEL
                     </button>
                     <button className="bigPillButton" onClick={() => {

@@ -1,34 +1,19 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
-import { EventData } from '../_interfaces/EventInterfaces';
+import EventCreator from "./EventCreator";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
-import EventEditor from './EventEditor';
 
 interface EventCardProps {
     id: string;
     removeFromList: (id: string) => void;
+    orgName: string;
 }
 
-export default function EventCard({ id, removeFromList }: EventCardProps) {
+export default function EventCard({ id, removeFromList, orgName }: EventCardProps) {
     const [showButtons, setShowButtons] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [eventData, setEventData] = useState<EventData>({
-        organizerId: "",
-        _id: "",
-        name: "",
-        draft: true,
-        draftList: [],
-        date: new Date(),
-        description: "",
-        location: {
-            type: "",
-            coordinates: [],
-        },
-        tags: [],
-        registeredUsers: [],
-        activities: []
-    });
+    const [eventName, setEventName] = useState("");
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
     const deleteEvent = async (e: MouseEvent<HTMLButtonElement>) => {
@@ -46,27 +31,6 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         }
     };
 
-    const editEvent = async (name: string, date: Date, description: string, tags: string[]) => {
-        try {
-            const response: AxiosResponse = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`,
-                {
-                    name: name,
-                    date: date,
-                    description: description,
-                    tags: tags
-                }, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${org.authToken}`
-                }
-            });
-            const { data } = response.data;
-            setEventData(data);
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
     const getEventById = async () => {
         try {
             const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
@@ -76,7 +40,8 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
                 }
             });
             const { data } = response.data;
-            return data;
+            setEventName(data.name)
+            // return data;
         } catch (err) {
             console.log(err);
             return err;
@@ -85,22 +50,11 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
 
     useEffect(() => {
         const fetchData = async () => {
-            const data = await getEventById();
-            setEventData(data);
+            await getEventById();
         };
         fetchData();
     }, []);
-
-    const handleEditClick = (e: MouseEvent<HTMLButtonElement>) => {
-        // Show EditCard modal
-        e.stopPropagation();
-        setIsEditing(!isEditing);
-    };
-    const handleCloseClick = () => {
-        // Close EditCard modal
-        setIsEditing(false);
-    };
-
+    
     return (
         // Show event name, show buttons on hover
         <div>
@@ -108,16 +62,16 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
                 onMouseEnter={() => setShowButtons(true)}
                 onMouseLeave={() => setShowButtons(false)}
             >
-                <p>{eventData?.name}</p>
+                <p>{eventName}</p>
                 {showButtons && (
                     <>
                         <button onClick={deleteEvent}>Delete</button>
-                        <button onClick={handleEditClick}>Edit</button>
+                        <button onClick={() => {setIsEditing(!isEditing);}}>Edit</button>
                     </>
                 )}
             </div>
 
-            {isEditing && <EventEditor id={id} handleCloseClick={handleCloseClick} handleEditEvent={editEvent} />}
+            {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} eventId={id} justCreated={false}/>}
         </div>
     );
 }

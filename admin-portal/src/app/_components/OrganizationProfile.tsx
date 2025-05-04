@@ -115,7 +115,7 @@ export default function OrganizationProfile() {
         <div>
           {eventIds.map((id: string) => {
             return (
-              <EventCard id={id} key={id} removeFromList={removeFromList} />
+              <EventCard id={id} key={id} orgName={orgName} removeFromList={removeFromList} />
             );
           })}
         </div>
@@ -125,7 +125,7 @@ export default function OrganizationProfile() {
         <div>
           {draftIds.map((id: string) => {
             return (
-              <EventCard id={id} key={id} removeFromList={removeFromList} />
+              <EventCard id={id} key={id} orgName={orgName} removeFromList={removeFromList} />
             );
           })}
         </div>
@@ -141,7 +141,7 @@ export default function OrganizationProfile() {
       }>
         Create Event
       </button>
-      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} eventId={editingId}/>}
+      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} eventId={editingId} justCreated={true}/>}
     </div>
   );
 }
