@@ -34,7 +34,7 @@ export default function EventCreator({ orgName, changeState, eventId, justCreate
     const [startTime, setStartTime] = useState('12:00');
     const [endTime, setEndTime] = useState('12:01');
     const [selectedTimeZone, setSelectedTimeZone] = useState('PT');
-    const [isDraft, setIsDraft] = useState<boolean>(true);
+    const [isDraft, setIsDraft] = useState(true);
     // A state variable I used to debug Nominatim Issues. Can be useful for notifications
     const [submissionStatus, setSubmissionStatus] = useState<string>("");
 
@@ -59,7 +59,6 @@ export default function EventCreator({ orgName, changeState, eventId, justCreate
             // NOTE: We can ignore the draft list as we can generate a new one
             const eventData = await getEventById();
             setUpdatedName(eventData.name)
-            console.log(eventData.date)
             setUpdatedDate(new Date(eventData.date))
             // We dont use Duration?
             setIsDraft(eventData.draft)
@@ -145,10 +144,10 @@ export default function EventCreator({ orgName, changeState, eventId, justCreate
     // TODO: maybe refresh to populate the event into org upon successful patch?
     // TODO: Update schema to handle user count?
     // Creates a JSON and attempts to patch it to DB
-    const handlePatch = async () => {
+    const handlePatch = async (currIsDraft: boolean) => {
         try {
             // TODO: Convert to GMT, figure out how things are stored
-            if ((notEmpty() && !isDraft) || isDraft) {
+            if ((notEmpty() && !currIsDraft) || currIsDraft) {
                 const selectedTags = updatedTags
                     .map((isSelected, index) => isSelected ? EventTags[index] : null)
                     .filter(tag => tag !== null);
@@ -161,7 +160,7 @@ export default function EventCreator({ orgName, changeState, eventId, justCreate
                         name: updatedName,
                         date: updatedDate,
                         duration: 0, // Hardcoded for now
-                        draft: isDraft,
+                        draft: currIsDraft,
                         draftList: uploadDraftList,
                         description: updatedDescription,
                         startTime: startTime,
@@ -194,7 +193,7 @@ export default function EventCreator({ orgName, changeState, eventId, justCreate
                 if (updatedDescription == "Your Event Description") {
                     errs = errs + "Description ";
                 }
-                if (!updatedTags.includes(true)) {
+                if (updatedTags.length == 0) {
                     errs = errs + "Tags ";
                 }
                 if ((currLatitude == 0) && (currLongitude == 0)) {
@@ -321,8 +320,7 @@ export default function EventCreator({ orgName, changeState, eventId, justCreate
                 {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
                     <button className="saveButton" onClick={() => {
-                        setIsDraft(true)
-                        handlePatch()
+                        handlePatch(true)
                     }}>
                         SAVE
                     </button>
@@ -346,8 +344,7 @@ export default function EventCreator({ orgName, changeState, eventId, justCreate
                         CANCEL
                     </button>
                     <button className="bigPillButton" onClick={() => {
-                        setIsDraft(false)
-                        handlePatch()
+                        handlePatch(false)
                     }}>
                         PUBLISH
                     </button>
