@@ -13,17 +13,18 @@ interface Props {
 
 const sections = [
   { title: "Questionnaires", type: "poll" },
-  { title: "Raffles", type: "raffle" },
+  { title: "Raffles",       type: "raffle" },
   { title: "Announcements", type: "announcement" },
+  { title: "Quizzes",       type: "quiz" },
 ];
 
 export default function ActivityDropdown({ eventId }: Props) {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [refresh, setRefresh] = useState(0);
-  const [mode, setMode] = useState<"list" | "create" | "edit">("list");
-  const [activeType, setActiveType] = useState<string | null>(null);
-  const [activeActivity, setActiveActivity] = useState<Activity | null>(null);
+  const [activities, setActivities]           = useState<Activity[]>([]);
+  const [refresh, setRefresh]                 = useState(0);
+  const [creatingType, setCreatingType]       = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
 
+  // 1) load all activities once or whenever refresh changes
   useEffect(() => {
     axios
       .post(
@@ -34,61 +35,51 @@ export default function ActivityDropdown({ eventId }: Props) {
       .catch(console.error);
   }, [eventId, refresh]);
 
-  // switch to create-mode
-  const handleCreate = (type: string) => {
-    setActiveType(type);
-    setMode("create");
-  };
-
-  // after creation, switch to edit-mode
-  const handleCreated = (activity: Activity) => {
-    setActiveActivity(activity);
-    setMode("edit");
-    setRefresh((r) => r + 1);
-  };
-
-  // back to list view
-  const handleCancel = () => {
-    setActiveType(null);
-    setActiveActivity(null);
-    setMode("list");
-  };
-
-  if (mode === "create" && activeType) {
+  // 2) If we're creating, show the Create page
+  if (creatingType) {
     return (
       <ActivityCreator
         eventId={eventId}
-        type={activeType}
-        onCancel={handleCancel}
-        onCreated={handleCreated}
+        type={creatingType}
+        onCancel={() => setCreatingType(null)}
+        onCreated={(newActivity) => {
+          setCreatingType(null);
+          setSelectedActivity(newActivity);
+          setRefresh((r) => r + 1);
+        }}
       />
     );
   }
 
-  if (mode === "edit" && activeActivity) {
+  // 3) If we've selected one to edit, show its editor
+  if (selectedActivity) {
+    const act = selectedActivity;
     return (
-      <div>
-        <button onClick={handleCancel}>← Back</button>
-        {activeActivity.type === "poll" && (
+      <div className="p-4">
+        <button onClick={() => setSelectedActivity(null)}>
+          ← Back to list
+        </button>
+
+        {act.type === "poll" && (
           <PollEditor
-            activityId={activeActivity._id}
-            timeStart={new Date(activeActivity.timeStart)}
-            timeEnd={new Date(activeActivity.timeEnd)}
+            activityId={act._id}
+            timeStart={new Date(act.timeStart)}
+            timeEnd={new Date(act.timeEnd)}
           />
         )}
-        {activeActivity.type === "announcement" && (
+        {act.type === "announcement" && (
           <AnnouncementEditor
-            activityId={activeActivity._id}
-            timeStart={new Date(activeActivity.timeStart)}
-            timeEnd={new Date(activeActivity.timeEnd)}
+            activityId={act._id}
+            timeStart={new Date(act.timeStart)}
+            timeEnd={new Date(act.timeEnd)}
           />
         )}
-        {/* RaffleEditor if you implement one */}
+        {/* add RaffleEditor as needed */}
       </div>
     );
   }
 
-  // default: list view
+  // 4) Default: render all 4 dropdowns
   return (
     <div>
       {sections.map(({ title, type }) => {
@@ -99,26 +90,22 @@ export default function ActivityDropdown({ eventId }: Props) {
             key={type}
             title={title}
             items={items}
-            renderItem={(act) => (
+            renderItem={(act, onEdit) => (
               <div className="flex justify-between">
                 <span>
-                  {/* question/title or fallback */}
                   { (act as any).content[0]?.question ??
                     (act as any).content[0]?.title ??
                     `Untitled ${title}` }
                 </span>
-                <button
-                  onClick={() => {
-                    setActiveActivity(act);
-                    setMode("edit");
-                  }}
-                >
-                  Edit
-                </button>
+                <button onClick={() => onEdit(act._id)}>Edit</button>
               </div>
             )}
-            onCreate={() => handleCreate(type)}
-            onEditItem={() => {}}
+            //  👉 clicking "+" here flips into create-page
+            onCreate={() => setCreatingType(type)}
+            onEditItem={(id) => {
+              const act = activities.find((a) => a._id === id);
+              if (act) setSelectedActivity(act);
+            }}
           />
         );
       })}
