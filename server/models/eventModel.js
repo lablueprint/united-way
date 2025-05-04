@@ -60,9 +60,12 @@ const eventSchema = new mongoose.Schema({
     required: true,
     type: [String],
   },
-  image: {
+  imageURL: {
     type: String,
   },
+  key: {
+    type: String,
+  }
 });
 
 // Create a 2dsphere index for geospatial queries
