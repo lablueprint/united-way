@@ -336,9 +336,9 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
                             <button className="customizeButton">
                                 Add Rewards
                             </button>
-                        </div>
-                        <div>
-                            {/* <QRCode value={_id}/> */}
+                            <div style={{display: 'flex'}}>
+                                <QRCode value={eventId}/>
+                            </div>
                         </div>
                     </div>
                 </div>
