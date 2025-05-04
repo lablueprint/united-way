@@ -9,6 +9,7 @@ import { RootState } from '../_interfaces/AuthInterfaces';
 // TODO: Make the organization profile based on each individual organization instead of all events.
 export default function OrganizationProfile() {
   const [eventIds, setEventIds] = useState<string[]>([]);
+  const [editingId, setEditingId] = useState<string>("");
   const [draftIds, setDraftIds] = useState<string[]>([]);
   const [orgName, setOrgName] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -69,6 +70,43 @@ export default function OrganizationProfile() {
     setEventIds(eventIds.filter((eventId) => eventId != id));
   };
 
+  const createBlankEvent = async () => {
+    try {        
+      const response: AxiosResponse = await axios.post(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
+        {
+          name: "Your Event Name",
+          date: new Date(),
+          duration: 0, // Hardcoded for now
+          draft: true,
+          draftList: [],
+          description: "Your Event Description",
+          startTime: '12:00',
+          endTime: '12:01',
+          location: {
+            type: "Point",
+            coordinates: [0, 0]
+          },
+          organizerID: org.orgId,
+          tags: [],
+          registeredUsers: [], // Hardcoded for now
+          activity: [], // Hardcoded for now
+          image: "placeholder" // Hardcoded for now
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${org.authToken}`
+          }
+        }
+      );
+    return response.data.data._id
+  } catch (err) {
+    console.log(err);
+    return ""
+  }
+}
+
   return (
     <div>
       <h1>Organization Profile</h1>
@@ -92,10 +130,18 @@ export default function OrganizationProfile() {
           })}
         </div>
       </div>
-      <button onClick={() => setIsEditing(!isEditing)}>
-        {isEditing ? "Cancel Event" : "Create Event"}
+      <button onClick={async () => {
+        // Create a new blank, event
+        const _id = await createBlankEvent()
+
+        if (_id != "") {
+          setIsEditing(!isEditing)}
+          setEditingId(_id);
+        }
+      }>
+        Create Event
       </button>
-      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} />}
+      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} eventId={editingId}/>}
     </div>
   );
 }

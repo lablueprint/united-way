@@ -6,10 +6,12 @@ import { RootState } from '../_interfaces/AuthInterfaces';
 import '../_styles/EventCreator.css';
 import TestLogo from "@/../public/images/logo.jpeg"
 import PenLogo from "@/../public/images/pen.png"
+import QRCode from 'react-qr-code';
 
 interface EventCreatorProps {
     orgName: string;
     changeState: React.Dispatch<React.SetStateAction<boolean>>;
+    eventId: string;
 }
 
 interface LocationProps {
@@ -19,7 +21,7 @@ interface LocationProps {
 }
 
 // TODO: Update the organization profile after creating this event to showcase.
-export default function EventCreator({ orgName, changeState }: EventCreatorProps) {
+export default function EventCreator({ orgName, changeState, eventId }: EventCreatorProps) {
     const [updatedName, setUpdatedName] = useState<string>("Your Event Name");
     const [updatedDate, setUpdatedDate] = useState<Date>(new Date());
     const [updatedDescription, setUpdatedDescription] = useState<string>("Your Event Description");
@@ -334,6 +336,9 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
                             <button className="customizeButton">
                                 Add Rewards
                             </button>
+                        </div>
+                        <div>
+                            {/* <QRCode value={_id}/> */}
                         </div>
                     </div>
                 </div>
