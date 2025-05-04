@@ -23,6 +23,7 @@ export default function ActivityDropdown({ eventId }: Props) {
   const [refresh, setRefresh]                 = useState(0);
   const [creatingType, setCreatingType]       = useState<string | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const reload = () => setRefresh((r) => r + 1);
 
   // 1) load all activities once or whenever refresh changes
   useEffect(() => {
@@ -100,7 +101,7 @@ export default function ActivityDropdown({ eventId }: Props) {
                 <button onClick={() => onEdit(act._id)}>Edit</button>
               </div>
             )}
-            //  👉 clicking "+" here flips into create-page
+            onOpen={reload}
             onCreate={() => setCreatingType(type)}
             onEditItem={(id) => {
               const act = activities.find((a) => a._id === id);

@@ -39,7 +39,7 @@ export interface EventData {
     name: string;
     date: Date;
     draft: boolean,
-    draftList: boolean,
+    draftList: boolean[],
     description: string;
     location: {
         type: string;

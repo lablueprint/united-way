@@ -82,7 +82,6 @@ export default function EventEditor({ id, handleCloseClick, handleEditEvent }: E
                 />
             </label>
             <input type="submit" value="Submit" />
-            <ActivityDropdown eventId={id} />
         </form>
     );
 }

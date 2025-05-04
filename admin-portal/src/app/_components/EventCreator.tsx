@@ -6,6 +6,7 @@ import { RootState } from '../_interfaces/AuthInterfaces';
 import '../_styles/EventCreator.css';
 import TestLogo from "@/../public/images/logo.jpeg"
 import PenLogo from "@/../public/images/pen.png"
+import ActivityDropdown from "./ActivityDropdown";
 import QRCode from 'react-qr-code';
 
 interface EventCreatorProps {
@@ -329,6 +330,8 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
                         <div className="customizeText">
                             Customize your Event
                         </div>
+                        {/* ACTIVITY DROPDOWN */}
+                        <ActivityDropdown eventId={eventId} />
                         <div className="customizeButtonFormat">
                             <button className="customizeButton">
                                 Add Poll
@@ -348,7 +351,7 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
 
                 {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
-                    <button className="saveButton" onClick={handleSave}>
+                    <button type="button" className="saveButton" onClick={handleSave}>
                         SAVE
                     </button>
                     <button className="bigPillButton" onClick={() => changeState(false)}>

@@ -19,6 +19,8 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         organizerId: "",
         _id: "",
         name: "",
+        draft: true,
+        draftList: [],
         date: new Date(),
         description: "",
         location: {
