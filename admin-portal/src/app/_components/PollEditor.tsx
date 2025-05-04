@@ -67,7 +67,7 @@ export default function PollEditor({ activityId, timeStart, timeEnd }: PollEdito
         }
       );
       const data = response.data.data;
-      setActivity(data);
+      // setActivity(data);
       setQuestions(data.content);
       return data;
     } catch (err) {

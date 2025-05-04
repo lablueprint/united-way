@@ -2,7 +2,8 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
-import ActivityCreator from './ActivityCreator';
+// import ActivityCreator from './ActivityCreator';
+import ActivityDropdown from './ActivityDropdown';
 
 interface EventEditorProps {
     id: string;
@@ -81,7 +82,7 @@ export default function EventEditor({ id, handleCloseClick, handleEditEvent }: E
                 />
             </label>
             <input type="submit" value="Submit" />
-            <ActivityCreator eventId={id} />
+            <ActivityDropdown eventId={id} />
         </form>
     );
 }
