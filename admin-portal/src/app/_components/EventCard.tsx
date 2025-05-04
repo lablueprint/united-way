@@ -35,7 +35,7 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         e.stopPropagation();
         try {
             removeFromList(id);
-            await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
+            const response: AxiosResponse = await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${org.authToken}`
