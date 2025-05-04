@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
-import EventCreator from "./EventCreator";
+import EventEditor from "./EventEditor";
 import { EventData } from '../_interfaces/EventInterfaces';
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
@@ -141,7 +141,7 @@ export default function OrganizationProfile() {
       }>
         Create Event
       </button>
-      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} eventId={editingId} justCreated={true}/>}
+      {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={editingId} justCreated={true}/>}
     </div>
   );
 }
