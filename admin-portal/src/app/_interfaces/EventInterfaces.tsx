@@ -38,6 +38,8 @@ export interface EventData {
     _id: string;
     name: string;
     date: Date;
+    draft: boolean,
+    draftList: boolean,
     description: string;
     location: {
         type: string;

@@ -149,6 +149,8 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
                     .map((isSelected, index) => isSelected ? EventTags[index] : null)
                     .filter(tag => tag !== null);
 
+                const uploadDraftList = generateDraftList()
+
                 const response: AxiosResponse = await axios.post(
                     `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
                     {
@@ -156,6 +158,7 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
                         date: updatedDate,
                         duration: 0, // Hardcoded for now
                         draft: false,
+                        draftList: uploadDraftList,
                         description: updatedDescription,
                         startTime: startTime,
                         endTime: endTime,
@@ -204,61 +207,43 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
 
     const handleSave = async () => {
         try {
-            if (notEmpty()) {
-                const selectedTags = updatedTags
-                    .map((isSelected, index) => isSelected ? EventTags[index] : null)
-                    .filter(tag => tag !== null);
+            const selectedTags = updatedTags
+                .map((isSelected, index) => isSelected ? EventTags[index] : null)
+                .filter(tag => tag !== null);
 
-                const draftList = generateDraftList();
-                
-                const response: AxiosResponse = await axios.post(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
-                    {
-                        name: updatedName,
-                        date: updatedDate,
-                        duration: 0, // Hardcoded for now
-                        draft: false,
-                        draftList: draftList,
-                        description: updatedDescription,
-                        startTime: startTime,
-                        endTime: endTime,
-                        location: {
-                            type: "Point",
-                            coordinates: [currLongitude, currLatitude]
-                        },
-                        organizerID: org.orgId,
-                        tags: selectedTags,
-                        registeredUsers: [], // Hardcoded for now
-                        activity: [], // Hardcoded for now
-                        image: "placeholder" // Hardcoded for now
+            const draftList = generateDraftList();
+            
+            const response: AxiosResponse = await axios.post(
+                `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
+                {
+                    name: updatedName,
+                    date: updatedDate,
+                    duration: 0, // Hardcoded for now
+                    draft: true,
+                    draftList: draftList,
+                    description: updatedDescription,
+                    startTime: startTime,
+                    endTime: endTime,
+                    location: {
+                        type: "Point",
+                        coordinates: [currLongitude, currLatitude]
                     },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${org.authToken}`
-                        }
+                    organizerID: org.orgId,
+                    tags: selectedTags,
+                    registeredUsers: [], // Hardcoded for now
+                    activity: [], // Hardcoded for now
+                    image: "placeholder" // Hardcoded for now
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${org.authToken}`
                     }
-                );
-                setSubmissionStatus(`Success!: ${response.data.message}`);
-                changeState(false);
-                console.log(submissionStatus);
-            }
-            else {
-                let errs = "";
-                if (updatedName == "Your Event Name") {
-                    errs = errs + "Name ";
                 }
-                if (updatedDescription == "Your Event Description") {
-                    errs = errs + "Description ";
-                }
-                if (!updatedTags.includes(true)) {
-                    errs = errs + "Tags ";
-                }
-                if ((currLatitude == 0) && (currLongitude == 0)) {
-                    errs = errs + "Address "
-                }
-                setSubmissionStatus(`Error: Empty Args: ${errs}`);
-            }
+            );
+            setSubmissionStatus(`Draft Success!: ${response.data.message}`);
+            changeState(false);
+            console.log(submissionStatus);
         } catch (err) {
             console.log(err);
             setSubmissionStatus(`Failure: ${err}`);
