@@ -34,6 +34,7 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
     const [startTime, setStartTime] = useState('12:00');
     const [endTime, setEndTime] = useState('12:01');
     const [selectedTimeZone, setSelectedTimeZone] = useState('PT');
+    const [isDraft, setIsDraft] = useState<boolean>(true);
     // A state variable I used to debug Nominatim Issues. Can be useful for notifications
     const [submissionStatus, setSubmissionStatus] = useState<string>("");
 
@@ -76,22 +77,6 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
             "July", "August", "September", "October", "November", "December"
         ];
         return months[d.getMonth()];
-    }
-
-    const getTimeString = (t: string) => {
-        const [hours, minutes] = t.split(":");
-        if (parseInt(hours) == 0) {
-            return ('12:' + minutes + ' AM');
-        }
-        else if (parseInt(hours) == 12) {
-            return ('12:' + minutes + ' PM');
-        }
-        else if (parseInt(hours) <= 11) {
-            return (hours + ':' + minutes + 'AM');
-        }
-        else {
-            return ((parseInt(hours) - 12) + ':' + minutes + 'PM');
-        }
     }
 
     // When creating draft, create array of flags of "TODOs" for a given event
@@ -141,26 +126,26 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
     // TODO: maybe refresh to populate the event into org upon successful patch?
     // TODO: Update schema to handle user count?
     // Creates a JSON and attempts to patch it to DB
-    const handleSubmit = async () => {
+    const handlePatch = async () => {
         try {
             console.log('date ', updatedDate);
             console.log('starttime ', startTime);
             console.log('tz', selectedTimeZone);
             // TODO: Convert to GMT, figure out how things are stored
-            if (notEmpty()) {
+            if ((notEmpty() && !isDraft) || isDraft) {
                 const selectedTags = updatedTags
                     .map((isSelected, index) => isSelected ? EventTags[index] : null)
                     .filter(tag => tag !== null);
 
                 const uploadDraftList = generateDraftList()
 
-                const response: AxiosResponse = await axios.post(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
+                const response: AxiosResponse = await axios.patch(
+                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`,
                     {
                         name: updatedName,
                         date: updatedDate,
                         duration: 0, // Hardcoded for now
-                        draft: false,
+                        draft: isDraft,
                         draftList: uploadDraftList,
                         description: updatedDescription,
                         startTime: startTime,
@@ -201,52 +186,6 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
                 }
                 setSubmissionStatus(`Error: Empty Args: ${errs}`);
             }
-        } catch (err) {
-            console.log(err);
-            setSubmissionStatus(`Failure: ${err}`);
-        }
-    }
-
-
-    const handleSave = async () => {
-        try {
-            const selectedTags = updatedTags
-                .map((isSelected, index) => isSelected ? EventTags[index] : null)
-                .filter(tag => tag !== null);
-
-            const draftList = generateDraftList();
-            
-            const response: AxiosResponse = await axios.post(
-                `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
-                {
-                    name: updatedName,
-                    date: updatedDate,
-                    duration: 0, // Hardcoded for now
-                    draft: true,
-                    draftList: draftList,
-                    description: updatedDescription,
-                    startTime: startTime,
-                    endTime: endTime,
-                    location: {
-                        type: "Point",
-                        coordinates: [currLongitude, currLatitude]
-                    },
-                    organizerID: org.orgId,
-                    tags: selectedTags,
-                    registeredUsers: [], // Hardcoded for now
-                    activity: [], // Hardcoded for now
-                    image: "placeholder" // Hardcoded for now
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${org.authToken}`
-                    }
-                }
-            );
-            setSubmissionStatus(`Draft Success!: ${response.data.message}`);
-            changeState(false);
-            console.log(submissionStatus);
         } catch (err) {
             console.log(err);
             setSubmissionStatus(`Failure: ${err}`);
@@ -339,9 +278,9 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
                             <button className="customizeButton">
                                 Add Rewards
                             </button>
-                        </div>
-                        <div>
-                            {/* <QRCode value={_id}/> */}
+                            <div style={{display: 'flex'}}>
+                                <QRCode value={eventId}/>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -351,13 +290,19 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
 
                 {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
-                    <button type="button" className="saveButton" onClick={handleSave}>
+                    <button className="saveButton" onClick={() => {
+                        setIsDraft(true)
+                        handlePatch()
+                    }}>
                         SAVE
                     </button>
                     <button className="bigPillButton" onClick={() => changeState(false)}>
                         CANCEL
                     </button>
-                    <button className="bigPillButton" onClick={handleSubmit}>
+                    <button className="bigPillButton" onClick={() => {
+                        setIsDraft(false)
+                        handlePatch()
+                    }}>
                         PUBLISH
                     </button>
                 </div>

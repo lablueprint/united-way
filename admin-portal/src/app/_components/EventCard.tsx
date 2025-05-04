@@ -1,6 +1,5 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
-import EventModal from './EventModal';
 import { EventData } from '../_interfaces/EventInterfaces';
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
@@ -14,7 +13,6 @@ interface EventCardProps {
 export default function EventCard({ id, removeFromList }: EventCardProps) {
     const [showButtons, setShowButtons] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [showModal, setShowModal] = useState(false);
     const [eventData, setEventData] = useState<EventData>({
         organizerId: "",
         _id: "",
@@ -37,7 +35,7 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         e.stopPropagation();
         try {
             removeFromList(id);
-            await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
+            const response: AxiosResponse = await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${org.authToken}`
@@ -103,18 +101,12 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         setIsEditing(false);
     };
 
-    const handleCardClick = () => {
-        // Show EventModal
-        setShowModal(!showModal);
-    }
-
     return (
         // Show event name, show buttons on hover
         <div>
             <div
                 onMouseEnter={() => setShowButtons(true)}
                 onMouseLeave={() => setShowButtons(false)}
-                onClick={() => handleCardClick()}
             >
                 <p>{eventData?.name}</p>
                 {showButtons && (
@@ -124,17 +116,6 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
                     </>
                 )}
             </div>
-
-            {showModal && (
-                <>
-                    <EventModal
-                        _id={eventData?._id}
-                        name={eventData?.name}
-                        description={eventData?.description}
-                        organizerId={eventData?.organizerId}
-                    />
-                </>
-            )}
 
             {isEditing && <EventEditor id={id} handleCloseClick={handleCloseClick} handleEditEvent={editEvent} />}
         </div>
