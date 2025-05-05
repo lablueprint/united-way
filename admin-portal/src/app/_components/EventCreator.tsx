@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios, { AxiosResponse } from "axios";
 import { EventTags } from "../_interfaces/EventInterfaces";
-import { useSelector } from 'react-redux';
-import { RootState } from '../_interfaces/AuthInterfaces';
 import '../_styles/EventCreator.css';
 import TestLogo from "@/../public/images/logo.jpeg"
 import PenLogo from "@/../public/images/pen.png"
+
+import axios from 'axios';
+import { AxiosResponse } from 'axios';
+
+import useApiAuth from '../_hooks/useApiAuth';
+import { RequestType, Request } from '../_interfaces/RequestInterfaces';
 
 interface EventCreatorProps {
     orgName: string;
@@ -39,7 +42,7 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
     // This timer will start when the user stops typing and reset once the user starts typing again
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const sendRequest = useApiAuth();
 
     const timeZones = [
         { label: "Pacific Time (PT) America/Los Angeles", value: "PT" },
@@ -116,42 +119,31 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
     // Creates a JSON and attempts to patch it to DB
     const handleSubmit = async () => {
         try {
-            console.log('date ', updatedDate);
-            console.log('starttime ', startTime);
-            console.log('tz', selectedTimeZone);
             // TODO: Convert to GMT, figure out how things are stored
             if (notEmpty()) {
                 const selectedTags = updatedTags
                     .map((isSelected, index) => isSelected ? EventTags[index] : null)
                     .filter(tag => tag !== null);
 
-                const response: AxiosResponse = await axios.post(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/createEvent`,
-                    {
-                        name: updatedName,
-                        date: updatedDate,
-                        duration: 0, // Hardcoded for now
-                        description: updatedDescription,
-                        startTime: startTime,
-                        endTime: endTime,
-                        location: {
-                            type: "Point",
-                            coordinates: [currLongitude, currLatitude]
-                        },
-                        organizerID: org.orgId,
-                        tags: selectedTags,
-                        registeredUsers: [], // Hardcoded for now
-                        activity: [], // Hardcoded for now
-                        image: "placeholder" // Hardcoded for now
+                const requestType = RequestType.POST;
+                const body = {
+                    name: updatedName,
+                    date: updatedDate,
+                    duration: 0, // Hardcoded for now
+                    description: updatedDescription,
+                    startTime: startTime,
+                    endTime: endTime,
+                    location: {
+                        type: "Point",
+                        coordinates: [currLongitude, currLatitude]
                     },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${org.authToken}`
-                        }
-                    }
-                );
-                setSubmissionStatus(`Success!: ${response.data.message}`);
+                    tags: selectedTags,
+                    registeredUsers: [], // Hardcoded for now
+                    activity: [], // Hardcoded for now
+                    image: "placeholder" // Hardcoded for now
+                }
+                const endpoint = "events/orgs/:id/createEvent";
+                await sendRequest({ requestType, endpoint, body });
                 changeState(false);
                 console.log(submissionStatus);
             }
@@ -208,7 +200,6 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${org.authToken}`
                     }
                 }
             );

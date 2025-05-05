@@ -89,11 +89,13 @@ const verifyUserLogin = async (req, res) => {
 const refreshOrgAccessToken = async (req, res) => {
   try {
       // Verify the refresh token and get the user id.
+      console.log("refresh was called", req.auth.uid)
       const org = await Organization.findOne({_id: req.auth.uid});
 
       // Ensure that the org id actually exists within the MongoDB cluster
       // If org is not found:
-      if (!org) {
+      if (org == null) {
+        console.log("here");
           res.status(401).json({
               status: "failure",
               message: "Unable to verify refresh token.",
@@ -102,8 +104,10 @@ const refreshOrgAccessToken = async (req, res) => {
           return;
       }
 
+      console.log("here")
       // If it does, then we will reauthenticate and provide another access
       // token using `generateToken`.
+      console.log("returning success")
       res.status(200).json({
           status: "success",
           message: "Successfully generated access token.",

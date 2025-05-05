@@ -5,6 +5,8 @@ import { EventData } from '../_interfaces/EventInterfaces';
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import EventEditor from './EventEditor';
+import useApiAuth from '../_hooks/useApiAuth';
+import { RequestType, Request } from '../_interfaces/RequestInterfaces';
 
 interface EventCardProps {
     id: string;
@@ -29,18 +31,16 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         registeredUsers: [],
         activities: []
     });
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const sendRequest = useApiAuth();
 
     const deleteEvent = async (e: MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
         try {
             removeFromList(id);
-            await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${org.authToken}`
-                }
-            });
+            const body = {};
+            const endpoint = `events/${id}`;
+            const requestType = RequestType.DELETE;
+            await sendRequest({ requestType, endpoint, body });
         } catch (err) {
             console.log(err);
         }
@@ -48,19 +48,15 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
 
     const editEvent = async (name: string, date: Date, description: string, tags: string[]) => {
         try {
-            const response: AxiosResponse = await axios.patch(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`,
-                {
-                    name: name,
-                    date: date,
-                    description: description,
-                    tags: tags
-                }, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${org.authToken}`
-                }
-            });
-            const { data } = response.data;
+            const requestType = RequestType.PATCH;
+            const body = {
+                name: name,
+                date: date,
+                description: description,
+                tags: tags
+            };
+            const endpoint = `events/${id}`;
+            const data = await sendRequest({ requestType, body, endpoint });
             setEventData(data);
         } catch (err) {
             console.log(err);
@@ -69,13 +65,10 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
 
     const getEventById = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${org.authToken}`
-                }
-            });
-            const { data } = response.data;
+            const body = {};
+            const requestType = RequestType.GET;
+            const endpoint = `events/${id}`
+            const data = await sendRequest({ requestType, endpoint, body });
             return data;
         } catch (err) {
             console.log(err);
