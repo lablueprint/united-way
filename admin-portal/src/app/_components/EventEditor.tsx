@@ -3,10 +3,10 @@ import axios, { AxiosResponse } from "axios";
 import { EventTags } from "../_interfaces/EventInterfaces";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
-import '../_styles/EventEditor.css';
 import TestLogo from "@/../public/images/logo.jpeg"
 import PenLogo from "@/../public/images/pen.png"
 import QRCode from 'react-qr-code';
+import '../_styles/EventEditor.css';
 
 interface EventEditorProps {
     orgName: string;

@@ -11,146 +11,135 @@ import location from '../_styles/_images/location_on.svg';
 import trophy from '../_styles/_images/trophy.svg';
 import '../_styles/TaskList.css';
 
+
 export default function TaskList() {
+    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+
+    const getOrganizerDrafts = async () => {
+        try {
+          const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/filtered`,
+            {
+              organizerID: org.orgId,
+              draft: true
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${org.authToken}`
+              }
+            },
+          );
+          const { data } = response.data;
+        }
+        catch (err) {
+          console.log(err);
+        }
+    }
+
+
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginLeft: "6.9rem" }}> 
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                <div style={{ fontFamily: "Helvetica", fontSize: "1rem", color: "#18147c", fontWeight: "400", display: "flex" }}>
+        <div className="draft-task-list"> 
+            <div className="header-box-parent">
+                <div className="header-box-text">
                     DRAFTS
                 </div>
-                <div style={{ backgroundColor: "#e8ecf4", color: "#18147c", width: "1.5rem", height: "1.8rem", fontWeight: "bold", borderRadius: "0.25rem", display: "flex", justifyContent: "center", alignItems: "center"}}>
+                <div className="header-box-count">
                     4
                 </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", }}>
-                <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                    <div style={{ fontFamily: "Barlow", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", textAlign: "center" }}>
+            <div className="draft-box-parent">
+                <div className="draft-box-information">
+                    <div className="draft-title">
                         MENTORSHIP PROGRAM 2025
                     </div>
-                    <div style={{ fontFamily: "Barlow-Normal", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", }}>
+                    <div className="bullet-divider">
                         •
                     </div>
-                    <div style={{ fontFamily: "Inter", fontSize: "0.75rem", fontWeight: "400", color: "#18147c", display: "flex", marginTop: "0.2rem", marginBottom: "0.2rem", textAlign: "center", alignSelf: "self-end", }}>
+                    <div className="draft-time">
                         MAY 3  |  4:30 - 7:30 PM
                     </div>
-                    <div style={{ fontFamily: "Barlow-Normal", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", }}>
+                    <div className="bullet-divider">
                         •
                     </div>
-                    <div style={{ fontFamily: "Inter", fontSize: "0.625rem", fontWeight: "400", color: "#18147c", display: "flex", marginTop: "0.2rem", marginBottom: "0.2rem", textAlign: "center", alignSelf: "self-end", }}>
+                    <div className="draft-location">
                         LOS ANGELES, CA
                     </div>
                 </div>
-                <div style={{ display: "flex", gap: "1rem", }}>
-                    <div style={{ display: "flex", objectFit: "contain", alignSelf: "stretch", }}>
+                <div className="task-list-parent">
+                    <div className="task-image">
                         <Image src={calendar} alt="Calendar icon" width={19} height={22} />
                     </div>
-                    <div style={{ fontFamily: "Helvetica", fontSize: "1.18rem", color: "#18147C", fontWeight: "400", }}>
+                    <div className="task-text">
                         Add a start date
                     </div>
                 </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", }}>
-                <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                    <div style={{ fontFamily: "Barlow", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", textAlign: "center" }}>
-                        MENTORSHIP PROGRAM 2025
-                    </div>
-                    <div style={{ fontFamily: "Barlow-Normal", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", }}>
-                        •
-                    </div>
-                    <div style={{ fontFamily: "Inter", fontSize: "0.75rem", fontWeight: "400", color: "#18147c", display: "flex", marginTop: "0.2rem", marginBottom: "0.2rem", textAlign: "center", alignSelf: "self-end", }}>
-                        MAY 3  |  4:30 - 7:30 PM
-                    </div>
-                    <div style={{ fontFamily: "Barlow-Normal", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", }}>
-                        •
-                    </div>
-                    <div style={{ fontFamily: "Inter", fontSize: "0.625rem", fontWeight: "400", color: "#18147c", display: "flex", marginTop: "0.2rem", marginBottom: "0.2rem", textAlign: "center", alignSelf: "self-end", }}>
-                        LOS ANGELES, CA
-                    </div>
-                </div>
-                <div style={{ display: "flex", gap: "1rem", }}>
-                    <div style={{ display: "flex", objectFit: "contain", alignSelf: "stretch", }}>
-                        <Image src={clock} alt="Alarm icon" width={19} height={22} />
-                    </div>
-                    <div style={{ fontFamily: "Helvetica", fontSize: "1.18rem", color: "#18147C", fontWeight: "400", }}>
-                        Add a start and finish time
-                    </div>
-                </div>
-                <div style={{ display: "flex", gap: "1rem", }}>
-                    <div style={{ display: "flex", objectFit: "contain", alignSelf: "stretch", }}>
-                        <Image src={location} alt="Location icon" width={19} height={22} />
-                    </div>
-                    <div style={{ fontFamily: "Helvetica", fontSize: "1.18rem", color: "#18147C", fontWeight: "400", }}>
-                        Add a location
-                    </div>
-                </div>
-                <div style={{ display: "flex", gap: "1rem", }}>
-                    <div style={{ display: "flex", objectFit: "contain", alignSelf: "stretch", }}>
-                        <Image src={publish} alt="Publish icon" width={19} height={22} />
-                    </div>
-                    <div style={{ fontFamily: "Helvetica", fontSize: "1.18rem", color: "#18147C", fontWeight: "400", }}>
-                        Publish
-                    </div>
-                </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", }}>
-                <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                    <div style={{ fontFamily: "Barlow", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", textAlign: "center" }}>
-                        MENTORSHIP PROGRAM 2025
-                    </div>
-                    <div style={{ fontFamily: "Barlow-Normal", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", }}>
-                        •
-                    </div>
-                    <div style={{ fontFamily: "Inter", fontSize: "0.75rem", fontWeight: "400", color: "#18147c", display: "flex", marginTop: "0.2rem", marginBottom: "0.2rem", textAlign: "center", alignSelf: "self-end", }}>
-                        MAY 3  |  4:30 - 7:30 PM
-                    </div>
-                    <div style={{ fontFamily: "Barlow-Normal", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", }}>
-                        •
-                    </div>
-                    <div style={{ fontFamily: "Inter", fontSize: "0.625rem", fontWeight: "400", color: "#18147c", display: "flex", marginTop: "0.2rem", marginBottom: "0.2rem", textAlign: "center", alignSelf: "self-end", }}>
-                        LOS ANGELES, CA
-                    </div>
-                </div>
-                <div style={{ display: "flex", gap: "1rem", }}>
-                    <div style={{ display: "flex", objectFit: "contain", alignSelf: "stretch", }}>
+                <div className="task-list-parent">
+                    <div className="task-image">
                         <Image src={pencil} alt="Pencil icon" width={19} height={22} />
                     </div>
-                    <div style={{ fontFamily: "Helvetica", fontSize: "1.18rem", color: "#18147C", fontWeight: "400", }}>
-                        Add a title
-                    </div>
-                </div>
-                <div style={{ display: "flex", gap: "1rem", }}>
-                    <div style={{ display: "flex", objectFit: "contain", alignSelf: "stretch", }}>
-                        <Image src={pencil} alt="Pencil icon" width={19} height={22} />
-                    </div>
-                    <div style={{ fontFamily: "Helvetica", fontSize: "1.18rem", color: "#18147C", fontWeight: "400", }}>
+                    <div className="task-text">
                         Upload a poster and flyer
                     </div>
                 </div>
+                <div className="task-list-parent">
+                    <div className="task-image">
+                        <Image src={trophy} alt="Trophy icon" width={19} height={22} />
+                    </div>
+                    <div className="task-text">
+                        Add rewards
+                    </div>
+                </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", }}>
-                <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                    <div style={{ fontFamily: "Barlow", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", textAlign: "center" }}>
+            
+
+            <div className="draft-box-parent">
+                <div className="draft-box-information">
+                    <div className="draft-title">
                         MENTORSHIP PROGRAM 2025
                     </div>
-                    <div style={{ fontFamily: "Barlow-Normal", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", }}>
+                    <div className="bullet-divider">
                         •
                     </div>
-                    <div style={{ fontFamily: "Inter", fontSize: "0.75rem", fontWeight: "400", color: "#18147c", display: "flex", marginTop: "0.2rem", marginBottom: "0.2rem", textAlign: "center", alignSelf: "self-end", }}>
+                    <div className="draft-time">
                         MAY 3  |  4:30 - 7:30 PM
                     </div>
-                    <div style={{ fontFamily: "Barlow-Normal", display: "flex", color: "#18147c", fontWeight: "600", fontSize: "1.25rem", }}>
+                    <div className="bullet-divider">
                         •
                     </div>
-                    <div style={{ fontFamily: "Inter", fontSize: "0.625rem", fontWeight: "400", color: "#18147c", display: "flex", marginTop: "0.2rem", marginBottom: "0.2rem", textAlign: "center", alignSelf: "self-end", }}>
+                    <div className="draft-location">
                         LOS ANGELES, CA
                     </div>
                 </div>
-                <div style={{ display: "flex", gap: "1rem", }}>
-                    <div style={{ display: "flex", objectFit: "contain", alignSelf: "stretch", }}>
-                        <Image src={trophy} alt="Trophy icon" width={19} height={22} />
+                <div className="task-list-parent">
+                    <div className="task-image">
+                    <Image src={clock} alt="Alarm icon" width={19} height={22} />
                     </div>
-                    <div style={{ fontFamily: "Helvetica", fontSize: "1.18rem", color: "#18147C", fontWeight: "400", }}>
-                        Add rewards
+                    <div className="task-text">
+                        Add a start and finish time
+                    </div>
+                </div>
+                <div className="task-list-parent">
+                    <div className="task-image">
+                        <Image src={location} alt="Location icon" width={19} height={22} />
+                    </div>
+                    <div className="task-text">
+                        Add a location
+                    </div>
+                </div>
+                <div className="task-list-parent">
+                    <div className="task-image">
+                        <Image src={publish} alt="Publish icon" width={19} height={22} />
+                    </div>
+                    <div className="task-text">
+                        Publish
+                    </div>
+                </div>
+                <div className="task-list-parent">
+                    <div className="task-image">
+                        <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+                    </div>
+                    <div className="task-text">
+                        Add a title
                     </div>
                 </div>
             </div>
