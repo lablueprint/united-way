@@ -21,7 +21,7 @@ const orgSlice = createSlice({
             localStorage.removeItem('org');
         },
         refresh: (state, action) => {
-            state.authToken = action.payload.orgId;
+            state.authToken = action.payload.authToken;
             localStorage.setItem('org', 
                 JSON.stringify({
                     orgId: state.orgId, 

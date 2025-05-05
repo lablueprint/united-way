@@ -104,10 +104,8 @@ const refreshOrgAccessToken = async (req, res) => {
           return;
       }
 
-      console.log("here")
       // If it does, then we will reauthenticate and provide another access
       // token using `generateToken`.
-      console.log("returning success")
       res.status(200).json({
           status: "success",
           message: "Successfully generated access token.",
