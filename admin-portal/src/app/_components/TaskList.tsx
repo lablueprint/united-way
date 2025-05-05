@@ -1,7 +1,9 @@
-import React, { useState, useEffect, MouseEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
+import { EventData } from '../_interfaces/EventInterfaces'
+
 import Image from 'next/image'
 import calendar from '../_styles/_images/calendar_today.svg';
 import clock from '../_styles/_images/alarm.svg';
@@ -13,7 +15,22 @@ import '../_styles/TaskList.css';
 
 
 export default function TaskList() {
+    const [draftCount, setDraftCount] = useState<number>(0);
+    const [allDrafts, setAllDrafts] = useState<EventData[]>();
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+
+    useEffect(() => {
+        console.log('allDrafts updated:', allDrafts);
+    }, [allDrafts]);
+
+    // Load in all drafts, draftCount on rendering TaskList
+    useEffect(() => {
+        (async () => {
+            const eventData = await getOrganizerDrafts();
+            setDraftCount(eventData?.length || 0);
+            setAllDrafts(eventData);
+        })();
+    }, [])
 
     const getOrganizerDrafts = async () => {
         try {
@@ -30,12 +47,36 @@ export default function TaskList() {
             },
           );
           const { data } = response.data;
+          return data;
         }
         catch (err) {
           console.log(err);
         }
     }
 
+    const getMonthString = (d: Date) => {
+        const months = [
+            "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+        ];
+        return months[d.getMonth()];
+    }
+
+    const getTimeString = (t: string) => {
+        const [hours, minutes] = t.split(":");
+        if (parseInt(hours) == 0) {
+            return ('12:' + minutes + ' AM');
+        }
+        else if (parseInt(hours) == 12) {
+            return ('12:' + minutes + ' PM');
+        }
+        else if (parseInt(hours) <= 11) {
+            return (hours + ':' + minutes + 'AM');
+        }
+        else {
+            return ((parseInt(hours) - 12) + ':' + minutes + ' PM');
+        }
+    }
 
     return (
         <div className="draft-task-list"> 
@@ -44,105 +85,137 @@ export default function TaskList() {
                     DRAFTS
                 </div>
                 <div className="header-box-count">
-                    4
+                    {draftCount}
                 </div>
             </div>
-            <div className="draft-box-parent">
-                <div className="draft-box-information">
-                    <div className="draft-title">
-                        MENTORSHIP PROGRAM 2025
-                    </div>
-                    <div className="bullet-divider">
-                        •
-                    </div>
-                    <div className="draft-time">
-                        MAY 3  |  4:30 - 7:30 PM
-                    </div>
-                    <div className="bullet-divider">
-                        •
-                    </div>
-                    <div className="draft-location">
-                        LOS ANGELES, CA
-                    </div>
-                </div>
-                <div className="task-list-parent">
-                    <div className="task-image">
-                        <Image src={calendar} alt="Calendar icon" width={19} height={22} />
-                    </div>
-                    <div className="task-text">
-                        Add a start date
-                    </div>
-                </div>
-                <div className="task-list-parent">
-                    <div className="task-image">
-                        <Image src={pencil} alt="Pencil icon" width={19} height={22} />
-                    </div>
-                    <div className="task-text">
-                        Upload a poster and flyer
-                    </div>
-                </div>
-                <div className="task-list-parent">
-                    <div className="task-image">
-                        <Image src={trophy} alt="Trophy icon" width={19} height={22} />
-                    </div>
-                    <div className="task-text">
-                        Add rewards
-                    </div>
-                </div>
-            </div>
-            
 
-            <div className="draft-box-parent">
-                <div className="draft-box-information">
-                    <div className="draft-title">
-                        MENTORSHIP PROGRAM 2025
+            {/* Iterate through Draft List. If there are TODO's to complete, display them*/}
+            {allDrafts?.map((draft: EventData) => {
+                const draftList = draft.draftList
+                const draftDate = new Date(draft.date)
+                const dateString = getMonthString(draftDate) + " " +  draftDate.getDay() + "  |  " + getTimeString(draft.startTime) + " - " + getTimeString(draft.endTime)
+
+                return (
+                    <div className="draft-task-list" key={draft._id}>
+                       <div className="draft-box-parent">
+                            <div className="draft-box-information">
+                                <div className="draft-title">
+                                    { draft.name.toUpperCase() }
+                                </div>
+                                <div className="bullet-divider">•</div>
+                                <div className="draft-time">
+                                    { dateString }
+                                </div>
+                                <div className="bullet-divider">•</div>
+                                {/* TODO: Figure out the city */}
+                                <div className="draft-location">
+                                    LOS ANGELES, CA
+                                </div>
+                            </div>
+                        </div>
+                        {/* TODO: Add Rewards, poster/flyer, start time, finish time, and date */}
+                        {/* Hardcode Tasks based on draftList index */}
+
+                        {/* Missing Event Name */}
+                        { !draftList[0] && (
+                            <div className="task-list-parent">
+                                <div className="task-image">
+                                    <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+                                </div>
+                                <div className="task-text">
+                                    Add a title
+                                </div>
+                            </div>
+                        )} 
+
+                        {/* Missing Description */}
+                        { !draftList[1] && (
+                            <div className="task-list-parent">
+                                <div className="task-image">
+                                    <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+                                </div>
+                                <div className="task-text">
+                                    Add a description
+                                </div>
+                            </div>
+                        )} 
+
+                        {/* Missing Location */}
+                        { !draftList[2] && (
+                            <div className="task-list-parent">
+                                <div className="task-image">
+                                <Image src={location} alt="Location icon" width={19} height={22} />
+                                </div>
+                                <div className="task-text">
+                                Add a location
+                                </div>
+                            </div>
+                        )} 
+
+                        {/* Missing tags */}
+                        { !draftList[3] && (
+                            <div className="task-list-parent">
+                                <div className="task-image">
+                                <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+                                </div>
+                                <div className="task-text">
+                                    Select tags for your event
+                                </div>
+                            </div>
+                        )} 
+
+                        {/* If everything is done, Publish! */}
+                        { !draftList.includes(false) && (
+                            <div className="task-list-parent">
+                                <div className="task-image">
+                                <Image src={publish} alt="Publish icon" width={19} height={22} />
+                                </div>
+                                <div className="task-text">
+                                    Publish
+                                </div>
+                            </div>
+                        )} 
                     </div>
-                    <div className="bullet-divider">
-                        •
-                    </div>
-                    <div className="draft-time">
-                        MAY 3  |  4:30 - 7:30 PM
-                    </div>
-                    <div className="bullet-divider">
-                        •
-                    </div>
-                    <div className="draft-location">
-                        LOS ANGELES, CA
-                    </div>
-                </div>
-                <div className="task-list-parent">
-                    <div className="task-image">
-                    <Image src={clock} alt="Alarm icon" width={19} height={22} />
-                    </div>
-                    <div className="task-text">
-                        Add a start and finish time
-                    </div>
-                </div>
-                <div className="task-list-parent">
-                    <div className="task-image">
-                        <Image src={location} alt="Location icon" width={19} height={22} />
-                    </div>
-                    <div className="task-text">
-                        Add a location
-                    </div>
-                </div>
-                <div className="task-list-parent">
-                    <div className="task-image">
-                        <Image src={publish} alt="Publish icon" width={19} height={22} />
-                    </div>
-                    <div className="task-text">
-                        Publish
-                    </div>
-                </div>
-                <div className="task-list-parent">
-                    <div className="task-image">
-                        <Image src={pencil} alt="Pencil icon" width={19} height={22} />
-                    </div>
-                    <div className="task-text">
-                        Add a title
-                    </div>
-                </div>
-            </div>
+                );
+            })}
         </div>
     );
 }
+
+        // <div className="draft-task-list"> 
+        //     ...
+        //     <div className="draft-box-parent">
+        //         ...
+        //         <div className="task-list-parent">
+        //             <div className="task-image">
+        //                 <Image src={calendar} alt="Calendar icon" width={19} height={22} />
+        //             </div>
+        //             <div className="task-text">
+        //                 Add a start date
+        //             </div>
+        //         </div>
+        //         <div className="task-list-parent">
+        //             <div className="task-image">
+        //                 <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+        //             </div>
+        //             <div className="task-text">
+        //                 Upload a poster and flyer
+        //             </div>
+        //         </div>
+        //         <div className="task-list-parent">
+        //             <div className="task-image">
+        //                 <Image src={trophy} alt="Trophy icon" width={19} height={22} />
+        //             </div>
+        //             <div className="task-text">
+        //                 Add rewards
+        //             </div>
+        //         </div>
+        //         <div className="task-list-parent">
+        //             <div className="task-image">
+        //             <Image src={clock} alt="Alarm icon" width={19} height={22} />
+        //             </div>
+        //             <div className="task-text">
+        //                 Add a start and finish time
+        //             </div>
+        //         </div>
+        //     </div>

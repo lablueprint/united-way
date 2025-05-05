@@ -41,6 +41,8 @@ export interface EventData {
     draft: boolean,
     draftList: boolean[],
     description: string;
+    startTime: string,
+    endTime: string,
     location: {
         type: string;
         coordinates: number[];
