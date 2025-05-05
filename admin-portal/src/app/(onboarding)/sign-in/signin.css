@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  overflow-y: hidden;
+  overflow-y: scroll;
 }
 
 .formContainer {
@@ -32,6 +32,7 @@
     display: flex;
     flex-direction: column;
     gap: 2.25rem;
+    padding: 0 0.075rem;
 }
 
 .inputContainer {
@@ -93,6 +94,16 @@
     border-radius: 0.5rem;
     border: none;
     padding: 0.875rem;
+    font-family: Helvetica, sans-serif;
+  }
+
+  .inputField:active, .inputField {
+    color: #FFFFFF;
+  }
+
+  .inputField:focus {
+    outline-color: rgba(255, 255, 255, 0.4);
+    outline: solid;
   }
 
   .button {
@@ -107,6 +118,17 @@
     border: none;
     font-weight: 700;
     width: 100%;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .button:hover {
+    background-color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+  }
+
+  .button:active {
+    background-color: #0B57B3;
+    color: #FFFFFF;
   }
 
   .pageSwitch {
@@ -124,6 +146,11 @@
 
   .link {
     font-weight: 700;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .pageSwitch .link:hover {
+    color: rgba(255, 255, 255, 0.7);
   }
 
   .graphic-contain {

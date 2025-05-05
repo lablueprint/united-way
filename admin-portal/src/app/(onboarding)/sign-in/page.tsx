@@ -106,7 +106,7 @@ export default function SignIn() {
             <button
               className="button"
               type="submit">
-              Submit
+              Sign In
             </button>
           </form>
           <div className="pageSwitch">

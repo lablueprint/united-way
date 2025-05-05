@@ -6,6 +6,11 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { login } from '../../_utils/redux/orgSlice';
 import styles from "./page.module.css"
+import Image from 'next/image';
+import '../sign-in/signin.css';
+import signin from '../../../../public/images/signin.svg';
+import uwLogo from '../../../../public/images/uwLogo.svg';
+
 
 export default function SignUp() {
   // phase: 0 = sign-up form; 1 = 2FA verification form.
@@ -14,6 +19,7 @@ export default function SignUp() {
   // Sign-up form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [orgName, setOrgName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   // Two-Factor fields
@@ -154,54 +160,85 @@ export default function SignUp() {
   };
 
   return (
-    <div className={styles.signUpContainer}>
+    <div className='container'>
+      <div className="header">
+        <div className="logo">
+          <Image src={uwLogo} height={40} width={40} alt="United Way Logo" />
+        </div>
+        <h1 className="logo-name">United Way</h1>
+      </div>
       {phase === 0 ? (
         // Sign-up Form (phase 0)
         <>
-          <div className={styles.formContainer}>
-            For new organizations:
-            <form
-              className={styles.formContent}
-              onSubmit={handleSubmit}
-            >
-              <p
-                className={styles.inputLabel}
-              >Email:</p>
-              <input
-                className={styles.inputField}
-                type="email"
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-              />
-              <p
-                className={styles.inputLabel}
-              >Password:</p>
-              <input
-                className={styles.inputField}
-                type="password"
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-              />
-              <p
-                className={styles.inputLabel}
-              >Confirm Password:</p>
-              <input
-                className={styles.inputField}
-                type="password"
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                value={confirmPassword}
-              />
-              <button
-                className={styles.signUpButton}
-                type="submit">
-                Submit
-              </button>
-            </form>
-            <Link href="/sign-in">
-              Already have an account? Sign in
-            </Link>
-          </div>
+            <div className='body'>
+              <div className='formContainer'>
+              {/* For returning organizations: */}
+                <h1 className="pageTitle">Sign Up</h1>
+                <form
+                  className="formContent"
+                  onSubmit={handleSubmit}>
+                  <div className="inputContainer">
+                    <div className="input">
+                      <p className="inputLabel">Organization Name</p>
+                      <input
+                        className="inputField"
+                        type="text"
+                        onChange={(e) => setOrgName(e.target.value)}
+                        value={orgName}
+                      />
+                    </div>
+                    <div className="input">
+                      <p className="inputLabel">Email</p>
+                      <input
+                        className="inputField"
+                        type="email"
+                        // placeholder="Email"
+                        onChange={(e) => setEmail(e.target.value)}
+                        value={email}
+                      />
+                    </div>
+                    <div className="input">
+                      <p className="inputLabel">Password</p>
+                      <input
+                        className="inputField"
+                        type="password"
+                        // placeholder="Password"
+                        onChange={(e) => setPassword(e.target.value)}
+                        value={password}
+                      />
+                    </div>
+                    <div className="input">
+                      <p className="inputLabel">Confirm Password</p>
+                      <input
+                        className="inputField"
+                        type="password"
+                        // placeholder="Password"
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        value={confirmPassword}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    className="button"
+                    type="submit">
+                    Sign Up
+                  </button>
+                </form>
+                <div className="pageSwitch">
+                  <p>Already have an account?</p>
+                  <Link className="link"href="/sign-up">Sign in</Link>
+                </div>
+                
+              </div>
+            </div>
+            <div className="graphic-contain">
+              <Image className="graphic-image" src={signin} alt="Sign Up Blob Graphic"/>
+            </div> 
+          
         </>
+        
+          
+          
       ) : (
         // 2FA Verification Form (phase 1)
         <div className={styles.signUpText}>
@@ -219,5 +256,6 @@ export default function SignUp() {
         </div>
       )}
     </div>)
+    
 
 }
