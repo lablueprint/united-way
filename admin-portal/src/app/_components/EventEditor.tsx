@@ -80,7 +80,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
     const notEmpty = () => {
         return ((updatedName != "Your Event Name") &&
             (updatedDescription != "Your Event Description") &&
-            (updatedTags.includes(true)) &&
+            ((updatedTags.length > 0)) &&
             ((currLatitude != 0) && (currLongitude != 0)))
     }
 
@@ -114,7 +114,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
         currDraftList.push(((currLatitude != 0) && (currLongitude != 0)));
 
         // Tags: 3
-        currDraftList.push((updatedTags.includes(true)));
+        currDraftList.push((updatedTags.length != 0));
 
         // TODO: When implemented, add flag for event photo
 
