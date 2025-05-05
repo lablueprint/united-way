@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import useApiAuth from "../_hooks/useApiAuth";
+import useApiAuth from "../../_hooks/useApiAuth";
 import { RequestType } from "../../_interfaces/RequestInterfaces"
 
 export default function Onboarding() {
