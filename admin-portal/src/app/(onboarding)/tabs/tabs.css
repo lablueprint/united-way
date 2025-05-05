@@ -1,33 +1,61 @@
-.split-container {
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("../../_styles/_fonts/BarlowCondensed-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+.container {
   display: flex;
+  flex-direction: column;
+  background-color: #030230;
   height: 100vh;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-y: hidden;
 }
 
-.left-panel {
-  width: 33.333%;
-  /* 1/3 of the screen */
-  height: 100%;
-  background-color: white;
-  padding: 2rem;
-  box-sizing: border-box;
-  overflow-y: auto;
+.body {
+  width: 90%;
+  margin: 0 auto;
 }
 
-.right-panel {
-  width: 66.667%;
-  /* 2/3 of the screen */
-  height: 100%;
-  background-color: #f0f0f0;
-  /* Light gray color */
+.header {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  line-height: 100%;
+  /* margin: 0 auto;
+  width: 90%; */
+  justify-content: flex-start;
+  padding: 1.25rem 0;
 }
 
-.heading {
-  font-size: 1.8rem;
+.logo-name {
+  font-family: "Barlow Condensed";  
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  letter-spacing: -2%;
+  align-self: center;
+}
+
+.header, .description, .pageTitle {
+  color: #FFFFFF;
+}
+
+.pageTitle {
+  font-size: 3.75rem;
   margin-bottom: 1.5rem;
-  color: black;
+  text-transform: uppercase;
+  font-family: "Barlow Condensed";
+}
+
+.pageSubheading {
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+.content {
+  padding: 0.5rem 0;
 }
 
 .paragraph {
@@ -35,32 +63,39 @@
   color: #333;
 }
 
-/* Sign in button */
-/* button {
-    width: 100%;
-    background-color: #000;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.3s;
+.buttonContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin: 0 5%;
+  align-self: flex-end;
+  padding: 2rem 0;
+  position: fixed;
+  bottom: 0;
+  right: 0
 }
 
-button:hover {
-    background-color: #222;
-} */
+.features {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0 auto;
+  gap: 1.125rem;
+}
+
+.continueButton, .skipButton {
+  padding: 0.5rem 2rem;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  border-radius: 100px;
+  color: white;
+  letter-spacing: -2%;
+}
 
 .continueButton {
-  margin-top: 1.8rem;
-  width: 100%;
-  background-color: #000;
-  color: white;
-  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.4);
   border: none;
-  border-radius: 5px;
-  font-size: 14px;
   cursor: pointer;
   transition: 0.3s;
 }
@@ -70,14 +105,10 @@ button:hover {
 }
 
 .skipButton {
-  margin-top: 1rem;
-  width: 100%;
-  background-color: white;
-  color: #222;
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: solid;
+  border-width: 1px;
   cursor: pointer;
   transition: 0.3s;
   outline-style: solid;
