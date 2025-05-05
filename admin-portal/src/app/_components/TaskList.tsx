@@ -93,7 +93,7 @@ export default function TaskList() {
             {allDrafts?.map((draft: EventData) => {
                 const draftList = draft.draftList
                 const draftDate = new Date(draft.date)
-                const dateString = getMonthString(draftDate) + " " +  draftDate.getDay() + "  |  " + getTimeString(draft.startTime) + " - " + getTimeString(draft.endTime)
+                const dateString = getMonthString(draftDate) + " " +  draftDate.getDate() + "  |  " + getTimeString(draft.startTime) + " - " + getTimeString(draft.endTime)
 
                 return (
                     <div className="draft-task-list" key={draft._id}>
