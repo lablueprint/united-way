@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
+import { Activity } from "../_interfaces/EventInterfaces";
 import { EventTags } from "../_interfaces/EventInterfaces";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import '../_styles/EventCreator.css';
 import TestLogo from "@/../public/images/logo.jpeg"
 import PenLogo from "@/../public/images/pen.png"
-import ActivityDropdown from "./ActivityDropdown";
 import QRCode from 'react-qr-code';
+import ActivityDropdown from './ActivityDropdown';
 
 interface EventCreatorProps {
     orgName: string;
@@ -139,6 +140,14 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
 
                 const uploadDraftList = generateDraftList()
 
+                // 1) Fetch all activities for this event
+                const fetchResp = await axios.post<{ data: Activity[] }>(
+                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/filtered`,
+                    { eventID: eventId }
+                );
+                const allActs = fetchResp.data.data;
+                const activityIds = allActs.map(a => a._id);
+
                 const response: AxiosResponse = await axios.patch(
                     `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`,
                     {
@@ -157,7 +166,7 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
                         organizerID: org.orgId,
                         tags: selectedTags,
                         registeredUsers: [], // Hardcoded for now
-                        activity: [], // Hardcoded for now
+                        activity: activityIds, // Hardcoded for now
                         image: "placeholder" // Hardcoded for now
                     },
                     {
@@ -269,7 +278,6 @@ export default function EventCreator({ orgName, changeState, eventId }: EventCre
                         <div className="customizeText">
                             Customize your Event
                         </div>
-                        {/* ACTIVITY DROPDOWN */}
                         <ActivityDropdown eventId={eventId} />
                         <div className="customizeButtonFormat">
                             <button className="customizeButton">

@@ -1,0 +1,112 @@
+.activityHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background-color: #10167F0A;
+}
+
+.divider {
+  border: none; 
+  height: 1px; 
+  margin-bottom: 5px;
+  margin-top: 5px;  
+  background-color: #10167F33;
+}
+
+.activityTitle {
+  font-family: Helvetica, sans-serif;
+  font-size: 1rem;
+  color: #10167F;
+}
+
+.activityButtons {
+  display: flex;
+  align-items: center;
+}
+
+.addButton {
+  font-family: Helvetica, sans-serif;
+  font-size: 1rem;
+  text-transform: uppercase;
+  border: 1px solid #10167F33;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  color:#10167F33;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.expandButton {
+  margin-left: 0.5rem;
+  padding: 0.25rem;
+  border: none;
+  background-color: transparent;
+  border-radius: 0.375rem;
+  color: #10167F;
+  cursor: pointer;
+}
+
+/* container for the row of cards */
+.cardList {
+  display: flex;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  overflow-x: auto; /* in case you have many cards */
+}
+
+/* each card wrapper */
+.cardListItem {
+  flex: 0 0 12.5rem; /* fixed width */
+}
+
+/* the card itself */
+.activityCard {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 0.063rem solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* top square image placeholder */
+.thumbnail {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: #f5f5f5;
+}
+
+/* content area grows to push footer to bottom */
+.cardInfo {
+  flex: 1;
+  padding: 0.75rem;
+}
+
+.cardTitle {
+  margin: 0 0 0.25rem;
+  font-size: 20px;
+  color: #10167F;
+  line-height: 1.2;
+}
+
+.cardFooter {
+  padding: 1rem;
+  text-align: right;
+}
+
+.editActivityButton {
+  font-family: Helvetica, sans-serif;
+  font-size: 1rem;
+  text-transform: uppercase;
+  border: 0.063rem solid #10167F33;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  color:#10167F33;
+  background-color: transparent;
+  cursor: pointer;
+}

@@ -145,6 +145,8 @@ export default function PollEditor({ activityId, timeStart, timeEnd }: PollEdito
 
   return (
     <div>
+      <h1>Poll</h1>
+      <h2>This is where you manage your polls.</h2>
       {questions.map((_, index) => (
         <button
           type="button"
