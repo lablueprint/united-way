@@ -1,18 +1,3 @@
-.box {
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-    width: 100%;
-    position: absolute;
-    top: 0;
-    color: black;
-}
-
-.image {
-    object-fit: contain;
-    min-width: 1/3;
-}
-
 .feature-container {
     display: flex;
     flex-direction: column;
