@@ -6,6 +6,10 @@ import React, { useState, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { login } from '../../_utils/redux/orgSlice';
 import { useDispatch } from 'react-redux';
+import Image from 'next/image';
+import uwLogo from '../../../../public/images/uwLogo.svg';
+import './signin.css';
+import signin from '../../../../public/images/signin.svg';
 
 import styles from './page.module.css'
 
@@ -63,40 +67,59 @@ export default function SignIn() {
   }
 
   return (
-    <div className={styles.formContainer}>
-      For returning organizations:
-      <form
-        className={styles.formContent}
-        onSubmit={handleSubmit}>
-        <p
-          className={styles.inputLabel}
-        >Email:</p>
-        <input
-          className={styles.inputField}
-          type="email"
-          // placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
-        />
-        <p
-          className={styles.inputLabel}
-        >Password:</p>
-        <input
-          className={styles.inputField}
-          type="password"
-          // placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
-        />
-        <button
-          className={styles.signInButton}
-          type="submit">
-          Submit
-        </button>
-      </form>
-      <Link href="/sign-up">
-        Don&apos;t have an account? Sign up
-      </Link>
+    <div className='container'>
+      <div className="header">
+        <div className="logo">
+          <Image src={uwLogo} height={40} width={40} alt="United Way Logo" />
+        </div>
+        <h1 className="logo-name">United Way</h1>
+      </div>
+      <div className='body'>
+        <div className='formContainer'>
+        {/* For returning organizations: */}
+          <h1 className="pageTitle">Sign In</h1>
+          <form
+            className="formContent"
+            onSubmit={handleSubmit}>
+            <div className="inputContainer">
+              <div className="input">
+                <p className="inputLabel">Email</p>
+                <input
+                  className="inputField"
+                  type="email"
+                  // placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                />
+              </div>
+              <div className="input">
+              <p className="inputLabel">Password</p>
+                <input
+                  className="inputField"
+                  type="password"
+                  // placeholder="Password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
+                />
+              </div>
+            </div>
+            <button
+              className="button"
+              type="submit">
+              Submit
+            </button>
+          </form>
+          <div className="pageSwitch">
+            <p>New here?</p>
+            <Link className="link"href="/sign-up">Create account</Link>
+          </div>
+          
+        </div>
+      </div>
+      <div className="graphic-contain">
+          <Image className="graphic-image" src={signin} alt="Sign In Blob Graphic"/>
+        </div> 
     </div>
+    
   );
 }

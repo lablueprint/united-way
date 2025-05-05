@@ -1,0 +1,139 @@
+@font-face {
+    font-family: "Barlow Condensed";
+    src: url("../../_styles/_fonts/BarlowCondensed-BoldItalic.ttf") format("truetype");
+    font-weight: 700;
+    font-style: italic;
+}
+  
+.container {
+    background-color: #04033C;
+    height: 100vh;
+    overflow-x: hidden;
+}
+
+.body {
+  width: 80%;
+  margin: 0 auto;
+  font-family: Helvetica, sans-serif;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  overflow-y: hidden;
+}
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  z-index: 99999;
+}
+
+.formContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+}
+
+.inputContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    line-height: 100%;
+    margin: 0 auto;
+    width: 90%;
+    justify-content: flex-start;
+    padding: 1.25rem 0;
+  }
+  
+  .pageTitle {
+    color: #FFFFFF;
+    font-size: 3.75rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    font-family: "Barlow Condensed";
+  }
+
+  .logo-name {
+    font-family: "Barlow Condensed";  
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    letter-spacing: -2%;
+    align-self: center;
+  }
+  
+  .header, .description, .pageTitle {
+    color: #FFFFFF;
+  }
+
+  .input {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .inputLabel, .inputField {
+    font-family: Helvetica, sans-serif;
+  }
+
+  .inputLabel {
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color:rgba(255, 255, 255, 0.7);
+  }
+
+  .inputField {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    border: none;
+    padding: 0.875rem;
+  }
+
+  .button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FFFFFF;
+    color: #10167F;
+    text-transform: uppercase;
+    padding: 0.875rem;
+    border-radius: 100px;
+    border: none;
+    font-weight: 700;
+    width: 100%;
+  }
+
+  .pageSwitch {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-transform: uppercase;
+    padding: 1.125rem 0;
+  }
+
+  .pageSwitch p, .pageSwitch .link{
+    font-size: 0.75rem;
+    color: #FFFFFF;
+  }
+
+  .link {
+    font-weight: 700;
+  }
+
+  .graphic-contain {
+    position: absolute;
+    right: 25%;
+    top: 10%;
+    width: 25%;
+    align-self: center;
+  }
+
+  .graphic-image {
+    object-fit: contain;
+  }
