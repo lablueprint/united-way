@@ -2,16 +2,16 @@
   display: flex;
   flex-direction: row;
   min-height: 80vh;
-  background: #fff;
   padding: 0;
   margin-top: 0;
+  gap: 32px;
+  justify-content: center;
 }
 
 .create-reward-header {
   width: 100%;
   display: flex;
   align-items: center;
-  background: #fff;
   padding: 0 48px;
   height: 88px;
   box-sizing: border-box;
@@ -61,26 +61,27 @@
 }
 
 .create-reward-left {
-  flex: 1;
   display: flex;
   align-items: flex-start;
-  justify-content: center;
-  padding-top: 48px;
+  justify-content: flex-end;
+  padding-top: 32px;
   margin-top: 0;
+  background: #fff;
+  padding-right: 16px;
 }
 
 .image-upload-area {
-  width: 380px;
-  height: 380px;
+  width: 260px;
+  height: 260px;
   background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 12px;
   margin-top: 0;
 }
 
@@ -106,56 +107,83 @@
 }
 
 .create-reward-right {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 48px 80px 0 0;
+  padding: 32px 32px 0 0;
   margin-top: 0;
+  background: #fff;
 }
 
 .create-reward-form {
   width: 100%;
-  max-width: 440px;
+  max-width: 1000px;
+  min-width: 700px;
   margin-left: auto;
-  margin-right: 0;
+  margin-right: auto;
   display: flex;
-  flex-direction: column;
-  gap: 28px;
+  flex-direction: row;
+  gap: 40px;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
-  padding: 36px 32px 32px 32px;
+  padding: 36px 40px 36px 40px;
   margin-top: 0;
+  position: relative;
+  align-items: flex-start;
+}
+
+.form-fields-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 400px;
+}
+
+.form-header-row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  background: #fff;
 }
 
 .create-reward-form label {
-  font-weight: 600;
+  font-weight: 700;
   color: #1a1a4b;
   margin-bottom: 6px;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .create-reward-form input,
 .create-reward-form textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 1rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
   background: #fafbfc;
   margin-bottom: 8px;
   resize: none;
+  font-weight: 500;
 }
 
 .create-reward-form textarea {
-  min-height: 70px;
+  min-height: 80px;
 }
 
 .create-reward-form .quantity-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  background: #fafbfc;
+  border-radius: 6px;
+  padding: 4px 10px;
+  width: fit-content;
+  border: 1px solid #d1d5db;
 }
 
 .create-reward-form .quantity-label {
@@ -170,19 +198,30 @@
 }
 
 .create-reward-form .quantity-btn {
-  background: #f0f0f7;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+  background: #fff;
+  border: 1px solid #1a1a4b;
+  border-radius: 50%;
   width: 28px;
   height: 28px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #1a1a4b;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background 0.2s;
 }
 
 .create-reward-form .quantity-btn:hover {
   background: #e0e7ff;
+}
+
+.create-reward-form .quantity-value {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1a1a4b;
 }
 
 .create-reward-form .save-btn {
@@ -211,4 +250,45 @@
   max-width: 120px;
   object-fit: contain;
   display: block;
+}
+
+.description-textarea,
+.directions-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fafbfc;
+  margin-bottom: 8px;
+  resize: none;
+  min-height: 70px;
+}
+
+.save-btn-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-bottom: -8px;
+}
+
+.save-btn {
+  margin-top: 0;
+}
+
+@media (max-width: 1100px) {
+  .create-reward-form {
+    flex-direction: column;
+    max-width: 98vw;
+    min-width: unset;
+    gap: 24px;
+    padding: 24px 8px;
+  }
+  .form-fields-col {
+    min-width: unset;
+  }
+  .image-upload-area {
+    margin: 0 auto;
+  }
 }

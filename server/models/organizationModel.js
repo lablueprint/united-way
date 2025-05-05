@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Example of a model schema to validate and structure documents
 const organizationSchema = new mongoose.Schema({
@@ -8,33 +8,36 @@ const organizationSchema = new mongoose.Schema({
   location: {
     type: {
       type: String, // GeoJSON type (e.g., "Point")
-      enum: ['Point'], // Restrict to "Point" for this schema
+      enum: ["Point"], // Restrict to "Point" for this schema
     },
     coordinates: {
       type: [Number], // Array of numbers [longitude, latitude]
     },
   },
-  name : {
+  name: {
     required: false,
     type: String,
   },
-  pastEvents : {
+  pastEvents: {
     required: false,
     type: [String],
   },
-  password : {
+  password: {
     required: true,
     type: String,
   },
   users: [String], // Array of user IDs
   rewards: [
     {
-      name: { type: String, required: true }, 
-      cost: { type: Number, required: true }, 
-      quantity: {type: Number, required: true}
-    },],
+      name: { type: String, required: true },
+      cost: { type: Number, required: true },
+      quantity: { type: Number, required: true },
+      image: { type: String, required: true },
+      description: { type: String, required: true },
+      directions: { type: String, required: true },
+    },
+  ],
   transactions: [String], // Array of transaction IDs
 });
 
-module.exports = mongoose.model('Organization', organizationSchema);
-
+module.exports = mongoose.model("Organization", organizationSchema);

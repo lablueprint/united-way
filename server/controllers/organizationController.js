@@ -2,6 +2,7 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const Organization = require("../models/organizationModel");
 const { generateToken } = require("../controllers/authController");
+const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 
 const createOrganization = async (req, res) => {
   try {
@@ -64,7 +65,11 @@ const getAllOrganizations = async (req, res) => {
 // for async functions must use await -- so you can resolve content later
 // pass in parameter of curly braces == no filter
 const getOrganizationById = async (req, res) => {
-  if (req.auth.role != "admin" && req.auth.role != "user" && req.auth.role != "organization") {
+  if (
+    req.auth.role != "admin" &&
+    req.auth.role != "user" &&
+    req.auth.role != "organization"
+  ) {
     res.status(401).json({
       status: "failure",
       message: "Invalid authorization token for request.",
@@ -138,11 +143,14 @@ const editOrganizationDetails = async (req, res) => {
   const orgId = req.params.id;
   const updateInput = req.body;
   try {
+    console.log("This is the update input", updateInput);
     const result = await Organization.updateOne(
       { _id: orgId },
       { $set: updateInput }
     );
+    console.log("Result of updateOne:", result);
     if (result.modifiedCount === 0) {
+
       res.status(404).json({
         status: "failure",
         message: "Organization not found or no changes made.",
@@ -156,6 +164,7 @@ const editOrganizationDetails = async (req, res) => {
       });
     }
   } catch (err) {
+    console.error("Error in editOrganizationDetails:", err);
     res.status(500).json({
       status: "failure",
       message: "Server-side error: update not completed.",
@@ -226,6 +235,51 @@ const deleteOrganization = async (req, res) => {
   }
 };
 
+const addImageToOrganization = async (req, res) => {
+  if (req.auth.role !== "admin" && req.auth.role !== "organization") {
+    return res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {},
+    });
+  }
+
+  if (!req.files || !req.files.image) {
+    return res.status(400).json({
+      status: "failure",
+      message: "No image file provided",
+      data: {},
+    });
+  }
+
+  const orgId = req.params.id;
+  const image = req.files.image;
+  const fileName = `organizations/${orgId}/${Date.now()}-${image.name}`;
+
+  try {
+    // Upload to S3
+    const result = await putObject(image.data, fileName);
+    console.log("S3 upload result:", result);
+    if (!result) {
+      throw new Error("Failed to upload to S3");
+    }
+    console.log("Image uploaded to S3:", result.url);
+
+  // Send back the URL
+    return res.status(200).json({
+      status: "success",
+      imageUrl: result.url
+    });
+  } catch (err) {
+    console.error("Error in addImageToOrganization:", err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: image could not be uploaded",
+      data: {},
+    });
+  }
+};
+
 module.exports = {
   createOrganization,
   getAllOrganizations,
@@ -234,4 +288,5 @@ module.exports = {
   editOrganizationDetails,
   getAssociatedEvents,
   deleteOrganization,
+  addImageToOrganization,
 };
