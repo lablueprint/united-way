@@ -29,6 +29,9 @@ export default function SignUpScreen() {
   // State to control the flow: 0 = Signup form; 1 = Two-Factor Verification
   const [state, setState] = useState(SignUpState.SignUpForm);
 
+  const [verificationMethod, setVerificationMethod] = useState<'email' | 'sms'>('email');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -68,6 +71,10 @@ export default function SignUpScreen() {
       Alert.alert('Enter a valid password. Your password must contain at least 12 characters including an uppercase letter, a lowercase letter, a symbol, and a number.');
       return false;
     }
+    if (verificationMethod == 'sms' && phoneNumber.length < 8) {
+      Alert.alert('Please enter a valid phone number.')
+      return false;
+    }
     return true;
   };
 
@@ -91,11 +98,11 @@ export default function SignUpScreen() {
       return;
     }
     // Email is not in use; proceed with sending OTP for 2FA
-    sendOTP();
+    verificationMethod === 'email' ? sendOTPEmail() : sendOTPSMS();
   };
 
-  // STEP 2: Send OTP to email for two-factor authentication
-  const sendOTP = async () => {
+  // Send OTP to email for two-factor authentication
+  const sendOTPEmail = async () => {
     try {
       const response: AxiosResponse = await axios.post(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/sendOTP`,
@@ -113,26 +120,69 @@ export default function SignUpScreen() {
     }
   };
 
-  // STEP 3: Verify the OTP code entered by the user
-  const verifyOTP = async () => {
+  // Send OTP to phone number for two-factor authentication
+  const sendOTPSMS = async () => {
     try {
-      const response: AxiosResponse = await axios.post(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/verifyCode`,
-        { code, hashedCode }
+      const formattedPhone = phoneNumber.startsWith('+')
+        ? phoneNumber
+        : `+1${phoneNumber}`;
+  
+      const response = await axios.post(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/sendSMS`,
+        { phoneNumber: formattedPhone }
       );
-      if (response.data === true) {
-        // OTP verified, proceed to add the user to the database
-        addUserToDatabase();
+  
+      if (response.data.status === 'success') {
+        setState(SignUpState.TwoFactor);
       } else {
-        Alert.alert("Invalid OTP. Please try again.");
+        Alert.alert("Error sending SMS.");
       }
     } catch (err) {
-      console.error('Error verifying OTP:', err);
-      Alert.alert("Error verifying OTP.");
+      console.error('Error sending SMS:', err);
+      Alert.alert("Error sending SMS verification code.");
+    }
+  };
+  
+  const verifyOTP = async () => {
+    if (verificationMethod === 'email') {
+      try {
+        const response = await axios.post(
+          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/verifyCode`,
+          { code, hashedCode }
+        );
+        if (response.data === true) {
+          addUserToDatabase();
+        } else {
+          Alert.alert("Invalid OTP. Please try again.");
+        }
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Error verifying OTP.");
+      }
+    } else {
+      try {
+        const formattedPhone = phoneNumber.startsWith('+')
+          ? phoneNumber
+          : `+1${phoneNumber}`;
+
+        const response = await axios.post(
+          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/verifySMS`,
+          { phoneNumber: formattedPhone, code }
+        );
+
+        if (response.data.status === 'success') {
+          addUserToDatabase();
+        } else {
+          Alert.alert("Invalid code");
+        }
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Verification failed.");
+      }
     }
   };
 
-  // STEP 4: Add user to the database after OTP verification succeeds
+  // Add user to the database after OTP verification succeeds
   const addUserToDatabase = async () => {
     try {
       const timestamp = Date.now(); // Get the current timestamp in milliseconds
@@ -146,14 +196,20 @@ export default function SignUpScreen() {
       // Format as YYYY-MM-DD
       const formattedDate = `${year}-${month}-${day}`;
 
+      const userData: any = {
+        email,
+        password,
+        dateJoined: formattedDate,
+        profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
+      };
+      
+      if (verificationMethod === 'sms') {
+        userData.phoneNumber = phoneNumber
+      }
+      
       const response: AxiosResponse = await axios.post(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
-        {
-          email: email,
-          password: password,
-          dateJoined: formattedDate,
-          profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
-        }
+        userData
       );
 
       dispatch(login({
@@ -161,7 +217,14 @@ export default function SignUpScreen() {
         authToken: response.data.authToken,
         refreshToken: response.data.refreshToken
       }));
-      router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken } });
+      router.push({
+        pathname: "/onboarding",
+        params: {
+          id: response.data.data._id,
+          authToken: response.data.authToken,
+          verificationMethod // <- verification method gets added
+        }
+      });
     } catch (err) {
       console.error(err);
       Alert.alert("Error creating user.");
@@ -197,6 +260,33 @@ export default function SignUpScreen() {
               secureTextEntry
             />
           </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>VERIFY USING</Text>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity onPress={() => setVerificationMethod('email')}>
+                <Text style={[styles.option, verificationMethod === 'email' && styles.selectedOption]}>
+                  Email
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setVerificationMethod('sms')}>
+                <Text style={[styles.option, verificationMethod === 'sms' && styles.selectedOption]}>
+                  SMS
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          {verificationMethod === 'sms' && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>PHONE NUMBER</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="234567890"
+                onChangeText={setPhoneNumber}
+                value={phoneNumber}
+                keyboardType="phone-pad"
+              />
+            </View>
+          )}
           <TouchableOpacity style={styles.signUpButton} onPress={handleSignup}>
             <Text style={styles.signUpButtonText} >Sign up</Text>
             {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
@@ -333,5 +423,15 @@ const styles = StyleSheet.create({
   skipLink: {
     color: '#666',
     textDecorationLine: 'underline',
+  },
+  option: { 
+    padding: 10, 
+    fontSize: 16, 
+    color: '#555' 
+  },
+  selectedOption: { 
+    fontWeight: 'bold', 
+    color: 'black', 
+    textDecorationLine: 'underline' 
   },
 });

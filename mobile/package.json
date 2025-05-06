@@ -49,7 +49,8 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.2",
     "react-redux": "^9.2.0",
-    "redux": "^5.0.1"
+    "redux": "^5.0.1",
+    "twilio": "^5.5.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -59,6 +60,7 @@
     "@types/react": "~18.3.12",
     "@types/react-native": "^0.73.0",
     "@types/react-test-renderer": "^18.3.0",
+    "@types/twilio": "^3.19.2",
     "jest": "^29.2.1",
     "jest-expo": "~52.0.2",
     "react-test-renderer": "18.3.1",

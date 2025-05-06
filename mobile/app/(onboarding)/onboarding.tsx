@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Button } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
@@ -6,13 +6,11 @@ import DropDownPicker from 'react-native-dropdown-picker';
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const { id, authToken } = params;
+  const { id, authToken, verificationMethod } = useLocalSearchParams();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [ethnicity, setEthnicity] = useState('');
   const [community, setCommunity] = useState('');
-  // Gender selector
   const [open, setOpen] = useState(false);
   const [gender, setGender] = useState(null);
   const [items, setItems] = useState([
@@ -30,104 +28,109 @@ export default function OnboardingScreen() {
 
   const handleEditUser = async () => {
     try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${id}`,
-        {
-          name: name,
-          phoneNumber: phone,
-          demographics: {
-            ethnicity: ethnicity,
-            community: community,
-            gender: gender
-          }
+      const payload: any = {
+        name,
+        demographics: {
+          ethnicity,
+          community,
+          gender,
         },
+      };
+      if (verificationMethod !== 'sms') {
+        payload.phoneNumber = phone;
+      }
+
+      const response: AxiosResponse = await axios.patch(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${id}`,
+        payload,
         {
           headers: {
             'Authorization': `Bearer ${authToken}`,
-            'Content-Type': "application/json"
-          }
+            'Content-Type': "application/json",
+          },
         }
       );
-      // Navigate to home screen
-      router.push({ pathname: "/interest" })
-      //router.push("/(tabs)");
+      router.push({ pathname: "/interest" });
     } catch (err) {
       console.log(err);
     }
-  }
+  };
+
   useEffect(() => {
-
-    if (state == 1) {
+    if (state === 1) {
       setTitle("What is your name?");
-
       setSubtitle("Please enter your first and last name");
       setPlaceholder(name || "Name");
       setTextInput(name);
-    } else if (state == 2) {
+    } else if (state === 2) {
+      setName(textInput);
+      if (verificationMethod === 'sms') {
+        setState(3);
+        return;
+      }
       setTitle("Phone Number");
-      setName(textInput)
-
       setSubtitle("Enter your number to receive updates");
       setPlaceholder(phone || "Phone Number");
       setTextInput(phone);
-    } else if (state == 3) {
+    } else if (state === 3) {
+      if (verificationMethod !== 'sms') {
+        setPhone(textInput);
+      }
       setTitle("Language");
-
-      setPhone(textInput)
       setSubtitle("Enter your Preferred Language");
       setPlaceholder(ethnicity || "Language");
       setTextInput(ethnicity);
-    } else if (state == 4) {
+    } else if (state === 4) {
+      setEthnicity(textInput);
       setTitle("Community");
-      setEthnicity(textInput)
-
       setSubtitle("Enter your Community");
       setPlaceholder(community || "Community");
       setTextInput(community);
-    } else if (state == 5) {
+    } else if (state === 5) {
+      setCommunity(textInput);
       setTitle("Gender");
-      setCommunity(textInput)
       setSubtitle("Enter your Gender");
       setPlaceholder(gender || "Please select");
       setTextInput("");
-    } else if (state == 6) {
-      setGender(dropDownInput)
-      handleEditUser()
+    } else if (state === 6) {
+      setGender(dropDownInput);
+      handleEditUser();
     }
-  }, [state]); // Runs when `state` changes
+  }, [state]);
 
-  const handleContinue1 = async () => {
-    setState(state => state + 1);
-  }
+  const handleContinue1 = () => {
+    setState((state) => state + 1);
+  };
 
-  const handleBack = async () => {
+  const handleBack = () => {
     if (state > 1) {
-      setState(state => state - 1); // Decrease the state first
+      setState((state) => state - 1);
     }
-
-  }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.formContainer}>
-        {state != 6 ?
-          (<View style={styles.content}>
-            {state != 1 ?
-              (<TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        {state !== 6 ? (
+          <View style={styles.content}>
+            {state !== 1 && (
+              <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                 <Text style={styles.backButtonText}>&lt; Back</Text>
-              </TouchableOpacity>) : <></>}
+              </TouchableOpacity>
+            )}
             <View style={styles.header}>
               <Text style={styles.title}>{title}</Text>
-              <Text style={styles.subtitle}>
-                {subtitle}
-              </Text>
+              <Text style={styles.subtitle}>{subtitle}</Text>
             </View>
-            {state != 5
-              ? (<TextInput
+            {state !== 5 ? (
+              <TextInput
                 style={styles.input}
                 value={textInput}
                 onChangeText={setTextInput}
-                placeholder={placeholder} />)
-              : (<DropDownPicker
+                placeholder={placeholder}
+              />
+            ) : (
+              <DropDownPicker
                 open={open}
                 value={gender}
                 items={items}
@@ -135,54 +138,29 @@ export default function OnboardingScreen() {
                 setValue={setGender}
                 setItems={setItems}
                 placeholder="Gender"
-              />)}
-
-
+              />
+            )}
             <TouchableOpacity style={styles.continueButton} onPress={handleContinue1}>
               <Text style={styles.continueButtonText}>Continue</Text>
             </TouchableOpacity>
-            <Text style={styles.textdd}>
-              Let's get you onboarded!
-            </Text>
-          </View>) : <Text>Loading...</Text>}
+            <Text style={styles.textdd}>Let's get you onboarded!</Text>
+          </View>
+        ) : (
+          <Text>Loading...</Text>
+        )}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-
-  formContainer: {
-    flex: 1,
-    padding: 20,
-    marginTop: 60,
-  },
-  textdd: {
-    color: 'black',
-    margin: 24,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 40,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    marginTop: 40,
-  },
-  header: {
-    marginBottom: 40,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
+  formContainer: { flex: 1, padding: 20, marginTop: 60 },
+  textdd: { color: 'black', margin: 24 },
+  container: { flex: 1, backgroundColor: 'white', borderRadius: 40 },
+  content: { flex: 1, padding: 20, marginTop: 40 },
+  header: { marginBottom: 40 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
+  subtitle: { fontSize: 16, color: '#666' },
   input: {
     backgroundColor: '#F5F5F5',
     padding: 16,
@@ -197,17 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  continueButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  backButton: {
-
-  },
-  backButtonText: {
-    color: 'black',
-    fontSize: 16,
-    marginVertical: 10,
-  }
+  continueButtonText: { color: 'white', fontSize: 16, fontWeight: '600' },
+  backButton: {},
+  backButtonText: { color: 'black', fontSize: 16, marginVertical: 10 },
 });
