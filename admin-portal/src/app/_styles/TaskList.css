@@ -1,0 +1,152 @@
+@font-face {
+    font-family: "Barlow";
+    src: url("./_fonts/BarlowCondensed-SemiBoldItalic.ttf") format("truetype");
+    font-weight: normal;
+    font-style: italics;
+}
+
+@font-face {
+    font-family: "Barlow";
+    src: url("./_fonts/BarlowCondensed-BoldItalic.ttf") format("opentype");
+    font-weight: bold;
+    font-style: italics;
+}
+
+@font-face {
+    font-family: "Barlow-Normal";
+    src: url("./_fonts/BarlowCondensed-SemiBold.ttf") format("truetype");
+    font-weight: normal;
+    font-style: italics;
+}
+
+@font-face {
+    font-family: "Barlow-Normal";
+    src: url("./_fonts/BarlowCondensed-Bold.ttf") format("opentype");
+    font-weight: bold;
+    font-style: italics;
+}
+
+@font-face {
+    font-family: "Inter";
+    src: url("./_fonts/Inter-VariableFont.ttf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Inter";
+    src: url("./_fonts/Inter_18pt-SemiBold.ttf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+}
+
+.draft-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.header-box-parent {
+    display: flex; 
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.header-box-text {
+    font-family: "Helvetica";
+    font-size: 1rem;
+    color: #18147c;
+    font-weight: 400;
+    display: flex;
+}
+
+.header-box-count {
+    background-color: #e8ecf4;
+    color: #18147c;
+    width: 1.5rem;
+    height: 1.8rem;
+    font-weight: bold;
+    border-radius: 0.25rem;
+    display: flex;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.5rem;
+}
+
+.draft-box-parent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.draft-box-information {
+    display: flex;
+    gap: 1rem;
+    align-items: "center";
+}
+
+.draft-title {
+    font-family: "Barlow";
+    display: flex;
+    color: #18147c;
+    font-weight: 600;
+    font-size: 1.25rem;
+    text-align: "center";
+}
+
+.bullet-divider {
+    font-family: "Barlow-Normal";
+    display: flex;
+    color: #18147c;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.draft-time {
+    font-family: "Inter";
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #18147c;
+    display: flex;
+    margin-top: 0.4rem;
+    margin-bottom: 0.2rem;
+    text-align: "center";
+    align-self: "self-end";
+}
+
+.draft-location {
+    font-family: "Inter";
+    font-size: 0.625rem;
+    font-weight: 400;
+    color: #18147c;
+    display: flex;
+    margin-top: 0.5rem;
+    margin-bottom: 0.2rem;
+    text-align: "center";
+    align-self: "self-end";
+}
+
+.task-list-grandparent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.task-list-parent {
+    display: flex;
+    gap: 1rem;
+}
+
+.task-image {
+    display: flex;
+    object-fit: "contain";
+    align-self: "stretch";
+}
+
+.task-text {
+    font-family: "Helvetica";
+    font-size: 1.18rem;
+    color: #18147C;
+    font-weight: 400;
+}

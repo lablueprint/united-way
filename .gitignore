@@ -17,6 +17,7 @@ coverage
 .next/
 out/
 admin-portal/next.config.ts
+mobile/ios
 
 # production
 build

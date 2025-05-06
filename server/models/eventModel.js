@@ -9,6 +9,14 @@ const eventSchema = new mongoose.Schema({
     required: true,
     type: Date,
   },
+  draft: {
+    required: true,
+    type: Boolean,
+  },
+  draftList: {
+    required: true,
+    type: [Boolean],
+  },
   duration: {
     required: true,
     type: Number,

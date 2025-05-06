@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   env: {
     IP_ADDRESS: "",
-    PORT: "",
+    PORT: "4000",
   }
 };
 
