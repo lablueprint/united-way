@@ -27,8 +27,12 @@ const getAllUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
-  if (req.auth.role != 'admin') {
-    res.status(401);
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401).json({
+      status: "failure",
+      message: "Unauthorized retrieval of user.",
+      data: {}
+    });
     return;
   }
 
