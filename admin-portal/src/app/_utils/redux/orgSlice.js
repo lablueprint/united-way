@@ -19,12 +19,23 @@ const orgSlice = createSlice({
             state.authToken = "";
             state.refreshToken = "";
             localStorage.removeItem('org');
+        },
+        refresh: (state, action) => {
+            state.authToken = action.payload.authToken;
+            localStorage.setItem('org', 
+                JSON.stringify({
+                    orgId: state.orgId, 
+                    authToken: action.payload.authToken, 
+                    refreshToken: state.refreshToken
+                })
+            );
         }
     }
 })
 
 const {
-    login, logout
+    login, logout, refresh
 } = orgSlice.actions
-export { login, logout };
+
+export { login, logout, refresh };
 export default orgSlice.reducer;

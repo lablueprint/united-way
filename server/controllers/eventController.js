@@ -3,6 +3,7 @@ const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 
 // Example of creating a document in the database
 const createEvent = async (req, res) => {
+  req.body.organizerID = req.params.id;
   const event = new Event(req.body);
   try {
     const data = await event.save(event);
@@ -247,6 +248,24 @@ const getAllEvents = async (req, res) => {
   }
 };
 
+const getEventsByOrganization = async (req, res) => {
+  try {
+    const events = await Event.find({organizerID: req.params.id});
+    res.status(200).json({
+      status: "success",
+      message: "Event successfully received.",
+      data: events,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: could not receive events.",
+      data: {},
+    });
+  }
+}
+
 //
 // TODO: filter by including sub-element matches as well
 // and not just hard equality (i.e. matching those that
@@ -357,6 +376,7 @@ module.exports = {
   getEventById,
   getAllEvents,
   getEventsByFilter,
+  getEventsByOrganization,
   editEventDetails,
   deleteEvent,
   addUserToEvent,

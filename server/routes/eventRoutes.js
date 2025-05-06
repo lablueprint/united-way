@@ -14,11 +14,12 @@ eventRouter.use(
   })
 );
 // Post event routes
-eventRouter.post("/createEvent", eventController.createEvent);
+eventRouter.post("/orgs/:id/createEvent", eventController.createEvent);
 
 // Get event routes
 eventRouter.get("/:id", eventController.getEventById);
 eventRouter.get("/", eventController.getAllEvents);
+eventRouter.get("/orgs/:id", eventController.getEventsByOrganization);
 eventRouter.post("/filtered", eventController.getEventsByFilter);
 
 // Update and delete routes

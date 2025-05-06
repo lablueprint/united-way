@@ -147,7 +147,6 @@ export default function SignUp() {
         refreshToken: response.data.refreshToken
       }));
       router.push('/onboarding');
-
     } catch (err) {
       console.log(err);
     }
