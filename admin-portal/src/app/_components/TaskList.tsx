@@ -107,7 +107,7 @@ export default function TaskList() {
                                     { dateString }
                                 </div>
                                 <div className="bullet-divider">•</div>
-                                {/* TODO: Figure out the city */}
+                                {/* TODO: Nominatim does not return cities, so this is hardcoded for our use case*/}
                                 <div className="draft-location">
                                     LOS ANGELES, CA
                                 </div>
@@ -115,66 +115,67 @@ export default function TaskList() {
                         </div>
                         {/* TODO: Add Rewards, poster/flyer, start time, finish time, and date */}
                         {/* Hardcode Tasks based on draftList index */}
+                        <div className="task-list-grandparent">
+                            {/* Missing Event Name */}
+                            { !draftList[0] && (
+                                <div className="task-list-parent">
+                                    <div className="task-image">
+                                        <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+                                    </div>
+                                    <div className="task-text">
+                                        Add a title
+                                    </div>
+                                </div>
+                            )} 
 
-                        {/* Missing Event Name */}
-                        { !draftList[0] && (
-                            <div className="task-list-parent">
-                                <div className="task-image">
+                            {/* Missing Description */}
+                            { !draftList[1] && (
+                                <div className="task-list-parent">
+                                    <div className="task-image">
+                                        <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+                                    </div>
+                                    <div className="task-text">
+                                        Add a description
+                                    </div>
+                                </div>
+                            )} 
+
+                            {/* Missing Location */}
+                            { !draftList[2] && (
+                                <div className="task-list-parent">
+                                    <div className="task-image">
+                                    <Image src={location} alt="Location icon" width={19} height={22} />
+                                    </div>
+                                    <div className="task-text">
+                                    Add a location
+                                    </div>
+                                </div>
+                            )} 
+
+                            {/* Missing tags */}
+                            { !draftList[3] && (
+                                <div className="task-list-parent">
+                                    <div className="task-image">
                                     <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+                                    </div>
+                                    <div className="task-text">
+                                        Select tags for your event
+                                    </div>
                                 </div>
-                                <div className="task-text">
-                                    Add a title
-                                </div>
-                            </div>
-                        )} 
+                            )} 
 
-                        {/* Missing Description */}
-                        { !draftList[1] && (
-                            <div className="task-list-parent">
-                                <div className="task-image">
-                                    <Image src={pencil} alt="Pencil icon" width={19} height={22} />
+                            {/* If everything is done, Publish! */}
+                            { !draftList.includes(false) && (
+                                <div className="task-list-parent">
+                                    <div className="task-image">
+                                    <Image src={publish} alt="Publish icon" width={19} height={22} />
+                                    </div>
+                                    <div className="task-text">
+                                        Publish
+                                    </div>
                                 </div>
-                                <div className="task-text">
-                                    Add a description
-                                </div>
-                            </div>
-                        )} 
-
-                        {/* Missing Location */}
-                        { !draftList[2] && (
-                            <div className="task-list-parent">
-                                <div className="task-image">
-                                <Image src={location} alt="Location icon" width={19} height={22} />
-                                </div>
-                                <div className="task-text">
-                                Add a location
-                                </div>
-                            </div>
-                        )} 
-
-                        {/* Missing tags */}
-                        { !draftList[3] && (
-                            <div className="task-list-parent">
-                                <div className="task-image">
-                                <Image src={pencil} alt="Pencil icon" width={19} height={22} />
-                                </div>
-                                <div className="task-text">
-                                    Select tags for your event
-                                </div>
-                            </div>
-                        )} 
-
-                        {/* If everything is done, Publish! */}
-                        { !draftList.includes(false) && (
-                            <div className="task-list-parent">
-                                <div className="task-image">
-                                <Image src={publish} alt="Publish icon" width={19} height={22} />
-                                </div>
-                                <div className="task-text">
-                                    Publish
-                                </div>
-                            </div>
-                        )} 
+                            )} 
+                        </div>
                     </div>
                 );
             })}

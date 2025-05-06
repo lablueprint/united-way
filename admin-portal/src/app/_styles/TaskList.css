@@ -127,6 +127,12 @@
     align-self: "self-end";
 }
 
+.task-list-grandparent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
 .task-list-parent {
     display: flex;
     gap: 1rem;
