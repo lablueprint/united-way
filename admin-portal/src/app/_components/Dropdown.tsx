@@ -76,20 +76,6 @@ export default function DropDown<Item>({
           </ul>
         </div>
       )}
-
-
-
-      {/* {open && (
-        <div>
-          <ul>
-            {items.map((it) => (
-              <li key={(it as any)._id}>
-                {renderItem(it, onEditItem)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )} */}
     </div>
   );
 }

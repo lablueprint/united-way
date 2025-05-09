@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
+import '../_styles/PollEditor.css';
 
 interface Choice {
   id: number;
@@ -19,176 +20,197 @@ interface PollEditorProps {
   timeEnd: Date;
 }
 
-export default function PollEditor({ activityId, timeStart, timeEnd }: PollEditorProps) {
+export default function PollEditor({
+  activityId,
+  timeStart,
+  timeEnd,
+}: PollEditorProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [questionIndex, setQuestionIndex] = useState<number>(0);
-  const [questionText, setQuestionText] = useState<string>("");
-  const [choices, setChoices] = useState<Choice[]>([]);
 
+  // load once
   useEffect(() => {
-    const fetchQuestions = async () => {
-      const activityData = await getActivityById(activityId);
-      setQuestions(activityData.content);
-
-      if (!activityData.content || activityData.content.length === 0) {
-        setQuestionText("New Poll Question");
-        setChoices([{ id: 1, text: "", count: 0 }]);
-        setQuestionIndex(0);
+    (async () => {
+      const data = await getActivityById(activityId);
+      if (data.content && data.content.length) {
+        setQuestions(data.content);
       } else {
-        const firstQuestion = activityData.content[0];
-        setQuestionText(firstQuestion.question);
-        setChoices(firstQuestion.options);
-        setQuestionIndex(0);
+        setQuestions([{ question: "New Poll Question", options: [{ id: 1, text: "", count: 0 }] }]);
       }
-    };
-    fetchQuestions();
+    })();
   }, [activityId]);
 
-  const getActivityById = async (activityID: string) => {
+  const getActivityById = async (id: string) => {
     try {
-      const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID}`
+      const resp: AxiosResponse = await axios.get(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${id}`
       );
-      return response.data.data;
-    } catch (err) {
-      console.error(err);
+      return resp.data.data;
+    } catch {
       return { content: [] };
     }
   };
 
-  const savePoll = async (updatedQuestions: Question[]) => {
+  const savePoll = async (updated: Question[]) => {
     try {
-      const response: AxiosResponse = await axios.patch(
+      const resp: AxiosResponse = await axios.patch(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        {
-          content: updatedQuestions,
-          timeStart,
-          timeEnd,
-        }
+        { content: updated, timeStart, timeEnd }
       );
-      const data = response.data.data;
-      // setActivity(data);
+      const data = resp.data.data;
       setQuestions(data.content);
-      return data;
-    } catch (err) {
-      console.error(err);
+      return data.content;
+    } catch (e) {
+      console.error(e);
+      return questions;
     }
   };
 
-  const addQuestion = async () => {
-    const newQuestion: Question = {
-      question: "New Poll Question",
-      options: [{ id: 1, text: "", count: 0 }],
-    };
-    const updatedQuestions = [...questions, newQuestion];
-    const data = await savePoll(updatedQuestions);
-    const idx = data.content.length - 1;
-    setQuestionIndex(idx);
-    setQuestionText(data.content[idx].question);
-    setChoices(data.content[idx].options);
-  };
+  const updateQuestionText = (qIdx: number, text: string) =>
+    savePoll(
+      questions.map((q, i) => i === qIdx ? { ...q, question: text } : q)
+    );
 
-  const deleteQuestion = async (index: number) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions.splice(index, 1);
-    const data = await savePoll(updatedQuestions);
-    const nextIndex = updatedQuestions.length - 1 < index ? updatedQuestions.length - 1 : index;
-    if (data.content.length > 0) {
-      setQuestionIndex(nextIndex);
-      setQuestionText(data.content[nextIndex].question);
-      setChoices(data.content[nextIndex].options);
-    } else {
-      setQuestionText("New Poll Question");
-      setChoices([{ id: 1, text: "", count: 0 }]);
-    }
-  };
+  const deleteQuestion = (qIdx: number) =>
+    savePoll(questions.filter((_, i) => i !== qIdx));
 
-  const handleUpdateQuestionText = async (text: string) => {
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].question = text;
-    setQuestionText(text);
-    await savePoll(newQuestions);
-  };
+  const addQuestion = () =>
+    savePoll([
+      ...questions,
+      { question: "New Poll Question", options: [{ id: 1, text: "", count: 0 }] },
+    ]);
 
-  const handleUpdateChoice = async (choiceIndex: number, value: string) => {
-    const newChoices = [...choices];
-    newChoices[choiceIndex].text = value;
-    setChoices(newChoices);
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].options = newChoices;
-    await savePoll(newQuestions);
-  };
+  const updateChoiceText = (qIdx: number, cIdx: number, text: string) =>
+    savePoll(
+      questions.map((q, i) =>
+        i !== qIdx
+          ? q
+          : {
+              ...q,
+              options: q.options.map((c, j) =>
+                j !== cIdx ? c : { ...c, text }
+              ),
+            }
+      )
+    );
 
-  const handleAddChoice = async () => {
-    const newChoice: Choice = {
-      id: choices.length ? Math.max(...choices.map((c) => c.id)) + 1 : 1,
-      text: "",
-      count: 0,
-    };
-    const newChoices = [...choices, newChoice];
-    setChoices(newChoices);
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].options = newChoices;
-    await savePoll(newQuestions);
-  };
+  const deleteChoice = (qIdx: number, cIdx: number) =>
+    savePoll(
+      questions.map((q, i) =>
+        i !== qIdx
+          ? q
+          : { ...q, options: q.options.filter((_, j) => j !== cIdx) }
+      )
+    );
 
-  const handleDeleteChoice = async (choiceIndex: number) => {
-    const newChoices = [...choices];
-    newChoices.splice(choiceIndex, 1);
-    setChoices(newChoices);
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].options = newChoices;
-    await savePoll(newQuestions);
-  };
+  const addChoice = (qIdx: number) =>
+    savePoll(
+      questions.map((q, i) =>
+        i !== qIdx
+          ? q
+          : {
+              ...q,
+              options: [
+                ...q.options,
+                {
+                  id: q.options.length
+                    ? Math.max(...q.options.map((c) => c.id)) + 1
+                    : 1,
+                  text: "",
+                  count: 0,
+                },
+              ],
+            }
+      )
+    );
 
-  if (questions.length === 0) return <div />;
+  if (!questions.length) return null;
 
   return (
-    <div>
-      <h1>Poll</h1>
-      <h2>This is where you manage your polls.</h2>
-      {questions.map((_, index) => (
-        <button
-          type="button"
-          key={`nav-${index}`}
-          onClick={() => {
-            setQuestionIndex(index);
-            setQuestionText(questions[index].question);
-            setChoices(questions[index].options);
-          }}
-        >
-          {index + 1}
-        </button>
-      ))}
-
-      <div>
-        <label>
-          Question:
-          <input
-            type="text"
-            value={questionText}
-            onChange={(e) => handleUpdateQuestionText(e.target.value)}
-          />
-        </label>
+    <div className="pollEditor">
+      <div className="pollEditorHeader">
+        <h1 className="pollEditorHeaderTitle">POLLS</h1>
+        <h2 className="pollEditorHeaderSubtitle">
+          View and edit your created polls.
+        </h2>
       </div>
 
-      {choices.map((choice, i) => (
-        <div key={`choice-${i}`}>
-          <input
-            type="text"
-            value={choice.text}
-            onChange={(e) => handleUpdateChoice(i, e.target.value)}
-          />
-          <button type="button" onClick={() => handleDeleteChoice(i)}>
-            Remove choice
-          </button>
+      <div className="draftSavePublishBox">
+        <div className="draftButton">Draft</div>
+        <div className="savePublishBox">
+          <button className="savePollButton">Save</button>
+          <button className="publishButton">Publish</button>
         </div>
-      ))}
+      </div>
 
-      <button type="button" onClick={handleAddChoice}>Add Choice</button>
+      <div className="questionBox">
+        <h1 className="pollTitle">UNTITLED PAGE</h1>
+        <div className="questionList">
+          {questions.map((q, qIdx) => (
+            <div key={qIdx} className="questionPanel">
+              <div className="questionHeader">
+                <label className="questionLabel">
+                  Question {qIdx + 1}:
+                </label>
+                <input
+                  className="questionInput"
+                  type="text"
+                  value={q.question}
+                  onChange={(e) =>
+                    updateQuestionText(qIdx, e.target.value)
+                  }
+                />
+                <div className="questionToolbar">
+                  {/* <button onClick={() => updateQuestionText(qIdx, q.question)}>
+                    ✏️
+                  </button> */}
+                  <button onClick={() => deleteQuestion(qIdx)}>🗑️</button>
+                </div>
+              </div>
 
-      <button type="button" onClick={addQuestion}>Add Question</button>
-      <button type="button" onClick={() => deleteQuestion(questionIndex)}>Delete Question</button>
+              <div className="optionList">
+                {q.options.map((choice, cIdx) => (
+                  <div key={cIdx} className="optionRow">
+                    <input type="radio" disabled />
+                    <input
+                      className="optionInput"
+                      type="text"
+                      value={choice.text}
+                      onChange={(e) =>
+                        updateChoiceText(qIdx, cIdx, e.target.value)
+                      }
+                    />
+                    <button
+                      className="removeOptionButton"
+                      onClick={() => deleteChoice(qIdx, cIdx)}
+                    >
+                      ✖️
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  className="addOptionButton optionRow"
+                  type="button"
+                  onClick={() => addChoice(qIdx)}
+                >
+                  <input type="radio" disabled />
+                  <span className="optionText">Add Another Choice</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="questionActions">
+        <button
+          className="addQuestionButton"
+          type="button"
+          onClick={addQuestion}
+        >
+          + Add Another Question
+        </button>
+      </div>
     </div>
   );
 }

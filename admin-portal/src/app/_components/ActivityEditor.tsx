@@ -58,7 +58,7 @@ export default function ActivityEditor({
             : createType === "poll"
               ? [{
                   question: "New Poll Question",
-                  options: [{ id: 0, text: "Option 1", count: 0 }],
+                  options: [{ id: 0, text: "Choice 1", count: 0 }],
                 }]
               : [];
 
@@ -186,7 +186,6 @@ export default function ActivityEditor({
       backgroundColor: "white",
       zIndex: 1000,
       overflow: "auto",
-      padding: "1rem",
     }}>
       <div>
         <h2>
