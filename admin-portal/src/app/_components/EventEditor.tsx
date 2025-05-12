@@ -3,10 +3,9 @@ import axios, { AxiosResponse } from "axios";
 import { EventTags } from "../_interfaces/EventInterfaces";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
-import TestLogo from "@/../public/images/logo.jpeg"
-import PenLogo from "@/../public/images/pen.png"
 import QRCode from 'react-qr-code';
 import '../_styles/EventEditor.css';
+import { pen, logo } from '../../../public/EventEditor/EventEditor-index'
 
 interface EventEditorProps {
     orgName: string;
@@ -101,12 +100,12 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
     // true --> not draft/complete, false --> draft
     const generateDraftList = () => {
         const currDraftList = [];
-        
+
         // Event Name: 0
         currDraftList.push(updatedName !== "Your Event Name" && updatedName !== "");
 
         // Start time, end time, time zone have default vals (they aren't in draft list)
-        
+
         // Description: 1
         currDraftList.push(updatedDescription !== "Your Event Description" && updatedDescription !== "");
 
@@ -186,7 +185,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                 changeState(false);
             }
             else {
-                var errs = "";
+                let errs = "";
                 if (updatedName == "Your Event Name") {
                     errs = errs + "Name ";
                 }
@@ -293,7 +292,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                 {/* Image selection */}
                 <div className="blankImage">
                     <div className="imagebox">
-                        <img className="penlogo" src={PenLogo.src} />
+                        <img className="penlogo" src={pen.src} />
                     </div>
 
                     <div className="leftBottom">
@@ -307,8 +306,8 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                             <button className="customizeButton">
                                 Add Rewards
                             </button>
-                            <div style={{display: 'flex'}}>
-                                <QRCode value={eventId}/>
+                            <div style={{ display: 'flex' }}>
+                                <QRCode value={eventId} />
                             </div>
                         </div>
                     </div>
@@ -372,7 +371,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                 {/* Organization Info */}
                 <div className="orgInfoBox">
                     <div className="orgLogo">
-                        <img src={TestLogo.src} />
+                        <img src={logo.src} />
                     </div>
                     <div className="flexIt">
                         <h4>
