@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema({
   name: {
@@ -9,14 +9,26 @@ const eventSchema = new mongoose.Schema({
     required: true,
     type: Date,
   },
+  duration: {
+    required: true,
+    type: Number,
+  },
   description: {
     required: true,
     type: String,
   },
+  startTime: {
+    required: true,
+    type: String
+  },
+  endTime: {
+    required: true,
+    type: String
+  },
   location: {
     type: {
       type: String,
-      enum: ['Point'],
+      enum: ["Point"],
       required: true,
     },
     coordinates: {
@@ -40,9 +52,15 @@ const eventSchema = new mongoose.Schema({
     required: true,
     type: [String],
   },
+  imageURL: {
+    type: String,
+  },
+  key: {
+    type: String,
+  }
 });
 
 // Create a 2dsphere index for geospatial queries
-eventSchema.index({ location: '2dsphere' });
+eventSchema.index({ location: "2dsphere" });
 
-module.exports = mongoose.model('Event', eventSchema);
+module.exports = mongoose.model("Event", eventSchema);

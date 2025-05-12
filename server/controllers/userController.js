@@ -5,7 +5,11 @@ const { generateToken } = require("../controllers/authController")
 
 const getAllUsers = async (req, res) => {
   if (req.auth.role != 'admin') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -28,9 +32,10 @@ const getAllUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401).json({
+    res.status(401).json(
+    {
       status: "failure",
-      message: "Unauthorized retrieval of user.",
+      message: "Invalid authorization token for request.",
       data: {}
     });
     return;
@@ -56,7 +61,11 @@ const getUserById = async (req, res) => {
 
 const addEventToUser = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -89,7 +98,11 @@ const addEventToUser = async (req, res) => {
 
 const removeEventFromUser = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   
@@ -141,10 +154,13 @@ const getUserByEmail = async (req, res) => {
 
 const editUserDetails = async (req, res) => {
   if (req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
-
   try {
     const userbyID = await User.findOneAndUpdate({_id: req.params["id"]}, {$set: req.body}, {new: true}); //Doesn't catch invalid fields
     res.status(200).json({
@@ -163,7 +179,11 @@ const editUserDetails = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   if (req.auth.role != 'user' && req.auth.role != 'admin') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 

@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Pressable, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import axios, { AxiosResponse } from "axios";
@@ -54,31 +54,53 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.text}>
-          For returning users:
+      <View style={styles.formContainer}>
+        <Text style={styles.title}>
+          Login
         </Text>
-        <TextInput
-          placeholder="Email"
-          onChangeText={setEmail}
-          value={email}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextInput
-          placeholder="Password"
-          onChangeText={setPassword}
-          value={password}
-          secureTextEntry
-        />
-        <TouchableOpacity onPress={handleSignIn}>
-          <Text>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>EMAIL</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            onChangeText={setEmail}
+            value={email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>PASSWORD</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              onChangeText={setPassword}
+              value={password}
+              secureTextEntry
+            />
+          </View>
+          <Pressable>
+            <Text style={styles.forgotPassword}>Forgot your password?</Text>
+          </Pressable>
+        </View>
+        <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
+          <Text style={styles.signInButtonText}>
             Sign in
           </Text>
         </TouchableOpacity>
-        <Link href="/">
-          Don't have an account? Sign up
-        </Link>
+
+        <View style={styles.createAccountSection}>
+          <Text style={styles.createAccountLabel}>FIRST TIME HERE?</Text>
+          <Link style={styles.createAccountLink} href="/sign-up"> Create your account now </Link>
+        </View>
+
+        <View style={styles.skipSection}>
+          <Text style={styles.skipLabel}>DON'T WANNA MAKE AN ACCOUNT?</Text>
+          <Link style={styles.skipLink} href="/"> Continue to dashboard </Link>
+        </View>
         {/* Super special dev button */}
         {/* <Link href="/(tabs)" style={styles.text}>
           Skip this and go home
@@ -91,16 +113,88 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'white',
   },
-  content: {
+  formContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
+    marginTop: 60,
   },
-  text: {
-    color: 'black',
-    margin: 24,
-  }
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: '#F5F5F5',
+    padding: 16,
+    borderRadius: 8,
+    fontSize: 16,
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  profileImageContainer: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -15 }],
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 2,
+  },
+  profileImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
+  forgotPassword: {
+    color: '#666',
+    textDecorationLine: 'underline',
+    alignSelf: 'flex-end',
+    marginTop: 8,
+  },
+  signInButton: {
+    backgroundColor: 'black',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  signInButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  createAccountSection: {
+    marginTop: 40,
+  },
+  createAccountLabel: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  createAccountLink: {
+    color: '#666',
+    textDecorationLine: 'underline',
+  },
+  skipSection: {
+    marginTop: 40,
+  },
+  skipLabel: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  skipLink: {
+    color: '#666',
+    textDecorationLine: 'underline',
+  },
 });

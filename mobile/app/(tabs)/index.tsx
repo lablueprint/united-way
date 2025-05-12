@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'flex-start', 
+    alignItems: 'flex-start',
     gap: 24,
     padding: 16,
     paddingVertical: 72,
@@ -23,13 +23,24 @@ const styles = StyleSheet.create({
 });
 
 //get the user by id and then just take the registeredevents
-const user = 'Joy';
 export default function HomeScreen() {
+  const user = useSelector(
+    (state: {
+      auth: { userId: string; authToken: string; refreshToken: string };
+    }) => {
+      return {
+        userId: state.auth.userId,
+        authToken: state.auth.authToken,
+        refreshToken: state.auth.refreshToken,
+      };
+    }
+  );
 
+  console.log(`\nuser: ${user.userId}\nauth: ${user.authToken}\nrefresh: ${user.refreshToken}`)
   return (
-    <View style={styles.container} >
-      <Text style={styles.header}>Welcome, {user}</Text>
-      <WeekCalendar/>
-    </ View>
+    <View style={styles.container}>
+      <Text style={styles.header}>Welcome</Text>
+      <WeekCalendar />
+    </View >
   );
 }
