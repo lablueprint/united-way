@@ -4,8 +4,7 @@ import { EventTags } from "../_interfaces/EventInterfaces";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import '../_styles/EventCreator.css';
-import TestLogo from "@/../public/images/logo.jpeg"
-import PenLogo from "@/../public/images/pen.png"
+import { pen, logo } from '@/../public/EventCreator/EventCreator-index'
 
 interface EventCreatorProps {
     orgName: string;
@@ -247,7 +246,7 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
                 {/* Image selection */}
                 <div className="blankImage">
                     <div className="imagebox">
-                        <img className="penlogo" src={PenLogo.src} />
+                        <img className="penlogo" src={pen.src} />
                     </div>
 
                     <div className="leftBottom">
@@ -300,7 +299,7 @@ export default function EventCreator({ orgName, changeState }: EventCreatorProps
                 {/* Organization Info */}
                 <div className="orgInfoBox">
                     <div className="orgLogo">
-                        <img src={TestLogo.src} />
+                        <img src={logo.src} />
                     </div>
                     <div className="flexIt">
                         <h4>
