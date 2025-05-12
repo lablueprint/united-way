@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   env: {
     IP_ADDRESS: "",
     PORT: "",
-  },
+  }
 };
 
 export default nextConfig;
