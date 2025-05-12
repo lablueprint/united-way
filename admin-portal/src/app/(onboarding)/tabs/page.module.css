@@ -29,15 +29,17 @@
   padding: 1.25rem 0;
 }
 
-.logo-name {
-  font-family: "Barlow Condensed";  
+.logoName {
+  font-family: "Barlow Condensed";
   text-transform: uppercase;
   font-size: 1.5rem;
   letter-spacing: -2%;
   align-self: center;
 }
 
-.header, .description, .pageTitle {
+.header,
+.description,
+.pageTitle {
   color: #FFFFFF;
 }
 
@@ -84,7 +86,8 @@
   gap: 1.125rem;
 }
 
-.continueButton, .skipButton {
+.continueButton,
+.skipButton {
   padding: 0.5rem 2rem;
   font-size: 1.5rem;
   text-transform: uppercase;
