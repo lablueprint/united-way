@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import styles from '../_styles/NavBar.module.css';
+import styles from '../_styles/NavBar.css';
 import Image from 'next/image'
 
 export default function NavigationBar() {
