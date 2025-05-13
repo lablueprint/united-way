@@ -1,17 +1,19 @@
 "use client";
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link';
+import BetterEventEditor from "../../../_components/BetterEventEditor";
 
 const Event = () => {
   const params = useParams();
   return (
-    <div>
-        <p>
+    <>
+        <BetterEventEditor />
+        <div>
             Event ID: {params.id}
-        </p>
+        </div>
         <br/>
         <Link href="/event">Go Back</Link>
-    </div>
+    </>
   )
 }
 

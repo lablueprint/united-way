@@ -5,9 +5,7 @@ import { RootState } from '../_interfaces/AuthInterfaces';
 import { EventData } from '../_interfaces/EventInterfaces'
 
 import Image from 'next/image'
-import pencil from '../_styles/_images/border_color.svg';
-import publish from '../_styles/_images/publish.svg';
-import location from '../_styles/_images/location_on.svg';
+import { pencil, publish, location } from '../../../public/TaskList/TaskList-index'
 import '../_styles/TaskList.css';
 
 
