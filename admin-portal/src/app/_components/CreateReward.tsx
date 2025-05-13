@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../_interfaces/AuthInterfaces";
 import "../_styles/createReward.css";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 const CreateReward = () => {
   const [name, setName] = useState("");
@@ -118,11 +119,14 @@ const CreateReward = () => {
         <div className="header-left">
           <img src="/images/udub.png" alt="Logo" />
           <div className="header-nav">
-            <button className="header-nav-btn">Home</button>
-            <button className="header-nav-btn">Events</button>
-            <button className="header-nav-btn active">Rewards</button>
+            <button className="header-nav-btn" onClick={() => router.push("/landing")}>Home </button>
+            <button className="header-nav-btn" onClick={() => router.push("/events")}>Events</button>
+            <button className="header-nav-btn active" onClick={() => router.push("/rewards")}>Rewards</button>
           </div>
         </div>
+
+
+
       </div>
       <div className="create-reward-page">
         <div className="create-reward-right">

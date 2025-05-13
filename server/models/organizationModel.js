@@ -35,6 +35,7 @@ const organizationSchema = new mongoose.Schema({
       image: { type: String, required: true },
       description: { type: String, required: true },
       directions: { type: String, required: true },
+      assignedEvents: { type: [String], required: true},
     },
   ],
   transactions: [String], // Array of transaction IDs
