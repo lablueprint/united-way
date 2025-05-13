@@ -51,6 +51,33 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
                 io.to(eventRoom).emit('announcement', activity);
             }, activityStartTimeDiff);
         }
+    } else if (activity.type === "poll") {
+        // Add entry in eventRooms data structure if it doesn't exist
+        if (!eventRooms[eventRoom]) {
+            eventRooms[eventRoom] = {};
+        }
+        if (!eventRooms[eventRoom].pollResponses) {
+            eventRooms[eventRoom].pollResponses = {};
+        }
+        // Initialize poll responses for the activity
+        eventRooms[eventRoom].pollResponses[activity._id.toString()] = activity.content.map((question) => {
+            return {
+                options: new Array(question.options.length).fill(null).map(() => ({
+                    count: 0
+                }))
+            }
+        });
+        if (activityStartTimeDiff > 0) {
+            setTimeout(() => {
+                // Let all clients in the event room know the activity is starting
+                io.to(eventRoom).emit('poll', activity);
+            }, activityStartTimeDiff);
+        }
+        if (activityEndTimeDiff > 0) {
+            setTimeout(() => {
+                io.to(eventRoom).emit('poll results', eventRooms[eventRoom].pollResponses[activity._id.toString()]);
+            }, activityEndTimeDiff);
+    }
     } else {
         if (activityStartTimeDiff > 0) {
             setTimeout(() => {
@@ -132,6 +159,8 @@ const joinRaffle = (socket, eventDetails, eventRooms) => {
     // Add entry in eventRooms data structure if it doesn't exist
     if (!eventRooms[eventRoom]) {
         eventRooms[eventRoom] = {};
+    }
+    if (!eventRooms[eventRoom].usedRaffleNumbers) {
         eventRooms[eventRoom].usedRaffleNumbers = new Set();
     }
     // TODO: Decide if there is a limit to the number of people who can join a raffle
@@ -144,6 +173,18 @@ const joinRaffle = (socket, eventDetails, eventRooms) => {
     socket.raffleNumber = raffleNumber;
     socket.emit('new raffle number', { raffleNumber });
     console.log(`Generated raffle number: ${raffleNumber}`);
+}
+
+const submitPoll = (socket, responses, poll, eventRooms) => {
+    const eventRoom = poll.eventID.toString();
+    console.log(eventRooms[eventRoom]);
+    // Add to poll response counts
+    for (let i = 0; i < responses.length; i++) {
+        const response = responses[i] - 1; // Adjust for 0-based index
+        eventRooms[eventRoom].pollResponses[poll._id][i].options[response].count += 1;
+    }
+    console.log(`Client ${socket.id} submitted poll responses: ${responses}`);
+    console.log(`Poll responses for event ${eventRoom}:`, JSON.stringify(eventRooms[eventRoom].pollResponses[poll._id]));
 }
 
 export const interactWithAttendee = (socket, eventRooms) => {
@@ -174,5 +215,10 @@ export const interactWithAttendee = (socket, eventRooms) => {
     // Listen for raffle join requests
     socket.on('join raffle', (eventDetails) => {
         joinRaffle(socket, eventDetails, eventRooms);
+    });
+
+    // Listen for poll submission
+    socket.on('submit poll', (responses, poll) => {
+        submitPoll(socket, responses, poll, eventRooms);
     });
 }

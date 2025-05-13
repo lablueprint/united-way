@@ -80,6 +80,23 @@ export default function EventScanner() {
           setHasNavigated(false);
         }} />
       )}
+      <Button
+        title={'Scan'}
+        onPress={() => {
+          if (scanned || hasNavigated) return;
+          setScanned(true);
+          setHasNavigated(true); // LOCK so you don’t scan again until reset
+          router.push({
+            pathname: `/events/[id]`,
+            params:
+            {
+              id: '67e97896bc526b5f26311365',
+              origin: '/events/scanner'
+            }
+          });
+        }
+        }
+      />
     </View>
   );
 }

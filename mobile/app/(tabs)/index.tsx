@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { useSelector } from "react-redux";
+import Poll from "../_components/Poll";
 
 const styles = StyleSheet.create({
   container: {

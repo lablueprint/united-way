@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
 import { io, Socket } from "socket.io-client";
 import { useRef } from 'react';
+import Poll from '../../_components/Poll';
 
 interface EventData {
   _id: string;
@@ -49,6 +50,8 @@ export default function EventDetails() {
   const [organizationName, setOrganizationName] = useState("");
   const [joinedRaffles, setJoinedRaffles] = useState(false);
   const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
+  const [pollVisible, setPollVisible] = useState(true);
+  const [pollId, setPollId] = useState<string | null>('681450cd93079c13520ccbf7');
 
   const { id, origin } = useLocalSearchParams();
   const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
@@ -99,7 +102,6 @@ export default function EventDetails() {
 
   useFocusEffect(
     useCallback(() => {
-      console.log("hello world");
       setBackLink(origin as string);
 
       return () => {
@@ -211,6 +213,11 @@ export default function EventDetails() {
     }
   };
 
+  const closePoll = () => {
+    setPollVisible(false);
+    setPollId(null);
+  }
+
   const listenForEventUpdates = () => {
     const socket = socketRef.current;
     // Listen for messages from the server
@@ -230,6 +237,10 @@ export default function EventDetails() {
       console.log('Announcement:', data.content[0].text);
       Alert.alert('Announcement', data.content[0].text);
     })
+    socket?.on('poll', (data) => {
+      setPollVisible(true);
+      setPollId(data._id);
+    });
     socket?.on('activity start', (data) => {
       console.log('Activity started:', data.type);
       Alert.alert('Activity started', `An activity of type ${data.type} has started.`);
@@ -374,6 +385,23 @@ export default function EventDetails() {
           </View>
         </View>
         {(registeredUsers).includes(user.userId) ?
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={pollVisible}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+              setPollVisible(!pollVisible);
+            }}
+          >
+            <View style={styles.modalOverlay}>
+                {pollId && socketRef.current && <Poll activityId={pollId} socket={socketRef.current} closePoll={closePoll} />}
+            </View>
+          </Modal>
+          :
+          <></>
+        }
+        {(registeredUsers).includes(user.userId) ?
           <View style={styles.section}>
             <Text style={styles.subheader}>Raffle</Text>
             <View style={styles.raffleContain}>
@@ -394,6 +422,7 @@ export default function EventDetails() {
           </View>
           :
           <></>
+          
         }
 
       </ScrollView>
@@ -525,5 +554,10 @@ const styles = StyleSheet.create({
   },
   buttonWrap: {
     flexShrink: 0,
-  }
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

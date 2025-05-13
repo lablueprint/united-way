@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Button } from 'react-native';
 import axios from 'axios';
+import { io, Socket } from "socket.io-client";
 
 interface PollCardProps {
     activityId: string;
+    socket: Socket;
+    closePoll: () => void;
 }
 
 // Note: the Polls take in a Poll activity id. 
-export default function Poll({ activityId }: PollCardProps) {
+export default function Poll({ activityId, socket, closePoll }: PollCardProps) {
     const [poll, setPoll] = useState<PollInterface>();
     const [questionIndex, setQuestionIndex] = useState<number>(0); // tracking question index for each poll
+    const [responses, setResponses] = useState<(number | null)[]>([]);
 
     interface Choices {
         id: number;
@@ -34,17 +38,25 @@ export default function Poll({ activityId }: PollCardProps) {
                 `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/${activityId}`
             );
             setPoll(data.data);
+            setResponses(new Array(data.data.content.length).fill(null));
         } catch (error) {
             console.error("Error fetching poll:", error);
         }
     };
 
-    const handleVote = async (pollId: string, optionId: number) => {
-        console.log(`Voting on poll ${pollId} for option ${optionId}`);
-
+    const handleVote = (pollId: string, optionId: number) => {
         // TODO: Integration with the behavior in the backend to compute votes.
         // Take a look at the structure of a poll.
         // The backend should change the number of votes for a given choice within the object.
+        const newResponses = [...responses];
+        newResponses[questionIndex] = optionId;
+        setResponses(newResponses);
+        console.log(responses);
+    };
+
+    const handleSubmit = () => {
+        socket.emit('submit poll', responses, poll);
+        closePoll();
     };
 
     const handlePrevious = () => {
@@ -71,7 +83,7 @@ export default function Poll({ activityId }: PollCardProps) {
                     {poll.content[questionIndex]?.options.map((option) => (
                         <View key={option.id} style={styles.optionContainer}>
                             <Text style={styles.optionText}>
-                                {option.text} ({option.count} votes)
+                                {option.text} {responses[questionIndex] === option.id ? '✓' : ''}
                             </Text>
                             <Button title={option.text} onPress={() => handleVote(poll._id, option.id)} />
                         </View>
@@ -90,6 +102,12 @@ export default function Poll({ activityId }: PollCardProps) {
                             disabled={questionIndex === poll.content.length - 1}
                         />
                     </View>
+
+                    <Button
+                        title="Submit"
+                        onPress={() => {handleSubmit()}}
+                        disabled={responses.some((response) => response === null)}
+                    />
 
                     <View style={styles.progressBarContainer}>
                         <View
