@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
-import EventCreator from "./EventCreator";
+import EventEditor from "./EventEditor";
+import TaskList from "./TaskList";
 import { EventData } from '../_interfaces/EventInterfaces';
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
@@ -108,40 +109,43 @@ export default function OrganizationProfile() {
 }
 
   return (
-    <div>
+    <>
+      <div>
       <h1>Organization Profile</h1>
       <div>
         <h2>Events</h2>
         <div>
-          {eventIds.map((id: string) => {
-            return (
-              <EventCard id={id} key={id} removeFromList={removeFromList} />
-            );
-          })}
+        {eventIds.map((id: string) => {
+          return (
+          <EventCard id={id} key={id} orgName={orgName} removeFromList={removeFromList} />
+          );
+        })}
         </div>
       </div>
       <div>
         <h2>Drafts</h2>
         <div>
-          {draftIds.map((id: string) => {
-            return (
-              <EventCard id={id} key={id} removeFromList={removeFromList} />
-            );
-          })}
+        {draftIds.map((id: string) => {
+          return (
+          <EventCard id={id} key={id} orgName={orgName} removeFromList={removeFromList} />
+          );
+        })}
         </div>
       </div>
       <button onClick={async () => {
-        // Create a new blank, event
+        // Create a new blank event
         const _id = await createBlankEvent()
 
         if (_id != "") {
-          setIsEditing(!isEditing)}
-          setEditingId(_id);
+        setIsEditing(!isEditing)
+        setEditingId(_id);
         }
-      }>
+      }}>
         Create Event
       </button>
-      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} eventId={editingId}/>}
-    </div>
+      {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={editingId} justCreated={true}/>}
+      </div>
+      <TaskList />
+      </>
   );
 }

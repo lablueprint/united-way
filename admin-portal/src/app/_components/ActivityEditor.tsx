@@ -17,6 +17,7 @@ interface ActivityEditorProps {
   onCancel?: () => void;
   onDeleted?: (id: string) => void; 
   refresh?: number;
+  isDraft: boolean;
 }
 
 export default function ActivityEditor({
@@ -26,6 +27,7 @@ export default function ActivityEditor({
   onCancel,
   onDeleted,
   refresh,
+  isDraft,
 }: ActivityEditorProps) {
   const [activity, setActivity] = useState<Activity | null>(null);
   const [start, setStart]       = useState<Value>(new Date());
@@ -50,45 +52,46 @@ export default function ActivityEditor({
       }
     }
 
-    async function createActivity() {
-      try {
-        const defaultContent =
-          createType === "announcement"
-            ? [{ text: "New Announcement" }]
-            : createType === "poll"
-              ? [{
-                  question: "New Poll Question",
-                  options: [{ id: 0, text: "Choice 1", count: 0 }],
-                }]
-              : [];
-
-        const res = await axios.post<{ data: Activity }>(
-          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
-          {
-            eventID:  eventId,
-            type:     createType,
-            content:  defaultContent,
-            timeStart: new Date(),
-            timeEnd:   new Date(),
-            active:    true,
-          }
-        );
-        const newAct = res.data.data;
-        setActivity(newAct);
-        setStart(new Date(newAct.timeStart));
-        setEnd(new Date(newAct.timeEnd));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     if (createType && !didCreateRef.current) {
       didCreateRef.current = true;
-      createActivity();
+      createActivity(createType);
     } else if (id) {
       fetchActivity();
     }
   }, [eventId, createType, id, refresh]);
+
+  async function createActivity(createType: "poll" | "announcement" | "raffle") {
+    try {
+      const defaultContent =
+        createType === "announcement"
+          ? [{ text: "New Announcement" }]
+          : createType === "poll"
+            ? [{
+                title: "Untitled Page",
+                question: "New Poll Question",
+                options: [{ id: 0, text: "Choice 1", count: 0 }],
+              }]
+            : [];
+
+      const res = await axios.post<{ data: Activity }>(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
+        {
+          eventID:  eventId,
+          type:     createType,
+          content:  defaultContent,
+          timeStart: new Date(),
+          timeEnd:   new Date(),
+          active:    true,
+        }
+      );
+      const newAct = res.data.data;
+      setActivity(newAct);
+      setStart(new Date(newAct.timeStart));
+      setEnd(new Date(newAct.timeEnd));
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   const handleDelete = async () => {
     if (!activity) return;
@@ -159,6 +162,8 @@ export default function ActivityEditor({
               activityId={activity._id}
               timeStart={start as Date}
               timeEnd={end as Date}
+              isDraft={isDraft}
+              createPoll={() => createActivity("poll")}
             />
           </>
         )}

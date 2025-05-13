@@ -7,6 +7,7 @@ import type { Activity } from "../_interfaces/EventInterfaces";
 
 interface ActivityDropdownProps {
   eventId: string;
+  isDraft: boolean;
 }
 
 const sections = [
@@ -16,7 +17,7 @@ const sections = [
   { title: "Rewards",       type: "quiz" },
 ];
 
-export default function ActivityDropdown({ eventId }: ActivityDropdownProps) {
+export default function ActivityDropdown({ eventId, isDraft }: ActivityDropdownProps) {
   const [activities,     setActivities]   = useState<Activity[]>([]);
   const [refresh,        setRefresh]      = useState(0);
   const [creatingType,   setCreatingType] = useState<string | null>(null);
@@ -48,6 +49,7 @@ export default function ActivityDropdown({ eventId }: ActivityDropdownProps) {
           setSelectedId(null);
           reload();
         }}
+        isDraft={isDraft}
       />
     );
   }
