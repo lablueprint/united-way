@@ -1,19 +1,16 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
-import axios, { AxiosResponse } from "axios";
-import EventModal from './EventModal';
-import { EventData } from '../_interfaces/EventInterfaces';
-import { useSelector } from 'react-redux';
-import { RootState } from '../_interfaces/AuthInterfaces';
-import EventEditor from './EventEditor';
+import EventEditor from "./EventEditor";
 import useApiAuth from '../_hooks/useApiAuth';
 import { RequestType, Request } from '../_interfaces/RequestInterfaces';
+import { EventData } from '../_interfaces/EventInterfaces';
 
 interface EventCardProps {
     id: string;
     removeFromList: (id: string) => void;
+    orgName: string;
 }
 
-export default function EventCard({ id, removeFromList }: EventCardProps) {
+export default function EventCard({ id, removeFromList, orgName }: EventCardProps) {
     const [showButtons, setShowButtons] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -22,6 +19,10 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
         _id: "",
         name: "",
         date: new Date(),
+        draft: true,
+        draftList: [],
+        startTime: "",
+        endTime: "",
         description: "",
         location: {
             type: "",
@@ -78,26 +79,10 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
 
     useEffect(() => {
         const fetchData = async () => {
-            const data = await getEventById();
-            setEventData(data);
+            setEventData(await getEventById());
         };
         fetchData();
     }, []);
-
-    const handleEditClick = (e: MouseEvent<HTMLButtonElement>) => {
-        // Show EditCard modal
-        e.stopPropagation();
-        setIsEditing(!isEditing);
-    };
-    const handleCloseClick = () => {
-        // Close EditCard modal
-        setIsEditing(false);
-    };
-
-    const handleCardClick = () => {
-        // Show EventModal
-        setShowModal(!showModal);
-    }
 
     return (
         // Show event name, show buttons on hover
@@ -105,29 +90,17 @@ export default function EventCard({ id, removeFromList }: EventCardProps) {
             <div
                 onMouseEnter={() => setShowButtons(true)}
                 onMouseLeave={() => setShowButtons(false)}
-                onClick={() => handleCardClick()}
             >
-                <p>{eventData?.name}</p>
+                <p>{eventData.name}</p>
                 {showButtons && (
                     <>
                         <button onClick={deleteEvent}>Delete</button>
-                        <button onClick={handleEditClick}>Edit</button>
+                        <button onClick={() => { setIsEditing(!isEditing); }}>Edit</button>
                     </>
                 )}
             </div>
 
-            {showModal && (
-                <>
-                    <EventModal
-                        _id={eventData?._id}
-                        name={eventData?.name}
-                        description={eventData?.description}
-                        organizerId={eventData?.organizerId}
-                    />
-                </>
-            )}
-
-            {isEditing && <EventEditor id={id} handleCloseClick={handleCloseClick} handleEditEvent={editEvent} />}
+            {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={id} justCreated={false} />}
         </div>
     );
 }

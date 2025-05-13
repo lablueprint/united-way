@@ -30,7 +30,7 @@ function useApiAuth() {
                 }
             })
             const { data } = response.data;
-            dispatch(refresh({
+            await dispatch(refresh({
                 authToken: data.accessToken
             }));
 
