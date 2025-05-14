@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { EventTags } from "../_interfaces/EventInterfaces";
-import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import QRCode from 'react-qr-code';
 import '../_styles/EventEditor.css';
 import { pen, logo } from '../../../public/EventEditor/EventEditor-index'
-import { AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import { RequestType } from '../_interfaces/RequestInterfaces';
@@ -46,8 +44,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
     // This timer will start when the user stops typing and reset once the user starts typing again
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-    const sendRequest = useApiAuth();
+    const [org, sendRequest] = useApiAuth();
 
     const timeZones = [
         { label: "Pacific Time (PT) America/Los Angeles", value: "PT" },

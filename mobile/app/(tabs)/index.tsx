@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { useSelector } from 'react-redux';
-import axios, { AxiosResponse } from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import WeekCalendar from '../_components/WeekCalendar';
 

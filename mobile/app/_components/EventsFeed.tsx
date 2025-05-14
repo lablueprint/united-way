@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  ActivityIndicator,
 } from "react-native";
-import axios, { AxiosResponse } from "axios";
 import { useRouter } from "expo-router";
-import { useSelector } from "react-redux";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 // Event interface from schema
 interface Event {
@@ -87,25 +87,16 @@ export default function EventsFeed() {
   //for filtering events
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const router = useRouter();
-  const user = useSelector((state) => ({
-    userId: state.auth.userId,
-    authToken: state.auth.authToken,
-    refreshToken: state.auth.refreshToken,
-  }));
+  const [user, sendRequest] = useApiAuth();
 
   // Fetch all events at once
   const getEvents = async (): Promise<Event[]> => {
     try {
-      const response: AxiosResponse<{ data: Event[] }> = await axios.get(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/`,
-        {
-          headers: {
-            Authorization: `Bearer ${user.authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return response.data.data;
+      const body = {};
+      const requestType = RequestType.GET;
+      const endpoint = "events/";
+      const data = await sendRequest({ body, requestType, endpoint });
+      return data;
     } catch (err) {
       return [];
     }

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios, { AxiosResponse } from "axios";
 import { View, Text, Image, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
+
+import useApiAuth from '@/app/_hooks/useApiAuth';
+import { RequestType } from '@/app/_interfaces/RequestInterfaces';
 
 interface UserDetails {
     name: string,
@@ -17,30 +18,25 @@ interface UserDetails {
 export default function Profile() {
     const [userDetails, setUserDetails] = useState<UserDetails>({ name: "Subaru", phoneNumber: "", email: "", password: "", profilePicture: "", dateJoined: "" });
     const router = useRouter();
-
-    const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const [user, sendRequest] = useApiAuth();
 
     const fetchUserDetails = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${user.authToken}`,
-                    },
-                }
-            );
-            const { data } = response.data;
+            const body = {};
+            const endpoint = "users/:id";
+            const requestType = RequestType.GET
+            const data = await sendRequest({ body, endpoint, requestType })
             setUserDetails(data);
         } catch (err) {
             console.log('Error catching event details from event id:', err);
             return err;
         }
     }
+
     useFocusEffect(useCallback(() => {
+        console.log("in the useCallback")
         fetchUserDetails();
     }, []));
-
-    console.log(user.authToken);
 
     const navigateTo = (route: string) => {
         if (userDetails) {

@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import axios, { AxiosResponse } from "axios";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 interface Announcement {
   text: string;
@@ -15,6 +17,7 @@ interface AnnouncementEditorProps {
 export default function AnnouncementEditor({ activityId, timeStart, timeEnd }: AnnouncementEditorProps) {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isModified, setIsModified] = useState(false);
+  const [org, sendRequest] = useApiAuth();
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -24,12 +27,12 @@ export default function AnnouncementEditor({ activityId, timeStart, timeEnd }: A
     fetchAnnouncements();
   }, [activityId]);
 
-  const getActivityById = async (activityID: string) => {
+  const getActivityById = async (activityId: string) => {
     try {
-      const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID}`
-      );
-      return response.data.data;
+      const body = {};
+      const endpoint = `activities/${activityId}`;
+      const requestType = RequestType.GET;
+      return await sendRequest({ body, endpoint, requestType });
     } catch (err) {
       console.log(err);
       return { content: [] };
@@ -49,7 +52,7 @@ export default function AnnouncementEditor({ activityId, timeStart, timeEnd }: A
   };
 
   const deleteAnnouncement = (index: number) => {
-    if (announcements.length === 1) return; 
+    if (announcements.length === 1) return;
     const updated = announcements.filter((_, i) => i !== index);
     setAnnouncements(updated);
     setIsModified(true);
@@ -57,10 +60,14 @@ export default function AnnouncementEditor({ activityId, timeStart, timeEnd }: A
 
   const saveAnnouncements = async () => {
     try {
-      await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        { content: announcements, timeStart, timeEnd }
-      );
+      const body = {
+        content: announcements,
+        timeStart,
+        timeEnd
+      };
+      const endpoint = `activities/${activityId}`;
+      const requestType = RequestType.PATCH;
+      await sendRequest({ body, endpoint, requestType });
       setIsModified(false);
     } catch (err) {
       console.log(err);

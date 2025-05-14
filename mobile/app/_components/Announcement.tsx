@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
-import axios from "axios";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 interface AnnouncementProps {
   activityId: string;
@@ -8,6 +10,7 @@ interface AnnouncementProps {
 
 export default function Announcement({ activityId }: AnnouncementProps) {
   const [announcement, setAnnouncement] = useState<AnnouncementData>();
+  const [user, sendRequest] = useApiAuth();
 
   interface AnnouncementData {
     eventID: string;
@@ -19,10 +22,11 @@ export default function Announcement({ activityId }: AnnouncementProps) {
 
   const fetchAnnouncement = async () => {
     try {
-      const { data } = await axios.get(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/${activityId}`,
-      );
-      setAnnouncement(data.data);
+      const body = {};
+      const requestType = RequestType.GET;
+      const endpoint = `activities/${activityId}`;
+      const data = await sendRequest({ body, requestType, endpoint });
+      setAnnouncement(data);
     } catch (error) {
       console.error("Error fetching announcements:", error);
     }

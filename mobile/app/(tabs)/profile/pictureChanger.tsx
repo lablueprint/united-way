@@ -1,32 +1,27 @@
 "use client"
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Image } from 'react-native';
-import axios, { AxiosResponse } from "axios";
-import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
+
+import useApiAuth from '@/app/_hooks/useApiAuth';
+import { RequestType } from '@/app/_interfaces/RequestInterfaces';
 
 
 export default function ProfilePictureEditor() {
-    const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
     const [pictureLink, setPictureLink] = useState<string>(""); //find blank pfp pic link
     const router = useRouter();
+    const [user, sendRequest] = useApiAuth();
+
 
     const handleSubmit = async (profilePicture: string) => {
         try {
-            const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-                {
-                    profilePicture: profilePicture,
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${user.authToken}`,
-                        'Content-Type': "application/json"
-                    },
-                }
-            );
-            const { data } = response.data.data.profilePicture;
-            setPictureLink(data);
-            console.log('PFP updated successfully', data);
+            const requestType = RequestType.PATCH;
+            const body = {
+                profilePicture: profilePicture,
+            };
+            const endpoint = `users/:id`
+            const data = await sendRequest({ requestType, body, endpoint });
+            setPictureLink(data.profilePicture);
         } catch (err) {
             console.error('Error updating PFP:', err);
         }

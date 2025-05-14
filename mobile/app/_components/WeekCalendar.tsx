@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Button, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, Touchable, Image } from 'react-native';
-import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
-import axios from 'axios';
-import { AxiosResponse } from 'axios';
+
+import useApiAuth from '../_hooks/useApiAuth';
+import { RequestType } from '../_interfaces/RequestInterfaces';
 
 const styles = StyleSheet.create({
   container: {
@@ -125,12 +125,12 @@ const getMonthAbbreviation = (date: Date) => {
 
 // start on Sunday
 export default function WeekCalendar() {
-  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } });
   const [registeredEvents, setRegisteredEvents] = useState<EventData[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [weekOffset, setWeekOffset] = useState(0);
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
+  const [user, sendRequest] = useApiAuth();
 
   const week = useMemo(() => {
     const todayDate = new Date();
@@ -157,24 +157,18 @@ export default function WeekCalendar() {
   useEffect(() => {
     const getRegisteredEvents = async () => {
       try {
-        const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`, {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
-          },
-        });
+        const body = {};
+        const requestType = RequestType.GET;
+        const endpoint = "users/:id";
+        const data = await sendRequest({ body, requestType, endpoint });
         // ^ gives event ids
-        const eventRequests = response.data.data.registeredEvents.map((eventId: string) => axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${user.authToken}`,
-              'Content-Type': "application/json"
-            },
-          }
-        )
-        );
+        const eventResponses = data.registeredEvents.map(async (eventId: string) => {
+          const body = {};
+          const endpoint = `events/${eventId}`;
+          const requestType = RequestType.GET;
+          return await sendRequest({ body, endpoint, requestType });
+        });
 
-        const eventResponses = await Promise.all(eventRequests);
         const fullEvents = eventResponses.map((res) => res.data.data).filter(Boolean);
         setRegisteredEvents(fullEvents);
       } catch (err) {

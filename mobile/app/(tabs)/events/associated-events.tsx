@@ -2,8 +2,10 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import axios, { AxiosResponse } from 'axios';
-import { useSelector } from 'react-redux';
+
+import useApiAuth from '@/app/_hooks/useApiAuth';
+import { RequestType } from '@/app/_interfaces/RequestInterfaces';
+
 interface EventData {
   _id: string;
   name: string;
@@ -21,8 +23,8 @@ interface EventData {
 // Exclude ID of original one you're clicking more of 
 export default function associatedEvents() {
   const { id, exclude } = useLocalSearchParams();
-  const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   const router = useRouter();
+  const [user, sendRequest] = useApiAuth();
 
 
   const [associatedEvents, setAssociatedEvents] = useState<EventData[]>([]);
@@ -30,29 +32,18 @@ export default function associatedEvents() {
   useEffect(() => {
     const getAssociatedEvents = async () => {
       try {
-        const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/${id}/events`, {
-          headers: {
-            'Authorization': `Bearer ${org.authToken}`,
-            'Content-Type': "application/json"
-          },
+        const body = {};
+        const endpoint = `orgs/${id}/events`;
+        const requestType = RequestType.GET;
+        const data = await sendRequest({ body, endpoint, requestType });
+        const filteredEventIds = data.eventIds.filter((eventId: string) => eventId !== exclude);
+        const fullEvents = filteredEventIds.map(async (eventId: string) => {
+          const body = {};
+          const endpoint = `events/${eventId}`;
+          const requestType = RequestType.GET
+          await sendRequest({ body, endpoint, requestType });
         });
-        const { data: eventIds } = response.data;
-        const filteredEventIds = eventIds.filter((eventId: string) => eventId !== exclude);
-        const eventRequests = filteredEventIds.map((eventId: string) =>
-          axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${org.authToken}`,
-                'Content-Type': "application/json"
-              },
-            }
-          )
-        );
-
-        const eventResponses = await Promise.all(eventRequests);
-        const fullEvents = eventResponses.map((res) => res.data.data);
         setAssociatedEvents(fullEvents);
-
       } catch (err) {
         console.error(err);
       }

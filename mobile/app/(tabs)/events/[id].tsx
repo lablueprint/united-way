@@ -1,10 +1,12 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import axios, { AxiosResponse } from 'axios';
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
+
+import useApiAuth from '@/app/_hooks/useApiAuth';
+import { RequestType } from '@/app/_interfaces/RequestInterfaces';
+
 interface EventData {
   _id: string;
   name: string;
@@ -19,6 +21,8 @@ interface EventData {
   registeredUsers: string[];
   // activities: Activity[];
 }
+
+
 
 export default function EventDetails() {
   // Temporary Duration
@@ -46,18 +50,15 @@ export default function EventDetails() {
   const [organizationName, setOrganizationName] = useState("");
 
   const { id, origin } = useLocalSearchParams();
-  const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+
+  const [user, sendRequest] = useApiAuth();
 
   const getEventDetails = async () => {
     try {
-      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${org.authToken}`,
-          'Content-Type': "application/json"
-        },
-      });
-      const { data } = response.data;
+      const body = {};
+      const endpoint = `events/${id}`
+      const requestType = RequestType.GET;
+      const data = await sendRequest({ requestType, endpoint, body });
       setEventData({
         ...data,
         date: new Date(data.date)
@@ -95,16 +96,12 @@ export default function EventDetails() {
 
   const addEventToUser = async (eventId: string) => {
     try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/addEvent`,
-        {
-          newEvent: eventId,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
-          },
-        });
+      const body = {
+        newEvent: eventId,
+      };
+      const endpoint = `users/:id/addEvent`;
+      const requestType = RequestType.PATCH;
+      await sendRequest({ requestType, endpoint, body });
     } catch (err) {
       console.error(err);
     }
@@ -112,17 +109,12 @@ export default function EventDetails() {
 
   const addUserToEvent = async (userId: string) => {
     try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventData._id}/addUser`,
-        {
-          newUser: userId,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
-          },
-        }
-      );
+      const body = {
+        newUser: userId,
+      };
+      const endpoint = `events/${eventData._id}/addUser`;
+      const requestType = RequestType.PATCH;
+      await sendRequest({ requestType, endpoint, body });
     } catch (err) {
       console.error(err);
     }
@@ -131,17 +123,12 @@ export default function EventDetails() {
 
   const removeUserFromEvent = async (userId: string) => {
     try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventData._id}/removeUser`,
-        {
-          userId: userId,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
-          },
-        }
-      );
+      const body = {
+        userId: userId,
+      };
+      const endpoint = `events/${eventData._id}/removeUser`;
+      const requestType = RequestType.PATCH;
+      await sendRequest({ requestType, endpoint, body });
     } catch (err) {
       console.error(err);
     }
@@ -149,17 +136,12 @@ export default function EventDetails() {
 
   const removeEventFromUser = async (eventId: string) => {
     try {
-      await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}/removeEvent`,
-        {
-          eventId: eventId,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': "application/json"
-          },
-        }
-      );
+      const body = {
+        eventId: eventId,
+      };
+      const endpoint = "users/:id/removeEvent";
+      const requestType = RequestType.PATCH;
+      await sendRequest({ requestType, endpoint, body });
     } catch (err) {
       console.error(err);
     }
@@ -192,11 +174,12 @@ export default function EventDetails() {
       try {
         if (!eventData.organizerID) return;
 
-        const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/orgs/filtered`, {
+        const requestType = RequestType.POST;
+        const endpoint = "orgs/filtered";
+        const body = {
           _id: eventData.organizerID,
-        });
-
-        const { data } = response.data;
+        };
+        const data = await sendRequest({ requestType, endpoint, body })
         const orgName = data[0]?.name;
         setOrganizationName(orgName || 'Unknown Organization');
       } catch (err) {

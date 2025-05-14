@@ -1,12 +1,12 @@
 "use client"
 import React, { useState, useRef, useCallback } from 'react';
 import { View, Text, TextInput, Image, Animated, Easing, Alert, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
-import axios, { AxiosResponse } from "axios";
-import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+
+import useApiAuth from '@/app/_hooks/useApiAuth';
+import { RequestType } from '@/app/_interfaces/RequestInterfaces';
 
 interface UserDetails {
   name: string,
@@ -23,7 +23,6 @@ interface UserDetails {
 
 export default function ProfileEditor() {
   const [userDetails, setUserDetails] = useState<UserDetails>({ name: "", phoneNumber: "", email: "", password: "", profilePicture: "", dateJoined: "", demographics: { community: "" }, collectedStamps: [], });
-  const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
@@ -33,6 +32,8 @@ export default function ProfileEditor() {
   const [isExpanded, setIsExpanded] = useState(false);
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
+
+  const [user, sendRequest] = useApiAuth();
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -54,14 +55,10 @@ export default function ProfileEditor() {
   }
   const fetchUserDetails = async () => {
     try {
-      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-          },
-        }
-      );
-      const { data } = response.data;
+      const body = {};
+      const requestType = RequestType.GET;
+      const endpoint = "users/:id";
+      const data = await sendRequest({ body, requestType, endpoint });
       setUserDetails(data);
       setCollectedStamps(data.collectedStamps || []);
 
@@ -73,16 +70,10 @@ export default function ProfileEditor() {
 
   const deletePic = async (voidPicture: string) => {
     try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-        {
-          profilePicture: voidPicture,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-          },
-        }
-      );
+      const body = { profilePicture: voidPicture };
+      const endpoint = "user/:id";
+      const requestType = RequestType.PATCH;
+      await sendRequest({ body, endpoint, requestType });
     } catch (err) {
       console.error('Error deleting PFP:', err);
     }
@@ -117,17 +108,10 @@ export default function ProfileEditor() {
       }
 
       if (Object.keys(updateData).length > 0) {
-        const response = await axios.patch(
-          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-          updateData,
-          {
-            headers: {
-              'Authorization': `Bearer ${user.authToken}`,
-              'Content-Type': "application/json"
-            },
-          }
-        );
-        console.log('User updated successfully');
+        const endpoint = "users/:id";
+        const requestType = RequestType.PATCH;
+        const body = updateData;
+        await sendRequest({ endpoint, requestType, body });
 
         fetchUserDetails();
       } else {
@@ -155,18 +139,12 @@ export default function ProfileEditor() {
               setCollectedStamps(updatedStamps);
 
               // Then send to server
-              await axios.patch(
-                `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-                {
-                  collectedStamps: updatedStamps
-                },
-                {
-                  headers: {
-                    'Authorization': `Bearer ${user.authToken}`,
-                    'Content-Type': "application/json"
-                  },
-                }
-              );
+              const body = {
+                collectedStamps: updatedStamps
+              };
+              const endpoint = "users/:id";
+              const requestType = RequestType.PATCH;
+              await sendRequest({ body, endpoint, requestType });
             } catch (err) {
               console.error('Error deleting stamp:', err);
             }

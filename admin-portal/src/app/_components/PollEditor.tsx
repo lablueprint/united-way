@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import axios, { AxiosResponse } from "axios";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 interface Choice {
   id: number;
@@ -24,6 +26,7 @@ export default function PollEditor({ activityId, timeStart, timeEnd }: PollEdito
   const [questionIndex, setQuestionIndex] = useState<number>(0);
   const [questionText, setQuestionText] = useState<string>("");
   const [choices, setChoices] = useState<Choice[]>([]);
+  const [org, sendRequest] = useApiAuth();
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -44,12 +47,12 @@ export default function PollEditor({ activityId, timeStart, timeEnd }: PollEdito
     fetchQuestions();
   }, [activityId]);
 
-  const getActivityById = async (activityID: string) => {
+  const getActivityById = async (activityId: string) => {
     try {
-      const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID}`
-      );
-      return response.data.data;
+      const body = {};
+      const requestType = RequestType.GET;
+      const endpoint = `activities/${activityId}`;
+      return await sendRequest({ body, requestType, endpoint });
     } catch (err) {
       console.error(err);
       return { content: [] };
@@ -58,15 +61,14 @@ export default function PollEditor({ activityId, timeStart, timeEnd }: PollEdito
 
   const savePoll = async (updatedQuestions: Question[]) => {
     try {
-      const response: AxiosResponse = await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        {
-          content: updatedQuestions,
-          timeStart,
-          timeEnd,
-        }
-      );
-      const data = response.data.data;
+      const body = {
+        content: updatedQuestions,
+        timeStart,
+        timeEnd,
+      };
+      const requestType = RequestType.PATCH;
+      const endpoint = `activities/${activityId}`;
+      const data = await sendRequest({ body, requestType, endpoint });
       setQuestions(data.content);
       return data;
     } catch (err) {
