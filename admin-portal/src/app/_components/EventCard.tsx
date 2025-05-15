@@ -32,7 +32,7 @@ export default function EventCard({ id, removeFromList, orgName }: EventCardProp
         registeredUsers: [],
         activities: []
     });
-    const sendRequest = useApiAuth();
+    const [org, sendRequest] = useApiAuth();
 
     const deleteEvent = async (e: MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();

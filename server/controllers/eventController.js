@@ -214,7 +214,9 @@ const removeUserFromEvent = async (req, res) => {
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
   try {
+    ("Here is the event", eventId);
     const event = await Event.findById(eventId);
+    (event);
     res.status(200).json({
       status: "success",
       message: "Event successfully received.",

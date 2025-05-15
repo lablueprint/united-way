@@ -1,7 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import axios, { AxiosResponse } from "axios";
 import { Activity, QuizContent } from "../_interfaces/EventInterfaces";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 interface Question {
   title: string;
@@ -24,12 +26,12 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
   const [title, setTitle] = useState<string>("");
   const [choices, setChoices] = useState<string[]>([]);
   const [answers, setAnswers] = useState<number[]>([]);
+  const [org, sendRequest] = useApiAuth();
 
   useEffect(() => {
     const fetchQuestions = async () => {
       const activityData = await getActivityById(activityId);
       setActivity(activityData);
-      console.log(activityData)
       setUpdatedQuestions(activityData.content);
 
       // If the contents of the activity is non-empty:
@@ -54,11 +56,10 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
 
   const getActivityById = async (activityID: string) => {
     try {
-      const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID}`
-      );
-      const { data } = response.data;
-      return data;
+      const body = {};
+      const endpoint = `activities/${activityID}`;
+      const requestType = RequestType.GET;
+      return await sendRequest({ body, endpoint, requestType });
     } catch (err) {
       console.log(err);
       return err;
@@ -115,15 +116,14 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
     content: Question[]
   ) => {
     try {
-      const response: AxiosResponse = await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        {
-          content: content,
-          timeStart,
-          timeEnd,
-        }
-      );
-      const { data } = response.data;
+      const body = {
+        content: content,
+        timeStart,
+        timeEnd,
+      };
+      const endpoint = `activities/${activityId}`;
+      const requestType = RequestType.PATCH;
+      const data = await sendRequest({ body, endpoint, requestType });
       setActivity(data);
       setUpdatedQuestions(data.content);
 

@@ -7,7 +7,7 @@ import { RequestType } from "../../_interfaces/RequestInterfaces"
 
 export default function Onboarding() {
   const router = useRouter();
-  const sendRequest = useApiAuth();
+  const [org, sendRequest] = useApiAuth();
   const [community, setCommunity] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [name, setName] = useState<string>('');

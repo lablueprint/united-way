@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosResponse } from "axios";
-import { useSelector } from 'react-redux';
-import { RootState } from '../_interfaces/AuthInterfaces';
 import { EventData } from '../_interfaces/EventInterfaces'
 
 import Image from 'next/image'
@@ -17,8 +14,7 @@ import { RequestType } from '../_interfaces/RequestInterfaces';
 export default function TaskList() {
     const [draftCount, setDraftCount] = useState<number>(0);
     const [allDrafts, setAllDrafts] = useState<EventData[]>();
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-    const sendRequest = useApiAuth();
+    const [org, sendRequest] = useApiAuth();
 
     // Load in all drafts, draftCount on rendering TaskList
     useEffect(() => {

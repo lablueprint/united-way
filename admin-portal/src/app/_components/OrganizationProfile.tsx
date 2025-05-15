@@ -7,8 +7,6 @@ import useApiAuth from "../_hooks/useApiAuth";
 import { RequestType } from "../_interfaces/RequestInterfaces";
 import { useDispatch } from "react-redux";
 import { refresh } from "../_utils/redux/orgSlice";
-import { useSelector } from "react-redux";
-import { RootState } from "../_interfaces/AuthInterfaces";
 
 // TODO: Make the organization profile based on each individual organization instead of all events.
 export default function OrganizationProfile() {
@@ -17,9 +15,8 @@ export default function OrganizationProfile() {
   const [draftIds, setDraftIds] = useState<string[]>([]);
   const [orgName, setOrgName] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const sendRequest = useApiAuth()
+  const [org, sendRequest] = useApiAuth()
   const dispatch = useDispatch();
-  const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
 
 
   useEffect(() => {
@@ -107,7 +104,6 @@ export default function OrganizationProfile() {
           <h2>Events</h2>
           <div>
             {eventIds.map((id: string) => {
-              console.log(eventIds)
               return (
                 <EventCard id={id} key={id} orgName={orgName} removeFromList={removeFromList} />
               );

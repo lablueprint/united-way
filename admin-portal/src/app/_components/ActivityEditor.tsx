@@ -1,11 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Activity } from "../_interfaces/EventInterfaces";
 import QuizEditor from "./QuizEditor";
 import PollEditor from "./PollEditor";
 import AnnouncementEditor from "./AnnouncementEditor";
 import DateTimePicker from "react-datetime-picker";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -20,14 +22,15 @@ export default function ActivityEditor({ id, refresh }: ActivityEditorProps) {
   const [end, setEnd] = useState<Value>(new Date());
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [org, sendRequest] = useApiAuth();
 
   const fetchActivities = async () => {
     try {
-      const { data } = await axios.post(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/filtered`,
-        { eventID: id }
-      );
-      setActivities(data.data);
+      const body = { eventID: id };
+      const endpoint = "activities/filtered";
+      const requestType = RequestType.POST;
+      const data = await sendRequest({ body, endpoint, requestType });
+      setActivities(data);
     } catch (err) {
       console.error(err);
     }
@@ -48,10 +51,13 @@ export default function ActivityEditor({ id, refresh }: ActivityEditorProps) {
     if (!selectedActivity) return;
 
     try {
-      await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${selectedActivity._id}`,
-        { timeStart: newStart, timeEnd: newEnd }
-      );
+      const body = {
+        timeStart: newStart,
+        timeEnd: newEnd
+      };
+      const endpoint = `activities/${selectedActivity._id}`;
+      const requestType = RequestType.PATCH;
+      await sendRequest({ body, endpoint, requestType });
 
       fetchActivities();
       setSelectedActivity({

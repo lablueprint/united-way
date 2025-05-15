@@ -1,8 +1,10 @@
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Button } from 'react-native';
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosResponse } from "axios";
 import DropDownPicker from 'react-native-dropdown-picker';
+
+import useApiAuth from '../_hooks/useApiAuth';
+import { RequestType } from '../_interfaces/RequestInterfaces';
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -28,25 +30,23 @@ export default function OnboardingScreen() {
   const [dropDownInput, setDropDownInput] = useState(null);
   const [state, setState] = useState(1);
 
+  const [user, sendRequest] = useApiAuth();
+
   const handleEditUser = async () => {
     try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${id}`,
-        {
-          name: name,
-          phoneNumber: phone,
-          demographics: {
-            ethnicity: ethnicity,
-            community: community,
-            gender: gender
-          }
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': "application/json"
-          }
+      const body = {
+        name: name,
+        phoneNumber: phone,
+        demographics: {
+          ethnicity: ethnicity,
+          community: community,
+          gender: gender
         }
-      );
+      };
+      const requestType = RequestType.PATCH;
+      const endpoint = `users/${id}`;
+      await sendRequest({ requestType, endpoint, body });
+
       // Navigate to home screen
       router.push({ pathname: "/interest" })
       //router.push("/(tabs)");
