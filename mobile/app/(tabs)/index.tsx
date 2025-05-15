@@ -21,24 +21,9 @@ const styles = StyleSheet.create({
   }
 });
 
-//get the user by id and then just take the registeredevents
 export default function HomeScreen() {
-  const user = useSelector(
-    (state: {
-      auth: { userId: string; authToken: string; refreshToken: string };
-    }) => {
-      return {
-        userId: state.auth.userId,
-        authToken: state.auth.authToken,
-        refreshToken: state.auth.refreshToken,
-      };
-    }
-  );
-
-  console.log(`\nuser: ${user.userId}\nauth: ${user.authToken}\nrefresh: ${user.refreshToken}`)
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Welcome</Text>
       <WeekCalendar />
     </View >
   );

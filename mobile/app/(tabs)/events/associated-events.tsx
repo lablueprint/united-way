@@ -36,13 +36,14 @@ export default function associatedEvents() {
         const endpoint = `orgs/${id}/events`;
         const requestType = RequestType.GET;
         const data = await sendRequest({ body, endpoint, requestType });
-        const filteredEventIds = data.eventIds.filter((eventId: string) => eventId !== exclude);
-        const fullEvents = filteredEventIds.map(async (eventId: string) => {
+        const filteredEventIds = data.filter((eventId: string) => eventId !== exclude);
+        const fullEvents = await Promise.all(filteredEventIds.map((eventId: string) => {
           const body = {};
           const endpoint = `events/${eventId}`;
           const requestType = RequestType.GET
-          await sendRequest({ body, endpoint, requestType });
-        });
+          const data = sendRequest({ body, endpoint, requestType });
+          return data;
+        }));
         setAssociatedEvents(fullEvents);
       } catch (err) {
         console.error(err);

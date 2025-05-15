@@ -50,9 +50,9 @@ const sendOTP = async (req, res) => {
         text: `Your one-time password (OTP) is: ${otp}. This code expires soon.`,
     };
 
-    console.log("Sending OTP to:", email);
+    ("Sending OTP to:", email);
     await transporter.sendMail(mailOptions);
-    console.log("OTP sent successfully");
+    ("OTP sent successfully");
 
     res.send(hashedOTP);
 } catch (error) {

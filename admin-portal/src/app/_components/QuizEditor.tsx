@@ -32,7 +32,6 @@ export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEdito
     const fetchQuestions = async () => {
       const activityData = await getActivityById(activityId);
       setActivity(activityData);
-      console.log(activityData)
       setUpdatedQuestions(activityData.content);
 
       // If the contents of the activity is non-empty:

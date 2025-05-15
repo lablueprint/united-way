@@ -162,14 +162,14 @@ export default function WeekCalendar() {
         const endpoint = "users/:id";
         const data = await sendRequest({ body, requestType, endpoint });
         // ^ gives event ids
-        const eventResponses = data.registeredEvents.map(async (eventId: string) => {
+        const eventResponses = await Promise.all(data.registeredEvents.map((eventId: string) => {
           const body = {};
           const endpoint = `events/${eventId}`;
           const requestType = RequestType.GET;
-          return await sendRequest({ body, endpoint, requestType });
-        });
-
-        const fullEvents = eventResponses.map((res) => res.data.data).filter(Boolean);
+          const data = sendRequest({ body, endpoint, requestType });
+          return data;
+        }));
+        const fullEvents = eventResponses.filter(Boolean);
         setRegisteredEvents(fullEvents);
       } catch (err) {
         console.error(err);

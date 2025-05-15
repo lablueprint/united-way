@@ -1,4 +1,4 @@
-export interface RootState {
+export default interface RootState {
     auth: {
         userId: string;
         authToken: string;

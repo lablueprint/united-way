@@ -44,12 +44,11 @@ export default function EventDetails() {
     tags: [],
     registeredUsers: [],
   });
-  const [backLink, setBackLink] = useState<string>("events/scanner");
 
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
   const [organizationName, setOrganizationName] = useState("");
 
-  const { id, origin } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
 
   const [user, sendRequest] = useApiAuth();
 
@@ -78,17 +77,6 @@ export default function EventDetails() {
       setRegisteredUsers(eventData.registeredUsers);
     }
   }, [eventData]);
-
-  useFocusEffect(
-    useCallback(() => {
-      console.log("hello world");
-      setBackLink(origin as string);
-
-      return () => {
-        setBackLink("events/scanner");
-      }
-    }, [origin])
-  )
 
   if (!id) {
     return <Text>No event details found.</Text>;
@@ -198,10 +186,7 @@ export default function EventDetails() {
       <View style={styles.imgContain}>
         <View style={styles.iconContain}>
           <View><TouchableOpacity onPress={() => {
-            if (router.canDismiss()) {
-              router.dismissAll();
-            }
-            router.navigate(backLink); setBackLink("events/scanner")
+            router.push({pathname: "/explore"});
           }
           }><Text>back</Text></TouchableOpacity></View>
           <View><Text>share</Text></View>
@@ -233,7 +218,6 @@ export default function EventDetails() {
               <View style={styles.buttonWrap}>
                 <TouchableOpacity style={styles.infoPill}
                   onPress={() => {
-                    console.log('inPress', eventData.organizerID);
                     router.push({
                       pathname: `/events/associated-events`,
                       params:
