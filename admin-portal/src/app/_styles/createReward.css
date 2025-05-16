@@ -15,9 +15,9 @@
   padding: 0 48px;
   height: 88px;
   box-sizing: border-box;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  background-color: #fff;
   position: relative;
-  z-index: 2;
+  margin-bottom: 10px;
 }
 
 .create-reward-header .header-left {
@@ -209,7 +209,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
 }
 
 .create-reward-form .quantity-btn:hover {
@@ -235,7 +234,6 @@
   font-size: 1.1rem;
   cursor: pointer;
   margin-top: 12px;
-  transition: background 0.2s, color 0.2s;
 }
 
 .create-reward-form .save-btn:hover {

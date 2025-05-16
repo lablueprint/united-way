@@ -3,9 +3,6 @@
 import React from "react";
 import { Reward } from "./RewardsSection";
 import "../_styles/rewardCard.css";
-import { RootState } from "../_interfaces/AuthInterfaces";
-import { useSelector } from "react-redux";
-import axios from "axios";
 import Image from "next/image";
 
 // Example reward for demonstration
@@ -19,14 +16,6 @@ const RewardCard = ({ reward }: RewardCardProps) => {
   const inventoryMax = 100;
   const inventoryPercent = (inventory / inventoryMax) * 100;
 
-  const org = useSelector((state: RootState) => {
-    return {
-      orgId: state.auth.orgId,
-      authToken: state.auth.authToken,
-      refreshToken: state.auth.refreshToken,
-    };
-  });
-
   return (
     <div className="reward-container">
       <div className="reward-image">
@@ -34,9 +23,9 @@ const RewardCard = ({ reward }: RewardCardProps) => {
           <Image
             src={reward.image}
             alt={reward.name}
-            fill
-            sizes="(max-width: 600px) 100vw, 15rem"
-            style={{ objectFit: "cover" }}
+            width={80}
+            height={80}
+            style={{ objectFit: "cover", borderRadius: "8px" }}
             unoptimized
           />
         ) : (
@@ -46,10 +35,8 @@ const RewardCard = ({ reward }: RewardCardProps) => {
       <div className="reward-details">
         <div className="reward-title">{reward.name}</div>
         <div className="reward-redeemed">
-          <span style={{ color: "green", fontSize: "1.1em" }}>●</span>
-          <span style={{ fontStyle: "italic", marginLeft: 6 }}>
-            Redeemed: 10 out of 70
-          </span>
+          <span className="green-dot">●</span>
+          <span className="redeemed-text">Redeemed: 10 out of 70</span>
         </div>
       </div>
       <div className="reward-section">
@@ -57,7 +44,7 @@ const RewardCard = ({ reward }: RewardCardProps) => {
         <div className="reward-value">★ {reward.cost} POINTS</div>
       </div>
       <div className="reward-section">
-        <div className="reward-label">Events Assigned To</div>
+        <div className="reward-label">Events Assigned</div>
         <div className="reward-value">3</div>
       </div>
       <div className="reward-section">
@@ -66,7 +53,11 @@ const RewardCard = ({ reward }: RewardCardProps) => {
         <div className="inventory-bar-container">
           <div
             className="inventory-bar"
-            style={{ width: `${(60 / 70) * 100}%` }}
+            style={
+              {
+                "--inventory-width": `${(inventoryPercent / 70) * 100}%`,
+              } as React.CSSProperties
+            }
           />
         </div>
       </div>
