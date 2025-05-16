@@ -259,7 +259,7 @@ useEffect(() => {
       <div className="hero">      
         <div className="hero-info">
           <div className="hero-header">
-            <h1 className="hero-welcome">Welcome, Tifajfoajeoirfoe</h1>
+            <h1 className="hero-welcome">Welcome, {orgName}</h1>
             <p className="hero-text">This is your admin portal. You’re able to manage events and rewards for users.</p>
           </div>
           <button 
