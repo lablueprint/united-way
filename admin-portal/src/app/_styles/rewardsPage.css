@@ -4,3 +4,55 @@
   width: 100%; /* Full width of the page */
   /* Optional space between columns */
 }
+
+@font-face {
+  font-family: "Barlow";
+  src: url("./_fonts/BarlowCondensed-SemiBoldItalic.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italics;
+}
+
+@font-face {
+  font-family: "Barlow";
+  src: url("./_fonts/BarlowCondensed-BoldItalic.ttf") format("opentype");
+  font-weight: bold;
+  font-style: italics;
+}
+
+@font-face {
+  font-family: "Barlow-Normal";
+  src: url("./_fonts/BarlowCondensed-SemiBold.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italics;
+}
+
+@font-face {
+  font-family: "Barlow-Normal";
+  src: url("./_fonts/BarlowCondensed-Bold.ttf") format("opentype");
+  font-weight: bold;
+  font-style: italics;
+}
+
+.banner {
+  position: relative;
+  width: 100vw;
+  height: 100%;
+  overflow: hidden;
+}
+
+.banner img {
+  width: 100vw;
+  height: 50%;
+  object-fit: cover;
+}
+
+.bannerText {
+  position: absolute;
+  top: 50%;
+  left: 15vw;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 4rem;
+  font-weight: bold;
+  font-family: 'Barlow';
+}

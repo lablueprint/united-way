@@ -4,6 +4,7 @@ import React from "react";
 import { Reward } from "./RewardsSection";
 import "../_styles/rewardCard.css";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 // Example reward for demonstration
 interface RewardCardProps {
@@ -15,7 +16,7 @@ const RewardCard = ({ reward }: RewardCardProps) => {
   const inventory = reward.quantity;
   const inventoryMax = reward.quantity;
   const inventoryPercent = (inventory / inventoryMax) * 100;
-
+  const router = useRouter();
   return (
     <div className="reward-container">
       <div className="reward-image">
@@ -65,7 +66,7 @@ const RewardCard = ({ reward }: RewardCardProps) => {
         </div>
       </div>
       <div className="reward-actions">
-        <span title="Edit">✏️</span>
+        <button onClick={() => router.push(`/rewards/edit/${reward._id}`)} title="Edit">✏️</button>
         <span title="View Details">👁️</span>
         <span title="Delete">🗑️</span>
       </div>

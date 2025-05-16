@@ -34,6 +34,7 @@ const RewardsSection = () => {
   useEffect(() => {
     const fetchRewards = async () => {
       try {
+        console.log(orgId)
         const url = `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${orgId}`;
         console.log("This is the URL: ", url);
         const currOrg: AxiosResponse = await axios.get(
