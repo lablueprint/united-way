@@ -1,0 +1,109 @@
+.activity-editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #F9FCFF;
+  z-index: 1000;
+  overflow: auto;
+}
+
+.activity-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.activity-editor-title {
+  margin: 0;
+}
+
+.activity-editor-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.activity-editor-delete {
+  color: #ff4d4f;
+  cursor: pointer;
+}
+
+.activity-editor-delete:hover {
+  text-decoration: underline;
+}
+
+/* Date/Time Picker Modal */
+.datetime-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.datetime-modal-content {
+  background-color: white;
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 90%;
+}
+
+.datetime-modal-title {
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #10167F;
+  font-family: Helvetica, sans-serif;
+}
+
+.datetime-field {
+  margin-bottom: 1.5rem;
+}
+
+.datetime-field:last-of-type {
+  margin-bottom: 2rem;
+}
+
+.datetime-field-label {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #10167F;
+  font-family: Helvetica, sans-serif;
+}
+
+.datetime-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.datetime-modal-button {
+  padding: 0.75rem 1.75rem;
+  border-radius: 6.25rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: Helvetica, sans-serif;
+}
+
+.datetime-modal-button-cancel {
+  border: 1px solid #C4C4C4;
+  background-color: transparent;
+  color: #595959;
+}
+
+.datetime-modal-button-save {
+  border: none;
+  background-color: #10167F;
+  color: white;
+} 

@@ -6,6 +6,8 @@ import PollEditor from "./PollEditor";
 import AnnouncementEditor from "./AnnouncementEditor";
 import DateTimePicker from "react-datetime-picker";
 import type { Activity } from "../_interfaces/EventInterfaces";
+import "../_styles/DateTimePicker.css";
+import "../_styles/ActivityEditor.css";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -32,9 +34,9 @@ export default function ActivityEditor({
   const [activity, setActivity] = useState<Activity | null>(null);
   const [start, setStart]       = useState<Value>(new Date());
   const [end, setEnd]           = useState<Value>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const didCreateRef            = useRef(false);
 
-  // On mount (or when createType/id/refresh change) either create or fetch
   useEffect(() => {
     async function fetchActivity() {
       try {
@@ -66,11 +68,13 @@ export default function ActivityEditor({
         createType === "announcement"
           ? [{ text: "New Announcement" }]
           : createType === "poll"
-            ? [{
+            ? {
                 title: "Untitled Page",
-                question: "New Poll Question",
-                options: [{ id: 0, text: "Choice 1", count: 0 }],
-              }]
+                questions: [{
+                  question: "New Poll Question",
+                  options: [{ id: 0, text: "Choice 1", count: 0 }],
+                }]
+              }
             : [];
 
       const res = await axios.post<{ data: Activity }>(
@@ -101,7 +105,6 @@ export default function ActivityEditor({
       await axios.delete(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activity._id}`
       );
-      // inform parent
       onDeleted?.(activity._id);
       onCancel?.()
     } catch (e) {
@@ -109,7 +112,6 @@ export default function ActivityEditor({
     }
   };
 
-  // Change activity time on the server
   const updateTime = async (newStart: Date, newEnd: Date) => {
     if (!activity) return;
     try {
@@ -118,6 +120,8 @@ export default function ActivityEditor({
         { timeStart: newStart, timeEnd: newEnd }
       );
       setActivity({ ...activity, timeStart: newStart, timeEnd: newEnd });
+      setShowDatePicker(false);
+      onCancel?.();
     } catch (e) {
       console.error(e);
     }
@@ -125,27 +129,18 @@ export default function ActivityEditor({
 
   const handleTimeChange = (v: Value, isStart: boolean) => {
     const d = Array.isArray(v) ? v[0] : v;
-    if (!d || !activity) return;
+    if (!d) return;
     if (isStart) {
       setStart(d);
-      updateTime(d, end as Date);
     } else {
       setEnd(d);
-      updateTime(start as Date, d);
     }
   };
 
-  // Render the correct sub-editor
   const renderEditor = () => {
     if (!activity) return null;
     return (
       <>
-        <div className="my-4">
-          <h3>Set Activity Duration</h3>
-          <DateTimePicker value={start} onChange={v => handleTimeChange(v, true)} />
-          <DateTimePicker value={end}   onChange={v => handleTimeChange(v, false)} />
-        </div>
-
         {activity.type === "quiz" && (
           <>
             <h3>Quiz Editor</h3>
@@ -164,6 +159,7 @@ export default function ActivityEditor({
               timeEnd={end as Date}
               isDraft={isDraft}
               createPoll={() => createActivity("poll")}
+              onSave={() => setShowDatePicker(true)}
             />
           </>
         )}
@@ -182,36 +178,76 @@ export default function ActivityEditor({
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "white",
-      zIndex: 1000,
-      overflow: "auto",
-    }}>
-      <div>
-        <h2>
-          {createType ? "New " : "Edit "}
-        </h2>
-        {onCancel && (
-          <button onClick={onCancel}>
-            Cancel
-          </button>
-        )}
-        {activity && (
+    <div className="activity-editor">
+      {/* <div className="activity-editor-header">
+        <div className="activity-editor-actions">
+          {activity && (
             <button
               onClick={handleDelete}
-              className="text-red-600 hover:underline"
+              className="activity-editor-delete"
             >
               Delete
             </button>
-        )}
-      </div>
+          )}
+        </div>
+      </div> */}
 
       {renderEditor()}
+
+      {/* Date/Time Picker Modal */}
+      {showDatePicker && (
+        <div className="datetime-modal">
+          <div className="datetime-modal-content">
+            <h3 className="datetime-modal-title">
+              Schedule Activity
+            </h3>
+            <div className="datetime-field">
+              <h4 className="datetime-field-label">
+                Start Time
+              </h4>
+              <DateTimePicker 
+                value={start} 
+                onChange={v => handleTimeChange(v, true)}
+                format="y-MM-dd h:mm a"
+                clearIcon={null}
+                calendarIcon={null}
+                autoFocus={false}
+                disableCalendar={false}
+                className="datetime-picker"
+              />
+            </div>
+            <div className="datetime-field">
+              <h4 className="datetime-field-label">
+                End Time
+              </h4>
+              <DateTimePicker 
+                value={end} 
+                onChange={v => handleTimeChange(v, false)}
+                format="y-MM-dd h:mm a"
+                clearIcon={null}
+                calendarIcon={null}
+                autoFocus={false}
+                disableCalendar={false}
+                className="datetime-picker"
+              />
+            </div>
+            <div className="datetime-modal-actions">
+              <button 
+                onClick={() => setShowDatePicker(false)}
+                className="datetime-modal-button datetime-modal-button-cancel"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => updateTime(start as Date, end as Date)}
+                className="datetime-modal-button datetime-modal-button-save"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

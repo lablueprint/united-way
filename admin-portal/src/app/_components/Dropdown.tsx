@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import '../_styles/Dropdown.css';
+import { Activity, PollContent } from "../_interfaces/EventInterfaces";
 
 export interface DropDownProps<Item> {
   title: string;
@@ -41,8 +42,8 @@ export default function DropDown<Item>({
         </div>
       </div>
 
-      {open && (
-        <div className="dropdownBody">
+      <div className={`dropdownBody ${open ? 'open' : ''}`}>
+        {items.length > 0 && (
           <ul className="cardList">
             {items.map((act) => (
               <li key={act._id} className="cardListItem">
@@ -53,10 +54,11 @@ export default function DropDown<Item>({
                   {/* Main info */}
                   <div className="cardInfo">
                     <h4 className="cardTitle">
-                      {/* e.g. act.content[0].title or question */}
-                      {(act as any).content[0]?.title 
-                        || (act as any).content[0]?.question 
-                        || "Untitled"}
+                      {(act as any).type === "poll" 
+                        ? ((act as any).content as PollContent).title || "Untitled"
+                        : (act as any).content[0]?.title 
+                          || (act as any).content[0]?.question 
+                          || "Untitled"}
                     </h4>
                   </div>
 
@@ -74,8 +76,8 @@ export default function DropDown<Item>({
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -1,3 +1,10 @@
+.dropdownsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
 .activityHeader {
   display: flex;
   justify-content: space-between;
@@ -5,6 +12,8 @@
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   background-color: #10167F0A;
+  margin-bottom: 0;
+  width: 100%;
 }
 
 .divider {
@@ -13,12 +22,14 @@
   margin-bottom: 5px;
   margin-top: 5px;  
   background-color: #10167F33;
+  width: 100%;
 }
 
 .activityTitle {
   font-family: Helvetica, sans-serif;
   font-size: 1rem;
   color: #10167F;
+  margin: 0;
 }
 
 .activityButtons {
@@ -48,19 +59,44 @@
   cursor: pointer;
 }
 
+.dropdownContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+}
+
+.dropdownBody {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+  background-color: white;
+  z-index: 10;
+}
+
+.dropdownBody.open {
+  max-height: 1000px;
+  opacity: 1;
+}
+
 /* container for the row of cards */
 .cardList {
   display: flex;
   gap: 1rem;
-  padding: 0;
+  padding: 1rem 0;
   margin: 0;
   list-style: none;
-  overflow-x: auto; /* in case you have many cards */
+  overflow-x: auto;
+  width: 100%;
 }
 
-/* each card wrapper */
 .cardListItem {
-  flex: 0 0 12.5rem; /* fixed width */
+  flex: 0 0 12.5rem;
 }
 
 /* the card itself */

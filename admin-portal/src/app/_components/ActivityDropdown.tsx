@@ -10,18 +10,24 @@ interface ActivityDropdownProps {
   isDraft: boolean;
 }
 
-const sections = [
-  { title: "Announcements", type: "announcement" },
-  { title: "Polls", type: "poll" },
-  { title: "Raffles",       type: "raffle" },
-  { title: "Rewards",       type: "quiz" },
-];
+type ActivityType = "announcement" | "poll" | "raffle";
+
+interface Section {
+  title: string;
+  type: ActivityType;
+}
 
 export default function ActivityDropdown({ eventId, isDraft }: ActivityDropdownProps) {
   const [activities,     setActivities]   = useState<Activity[]>([]);
   const [refresh,        setRefresh]      = useState(0);
-  const [creatingType,   setCreatingType] = useState<string | null>(null);
+  const [creatingType,   setCreatingType] = useState<ActivityType | null>(null);
   const [selectedId,     setSelectedId]   = useState<string | null>(null);
+
+  const sections: Section[] = [
+    { title: "Announcements", type: "announcement" },
+    { title: "Polls", type: "poll" },
+    { title: "Raffles", type: "raffle" },
+  ];
 
   const reload = () => setRefresh(r => r + 1);
 
@@ -56,8 +62,8 @@ export default function ActivityDropdown({ eventId, isDraft }: ActivityDropdownP
 
   // Otherwise, render the four dropdowns
   return (
-    <div>
-      {sections.map(({ title, type }) => {
+    <div className="dropdownsContainer">
+      {sections.map(({ title, type }: Section) => {
         const items = activities.filter(a => a.type === type);
 
         return (
@@ -71,9 +77,7 @@ export default function ActivityDropdown({ eventId, isDraft }: ActivityDropdownP
             renderItem={(act, onEdit) => (
               <div>
                 <span>
-                  {(act as any).content[0]?.question
-                    ?? (act as any).content[0]?.title
-                    ?? `Untitled ${title}`}
+                  {`${title} ${items.indexOf(act) + 1}`}
                 </span>
                 <button onClick={() => onEdit(act._id)}>Edit</button>
               </div>

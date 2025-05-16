@@ -19,6 +19,18 @@ export interface Activity {
     active: boolean;
 }
 
+export interface PollContent {
+    title: string;
+    questions: Array<{
+        question: string;
+        options: Array<{
+            id: number;
+            text: string;
+            count: number;
+        }>;
+    }>;
+}
+
 export const EventTags: string[] = [
     'Sports',
     'Entertainment',
