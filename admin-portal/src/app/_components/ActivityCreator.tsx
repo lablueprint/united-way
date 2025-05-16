@@ -1,10 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import axios from "axios";
 import "react-datetime-picker/dist/DateTimePicker.css";
 import "react-calendar/dist/Calendar.css";
 import "react-clock/dist/Clock.css";
 import ActivityEditor from "./ActivityEditor";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 interface EventActivityProps {
   eventId: string;
@@ -13,6 +15,7 @@ interface EventActivityProps {
 export default function ActivityCreator({ eventId }: EventActivityProps) {
   const [message, setMessage] = useState("");
   const [refresh, setRefresh] = useState(0);
+  const [org, sendRequest] = useApiAuth();
   const start = new Date()
   const end = new Date()
 
@@ -42,17 +45,18 @@ export default function ActivityCreator({ eventId }: EventActivityProps) {
               ]
               : "";
 
-      await axios.post(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
-        {
-          eventID: eventId,
-          type,
-          content: defaultContent,
-          timeStart: start,
-          timeEnd: end,
-          active: true,
-        }
-      );
+      const body = {
+        eventID: eventId,
+        type,
+        content: defaultContent,
+        timeStart: start,
+        timeEnd: end,
+        active: true,
+      };
+
+      const endpoint = "activities/createActivity";
+      const requestType = RequestType.POST;
+      await sendRequest({ body, endpoint, requestType });
 
       setMessage(`Created ${type} activity successfully!`);
       setRefresh((prev) => prev + 1);

@@ -176,10 +176,12 @@ const editOrganizationDetails = async (req, res) => {
 // using id to find which organization we're returning
 const getAssociatedEvents = async (req, res) => {
   const orgId = req.params.id;
+  (orgId)
   try {
     const organizationByID = await Organization.findOne({ _id: orgId });
     if (organizationByID) {
       const eventList = organizationByID["activeEvents"];
+      (eventList);
       res.status(200).json({
         status: "success",
         message: "Successfully received associated events for organization",
