@@ -27,11 +27,11 @@ const eventSchema = new mongoose.Schema({
   },
   startTime: {
     required: true,
-    type: String
+    type: String,
   },
   endTime: {
     required: true,
-    type: String
+    type: String,
   },
   location: {
     type: {
@@ -56,6 +56,10 @@ const eventSchema = new mongoose.Schema({
     required: true,
     type: [String],
   },
+  checkedInUsers: {
+    required: true,
+    type: [String],
+  },
   activity: {
     required: true,
     type: [String],
@@ -65,7 +69,7 @@ const eventSchema = new mongoose.Schema({
   },
   key: {
     type: String,
-  }
+  },
 });
 
 // Create a 2dsphere index for geospatial queries

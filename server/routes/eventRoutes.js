@@ -24,12 +24,13 @@ eventRouter.post("/filtered", eventController.getEventsByFilter);
 
 // Update and delete routes
 eventRouter.patch("/:id", eventController.editEventDetails);
-eventRouter.patch('/:id/addUser', eventController.addUserToEvent);
-eventRouter.patch('/:id/removeUser', eventController.removeUserFromEvent);
+eventRouter.patch("/:id/addUser", eventController.addUserToEvent);
+eventRouter.patch("/:id/removeUser", eventController.removeUserFromEvent);
+eventRouter.patch("/:id/checkInUser", eventController.checkInUserToEvent);
 eventRouter.patch("/:id/addImage", eventController.addImageToEvent);
 eventRouter.patch("/:id/removeImage", eventController.removeImageFromEvent);
 eventRouter.delete("/:id", eventController.deleteEvent);
-eventRouter.post('/:id/addActivity', eventController.addActivity)
-eventRouter.get('/:id/getPolls', eventController.getPolls)
+eventRouter.post("/:id/addActivity", eventController.addActivity);
+eventRouter.get("/:id/getPolls", eventController.getPolls);
 
 module.exports = eventRouter;

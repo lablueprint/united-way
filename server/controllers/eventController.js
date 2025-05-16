@@ -29,7 +29,7 @@ const addImageToEvent = async (req, res) => {
     res.status(401).json({
       status: "failure",
       message: "Invalid authorization token for request.",
-      data: {}
+      data: {},
     });
     return;
   }
@@ -84,7 +84,7 @@ const removeImageFromEvent = async (req, res) => {
     res.status(401).json({
       status: "failure",
       message: "Invalid authorization token for request.",
-      data: {}
+      data: {},
     });
     return;
   }
@@ -132,11 +132,11 @@ const removeImageFromEvent = async (req, res) => {
 };
 
 const addUserToEvent = async (req, res) => {
-  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+  if (req.auth.role != "admin" && req.auth.role != "user") {
     res.status(401).json({
       status: "failure",
       message: "Invalid authorization token for request.",
-      data: {}
+      data: {},
     });
     return;
   }
@@ -172,11 +172,11 @@ const addUserToEvent = async (req, res) => {
 };
 
 const removeUserFromEvent = async (req, res) => {
-  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+  if (req.auth.role != "admin" && req.auth.role != "user") {
     res.status(401).json({
       status: "failure",
       message: "Invalid authorization token for request.",
-      data: {}
+      data: {},
     });
     return;
   }
@@ -211,12 +211,55 @@ const removeUserFromEvent = async (req, res) => {
   }
 };
 
+const checkInUserToEvent = async (req, res) => {
+  if (req.auth.role != "admin" && req.auth.role != "user") {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {},
+    });
+    return;
+  }
+
+  const origId = req.params.id;
+  const { newUser } = req.body;
+
+  try {
+    const result = await Event.updateOne(
+      { _id: origId },
+      { $addToSet: { checkedInUsers: newUser } }
+    );
+
+    if (result.modifiedCount === 0) {
+      res.status(404).json({
+        status: "failure",
+        message: "Event not found or no changes made.",
+        data: result,
+      });
+    } else {
+      res.status(200).json({
+        status: "success",
+        message: "Event updated successfully.",
+        data: result,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: update not completed.",
+      data: {},
+    });
+  }
+};
+
+// check if user already checkedin
+
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
   try {
-    ("Here is the event", eventId);
+    "Here is the event", eventId;
     const event = await Event.findById(eventId);
-    (event);
+    event;
     res.status(200).json({
       status: "success",
       message: "Event successfully received.",
@@ -252,7 +295,7 @@ const getAllEvents = async (req, res) => {
 
 const getEventsByOrganization = async (req, res) => {
   try {
-    const events = await Event.find({organizerID: req.params.id});
+    const events = await Event.find({ organizerID: req.params.id });
     res.status(200).json({
       status: "success",
       message: "Event successfully received.",
@@ -266,7 +309,7 @@ const getEventsByOrganization = async (req, res) => {
       data: {},
     });
   }
-}
+};
 
 //
 // TODO: filter by including sub-element matches as well
@@ -337,19 +380,21 @@ const deleteEvent = async (req, res) => {
 
 const addActivity = async (req, res) => {
   try {
-      const { id } = req.params; 
-      const { activity } = req.body; 
+    const { id } = req.params;
+    const { activity } = req.body;
 
-      const event = await Event.findById(id);
-      
-      event.activity.push(activity);
+    const event = await Event.findById(id);
 
-      await event.save();
+    event.activity.push(activity);
 
-      res.status(200).json({ message: "Activity added successfully.", event });
+    await event.save();
+
+    res.status(200).json({ message: "Activity added successfully.", event });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "An error occurred while adding the activity.", error });
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while adding the activity.", error });
   }
 };
 
@@ -358,10 +403,10 @@ const getPolls = async (req, res) => {
     const { id } = req.params;
 
     const event = await Event.findById(id);
-    const polls = event.activity.filter(a => a.type === 'poll' );
-    
+    const polls = event.activity.filter((a) => a.type === "poll");
+
     res.status(200).json({
-      polls: polls
+      polls: polls,
     });
   } catch (err) {
     console.error(err);
@@ -370,11 +415,10 @@ const getPolls = async (req, res) => {
       message: "Server-side error: event could not be received.",
     });
   }
-}
+};
 
 module.exports = {
   createEvent,
-  removeUserFromEvent,
   getEventById,
   getAllEvents,
   getEventsByFilter,
@@ -382,8 +426,10 @@ module.exports = {
   editEventDetails,
   deleteEvent,
   addUserToEvent,
+  removeUserFromEvent,
+  checkInUserToEvent,
   addActivity,
   getPolls,
   addImageToEvent,
-  removeImageFromEvent
+  removeImageFromEvent,
 };
