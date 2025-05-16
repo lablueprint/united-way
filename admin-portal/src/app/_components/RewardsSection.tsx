@@ -16,13 +16,15 @@ export interface Reward {
   image: string;
   cost: number;
   quantity: number;
+  description: string;
+  directions: string;
+  assignedEvents: string[];
   _id: string;
 }
 
 const RewardsSection = () => {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  //add the router
   const router = useRouter();
 
   // Select primitive values to avoid object dependency changes
@@ -34,13 +36,15 @@ const RewardsSection = () => {
       try {
         const url = `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${orgId}`;
         console.log("This is the URL: ", url);
-        const currOrg: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${orgId}`, 
+        const currOrg: AxiosResponse = await axios.get(
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${orgId}`,
           {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         setRewards(currOrg.data.data.rewards || []);
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -118,18 +122,22 @@ const RewardsSection = () => {
   };
 
   return (
-    <div>
-      <button
-        className="floating-add-button sleek-add-button"
-        onClick={() => router.push("/rewards/create")}
-      >
-        + Add Reward
-      </button>
+    <div className="rewards-container">
       <div className="rewards-image">
         <img src="/home-banner.svg" alt="Rewards" className="rewards-image" />
+        <div className="rewards-header">
+          <h1 className="rewards-title">Rewards</h1>
+          <p className="rewards-description">View and edit your rewards.</p>
+        </div>
+        <button
+          className="floating-add-button sleek-add-button"
+          onClick={() => router.push("/rewards/create")}
+        >
+          + CREATE REWARDS
+        </button>
       </div>
 
-      <div>
+      <div className="rewards-section">
         {rewards.map((reward) => (
           <RewardCard key={reward._id} reward={reward} />
         ))}

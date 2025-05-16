@@ -11,9 +11,9 @@ interface RewardCardProps {
 }
 
 const RewardCard = ({ reward }: RewardCardProps) => {
-  // Fake inventory for demonstration
-  const inventory = 60; // out of 100
-  const inventoryMax = 100;
+  // Use schema values for inventory and events
+  const inventory = reward.quantity;
+  const inventoryMax = reward.quantity;
   const inventoryPercent = (inventory / inventoryMax) * 100;
 
   return (
@@ -34,9 +34,14 @@ const RewardCard = ({ reward }: RewardCardProps) => {
       </div>
       <div className="reward-details">
         <div className="reward-title">{reward.name}</div>
-        <div className="reward-redeemed">
-          <span className="green-dot">●</span>
-          <span className="redeemed-text">Redeemed: 10 out of 70</span>
+        {/* Additional fields from schema */}
+        <div className="reward-section">
+          <div className="reward-label">Description</div>
+          <div className="reward-value">{reward.description}</div>
+        </div>
+        <div className="reward-section">
+          <div className="reward-label">Directions</div>
+          <div className="reward-value">{reward.directions}</div>
         </div>
       </div>
       <div className="reward-section">
@@ -45,27 +50,24 @@ const RewardCard = ({ reward }: RewardCardProps) => {
       </div>
       <div className="reward-section">
         <div className="reward-label">Events Assigned</div>
-        <div className="reward-value">3</div>
+        <div className="reward-value">{reward.assignedEvents.length}</div>
       </div>
       <div className="reward-section">
         <div className="reward-label">Inventory</div>
-        <div className="reward-value">60 left</div>
+        <div className="reward-value">{reward.quantity} left</div>
         <div className="inventory-bar-container">
           <div
             className="inventory-bar"
             style={
-              {
-                "--inventory-width": `${(inventoryPercent / 70) * 100}%`,
-              } as React.CSSProperties
+              { "--inventory-width": `${inventoryPercent}%` } as React.CSSProperties
             }
           />
         </div>
       </div>
       <div className="reward-actions">
-        {/* Place your icons here */}
-        <span>✏️</span>
-        <span>👁️</span>
-        <span>🗑️</span>
+        <span title="Edit">✏️</span>
+        <span title="View Details">👁️</span>
+        <span title="Delete">🗑️</span>
       </div>
     </div>
   );

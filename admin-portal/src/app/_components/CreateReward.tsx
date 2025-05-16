@@ -115,19 +115,6 @@ const CreateReward = () => {
 
   return (
     <>
-      <div className="create-reward-header">
-        <div className="header-left">
-          <img src="/images/udub.png" alt="Logo" />
-          <div className="header-nav">
-            <button className="header-nav-btn" onClick={() => router.push("/landing")}>Home </button>
-            <button className="header-nav-btn" onClick={() => router.push("/events")}>Events</button>
-            <button className="header-nav-btn active" onClick={() => router.push("/rewards")}>Rewards</button>
-          </div>
-        </div>
-
-
-
-      </div>
       <div className="create-reward-page">
         <div className="create-reward-right">
           <form
