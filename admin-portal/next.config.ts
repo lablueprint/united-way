@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     domains: ["unitedway-uploads.s3.us-east-2.amazonaws.com"],
   },
   env: {
-    IP_ADDRESS: "",
+    IP_ADDRESS: "localhost",
     PORT: "4000",
   }
 };
