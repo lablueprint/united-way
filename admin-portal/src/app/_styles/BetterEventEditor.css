@@ -1,0 +1,338 @@
+/* TODO: Import fonts from file */
+@font-face {
+    font-family: "Barlow";
+    font-style: italics;
+    font-weight: normal;
+    src: url("./_fonts/BarlowCondensed-SemiBoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Barlow";
+    font-style: italics;
+    font-weight: bold;
+    src: url("./_fonts/BarlowCondensed-BoldItalic.ttf") format("opentype");
+}
+
+@font-face {
+    font-family: "Barlow-Normal";
+    font-style: italics;
+    font-weight: normal;
+    src: url("./_fonts/BarlowCondensed-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Barlow-Normal";
+    font-style: italics;
+    font-weight: bold;
+    src: url("./_fonts/BarlowCondensed-Bold.ttf") format("opentype");
+}
+
+.event-header {
+    background-image: url("../../../public/BetterEventEditor/images/banner.svg");
+    width: 100vw;
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding: 1rem 5.5rem 5.5rem 5.5rem;
+}
+
+.event-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.event-directory-path {
+    align-items: "center";
+    color: #9c9cac;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+    gap: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.right-arrow {
+    align-self: "stretch";
+    display: flex;
+    object-fit: "contain";
+    padding-top: 0.2rem;
+    padding-bottom: 0.3rem;
+}
+
+.event-directory-path-eventname {
+    color:rgb(255, 255, 255);
+    display: flex;
+    font-family: "Helvetica";
+    font-weight: bold;
+    font-size: 1rem;
+    font-weight: 700;
+    gap: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.event-header-events-title {
+    color:rgb(255, 255, 255);
+    display: flex;
+    font-family: "Barlow";
+    font-size: 6.25rem;
+    font-weight: italic;
+    font-weight: 800;
+}
+
+.event-header-events-subtitle {
+    color:rgb(255, 255, 255);
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1.37rem;
+    font-weight: 400;
+}
+
+.editor-body-parent {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1.25rem 5.5rem 1.25rem 5.5rem
+}
+
+.draft-save-publish-indicators {
+    align-items: "center";
+    align-text: "center";
+    display: flex;
+    justify-content: space-between;
+}
+
+.draft-indicator {
+    align-items: "center";
+    align-text: "center";
+    background-color: #e8e4e4;
+    border-radius: 1rem;
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    width: fit-content;
+}
+
+.draft-indicator-logo {
+    align-self: "stretch";
+    display: flex;
+    object-fit: "contain";
+}
+
+.draft-indicator-text {
+    color: #595959;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.save-publish-parent {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.save-button {
+    background-color: #e7e8f3;
+    border-radius: 1rem;
+    color: #171885;
+    cursor: pointer;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem 0.75rem 1.25rem;
+}
+
+.publish-button {
+    background-color: #171885;
+    border-radius: 1rem;
+    color: #e7e8f3;
+    cursor: pointer;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem 0.75rem 1.25rem;
+}
+
+.event-editor-interface {
+    display: flex;
+    justify-content: space-between;
+}
+
+.image-editor-and-tags {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 32rem;
+}
+
+.image-editor {
+    background-color: #e7e8f3;
+    border-radius: 0.5rem;
+    padding: 11rem 11rem 11rem 11rem;
+}
+
+.tags-parent {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.tags-title {
+    color: #171885;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.event-detail-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 40rem;
+}
+
+.event-title-and-org {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.event-title-editor-card {
+    background-color: #f5f6fa;
+    border-radius: 0.5rem;
+    color: #171885;
+    cursor: pointer;
+    display: flex;
+    font-family: "Barlow";
+    font-size: 2.8rem;
+    font-weight: italic;
+    font-weight: 700;
+    padding: 1rem 35rem 1rem 1rem;
+}
+
+.organization-card-parent {
+    align-items: center;
+    background-color: #f5f6fa;
+    border-radius: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.4rem 0.6rem 0.4rem 0.6rem;
+}
+
+.org-logo {
+    align-self: "stretch";
+    display: flex;
+    object-fit: "contain";
+}
+
+.org-info {
+    color: #171885;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+    gap: 0.2rem;
+    margin-right: 0.2rem;
+}
+
+.org-name {
+    color: #6c70b0;
+    display: flex;
+    text-decoration: underline;
+}
+
+.time-card-parent {
+    align-items: center;
+    align-text: center;
+    background-color: #f5f6fa;
+    border-radius: 0.5rem;
+    color: #171885;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+    gap: 0.625rem;
+    padding: 0.625rem 0.625rem 0.625rem 0.625rem;
+}
+
+.event-date {
+    cursor: pointer;
+}
+
+.start-end-time {
+    cursor: pointer;
+    margin-left: 1rem;
+}
+
+.timezone {
+    cursor: pointer;
+}
+
+.down_arrow {
+    align-self: "stretch";
+    cursor: pointer;
+    display: flex;
+    object-fit: "contain";
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+.description-location-attendees {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.description-parent {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.description-title {
+    color: #171885;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+    font-weight: bold;
+    gap: 0.625rem;
+}
+
+.description-body {
+    background-color: #f5f6fa;
+    border-radius: 0.5rem;
+    color: #171885;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+    padding: 1rem 0.75rem 1rem 0.75rem
+}
+
+.location {
+    background-color: #f5f6fa;
+    border-radius: 0.5rem;
+    color: #171885;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+    padding: 1rem 0.75rem 1rem 0.75rem;
+    text-decoration: underline;
+}
+
+.attendees-parent {
+    background-color: #f5f6fa;
+    border-radius: 0.5rem;
+    color: #171885;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+    padding: 1rem 0.75rem 1rem 0.75rem;
+}

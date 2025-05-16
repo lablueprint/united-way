@@ -52,3 +52,16 @@ export interface EventData {
     registeredUsers: string[];
     activities: Activity[];
 }
+
+export interface EventEditorProps {
+    orgName: string;
+    changeState: React.Dispatch<React.SetStateAction<boolean>>;
+    eventId: string;
+    justCreated: boolean;
+}
+
+export interface LocationProps {
+    display_name: string;
+    lat: string;
+    lon: string;
+}
