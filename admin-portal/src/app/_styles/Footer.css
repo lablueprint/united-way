@@ -74,6 +74,9 @@
     font-size: 1.1rem;
     font-weight: normal;
     color: #10167F;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.1rem;
 }
 
 .subtitle {

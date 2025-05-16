@@ -16,7 +16,7 @@ export default function Footer() {
                         United Way of<br />Greater Los Angeles
                     </p>
                     <p className="sectionHeader">
-                        Creating L.A.&apos;s FUTURE TOGETHER
+                        CREATING L.A.&apos;s FUTURE TOGETHER
                     </p>
                 </div>
                 <div className="sectionA2">
@@ -24,8 +24,8 @@ export default function Footer() {
                         CONTACT US
                     </p>
                     <p className="sectionContent">
-                        515 S. Figueroa St., Suite 900
-                        Los Angeles, CA 90071
+                        515 S. FIGUEROA ST., SUITE 900 <br />
+                        LOS ANGELES, CA 90071
                     </p>
                 </div>
                 <div className="sectionA3">
