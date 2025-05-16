@@ -5,19 +5,17 @@ import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
 import EventCard from "@/app/_components/EventCard";
 import EventCreator from "@/app/_components/EventCreator";
-import OrganizationProfile from '../../_components/OrganizationProfile';
-import './home.css';
+import EventCarousel from "@/app/_components/EventCarousel";
+import NoMoreEventsTrigger from "@/app/_components/NoMoreEvents";
 import emptyLogo from '../../../../public/images/logo-blue-50.svg';
-import hero from '../../../../public/images/home-banner.svg';
 import addIcon from '../../../../public/images/add-icon.svg';
 import rightArrow from '../../../../public/images/right-arrow.svg';
-import { getImageProps } from "next/image";
 import Image from "next/image";
 import single from '../../../../public/images/single-event.svg';
 import attendee from '../../../../public/images/attendee.svg';
-import EventCarousel from "@/app/_components/EventCarousel";
-
 import { useState, useEffect } from "react";
+import './home.css';
+
 export default function Landing() {
   const [responseValue, setResponseValue] = useState();
   const dispatch = useDispatch();
@@ -50,20 +48,6 @@ export default function Landing() {
     imageURL: string;
     // activities: Activity[];
   }
-  
-  
-  // Example of requesting data from the database/backend and making use of the data.
-  const exampleGetToRoot = async () => {
-    try {
-      console.log(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/`);
-      const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/`
-      );
-      setResponseValue(response.data);
-    } catch (error) {
-      console.log(error);
-    } // Post request
-  }
 
   const isToday = ( inputDate : Date ) => {
     const today = new Date();
@@ -94,6 +78,7 @@ export default function Landing() {
   };
 
   // pulling events and organizer info
+  const [atBottom, setAtBottom] = useState(false);
   const [eventIds, setEventIds] = useState<string[]>([]);
   const [orgName, setOrgName] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -255,7 +240,11 @@ useEffect(() => {
 
   return (
     <div className="body">
-      <div className="nav-bar"> placeholder nav </div>
+      <div className="nav-bar"> 
+        <button className="button" onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
+          Log out
+        </button>
+      </div>
       <div className="hero">      
         <div className="hero-info">
           <div className="hero-header">
@@ -300,37 +289,7 @@ useEffect(() => {
 
                   ) : (
                     <EventCarousel events={visibleEvents} intervalMs={2000} visibleCount={4} />
-
-                    // <div className="slider-container">
-                    //   <div className="slider-track">
-                    //     <div className="list-title">
-                    //       <h2 className="subtitle">Events Today</h2>
-                    //     </div>
-                    //     <div>
-                    //       {visibleEvents.map((event, i) => {
-                    //           return (
-                    //             <div 
-                    //               key={`${event._id}-${i}`} 
-                    //               className={`event-slide ${i === focusIndex ? 'focused' : ''}`}
-                    //             >
-                    //               <p className="event-name">{event.name}</p>
-                    //               <div className="event-date-time">
-                    //                 <p className="event-date">Today</p>
-                    //                 <p className="event-time">{startTime} - {endTime}</p>
-                    //               </div>
-          
-                    //             </div>
-                    //           )
-                    //         })}
-                    //     </div>
-                    //   </div>
-                    // </div> 
                   )}
-                  {/* { todayIds.length > 0 && todayIds.map((id: string) => {
-                    return (
-                     
-                    );
-                  })} */}
                 </div>
               </div>
             ) : ( 
@@ -361,30 +320,18 @@ useEffect(() => {
             </div>
           </div>
         </div>
-      ) : (
-        <div className="empty-event">
-          <div className="empty-content">
-            <Image src={emptyLogo} alt="United Way Sheer Blue Logo" width={80}/>
-            <p className="empty-text">No events today.</p>
+        ) : (
+          <div className="empty-event">
+            <div className="empty-content">
+              <Image src={emptyLogo} alt="United Way Sheer Blue Logo" width={80}/>
+              <p className="empty-text">No upcoming events.</p>
+            </div>
           </div>
-        </div>
 
-      )}
+        )}
       
-        <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
-          Log out
-        </button>
-        <button onClick={() => setIsEditing(!isEditing)}>
-          {isEditing ? "Cancel Event" : "Create Event"}
-        </button>
-        {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} />}
-        <div>
-
-        Org: {org.orgId}<br />
-        Auth: {org.authToken}<br />
-        Refresh: {org.refreshToken}<br />
-      </div>
-      </div>
-
+      <NoMoreEventsTrigger />
+    
+    </div>
   );
 }

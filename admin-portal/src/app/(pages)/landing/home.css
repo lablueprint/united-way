@@ -32,7 +32,13 @@
 
 .nav-bar {
     background-color: #f0f0f0;
-    padding: 1rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.nav-bar .button {
+    transform: scale(0.5);
 }
 
 .hero {
