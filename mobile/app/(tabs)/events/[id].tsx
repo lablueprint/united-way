@@ -51,8 +51,9 @@ export default function EventDetails() {
   const [joinedRaffles, setJoinedRaffles] = useState(false);
   const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
   const [pollVisible, setPollVisible] = useState(true);
-  const [pollId, setPollId] = useState<string | null>('681450cd93079c13520ccbf7');
-
+  // const [pollId, setPollId] = useState<string | null>('681450cd93079c13520ccbf7');
+  const [pollId, setPollId] = useState<string | null>(null);
+  const [showResults, setShowResults] = useState(false);
   const { id, origin } = useLocalSearchParams();
   const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
@@ -147,7 +148,6 @@ export default function EventDetails() {
     } catch (err) {
       console.error(err);
     }
-
   };
 
   const removeUserFromEvent = async (userId: string) => {
@@ -238,9 +238,17 @@ export default function EventDetails() {
       Alert.alert('Announcement', data.content[0].text);
     })
     socket?.on('poll', (data) => {
+      console.log('Poll starting');
+      setShowResults(false);
       setPollVisible(true);
       setPollId(data._id);
     });
+    socket?.on('poll results', (data, results) => {
+      setShowResults(true);
+      setPollVisible(true);
+      setPollId(data._id);
+      console.log('Poll results:', results);
+    })
     socket?.on('activity start', (data) => {
       console.log('Activity started:', data.type);
       Alert.alert('Activity started', `An activity of type ${data.type} has started.`);
@@ -395,7 +403,7 @@ export default function EventDetails() {
             }}
           >
             <View style={styles.modalOverlay}>
-                {pollId && socketRef.current && <Poll activityId={pollId} socket={socketRef.current} closePoll={closePoll} />}
+              {pollId && socketRef.current && <Poll activityId={pollId} socket={socketRef.current} closePoll={closePoll} showResults={showResults}/>}
             </View>
           </Modal>
           :

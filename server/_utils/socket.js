@@ -62,7 +62,10 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
         // Initialize poll responses for the activity
         eventRooms[eventRoom].pollResponses[activity._id.toString()] = activity.content.map((question) => {
             return {
-                options: new Array(question.options.length).fill(null).map(() => ({
+                question: question.question,
+                options: question.options.map((option) => ({
+                    id: option.id,
+                    text: option.text,
                     count: 0
                 }))
             }
@@ -74,8 +77,18 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
             }, activityStartTimeDiff);
         }
         if (activityEndTimeDiff > 0) {
-            setTimeout(() => {
-                io.to(eventRoom).emit('poll results', eventRooms[eventRoom].pollResponses[activity._id.toString()]);
+            setTimeout(async () => {
+                const results = {content: eventRooms[eventRoom].pollResponses[activity._id.toString()]};
+                try {
+                    await activityModel.findByIdAndUpdate(
+                        activity._id.toString(),
+                        results,
+                        { new: true }
+                    );
+                } catch (err) {
+                    console.error(err);
+                }
+                io.to(eventRoom).emit('poll results', activity, results);
             }, activityEndTimeDiff);
     }
     } else {

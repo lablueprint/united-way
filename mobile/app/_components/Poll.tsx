@@ -7,10 +7,11 @@ interface PollCardProps {
     activityId: string;
     socket: Socket;
     closePoll: () => void;
+    showResults: Boolean;
 }
 
 // Note: the Polls take in a Poll activity id. 
-export default function Poll({ activityId, socket, closePoll }: PollCardProps) {
+export default function Poll({ activityId, socket, closePoll, showResults }: PollCardProps) {
     const [poll, setPoll] = useState<PollInterface>();
     const [questionIndex, setQuestionIndex] = useState<number>(0); // tracking question index for each poll
     const [responses, setResponses] = useState<(number | null)[]>([]);
@@ -72,7 +73,7 @@ export default function Poll({ activityId, socket, closePoll }: PollCardProps) {
     }, [activityId]);
 
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
             {poll ? (
 
                 <View key={poll._id} style={styles.pollCard}>
@@ -83,9 +84,16 @@ export default function Poll({ activityId, socket, closePoll }: PollCardProps) {
                     {poll.content[questionIndex]?.options.map((option) => (
                         <View key={option.id} style={styles.optionContainer}>
                             <Text style={styles.optionText}>
-                                {option.text} {responses[questionIndex] === option.id ? '✓' : ''}
+                                {option.text} {!showResults && responses[questionIndex] === option.id ? '✓' : ''}
                             </Text>
-                            <Button title={option.text} onPress={() => handleVote(poll._id, option.id)} />
+                            {
+                                showResults ?
+                                <Text style={styles.optionText}>
+                                    {option.count} votes
+                                </Text>
+                                :
+                                <Button title={option.text} onPress={() => handleVote(poll._id, option.id)} />
+                            }
                         </View>
                     ))}
 
@@ -103,11 +111,19 @@ export default function Poll({ activityId, socket, closePoll }: PollCardProps) {
                         />
                     </View>
 
-                    <Button
-                        title="Submit"
-                        onPress={() => {handleSubmit()}}
-                        disabled={responses.some((response) => response === null)}
-                    />
+                    {
+                        showResults ?
+                        <Button
+                            title="Close"
+                            onPress={() => {closePoll()}}
+                        />
+                        :
+                        <Button
+                            title="Submit"
+                            onPress={() => {handleSubmit()}}
+                            disabled={responses.some((response) => response === null)}
+                        />
+                    }
 
                     <View style={styles.progressBarContainer}>
                         <View
@@ -123,14 +139,14 @@ export default function Poll({ activityId, socket, closePoll }: PollCardProps) {
             ) : (
                 <Text style={styles.loadingText}>Loading poll...</Text>
             )}
-        </ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: 10,
+        justifyContent: 'center',
     },
     pollCard: {
         backgroundColor: '#2c2c2c',
