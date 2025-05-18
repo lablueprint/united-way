@@ -1,37 +1,24 @@
 "use client";
-import axios, { AxiosResponse } from "axios";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
 import EventCard from "@/app/_components/EventCard";
-import EventCreator from "@/app/_components/EventCreator";
+import EventEditor from "@/app/_components/EventEditor";
 import EventCarousel from "@/app/_components/EventCarousel";
 import NoMoreEventsTrigger from "@/app/_components/NoMoreEvents";
-import emptyLogo from '../../../../public/images/logo-blue-50.svg';
-import addIcon from '../../../../public/images/add-icon.svg';
-import rightArrow from '../../../../public/images/right-arrow.svg';
+import useApiAuth from '@/app/_hooks/useApiAuth';
+import { RequestType } from '@/app/_interfaces/RequestInterfaces';
+import { UseDispatch } from 'react-redux';
+import { EventData } from '@/app/_interfaces/EventInterfaces';
+import { refresh } from '../../_utils/redux/orgSlice';
 import Image from "next/image";
-import single from '../../../../public/images/single-event.svg';
-import attendee from '../../../../public/images/attendee.svg';
+import { emptyLogo, addIcon, rightArrow, single, attendee } from '../../../../public/Landing/Landing-index';
+
 import { useState, useEffect } from "react";
-import './home.css';
+import axios, { AxiosResponse } from 'axios';
+import styles from "./page.module.css"
 
 export default function Landing() {
-  const [responseValue, setResponseValue] = useState();
-  const dispatch = useDispatch();
-  const router = useRouter();
-  interface RootState {
-    auth: {
-      orgId: string;
-      authToken: string;
-      refreshToken: string;
-    };
-  }
-
-  const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-  const dispatchLogout = async () => {
-    await dispatch(logout());
-  }
 
   interface EventData {
     _id: string;
@@ -48,38 +35,23 @@ export default function Landing() {
     imageURL: string;
     // activities: Activity[];
   }
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [org, sendRequest] = useApiAuth();
 
-  const isToday = ( inputDate : Date ) => {
-    const today = new Date();
-
-    return ((inputDate.getDate() == today.getDate()) &&
-       (inputDate.getMonth() == today.getMonth()) &&
-       (inputDate.getFullYear() == today.getFullYear()));
+  const dispatchLogout = async () => {
+    await dispatch(logout());
   }
-
-  const isUpcoming = ( inputDate : Date ) => {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    const copyInput = new Date(inputDate); //prevent mutating original 
-    copyInput.setHours(0,0,0,0);
-    
-    return copyInput >= today;
-  }
-
   // event schema has the date as a string right now, but needs to be event object
   const location = "Los Angeles, CA";
   const startTime = "12:00"; // need to figure out am/pm stuff later
   const endTime = "12:01";
 
-  const getMonthAbbreviation = (date: Date) => {
-    return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
-  };
-
   // pulling events and organizer info
-  const [atBottom, setAtBottom] = useState(false);
   const [eventIds, setEventIds] = useState<string[]>([]);
   const [orgName, setOrgName] = useState<string>("");
+  const [editingId, setEditingId] = useState<string>("");
+  // const [draftIds, setDraftIds] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [upcomingIds, setUpcomingIds] = useState<string[]>([]);
   const [todayIds, setTodayIds] = useState<string[]>([]);
@@ -105,6 +77,25 @@ export default function Landing() {
     setEventIds(eventIds.filter((eventId) => eventId != id));
   };
 
+
+  const isToday = ( inputDate : Date ) => {
+    const today = new Date();
+
+    return ((inputDate.getDate() == today.getDate()) &&
+       (inputDate.getMonth() == today.getMonth()) &&
+       (inputDate.getFullYear() == today.getFullYear()));
+  }
+
+  const isUpcoming = ( inputDate : Date ) => {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const copyInput = new Date(inputDate); //prevent mutating original 
+    copyInput.setHours(0,0,0,0);
+    
+    return copyInput >= today;
+  }
+
   const getEventById = async (id: string) => {
     try {
         const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${id}`, {
@@ -120,6 +111,37 @@ export default function Landing() {
         return err;
     }
 };
+
+const createBlankEvent = async () => {
+  try {
+    const requestType = RequestType.POST;
+    const endpoint = "events/orgs/:id/createEvent";
+    const body = {
+      name: "Your Event Name",
+      date: new Date(),
+      duration: 0, // Hardcoded for now
+      draft: true,
+      draftList: [],
+      description: "Your Event Description",
+      startTime: '12:00',
+      endTime: '12:01',
+      location: {
+        type: "Point",
+        coordinates: [0, 0]
+      },
+      organizerID: org.orgId,
+      tags: [],
+      registeredUsers: [], // Hardcoded for now
+      activity: [], // Hardcoded for now
+      image: "placeholder" // Hardcoded for now
+    };
+    const data = await sendRequest({ requestType, endpoint, body });
+    return data._id;
+  } catch (err) {
+    console.log(err);
+    return ""
+  }
+}
 
 useEffect(() => {
   const fetchTodayEvent = async () => {
@@ -154,67 +176,23 @@ useEffect(() => {
   }
 }, [todayIds]);
 
-
-// // Auto Scroll for Slider
-// useEffect(() => {
-//   if (visibleEvents.length < 4) return;
-
-//   const interval = setInterval(() => {
-//     setFocusIndex(prev => {
-//       if (prev < 3) {
-//         return prev + 1; // move focus down
-//       } else {
-//         // shift window
-//         const nextEvent = allEvents[nextItemIndex % allEvents.length];
-//         const newVisible = [nextEvent, ...visibleEvents.slice(0, 3)];
-//         setVisibleEvents(newVisible);
-//         setNextItemIndex(i => (i + 1) % allEvents.length);
-//         return 0; // focus resets to top
-//       }
-//     });
-//   }, 2000);
-
-//   return () => clearInterval(interval);
-// }, [visibleEvents, nextItemIndex, allEvents]);
-
-
 useEffect(() => {
-  // Get organization info
-  const getOrganizationData = async () => {
-    try {
-      const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${org.authToken}`
-        }
-      });
-      const { data } = response.data;
-      setOrgName(data.name);
-    }
-    catch (err) {
-      console.log(err);
-    }} 
-    // Get all events
     const getOrganizerEvents = async () => {
       try {
-        const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/filtered`,
-          {
-            organizerID: org.orgId
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${org.authToken}`
-            }
-          }
-        );
-        const { data } = response.data;
+        const requestType = RequestType.POST;
+        const endpoint = "events/filtered";
+        const body = {
+          organizerID: org.orgId,
+          draft: false
+        };
+        const data = await sendRequest({ requestType, body, endpoint })
+        console.log('data', data)
         const normalizedEventData = data.map((event : EventData) => ({
           ...event,
           date: new Date(event.date),
         }))
 
+        setOrgName("Kimberly");
         setTodayIds((normalizedEventData.filter((event: EventData) => isToday(event.date) == true)).map((event: EventData) => event._id));
         setUpcomingIds(
           normalizedEventData
@@ -227,35 +205,41 @@ useEffect(() => {
         console.log(err);
       }
     }
-    getOrganizationData();
+    
     getOrganizerEvents();
   }, []);
 
   return (
-    <div className="body">
-      <div className="nav-bar"> 
-        <button className="button" onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
+    <div className={styles.body}>
+      <div className={styles.navBar}> 
+        <button className={styles.button} onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
           Log out
         </button>
       </div>
-      <div className="hero">      
-        <div className="hero-info">
-          <div className="hero-header">
-            <h1 className="hero-welcome">Welcome, {orgName}</h1>
-            <p className="hero-text">This is your admin portal. You’re able to manage events and rewards for users.</p>
+      <div className={styles.hero}>      
+        <div className={styles.heroInfo}>
+          <div className={styles.heroHeader}>
+            <h1 className={styles.heroWelcome}>Welcome, {orgName}</h1>
+            <p className={styles.heroText}>This is your admin portal. You’re able to manage events and rewards for users.</p>
           </div>
           <button 
-            className="button"
-            onClick={() => {setIsEditing(!isEditing)}}  
-          >
+            className={styles.button}
+            onClick={ async () => { 
+              const _id = await createBlankEvent()
+
+              if (_id != "") {
+                setIsEditing(!isEditing)
+                setEditingId(_id);
+              }
+            }}>
             <Image src={addIcon} alt="Plus icon for creating a new event" width={10}/>
             {isEditing ? "Cancel Event" : "Create Event"}
           </button>
         </div>
       </div>
       { upcomingIds.length > 0 ? (
-        <div className="content">
-          <div className="event-container">
+        <div className={styles.content}>
+          <div className={styles.eventContainer}>
             {/* If no events today, display empty event screen. */}
             { todayIds.length > 0 ? (
               <div>
@@ -286,28 +270,28 @@ useEffect(() => {
                 </div>
               </div>
             ) : ( 
-              <div className="empty-list">
-                <div className="empty-list-container">
-                  <h2 className="empty-title">Events Today</h2>
-                  <div className="empty-content-container">
-                    <div className="empty-img-container">
+              <div className={styles.emptyList}>
+                <div className={styles.emptyListContainer}>
+                  <h2 className={styles.emptyTitle}>Events Today</h2>
+                  <div className={styles.emptyContentContainer}>
+                    <div className={styles.emptyImgContainer}>
                       <Image width={80} src={emptyLogo} alt="United Way Logo Sheer Blue"/>
                     </div>
-                    <p className="empty-text">No events today.</p>
+                    <p className={styles.emptyText}>No events today.</p>
                   </div>
                 </div>
               </div>
             )} 
           </div>
-          <div className="event-container">
-            <div className="list-title">
-              <h2 className="subtitle">Upcoming Events</h2>
-              <h2 className="subtitle-link">View All Events <Image className="arrow-icon" width={11} src={rightArrow} alt="Right Arrow Icon"/></h2>
+          <div className={styles.eventContainer}>
+            <div className={styles.listTitle}>
+              <h2 className={styles.subtitle}>Upcoming Events</h2>
+              <h2 className={styles.subtitleLink}>View All Events <Image className="arrow-icon" width={11} src={rightArrow} alt="Right Arrow Icon"/></h2>
             </div>
-            <div className="event-list upcoming-list">
+            <div className={`${styles.eventList} ${styles.upcomingList}`}>
               { upcomingIds.length > 0  && upcomingIds.map((id: string) => {
                 return (
-                  <EventCard id={id} key={id} removeFromList={removeFromList} />
+                  <EventCard id={id} key={id} removeFromList={removeFromList} orgName={orgName} />
                 );
               })}
             </div>
@@ -316,29 +300,16 @@ useEffect(() => {
         </div>
         
         ) : (
-          <div className="empty-event">
-            <div className="empty-content">
+          <div className={styles.emptyEvent}>
+            <div className={styles.emptyContent}>
               <Image src={emptyLogo} alt="United Way Sheer Blue Logo" width={80}/>
-              <p className="empty-text">No upcoming events.</p>
+              <p className={styles.emptyText}>No upcoming events.</p>
             </div>
           </div>
 
         )}
             
-      <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
-        Log out
-      </button>
-      <button onClick={() => setIsEditing(!isEditing)}>
-        {isEditing ? "Cancel Event" : "Create Event"}
-      </button>
-      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} />}
-      <div>
-
-        Org: {org.orgId}<br />
-        Auth: {org.authToken}<br />
-        Refresh: {org.refreshToken}<br />
-      </div>
-
+            {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={editingId} justCreated={true} />}
     </div>
   );
   

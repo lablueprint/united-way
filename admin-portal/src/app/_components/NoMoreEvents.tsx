@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './NoMoreEvents.css';
-import emptyLogo from '../../../public/images/logo-blue-50.svg';
+import { emptyLogo } from '../../../public/Landing/Landing-index';
 import Image from 'next/image';
 
 export default function NoMoreEventsTrigger() {
@@ -11,8 +11,9 @@ export default function NoMoreEventsTrigger() {
         const scrollY = window.scrollY;
         const windowHeight = window.innerHeight;
         const pageHeight = document.body.offsetHeight;
-  
-        const nearBottom = scrollY + windowHeight >= pageHeight - 150;
+        
+        const buffer = windowHeight * 0.7;
+        const nearBottom = scrollY + windowHeight >= pageHeight - buffer;
         setVisible(nearBottom);
       };
   

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Button } from 'react-native';
-import axios from 'axios';
+
+import useApiAuth from '../_hooks/useApiAuth';
+import { RequestType } from '../_interfaces/RequestInterfaces';
 
 interface PollCardProps {
     activityId: string;
@@ -10,6 +12,7 @@ interface PollCardProps {
 export default function Poll({ activityId }: PollCardProps) {
     const [poll, setPoll] = useState<PollInterface>();
     const [questionIndex, setQuestionIndex] = useState<number>(0); // tracking question index for each poll
+    const [user, sendRequest] = useApiAuth();
 
     interface Choices {
         id: number;
@@ -30,9 +33,10 @@ export default function Poll({ activityId }: PollCardProps) {
 
     const fetchPoll = async () => {
         try {
-            const { data } = await axios.get(
-                `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/${activityId}`
-            );
+            const body = {};
+            const requestType = RequestType.GET;
+            const endpoint = `activities/${activityId}`;
+            const data = await sendRequest({ body, requestType, endpoint });
             setPoll(data.data);
         } catch (error) {
             console.error("Error fetching poll:", error);

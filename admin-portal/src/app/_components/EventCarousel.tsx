@@ -1,8 +1,9 @@
+'use client';
 import { useEffect, useRef, useState } from 'react';
 import '@/app/_styles/EventCarousel.css';
 import Image from 'next/image';
-import placeholderTwo from '../../../public/images/single-event.svg';
-import rightArrowDark from '../../../public/images/right-arrow-dark.svg';
+import placeholderTwo from '../../../public/Landing/images/single-event.svg';
+import rightArrowDark from '../../../public/EventCarousel/images/right-arrow-dark.svg';
 
 export interface EventData {
   _id: string;
@@ -36,55 +37,57 @@ export default function EventCarousel({
 }: Props) {
   const [visibleEvents, setVisibleEvents] = useState<EventData[]>([]);
   const [focusIndex, setFocusIndex] = useState(0);
-  const visibleRef = useRef<EventData[]>([]);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [transitioning, setTransitioning] = useState(false);
+  
+  const totalPages = Math.ceil(events.length / visibleCount);
 
-  // Sync visibleEvents ref
-  useEffect(() => {
-    visibleRef.current = visibleEvents;
-  }, [visibleEvents]);
-
-  // Initialize visible window when events load
+  // Initialize first page on load
   useEffect(() => {
     if (events.length === 0) return;
-    setVisibleEvents(events.slice(0, visibleCount));
+    const start = 0;
+    const end = visibleCount;
+    setVisibleEvents(events.slice(start, end));
     setFocusIndex(0);
+    setPageIndex(0);
   }, [events, visibleCount]);
 
-  // Rotation + focus logic
+  // Auto scroll and rotate pages
   useEffect(() => {
-    if (events.length === 0 || visibleEvents.length === 0) return;
-
+    if (events.length === 0) return;
+  
+    const totalPages = Math.ceil(events.length / visibleCount);
+  
     const interval = setInterval(() => {
       setFocusIndex((prevFocus) => {
         const isAtBottom = prevFocus >= visibleEvents.length - 1;
-
+  
         if (!isAtBottom) {
           return prevFocus + 1;
         }
-
-        // Reset focus
-        if (events.length <= visibleCount) {
-          return 0;
-        }
-
-        // Rotate visible window forward
-        const currentVisible = visibleRef.current;
-        const first = currentVisible[0];
-        const firstIndex = events.findIndex((e) => e._id === first._id);
-        const newStart = (firstIndex - 1 + events.length) % events.length;
-
-        const newWindow = [];
-        for (let i = 0; i < visibleCount; i++) {
-          newWindow.push(events[(newStart + i) % events.length]);
-        }
-
-        setVisibleEvents(newWindow);
-        return 0;
+  
+        // Start transition
+        setTransitioning(true);
+  
+        // After transition duration, switch page
+        setTimeout(() => {
+          const nextPage = (pageIndex + 1) % totalPages;
+          const start = nextPage * visibleCount;
+          const end = start + visibleCount;
+          const nextVisibleEvents = events.slice(start, end);
+  
+          setVisibleEvents(nextVisibleEvents);
+          setPageIndex(nextPage);
+          setFocusIndex(0);
+          setTransitioning(false);
+        }, 300); // Match this to your CSS transition duration
+  
+        return prevFocus; // temporarily freeze focus until transition completes
       });
     }, intervalMs);
-
+  
     return () => clearInterval(interval);
-  }, [events, intervalMs, visibleCount, visibleEvents.length]);
+  }, [events, intervalMs, visibleCount, pageIndex, visibleEvents.length]);
 
   const featuredEvent = visibleEvents[focusIndex];
 
@@ -106,7 +109,7 @@ export default function EventCarousel({
           <div className="list-title">
             <h2 className="subtitle">Events Today</h2>
           </div>
-          <div>
+          <div className={`event-page ${transitioning ? 'page-transition' : ''}`}>
             {visibleEvents.map((event, i) => (
               <div
                 key={`${event._id}-${i}`}
