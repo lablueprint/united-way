@@ -12,6 +12,13 @@
     font-style: italic;
 }
 
+.footerBody {
+    padding: 5rem;
+    display: flex;
+    flex-direction: column;
+    background-color: #F3F3F3;
+}
+
 .orgHeader {
     /* src: url("./_fonts/BarlowCondensed-ExtraBoldItalic.ttf") format("truetype"); */
     font-size: 2rem;

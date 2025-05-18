@@ -4,11 +4,7 @@ import '../_styles/Footer.css';
 
 export default function Footer() {
     return (
-        <div style={{
-            padding: 80,
-            display: "flex",
-            flexDirection: "column"
-        }}>
+        <div className="footerBody">
             { /* Pertinent Information */}
             <div className="sectionA">
                 <div className="sectionA1">
