@@ -18,7 +18,7 @@ export default function StackLayout() {
                 }}
             />
             <Stack.Screen
-                name="profileEditor"
+                name="account"
                 options={{
                     headerShown: false,
                 }}

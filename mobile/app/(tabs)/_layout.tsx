@@ -19,7 +19,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "My Events",
         }}
       />
       <Tabs.Screen
@@ -29,15 +29,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="events"
+        name="rewards"
         options={{
-          title: "Events",
+          title: "Rewards",
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
-          title: "Settings",
+          title: "Profile"
         }}
       />
     </Tabs>

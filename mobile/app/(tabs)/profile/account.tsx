@@ -162,33 +162,21 @@ export default function ProfileEditor() {
 
   return (
     <View style={styles.container}>
+      {/* <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
+        <Image source={{}}></Image>
+      </TouchableOpacity> */}
       <View style={styles.topContainer}>
         <Text style={styles.header}>Account</Text>
-        {/* Picture Editing */}
-        <View style={styles.gridContainer}>
-          <Image
-            source={{ uri: userDetails.profilePicture }}
-            style={styles.profilePicture}
-          />
-          <View style={styles.pictureButtonContainer}>
-            <TouchableOpacity
-              style={styles.changeBlock}
-              onPress={() => navigateTo('/profile/pictureChanger')}>
-              <Text style={styles.changePicture}>Change Picture</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.deleteBlock}
-              onPress={() => { deletePic("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s") }}>
-              <Text style={styles.deletePicture}>Delete Picture</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* Basic information */}
         <View>
-          <Text style={styles.basicHeader}>   Basic</Text>
+          <Text style={styles.basicHeader}>
+            BASIC INFORMATION
+          </Text>
           <View style={styles.formContainer}>
-            <Text style={styles.label}>    Name:</Text>
+            <Text style={styles.label}>
+              FIRST NAME
+            </Text>
             <TextInput
               style={styles.input}
               placeholder={userDetails.name}
@@ -232,41 +220,7 @@ export default function ProfileEditor() {
               <AntDesign name="up" size={20} color="#666666" />
             </Animated.View>
           </TouchableOpacity>
-
-          {isExpanded && (
-            <View style={styles.formContainer}>
-              <Text style={styles.label}>    Location:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={userDetails.demographics.community}
-                onChangeText={(text) => setCommunity(text)}
-                value={community}
-              />
-              <Text style={styles.label}>    Interests:</Text>
-              <View style={styles.stampsGrid}>
-                {collectedStamps.map((stamp, index) => (
-                  <View key={index} style={styles.stampBlock}>
-                    <Text style={styles.stampText}>{stamp}</Text>
-                    <TouchableOpacity
-                      style={styles.deleteStampButton}
-                      onPress={() => handleDeleteStamp(stamp)}
-                    >
-                      <Text style={styles.deleteIcon}>×</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
         </View>
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
-          <Text style={styles.buttonText}>Back to Profile</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );

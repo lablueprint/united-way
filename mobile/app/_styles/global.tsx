@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native"
-export const Colors = {
+export const Color = {
     uwBlue: "#0B57B3",
-    uwDarkBlue: "#030230",
+    uwDarkBlue: "#10167F",
     uwOrange: "#FBA541",
     uwLightBlue: "#E7F3FE",
     uwWhite: "#FFFFFF",
