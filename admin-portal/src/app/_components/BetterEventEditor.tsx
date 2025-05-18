@@ -4,7 +4,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import { LocationProps, EventTags, EventData } from "../_interfaces/EventInterfaces";
 import Image from 'next/image'
-import { add_photo, banner, down_arrow, draft, hero, right_arrow, user } from '../../../public/BetterEventEditor/BetterEventEditor-index'
+import AddTagsModal from "./AddTagsModal";
+import { add_photo, down_arrow, draft, hero, right_arrow} from '../../../public/BetterEventEditor/BetterEventEditor-index'
 import '../_styles/BetterEventEditor.css';
 
 interface EventEditorProps {
@@ -19,10 +20,13 @@ export default function BetterEventEditor() {
     const [longitude, setLongitude] = useState<number>(0);
     const [options, setOptions] = useState<LocationProps[]>([]);
     const [address, setAddress] = useState<string>("");
+    const [tags, setTags] = useState<boolean[]>(Array(EventTags.length).fill(false));
+    const selectedTagColors = ["tag-selected-red", "tag-selected-salmon", "tag-selected-yellow"];
 
     const [isEditingEventTitle, setIsEditingEventTitle] = useState<boolean>(false);
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
     const [isEditingLocation, setIsEditingLocation] = useState<boolean>(false);
+    const [isDisplayingTagModal, setIsDisplayingTagModal] = useState<boolean>(false);
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken }})
 
@@ -75,13 +79,12 @@ export default function BetterEventEditor() {
             {/* Events header */}
             <div className="event-header">
                 <div className="event-header-info">
-                    {/* TODO: Not hardcode this probably */}
                     <div className="event-directory-path">
                         <div>Home</div>
                         <div className="right-arrow"><Image src={right_arrow} alt="Right Arrow Icon" width={8} height={13} /></div>
                         <div>Events</div>
                         <div className="right-arrow"><Image src={right_arrow} alt="Right Arrow Icon" width={8} height={13} /></div>
-                        <div className="event-directory-path-eventname">Untitled Page</div>
+                        <div className="event-directory-path-eventname">{eventTitle.length == 0 ? "Untitled Event" : eventTitle}</div>
                     </div>
                 </div>
                 <div className="event-header-events-title">EVENTS</div>
@@ -114,11 +117,32 @@ export default function BetterEventEditor() {
                                 </div>
                             </div>
                         </div>
+                        <div className="tags-title">
+                            SELECT KEYWORDS
+                        </div>
                         <div className="tags-parent">
-                            <div className="tags-title">
-                                Select Keywords
+                            <div className="tags-container">
+                                {
+                                    isDisplayingTagModal ?
+                                    (<AddTagsModal tags={tags} setTags={setTags} setIsDisplayingTagModal={setIsDisplayingTagModal} />)
+                                    :
+                                    EventTags.map((_, index) => {
+                                        return (
+                                            tags[index] ?
+                                            <div 
+                                                className={selectedTagColors[(index) % 3]}
+                                                key={index}>
+                                                {EventTags[index]}
+                                            </div>
+                                            :
+                                            <React.Fragment key={index}></React.Fragment>
+                                        )
+                                    })
+                                }
                             </div>
-                            {/* TODO: Add the button stuffs */}
+                            <div className="add-tag-button" onClick={() => {setIsDisplayingTagModal(true)}}>
+                                + ADD TAG
+                            </div>
                         </div>
                     </div>
                     <div className="event-detail-fields">

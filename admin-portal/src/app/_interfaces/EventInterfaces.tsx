@@ -27,10 +27,7 @@ export const EventTags: string[] = [
     'Wellness',
     'Music',
     'Pets',
-    'Shopping',
-    'Reading',
     'Travel',
-    'Home',
     'Vehicles'
 ];
 
