@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { io, Socket } from "socket.io-client";
 import { useRef } from 'react';
 import Poll from '../../_components/Poll';
+import Announcement from '../../_components/Announcement';
 
 interface EventData {
   _id: string;
@@ -51,8 +52,9 @@ export default function EventDetails() {
   const [joinedRaffles, setJoinedRaffles] = useState(false);
   const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
   const [pollVisible, setPollVisible] = useState(false);
-  // const [pollId, setPollId] = useState<string | null>('681450cd93079c13520ccbf7');
+  const [announcementVisible, setAnnouncementVisible] = useState(false);
   const [pollId, setPollId] = useState<string | null>(null);
+  const [announcementId, setAnnouncementId] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const { id, origin } = useLocalSearchParams();
   const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
@@ -215,7 +217,10 @@ export default function EventDetails() {
 
   const closePoll = () => {
     setPollVisible(false);
-    setPollId(null);
+  }
+
+  const closeAnnouncement = () => {
+    setAnnouncementVisible(false);
   }
 
   const listenForEventUpdates = () => {
@@ -231,24 +236,30 @@ export default function EventDetails() {
     });
     socket?.on('event end', (data) => {
       closePoll();
+      closeAnnouncement();
       console.log('Event ended:', data.name);
       Alert.alert('Event ended', `The event ${data.name} has ended!`);
     });
-    socket?.on('announcement', (data) => {
-      console.log('Announcement:', data.content[0].text);
-      Alert.alert('Announcement', data.content[0].text);
-    })
-    socket?.on('poll', (data) => {
+    socket?.on('announcement start', (id) => {
+      console.log('Announcement starting');
+      setAnnouncementVisible(true);
+      setAnnouncementId(id);
+    });
+    socket?.on('announcement end', (id) => {
+      console.log('Announcement ending');
+      setAnnouncementVisible(false);
+      setAnnouncementId(null);
+    });
+    socket?.on('poll', (id) => {
       console.log('Poll starting');
       setShowResults(false);
       setPollVisible(true);
-      setPollId(data._id);
+      setPollId(id);
     });
-    socket?.on('poll results', (data, results) => {
+    socket?.on('poll results', (id) => {
       setShowResults(true);
       setPollVisible(true);
-      setPollId(data._id);
-      console.log('Poll results:', results);
+      setPollId(id);
     })
     socket?.on('activity start', (data) => {
       console.log('Activity started:', data.type);
@@ -259,15 +270,15 @@ export default function EventDetails() {
       Alert.alert('Activity ended', `An activity of type ${data.type} has ended.`);
     });
     // Listen for raffle updates
-    socket?.on('new raffle number', (data) => {
-      console.log('New raffle number:', data.raffleNumber);
-      setRaffleNumber(data.raffleNumber);
+    socket?.on('new raffle number', (raffleNumber) => {
+      console.log('New raffle number:', raffleNumber);
+      setRaffleNumber(raffleNumber);
     });
-    socket?.on('raffle winner', (data) => {
-      Alert.alert(`Raffle result: ${data.randomRaffleNumber}`, 'You won the raffle!');
+    socket?.on('raffle winner', (randomRaffleNumber) => {
+      Alert.alert(`Raffle result: ${randomRaffleNumber}`, 'You won the raffle!');
     });
-    socket?.on('raffle loser', (data) => {
-      Alert.alert(`Raffle result: ${data.randomRaffleNumber}`, 'You did not win the raffle. Better luck next time!');
+    socket?.on('raffle loser', (randomRaffleNumber) => {
+      Alert.alert(`Raffle result: ${randomRaffleNumber}`, 'You did not win the raffle. Better luck next time!');
     });
     // Listen for disconnection
     socket?.on('disconnect', () => {
@@ -405,6 +416,23 @@ export default function EventDetails() {
           >
             <View style={styles.modalOverlay}>
               {pollId && socketRef.current && <Poll activityId={pollId} socket={socketRef.current} closePoll={closePoll} showResults={showResults}/>}
+            </View>
+          </Modal>
+          :
+          <></>
+        }
+        {(registeredUsers).includes(user.userId) ?
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={announcementVisible}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+              setPollVisible(!announcementVisible);
+            }}
+          >
+            <View style={styles.modalOverlay}>
+              {announcementId && socketRef.current && <Announcement activityId={announcementId} closeAnnouncement={closeAnnouncement} />}
             </View>
           </Modal>
           :

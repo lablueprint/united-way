@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Button } from "react-native";
 import axios from "axios";
 
 interface AnnouncementProps {
   activityId: string;
+  closeAnnouncement: () => void;
 }
 
-export default function Announcement({ activityId }: AnnouncementProps) {
+export default function Announcement({ activityId, closeAnnouncement }: AnnouncementProps) {
   const [announcement, setAnnouncement] = useState<AnnouncementData>();
 
   interface AnnouncementData {
@@ -41,19 +42,21 @@ export default function Announcement({ activityId }: AnnouncementProps) {
   }
 
   return (
-    <ScrollView>
-      <View key={announcement._id} style={styles.card}>
-        <Text style={styles.timeText}>
-          Aired on: {new Date(announcement.timeStart).toLocaleString()}
-        </Text>
+    <View key={announcement._id} style={styles.card}>
+      <Text style={styles.timeText}>
+        Aired on: {new Date(announcement.timeStart).toLocaleString()}
+      </Text>
 
-        {announcement.content.map((textObj, index) => (
-          <Text key={index} style={styles.announcementText}>
-            {textObj.text}
-          </Text>
-        ))}
-      </View>
-    </ScrollView>
+      {announcement.content.map((textObj, index) => (
+        <Text key={index} style={styles.announcementText}>
+          {textObj.text}
+        </Text>
+      ))}
+      <Button
+        title="Close"
+        onPress={() => {closeAnnouncement()}}
+      />
+    </View>
   );
 }
 

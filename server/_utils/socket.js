@@ -20,10 +20,10 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
                     sockets.forEach((socketId) => {
                         const socket = io.sockets.sockets.get(socketId);
                         if (socket.raffleNumber === randomRaffleNumber) {
-                            socket.emit('raffle winner', { randomRaffleNumber });
+                            socket.emit('raffle winner', randomRaffleNumber);
                         }
                         else {
-                            socket.emit('raffle loser', { randomRaffleNumber });
+                            socket.emit('raffle loser', randomRaffleNumber);
                         }
                     });
                     // Regenerate random raffle numbers for all clients in the raffle room
@@ -36,7 +36,7 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
                         } while (eventRooms[eventRoom].usedRaffleNumbers.has(raffleNumber));
                         eventRooms[eventRoom].usedRaffleNumbers.add(raffleNumber);
                         socket.raffleNumber = raffleNumber;
-                        socket.emit('new raffle number', { raffleNumber });
+                        socket.emit('new raffle number', raffleNumber);
                         console.log(`Generated raffle number: ${raffleNumber}`);
                     });
                 } else {
@@ -48,8 +48,14 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
         if (activityStartTimeDiff > 0) {
             setTimeout(() => {
                 // Let all clients in the event room know the activity is starting
-                io.to(eventRoom).emit('announcement', activity);
+                io.to(eventRoom).emit('announcement start', activity._id.toString());
             }, activityStartTimeDiff);
+        }
+        if (activityEndTimeDiff > 0) {
+            setTimeout(() => {
+                // Let all clients in the event room know the activity is ending
+                io.to(eventRoom).emit('announcement end', activity._id.toString());
+            }, activityEndTimeDiff);
         }
     } else if (activity.type === "poll") {
         // Add entry in eventRooms data structure if it doesn't exist
@@ -74,7 +80,7 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
         if (activityStartTimeDiff > 0) {
             setTimeout(() => {
                 // Let all clients in the event room know the activity is starting
-                io.to(eventRoom).emit('poll', activity);
+                io.to(eventRoom).emit('poll', activity._id.toString());
             }, activityStartTimeDiff);
         }
         if (activityEndTimeDiff > 0) {
@@ -89,7 +95,7 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
                 } catch (err) {
                     console.error(err);
                 }
-                io.to(eventRoom).emit('poll results', activity, results);
+                io.to(eventRoom).emit('poll results', activity._id.toString());
             }, activityEndTimeDiff);
     }
     } else {
