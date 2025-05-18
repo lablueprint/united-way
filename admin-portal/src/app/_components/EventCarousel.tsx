@@ -80,7 +80,7 @@ export default function EventCarousel({
           setPageIndex(nextPage);
           setFocusIndex(0);
           setTransitioning(false);
-        }, 300); // Match this to your CSS transition duration
+        }, 300); 
   
         return prevFocus; // temporarily freeze focus until transition completes
       });
