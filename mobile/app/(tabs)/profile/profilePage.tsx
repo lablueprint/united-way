@@ -3,6 +3,8 @@ import { View, Text, Image, Button, TouchableOpacity, StyleSheet } from 'react-n
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
+import { useFonts } from 'expo-font';
+
 import useApiAuth from '@/app/_hooks/useApiAuth';
 import { RequestType } from '@/app/_interfaces/RequestInterfaces';
 
@@ -13,10 +15,11 @@ interface UserDetails {
     password: string,
     profilePicture: string,
     dateJoined: string,
+    isTemporary: boolean,
 }
 
 export default function Profile() {
-    const [userDetails, setUserDetails] = useState<UserDetails>({ name: "Subaru", phoneNumber: "", email: "", password: "", profilePicture: "", dateJoined: "" });
+    const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
     const router = useRouter();
     const [user, sendRequest] = useApiAuth();
 
@@ -44,6 +47,17 @@ export default function Profile() {
             router.push(`${route}?details=${encodedDetails}`);
         }
     };
+
+    console.log(userDetails)
+    if (userDetails == undefined || userDetails.isTemporary == true) {
+        return (
+            <View>
+                <Text>
+                    Testing.
+                </Text>
+            </View>
+        )
+    }
 
     return (
         <View style={styles.container}>
