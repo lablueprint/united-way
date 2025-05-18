@@ -1,8 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef} from 'react';
 import axios, { AxiosResponse } from "axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
-import './styles.css';
+import "../_styles/UpcomingCalendar.css"
+import { ChevronLeft, ChevronRight, Edit} from "lucide-react"
+
+
 
 interface Event {
   organizerId: string;
@@ -17,17 +20,37 @@ interface Event {
   tags: [];
   registeredUsers: [];
   activities: [];
+  locationString: string;
 }
 
+
 const UpcomingCalendar = () => {
-  const [calendarState, setCalendarState] = useState(0); // 0 - calendar view, 1 - list view
+  const [viewMode, setViewMode] = useState("Default")
   const [selectedWeek, setSelectedWeek] = useState('');
-  
   const [eventData, setEventData] = useState<{ [date: string]: Event[] }>({});
   const [selectedDate, setSelectedDate] = useState<Event[] | null>(null);
-  const [selectedWeekLabel, setSelectedWeekLabel] = useState('Select Week');
-  const selectedWeekRef = useRef(selectedWeek);
-  const selectedWeekLabelRef = useRef(selectedWeekLabel);
+  const [selectedWeekLabel, setSelectedWeekLabel] = useState('');
+  const [indexOfWeek, setIndex] = useState(0);
+  const [indexOfDay, setDayIndex] = useState(-1);
+  const indexRef = useRef(-1);
+  const selectedWeekRef = useRef('');
+  const selectedWeekLabelRef = useRef('');
+  const [firstRender, setFirstRender] = useState(0)
+  const [currentMonth, setCurrentMonth] = useState('')
+  const [activeTab, setActiveTab] = useState("All")
+  const activeTabRef = useRef("All");
+  const [listEvents, setListEvents] = useState<Event[]>([])
+  const listEventsRef = useRef([])
+
+  const dayNames = [
+    { day: "SUN"},
+    { day: "MON"},
+    { day: "TUE"},
+    { day: "WED"},
+    { day: "THU"},
+    { day: "FRI"},
+    { day: "SAT"},
+  ]
 
   const org = useSelector((state: RootState) => ({
     orgId: state.auth.orgId,
@@ -35,272 +58,676 @@ const UpcomingCalendar = () => {
     refreshToken: state.auth.refreshToken
   }));
 
-  const changeState = async () => {
-    if (calendarState === 0) setCalendarState(1);
-    if (calendarState === 1) setCalendarState(0);
-    console.log("SelectedWeek: " + selectedWeek);
-  };
-  const formatStartTime = (inputDate: string) => {
-    // Extract the time portion from the input string (e.g., "11:09:14 PM")
-    const timePart = inputDate.split(', ')[1];  
-
-    // Now we have "11:09:14 PM" and we need to trim the seconds part
-    const formattedTime = timePart.split(':')[0] + ':' + timePart.split(':')[1] + ' ' + timePart.split(' ')[1];
-    return formattedTime;
+  const handleViewMode = async (mode: string) => {
+    setViewMode(mode); 
+    setActiveTab("All");
   }
-    
 
-  const handleDateClick = (event: Event[]) => {
+  const handleDateClick = (event: Event[], index: number) => {
+    setDayIndex(index)
     setSelectedDate(event);
   };
 
-  const formatDate = (date: Date) =>
-    date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const formatDate = useCallback((date: Date) =>
+    date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }),
+    []
+  );
 
-  const formatDateForController = (date: Date) =>
-    date.toISOString().split("T")[0];
+  const formatDateForController = useCallback((date: Date) =>
+    date.toISOString().split("T")[0],
+    []
+  );
 
-  // const parseSelectedWeek = (weekString: string) => {
-  //   const [startDateString, endDateString] = weekString.split("_");
-  //   const startDate = new Date(startDateString);
-  //   const endDate = new Date(endDateString);
-  //   return { startDate, endDate };
-  // };
-
-  const setOrResetSelectedWeek = (week: string) => {
-    console.log("In reset selected week: " + week);
-    const start = week.split("_")[0];
-    const end = week.split("_")[1];
-    console.log("WEEK" + week)
-    console.log("START: " + start + ", "+ new Date(start));
-    console.log("END: " + end + ", " + new Date(end));
-    setSelectedWeekLabel(formatDate(new Date(start)) + ' - ' + formatDate(new Date(end)))
-    selectedWeekLabelRef.current = formatDate(new Date(start)) + ' - ' + formatDate(new Date(end));
-    setSelectedWeek(week);
-    selectedWeekRef.current = week;
-    console.log("REs:"+ formatDate(new Date(start)) + ' - ' + formatDate(new Date(end)))
-    console.log("SELECTEDWEEK" + selectedWeekLabelRef.current)
-    const initialEventData = {}; // Define the initial state
-
-    // Reset eventData to the initial state
-    setEventData(initialEventData);
-    getEventsForWeek();
-  };
-
-  const getUpcomingWeeks = () => {
+  const getUpcomingWeeks = useCallback(() => {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+    const dayOfWeek = today.getDay();
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - dayOfWeek); // Adjust to the start of the week
-  
+    startOfWeek.setDate(today.getDate() - dayOfWeek);
+
     const weeks = [];
     for (let i = 0; i < 4; i++) {
       const start = new Date(startOfWeek);
-      start.setDate(start.getDate() + i * 7); // Move to the start of the ith week
+      start.setDate(start.getDate() + i * 7);
       const end = new Date(start);
-      end.setDate(start.getDate() + 6); // Move to the end of the week
+      end.setDate(start.getDate() + 6);
+      const label = `${formatDate(start)} – ${formatDate(end)}`.toUpperCase();;
+      const value = `${start.toISOString()}_${end.toISOString()}`;
       weeks.push({
-        label: `${formatDate(start)} – ${formatDate(end)}`,
-        value: `${start.toISOString()}_${end.toISOString()}`,
+        label,
+        value,
       });
     }
     return weeks;
-  };
-  
+  }, [formatDate]);
 
-  const weekOptions = getUpcomingWeeks();
-  //console.log("WEEKOPTIONS: ")
-  //console.log(weekOptions)
+  const getNextWeek = async (up: boolean) => {
+    if (up) {
+      setIndex(indexOfWeek+1);
+      indexRef.current = indexOfWeek + 1;
+      const [startISO, endISO] = selectedWeekRef.current.split('_');
+      const startDate = new Date(startISO);
+      const endDate = new Date(endISO);
+      startDate.setDate(startDate.getDate() + 7);
+      endDate.setDate(endDate.getDate() + 7);
+      selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
+      selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
+      setSelectedWeekLabel(selectedWeekLabelRef.current);
+      setSelectedWeek(selectedWeekRef.current);
+    }
+    else if (!up) {
+      setIndex(indexOfWeek-1);
+      indexRef.current = indexOfWeek - 1;
+      const [startISO, endISO] = selectedWeekRef.current.split('_');
+      const startDate = new Date(startISO);
+      const endDate = new Date(endISO);
+      startDate.setDate(startDate.getDate() - 7);
+      endDate.setDate(endDate.getDate() - 7);
+      selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
+      selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
+      setSelectedWeekLabel(selectedWeekLabelRef.current);
+      setSelectedWeek(selectedWeekRef.current);
+    }
+    else {return;}
+    setEventData({});
+    setSelectedDate(null);
+    const [start, end] = selectedWeekRef.current.split('_');
+    const date = new Date(end);
+
+    const monthYear = date.toLocaleString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    });
+
+    setCurrentMonth(monthYear)
+  }
+  const resetTime = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  const getNextMonth = async (up: boolean) => {
+    const [startISO, endISO] = selectedWeekRef.current.split('_');
+    let startDate = new Date(startISO);
+    let endDate = new Date(endISO);
+    startDate = resetTime(startDate);
+    endDate = resetTime(endDate);
+
+    if (up) {
+      setIndex(indexOfWeek+1);
+      indexRef.current = indexOfWeek + 1;
+      const firstOfMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 1);
+      while (!(firstOfMonth >= startDate && firstOfMonth <= endDate)) {
+        startDate.setDate(startDate.getDate() + 7);
+        endDate.setDate(endDate.getDate() + 7);
+        selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
+        selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
+      }
+
+    }
+    else if (!up) {
+      setIndex(indexOfWeek-1);
+      indexRef.current = indexOfWeek - 1;
+      const firstOfMonth = new Date(endDate.getFullYear(), endDate.getMonth() - 1, 1);
+      while (!(firstOfMonth >= startDate && firstOfMonth <= endDate)) {
+        startDate.setDate(startDate.getDate() - 7);
+        endDate.setDate(endDate.getDate() - 7);
+        selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
+        selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
+      }
+    }
+    else {return;}
+    setSelectedWeekLabel(selectedWeekLabelRef.current);
+    setSelectedWeek(selectedWeekRef.current);
+    setEventData({});
+    setSelectedDate(null);
+
+    const [start, end] = selectedWeekRef.current.split('_');
+    const date = new Date(end);
+    const monthYear = date.toLocaleString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    });
+    setCurrentMonth(monthYear)
+  }
+
+  const handleTabClick = async (tab: string) => {
+    console.log("In handle tab click: ", tab);
+    setActiveTab(tab);
+    activeTabRef.current= tab
+    setListEvents([]);
+    listEventsRef.current = [];
+    getAllEvents();
+
+  }
+
+  const getAllEvents = async () => {
+    let mylistEvents = {}
+    try {
+      console.log("In get all events")
+      console.log("Active Tab: ", activeTabRef.current)
+      const response: AxiosResponse = await axios.get(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/tag/${activeTabRef.current}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${org.authToken}`,
+          }
+        }
+      );
+      
+      mylistEvents = response.data;
+    } catch (error) {
+      console.error(`getEventsForWeek: Error fetching all events:`, error);
+      setListEvents([]);
+    }
+    setListEvents(mylistEvents.data);
+    listEventsRef.current = mylistEvents.data;
+    console.log("List Events: ", listEventsRef.current);
+  }
 
   const getEventsForWeek = async () => {
-    // let newEventData = {};
-    if (!selectedWeekRef.current) return; // Exit if no week is selected
-
-    const [startDateString, endDateString] = selectedWeekRef.current.split("_");
+    if (!selectedWeek) {
+      return;
+    }
+    let week = ''
+    if (selectedWeek == '') {
+      week = selectedWeekRef.current
+    } else {
+      week = selectedWeek
+    }
+    const [startDateString, endDateString] = week.split("_");
     const startDate = new Date(startDateString);
     const endDate = new Date(endDateString);
+    console.log("Before getEventsForWeek:", week, " ", startDate, " ", endDate);
 
-    // Loop through each day in the selected week
-    for (let current = new Date(startDate); current <= endDate; current.setDate(current.getDate()+1)) {
+    const newEventData: { [date: string]: Event[] } = {};
+
+    for (let current = new Date(startDate); current <= endDate; current.setDate(current.getDate() + 1)) {
       const formattedDate = formatDate(current);
+      const ISODate = formatDateForController(current);
 
       try {
-        //console.log('Sending in formatted date: ' + current.toISOString());
-        const ISODate = formatDateForController(current);
-        // Fetch events for the current date using the new endpoint
         const response: AxiosResponse = await axios.get(
           `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/byDay/${ISODate}`,
           {
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${org.authToken}`, // Authorization token
+              "Authorization": `Bearer ${org.authToken}`,
             }
           }
         );
-
-        // Update state with the response data for the specific date
-        setEventData((prevData) => ({
-          ...prevData,
-          [formattedDate]: response.data, // Directly assign the response data to the specific date
-        }));
-        //console.log("Got the events for " + formattedDate + " and the events are " + eventData[formattedDate]);
+        
+        newEventData[formattedDate] = response.data;
       } catch (error) {
-        // Handle errors specific to the axios request
-        console.error(`Error fetching events for ${formattedDate}:`, error);
-        // Optionally, you can store an empty array for that date or handle the error differently
-        setEventData((prevData) => ({
-          ...prevData,
-          [formattedDate]: [], // Optionally set an empty array for that date
-        }));
+        console.error(`getEventsForWeek: Error fetching events for ${formattedDate}:`, error);
+        newEventData[formattedDate] = [];
       }
-      //console.log(eventData[formattedDate]);
+    }
+    setEventData(newEventData);
+    console.log("Date selected: ", formatDate(startDate), " Event Data: ", newEventData[formatDate(startDate)]);
+    if (firstRender == 0) {
+      console.log("FIRST ONE")
+      const today = formatDate(new Date())
+      let index = 0;
+      for (const [key] of Object.entries(newEventData)) {
+        if (key == today) {
+          break;
+        }
+        index+=1
+      }
+      console.log("Just eventData and other info:", formatDate(new Date(today)), " ", eventData);
+      handleDateClick(newEventData[formatDate(new Date(today))], index);
+      setFirstRender(1)
+    } else {
+    handleDateClick(newEventData[formatDate(startDate)], 0);
     }
   };
 
-  // const { startDate} = parseSelectedWeek(selectedWeek);
-    console.log("SelectedWeekLabel: ", selectedWeekLabel, "SelectedWeek: ", selectedWeek, "EventData: ", eventData);
-    return (
+  useEffect(() => {
+    if (selectedWeek && viewMode == "Calendar") {
+      getEventsForWeek();
+    }
+    else if (viewMode == "Default") {
+      getAllEvents();
+    } 
+    else {
+      setEventData({});
+      setListEvents([]);
+      listEventsRef.current = [];
+    }
+  }, [selectedWeek, viewMode]);
+
+  useEffect(() =>  {
+    if (firstRender == 0) {
+    const defaultWeeks = getUpcomingWeeks();
+    
+    selectedWeekRef.current = defaultWeeks[0].value;
+    selectedWeekLabelRef.current = defaultWeeks[0].label;
+
+    setSelectedWeekLabel(defaultWeeks[0].label);
+    setSelectedWeek(defaultWeeks[0].value);
+    const [start, end] = defaultWeeks[0].value.split('_');
+    const date = new Date(end);
+
+    const monthYear = date.toLocaleString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    });
+
+    setCurrentMonth(monthYear)
+
+    console.log("Selected Week: ", selectedWeekRef);
+    console.log("Selected Week Label: ", selectedWeekLabelRef);
+    getAllEvents();
+    getEventsForWeek();
+    
+    }
+  }, [])
+
+  useEffect(()=> {
+    setActiveTab("All")
+    activeTabRef.current = "All";
+    
+  }, [viewMode])
+
+
+  console.log("Component Render: currentMonth:", currentMonth);
+
+  return (
+    <div className="events-page">
+
+      <div className = "hero-container">
+        <div className = "hero-logo-container">
+        <div className="hero-logo"></div>
+        </div>
+        <div className = "hero-content">
+          <div className = "hero-text">
+        
+            <div className = "hero-title">
+                EVENTS
+            </div>
+            <div className = "hero-subtitle">
+                View current, published, past and event drafts
+            </div>
+
+          </div>
+          <div className = "hero-button-container">
+            <div className = "hero-button">
+            + CREATE EVENT
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+      <div className={`grey-border ${viewMode === "Default" ? "calendar" : ""}`}></div>
+
       
-    <div className = "calendar-container">
-      <button onClick={getEventsForWeek}>
-        Get Events for this Week
-      </button>
-      <div className = "calendar-title-container">
-      <p className= "calendar-title">Your Upcoming Events</p>
+      
+
+    <div className="calendar-container">
+      {viewMode == "Calendar"? 
+      <>
+      <div className="calendar-header">
+        <div className="tags-container">
+          {["All", "Drafts"].map((tab) => (
+            <button
+              key={tab}
+              className={`list-tab ${activeTab === tab ? "active" : ""}`}
+              onClick={() => handleTabClick(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        <div className = "view-container">
+                <div className="view-text-container">
+                  <div className = "view-text" >VIEW</div>
+                </div>
+                <button
+                  className={`view-tab ${viewMode === "Default" ? "active" : ""}`}
+                  onClick={() => {handleViewMode("Default")}}
+                >
+                  Default
+                </button>
+                <button
+                  className={`view-tab ${viewMode === "Calendar" ? "active" : ""}`}
+                  onClick={() => {handleViewMode("Calendar")}}
+                >
+                  Calendar
+                </button>
+        </div>
+      </div>
+      <div className = "calendar-body">
+      <div className="calendar-navigation">
+        <button className="nav-button" onClick={() => getNextMonth(false)}>
+          <ChevronLeft size={20} />
+        </button>
+        <h2 className="month-title">{currentMonth}</h2>
+        <button className="nav-button" onClick={() => getNextMonth(true)}>
+          <ChevronRight size={20} />
+        </button>
       </div>
 
-      <div className = "calendar-button-container">
-      <div></div>
-      <div className = "calendar-text-button">
-      <p>Filter By Date</p>
-      <select
-      id="week-select"
-      value={selectedWeekLabelRef.current}  
-      onChange={(e) => {console.log(e.target.value); setOrResetSelectedWeek(e.target.value);}}
-    >
-      <option value="" disabled>
-        -- Choose a week --
-      </option>
-      {weekOptions.map((week, index) => (
-        <option key={index} value={week.value}>
-          {week.label}
-        </option>
-      ))}
-    </select>
-    </div>
-    <div className = "calendar-text-button">
-      <p>View</p>
-      <button className = "state-button" onClick={changeState}>
-        {calendarState === 0 ? 'Calendar' : 'List'}
-      </button>
-      </div>
-      </div>
-      {calendarState === 0 ? (
-        <> 
-        <div className="panel">
-        <div className="grid">
+      {/* Calendar Days */}
+      
+      <div className="calendar-days">
+      <button className="nav-button" onClick = {() => getNextWeek(false)}>
+      <ChevronLeft size={16} onClick = {() => getNextWeek(true)}/>
+        </button>
+        <div className="calendar-grid">
+          {/* Day names row */}
+          <div className="days-row">
+            {dayNames.map((day, index) => (
+              <div key={index} className="day-name">
+                {day.day}
+              </div>
+            ))}
+          </div>
 
-            <button>{'<'}</button>
-            <div className = "day">SUN</div>
-            <div className = "day">MON</div>
-            <div className = "day">TUE</div>
-            <div className = "day">WED</div>
-            <div className = "day">THU</div>
-            <div className = "day">FRI</div>
-            <div className = "day">SAT</div>
-            <button>{'>'}</button>
-            <div></div>
-
-          
+          {/* Dates row */}
+          <div className="dates-row">
           {Object.keys(eventData).length === 0 ? (
-  <p>Week not selected</p>
-) : (
-  Object.entries(eventData).map(([date, events]) => (
-    <div key={date} >
-      {/* Pass the events array for the selected date */}
-      <button
-  className="calendar-day-button"
-  onClick={() => handleDateClick(events)}
->
-  {(date[date.length - 2] >= '0' && date[date.length - 2] <= '9')
-    ? (date[date.length - 2] + date[date.length - 1])
-    : date[date.length - 1]}
-</button>
+                <p></p>
+              ) : (
+                Object.entries(eventData).map(([date, events], index) => (
+                  <div key={date} className="date-column">
+                    <button
+                      className={`day-number-container ${index == indexOfDay ? "highlighted" : ""}`}
+                      onClick={() => handleDateClick(events, index)}
+                    >
+                      <div className={`day-number ${date.split(" ")[0] == currentMonth.split(" ")[0].slice(0, 3) ? "samemonth" : ""}`} >
+                      {(date[date.length - 2] >= '0' && date[date.length - 2] <= '9')
+                        ? (date[date.length - 2] + date[date.length - 1])
+                        : date[date.length - 1]}
+                      </div>
+                      <div className="day-dots">
+                      <p>{ 
+                      events.length >= 3 
+                        ? "•••" 
+                        : events.length >= 1 
+                          ? "•" 
+                          : <span style={{ visibility: 'hidden' }}>.</span> 
+                    }</p>
+                    </div>
+                    </button>
+                    
+                  </div>
+                ))
+              )}
+              </div>
+        </div>
+        <button className="nav-button">
+          <ChevronRight size={16} onClick = {() => getNextWeek(true)}/>
+        </button>
+        
       </div>
-  ))
-)}
-</div>
-
-<div className="scroller-container">
-      {selectedDate == null || selectedDate.length === 0 ? (
-        <p>No Events on This Day</p>
-      ) : (
-        selectedDate.map((event) => (
-          
-          <li key={event._id}>
-            <div className = "scroller-item">
-            <div 
-      style={{
-        width: '200px',   // width of the square
-        height: '200px',  // height of the square
-        backgroundColor: "#C2CBD9"  // background color of the square
-      }}
-    >
-    </div>
-
-
-            <h3 className='event-title'>{event.name}</h3>
-            <p className = 'event-des'>
-              {event.description}
-            </p>
-            <div className = "event-time">
-            <p style={{ display: "inline" }} >TODAY | {event.date ? formatStartTime(new Date(event.date).toLocaleString()) : "TBD"}</p>
+      {/* Events List */}
+      <div className="list-group-container current">
+              {selectedDate === null ? (
+                  <p>Loading...</p>
+                ) : selectedDate.length === 0 ? (
+                  <p>No events on this day</p>
+                ) : (
+                selectedDate.map((event) => (
+                  <div key={event._id} className="current-item-container">
+                    <div className="event-image">
+                      <img src={event.image || "/placeholder.svg"} alt="Event" />
+                    </div>
+                    <div className="event-details-container">
+                      <h3 className="event-title">{event.name}</h3>
+                      <div className="event-info">
+                              <span className="event-date">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric'
+                                    }).toUpperCase()
+                                  : "No date"}
+                              </span>
+                              <span className="event-separator">|</span>
+                              <span className="event-time">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleTimeString('en-US', {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true
+                                    })
+                                  : "No time"}
+                              </span>
+                              <div className="event-location">
+                                {event.locationString == "" ? "No location specified" : event.locationString}
+                              </div>
+                              <div className = "attend">
+                                
+                              <div className="attend-image">
+                              <img src="/attend.png" alt="Attend" />
+                              
+                              </div>
+                              <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
+                              </div>
+                              </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-            
-            <p className = "event-location">
-              {event.location.type} -{" "}
-              {event.location.coordinates.length > 0
-                ? `(${event.location.coordinates.join(", ")})`
-                : " Unspecified"}
-            </p>
-            
+      </div>
+      </>: <>
+        <div className = "list-container">
+            <div className = "list-option-container" >
+              <div className = "tags-container">
+              {["All", "Current", "Upcoming", "Drafts", "Past" ].map((tab) => (
+                <button
+                  key={tab}
+                  className={`list-tab ${activeTab === tab ? "active" : ""}`}
+                  onClick={() => handleTabClick(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+              </div>
+              <div className = "view-container">
+                <div className="view-text-container">
+                  <div className = "view-text" >VIEW</div>
+                </div>
+                <button
+                  className={`view-tab ${viewMode === "Default" ? "active" : ""}`}
+                  onClick={() => {handleViewMode("Default")}}
+                >
+                  Default
+                </button>
+                <button
+                  className={`view-tab ${viewMode === "Calendar" ? "active" : ""}`}
+                  onClick={() => {handleViewMode("Calendar")}}
+                >
+                  Calendar
+                </button>
+              </div>
             </div>
-          </li>
-        ))
-      )}
-    </div>
+            <div className = "list-current-container">
+              
+              {listEventsRef.current.length == 0 ? (
+              <p>No events found</p>
+            ) : (
+              
+              Object.entries(listEventsRef.current).map(([groupName, events]) => (
+                <div key={groupName} >
+                  <div className = "event-header"> 
+                    <div className = "current-title">{`${groupName.toUpperCase()} EVENTS`}</div>
+                    <div className = "event-count">{`${listEventsRef.current[groupName].length}`}</div>
+                  </div>
+                  <div   className={`list-group-container ${groupName.toLowerCase()}`}>
+                  {events.map((event: Event, index) => {
+                    if (groupName === "Current") {
+                      return (
+                        <div key={event.id || index} className="current-item-container">
+                          <div className="event-image">
+                            <img src={event.image || "/placeholder.svg"} alt="Event" />
+                          </div>
+                          <div className = "event-details-container">
+                            <h3 className="event-title">{event.name.toUpperCase()}</h3>
+                            <div className="event-info">
+                              <span className="event-date">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric'
+                                    }).toUpperCase()
+                                  : "No date"}
+                              </span>
+                              <span className="event-separator">|</span>
+                              <span className="event-time">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleTimeString('en-US', {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true
+                                    })
+                                  : "No time"}
+                              </span>
+                              </div>
+                              <div className="event-location">
+                                {event.locationString == "" ? "No location specified" : event.locationString}
+                              </div>
+                              <div className = "attend">
+                                
+                              <div className="attend-image">
+                              <img src="/attend.png" alt="Attend" />
+                              
+                              </div>
+                              <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
+                              </div>
+                            </div>
+                        </div>
+                      );
+                    } else if (groupName === "Past") {
+                      return (
+                        <div key={event._id} className="event-item past-event">
+                          <div className="event-details">
+                            <h3 className="event-title">{event.name}</h3>
+                            <span className="event-separator">•</span>
+                            <div className="event-info-past">
+                              <span className="event-date">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric'
+                                    }).toUpperCase()
+                                  : "No date"}
+                              </span>
+                              <span className="event-separator">|</span>
+                              <span className="event-time">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleTimeString('en-US', {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true
+                                    })
+                                  : "No time"}
+                              </span>
+                              <span className="event-location">
+                                {event.locationString == null ? "No location specified" : event.locationString}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    } else if (groupName === "Upcoming") {
+                      return (
+                        <div key={event._id} className="current-item-container">
+                          <div className="event-image">
+                            <img src={event.image || "/placeholder.svg"} alt="Event" />
+                          </div>
+                          <div className = "event-details-container">
+                            <h3 className="event-title">{event.name}</h3>
+                            <div className="event-info">
+                              <span className="event-date">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric'
+                                    }).toUpperCase()
+                                  : "No date"}
+                              </span>
+                              <span className="event-separator">|</span>
+                              <span className="event-time">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleTimeString('en-US', {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true
+                                    })
+                                  : "No time"}
+                              </span>
+                              
+                              </div>
+                              <div className="event-location">
+                                {event.locationString == "" ? "No location specified" : event.locationString}
+                              </div>
+                              <div className = "attend">
+                                
+                              <div className="attend-image">
+                              <img src="/attend.png" alt="Attend" />
+                              
+                              </div>
+                              <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
+                              </div>
+                            </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div key={event._id} className="event-item">
+                          <div className="event-details">
+                            <h3 className="event-title">{event.name}</h3>
+                            <span className="event-separator">•</span>
+                            <div className="event-info">
+                              <span className="event-date">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric'
+                                    }).toUpperCase()
+                                  : "No date"}
+                              </span>
+                              <span className="event-separator">|</span>
+                              <span className="event-time">
+                                {event.date != null
+                                  ? new Date(event.date).toLocaleTimeString('en-US', {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true
+                                    })
+                                  : "No time"}
+                              </span>
+                              <span className="event-separator">•</span>
+                              <span className="event-location">
+                                {event.locationString == null ? "No location specified" : event.locationString}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="edit-right-aligned">
+                            <button className="edit-button">
+                              <Edit size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+                  })}
+                </div>
+                </div>
+              ))
+              
+            )}
+                <div className = "current-item"></div>
+            </div>
 
         </div>
-        </>
-      ) : (
-        // <div>
-        //   {/* List view for displaying events */}
-        //   <div className="events-list">
-        //     {Object.keys(eventData).map((date) => (
-        //       <div key={date}>
-        //         <h3>{date}</h3>
-        //         <ul>
-        //           {eventData[date].map((event) => (
-        //             <li key={event._id}>
-        //               <h3>{event.name}</h3>
-        //             <p><strong>Date:</strong> {event.date ? new Date(event.date).toLocaleString() : "TBD"}</p>
-        //             <p><strong>Description:</strong> {event.description}</p>
-        //             <p><strong>Location:</strong> {event.location.type} - 
-        //               {event.location.coordinates.length > 0
-        //                 ? ` (${event.location.coordinates.join(", ")})`
-        //                 : " Unspecified"}
-        //             </p>
-        //             <p><strong>Tags:</strong> {event.tags.join(", ") || "None"}</p>
-        //             <p><strong>Registered Users:</strong> {event.registeredUsers.length}</p>
-        //             </li>
-        //           ))}
-        //         </ul>
-        //       </div>
-        //     ))}
-        //   </div>
-        // </div>
-        <div>Event List</div>
-      )}
+      
+      </>
+      }
+    </div>
     </div>
   );
 };
