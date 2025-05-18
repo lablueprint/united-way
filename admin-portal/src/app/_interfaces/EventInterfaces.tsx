@@ -19,11 +19,30 @@ export interface Activity {
     active: boolean;
 }
 
+export const EventTags: string[] = [
+    'Sports',
+    'Entertainment',
+    'Food',
+    'Technology',
+    'Wellness',
+    'Music',
+    'Pets',
+    'Shopping',
+    'Reading',
+    'Travel',
+    'Home',
+    'Vehicles'
+];
+
 export interface EventData {
     _id: string;
     name: string;
     date: Date;
+    draft: boolean,
+    draftList: boolean[],
     description: string;
+    startTime: string,
+    endTime: string,
     location: {
         type: string;
         coordinates: number[];

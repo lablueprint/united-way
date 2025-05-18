@@ -1,156 +1,218 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import {
+    StyleSheet,
+    View,
+    Text,
+    TouchableOpacity,
+    SafeAreaView,
+    StatusBar,
+    ImageBackground,
+    Image,
+} from "react-native";
+import React from "react";
+import { useRouter } from "expo-router";
 import { useDispatch } from 'react-redux';
-import { Link, useRouter, Redirect } from 'expo-router';
-import axios, { AxiosResponse } from "axios";
-import * as SecureStore from 'expo-secure-store';
 import { login } from '../_utils/redux/userSlice';
+import axios from "axios";
 
 export default function SignUpScreen() {
-    const [id, setId] = useState("");
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState('');
-    const router = useRouter();
     const dispatch = useDispatch();
+    const handleSignIn = async () => {
+        router.push({ pathname: "/sign-in", params: {} });
+    };
+    const router = useRouter();
 
-    useEffect(() => {
-        const getUser = async () => {
-            const storedUser = await SecureStore.getItemAsync("user");
-            if (storedUser != null) {
-                const parsedUser = JSON.parse(storedUser);
-                setId(parsedUser.userId);
-                dispatch(login({
-                    userId: parsedUser.userId,
-                    authToken: parsedUser.authToken,
-                    refreshToken: parsedUser.refreshToken
-                }));
+    const handleSignUp = async () => {
+        router.push({ pathname: "/sign-up" });
+    };
+
+    const handleTempLogin = async () => {
+        const response: AxiosResponse = await axios.post(
+            `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
+            {
+                isTemporary: true
             }
-        };
-        getUser();
-    }, [])
-
-    if (id) {
-        return <Redirect href="/(tabs)" />
-    }
-
-    const handleAddUser = async () => {
-        // Check if email and password are valid
-        // TODO: Backend password validation
-        if (!validateInputs()) {
-            return;
-        }
-        // Check if email is in database already
-        if (await userExists() != null) {
-            Alert.alert('This email is already associated with an account.');
-            return;
-        }
-        // Add user to database
-        try {
-            const response: AxiosResponse = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
-                {
-                    email: email,
-                    password: password
-                }
-            );
-
-            // Navigate to onboarding screen
-            dispatch(login({
-                userId: response.data.data._id,
-                authToken: response.data.authToken,
-                refreshToken: response.data.refreshToken
-            }))
-
-            router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken} });
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    const userExists = async () => {
-        // Check if email is in database already
-        try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`);
-            return response.data.data;
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    const validateInputs = () => {
-        if (!validateEmail()) {
-            Alert.alert('Enter a valid email.');
-            return false;
-        } else if (!validatePassword()) {
-            Alert.alert('Enter a valid password. Your password must contain at least 12 characters including an uppercase letter, a lowercase letter, a symbol, and a number.')
-            return false;
-        }
-        return true;
-    }
-
-    const validatePassword = () => {
-        // Require 12+ characters including uppercase and lowercase letters, a symbol, and a number
-        return password.match(
-            /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{12,}$/
         );
-    }
-
-    const validateEmail = () => {
-        // Practical implementation of RFC 2822 from https://www.regular-expressions.info/email.html
-        return email.toLowerCase().match(
-            /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-        );
+        const content = response.data;
+        dispatch(login({
+            userId: content.data._id,
+            authToken: content.authToken,
+            refreshToken: content.refreshToken
+        }))
+        router.push({ pathname: "/(tabs)" });
     }
 
     return (
         <View style={styles.container}>
-            <View style={styles.content}>
-                <Text style={styles.text}>
-                    For first-time users:
-                </Text>
-                <TextInput
-                    placeholder="Email"
-                    onChangeText={setEmail}
-                    value={email}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                />
-                <TextInput
-                    placeholder="Password"
-                    onChangeText={setPassword}
-                    value={password}
-                    secureTextEntry
-                />
-                <TouchableOpacity onPress={handleAddUser}>
-                    <Text>
-                    Sign up
-                    </Text>
-                </TouchableOpacity>
-                <Link href="/sign-in">
-                    Already have an account? Sign in
-                </Link>
-                {/* Super special dev button */}
-                {/* <Link href="/(tabs)" style={styles.text}>
-                    Skip this and go home
-                </Link> */}
-            </View>
-            
-        </View>
+            <ImageBackground
+                source={require("../../assets/images/onboarding/splash.png")}
+                style={styles.background}
+            >
+                <StatusBar barStyle="dark-content" />
+                <SafeAreaView style={styles.safeArea}>
+                    <View style={styles.content}>
+                        {/* Main content */}
+                        <View style={styles.mainContent}>
+                            <Image
+                                source={require("../../assets/images/onboarding/uw-logo.png")}
+                                style={styles.logo}
+                            />
+                            <Text style={styles.smallText}>UNITED WAY</Text>
+                            <Text style={styles.title}>
+                                Explore upcoming community events
+                            </Text>
+
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={styles.signUpButton}
+                                    onPress={handleSignUp}
+                                >
+                                    <Text style={styles.signUpButtonText}>Sign Up</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.signInButton}
+                                    onPress={handleSignIn}
+                                >
+                                    <Text style={styles.signInButtonText}>Sign In</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={styles.signInButton} onPress={handleTempLogin}>
+                                    <Text>Get Started Without An Account</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        {/* Language selector */}
+                        <View style={styles.languageContainer}>
+                            <TouchableOpacity style={styles.languageButton}>
+                                <Text style={styles.languageText}>ES</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.languageButton, styles.languageButtonActive]}
+                            >
+                                <Text style={[styles.languageText, styles.languageTextActive]}>
+                                    EN
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View >
+                </SafeAreaView >
+            </ImageBackground >
+        </View >
     );
 }
 
 const styles = StyleSheet.create({
+    background: {
+        flex: 1,
+        resizeMode: "cover",
+    },
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: "white",
+    },
+    safeArea: {
+        flex: 1,
     },
     content: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        paddingHorizontal: 20,
+        justifyContent: "space-between",
     },
-    text: {
-        color: 'black',
-        margin: 24,
-    }
+    placeholderBox: {
+        alignItems: "center",
+        aspectRatio: 1,
+        width: "100%",
+        borderRadius: 12,
+        backgroundColor: "#1815150A",
+        marginTop: 20,
+    },
+    mainContent: {
+        alignItems: "center",
+        justifyContent: "center",
+        flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: "auto",
+    },
+    logo: {
+        marginTop: 80,
+        marginBottom: 30,
+    },
+    smallText: {
+        fontSize: 16,
+        fontFamily: "BarlowCondensedBoldItalic",
+        color: "white",
+        letterSpacing: -0.02 * 16, // -2% kerning
+    },
+    title: {
+        color: "white",
+        fontSize: 48,
+        fontFamily: "BarlowCondensedBoldItalic",
+        textTransform: "uppercase",
+        textAlign: "center",
+        letterSpacing: -0.02 * 48, // -2% kerning
+        marginBottom: 100,
+    },
+    subtitle: {
+        fontSize: 24,
+        color: "#666",
+        marginBottom: 20,
+    },
+    buttonContainer: {
+        width: "100%",
+        gap: 12,
+    },
+    signUpButton: {
+        backgroundColor: "rgb(4, 52, 110)",
+        padding: 16,
+        borderRadius: 50,
+    },
+    signUpButtonText: {
+        color: "white",
+        textAlign: "center",
+        fontSize: 20,
+        fontWeight: "bold",
+        fontFamily: "Helvetica",
+        lineHeight: 24,
+        textTransform: "uppercase",
+    },
+    signInButton: {
+        backgroundColor: "rgb(255, 255, 255)",
+        padding: 16,
+        borderRadius: 50,
+    },
+    signInButtonText: {
+        color: "#10167F",
+        textAlign: "center",
+        fontSize: 20,
+        fontWeight: "bold",
+        fontFamily: "Helvetica",
+        lineHeight: 24,
+        textTransform: "uppercase",
+    },
+    languageContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        marginBottom: 20,
+        marginTop: 15,
+        backgroundColor: "#F2F2F2",
+        borderRadius: 8,
+        padding: 2,
+        alignSelf: "center",
+    },
+    languageButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 6,
+    },
+    languageButtonActive: {
+        backgroundColor: "#10167F",
+    },
+    languageText: {
+        fontSize: 16,
+        color: "#333",
+    },
+    languageTextActive: {
+        color: "white",
+    },
 });

@@ -16,6 +16,8 @@ coverage
 # next.js
 .next/
 out/
+admin-portal/next.config.ts
+mobile/ios
 
 # production
 build
@@ -38,6 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+admin-portal/next.config.ts
 
 ##################################################
 

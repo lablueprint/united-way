@@ -5,7 +5,11 @@ const { generateToken } = require("../controllers/authController")
 
 const getAllUsers = async (req, res) => {
   if (req.auth.role != 'admin') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -27,11 +31,17 @@ const getAllUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
-  if (req.auth.role != 'admin') {
-    res.status(401);
+  if (req.auth.role != 'admin' && req.auth.role != 'user') {
+    res.status(401).json(
+    {
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
+  (req.params["id"])
   try {
     const userbyID = await User.findOne({_id: req.params["id"]});
     res.status(200).json({
@@ -52,7 +62,11 @@ const getUserById = async (req, res) => {
 
 const addEventToUser = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -85,7 +99,11 @@ const addEventToUser = async (req, res) => {
 
 const removeEventFromUser = async (req, res) => {
   if (req.auth.role != 'admin' && req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
   
@@ -137,10 +155,13 @@ const getUserByEmail = async (req, res) => {
 
 const editUserDetails = async (req, res) => {
   if (req.auth.role != 'user') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
-
   try {
     const userbyID = await User.findOneAndUpdate({_id: req.params["id"]}, {$set: req.body}, {new: true}); //Doesn't catch invalid fields
     res.status(200).json({
@@ -159,7 +180,11 @@ const editUserDetails = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   if (req.auth.role != 'user' && req.auth.role != 'admin') {
-    res.status(401);
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {}
+    });
     return;
   }
 
@@ -182,19 +207,34 @@ const deleteUser = async (req, res) => {
 
 const createNewUser = async (req, res) => {
   try {
+    // Creating a temporary account
+    if (req.body == {}) {
+      const user = new User(req.body);
+      await user.save();
+      res.status(201).json({
+        status: "success",
+        message: "User successfully created.",
+        data: user,
+          // Add access, refresh tokens here.
+          authToken: generateToken({tokenType: "access", uid: user._id, role: "user"}),
+          refreshToken: generateToken({tokenType: "refresh", uid: user._id})
+      });
+      return;
+    }
+
     // Salt and hash the password.
     // Note: upon creation, the user should then be signed in on the front-end, so must add refresh/access tokens to reponse
     bcrypt.hash(req.body.password, `$2b$${process.env.SALT_ROUNDS}$${process.env.HASH_SALT}`, async (err, hash) => {
       req.body.password = hash;
-    const user = new User(req.body);
-    await user.save();
-    res.status(201).json({
-      status: "success",
-      message: "User successfully created.",
-      data: user,
-        // Add access, refresh tokens here.
-        authToken: generateToken({tokenType: "access", uid: user._id, role: "user"}),
-        refreshToken: generateToken({tokenType: "refresh", uid: user._id})
+      const user = new User(req.body);
+      await user.save();
+      res.status(201).json({
+        status: "success",
+        message: "User successfully created.",
+        data: user,
+          // Add access, refresh tokens here.
+          authToken: generateToken({tokenType: "access", uid: user._id, role: "user"}),
+          refreshToken: generateToken({tokenType: "refresh", uid: user._id})
       });
     })
   } catch (err) {

@@ -1,32 +1,30 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { useSelector } from 'react-redux';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import WeekCalendar from '../_components/WeekCalendar';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: 24,
     padding: 16,
+    paddingVertical: 72,
   },
+  header: {
+    textTransform: 'uppercase',
+    fontStyle: 'italic',
+    fontWeight: 700,
+    fontSize: 32,
+  }
 });
 
 export default function HomeScreen() {
-  const user = useSelector((state: { auth: { userId: string, authToken: string, refreshToken: string } }) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   return (
-    <View style={styles.container} >
-      <Text>
-        Main home screen test.
-        {
-          `\nuser: ${user.userId}`
-        }
-        {
-          `\nauth: ${user.authToken}`
-        }
-        {
-          `\nrefresh: ${user.refreshToken}`
-        }
-      </Text>
-    </ View>
+    <View style={styles.container}>
+      <WeekCalendar />
+    </View >
   );
 }

@@ -1,6 +1,9 @@
+"use client";
 import React, { useState, useEffect } from "react";
-import axios, { AxiosResponse } from "axios";
 import { Activity, QuizContent } from "../_interfaces/EventInterfaces";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 interface Question {
   title: string;
@@ -11,9 +14,11 @@ interface Question {
 
 interface QuizEditorProp {
   activityId: string;
+  timeStart: Date;
+  timeEnd: Date;
 }
 
-export default function QuizEditor({ activityId }: QuizEditorProp) {
+export default function QuizEditor({ activityId, timeStart, timeEnd }: QuizEditorProp) {
   const [updatedQuestions, setUpdatedQuestions] = useState<Question[]>([]);
   const [activity, setActivity] = useState<Activity>();
   const [questionIndex, setQuestionIndex] = useState<number>(0);
@@ -21,6 +26,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
   const [title, setTitle] = useState<string>("");
   const [choices, setChoices] = useState<string[]>([]);
   const [answers, setAnswers] = useState<number[]>([]);
+  const [org, sendRequest] = useApiAuth();
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -50,11 +56,10 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
   const getActivityById = async (activityID: string) => {
     try {
-      const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityID}`
-      );
-      const { data } = response.data;
-      return data;
+      const body = {};
+      const endpoint = `activities/${activityID}`;
+      const requestType = RequestType.GET;
+      return await sendRequest({ body, endpoint, requestType });
     } catch (err) {
       console.log(err);
       return err;
@@ -91,7 +96,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
   const deleteQuestion = async (questionIndex: number) => {
     try {
-      let newQuestions = [...updatedQuestions];
+      const newQuestions = [...updatedQuestions];
       newQuestions.splice(questionIndex, 1);
 
       const data: { content: Question[] } = await saveQuiz(newQuestions);
@@ -111,13 +116,14 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
     content: Question[]
   ) => {
     try {
-      const response: AxiosResponse = await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        {
-          content: content,
-        }
-      );
-      const { data } = response.data;
+      const body = {
+        content: content,
+        timeStart,
+        timeEnd,
+      };
+      const endpoint = `activities/${activityId}`;
+      const requestType = RequestType.PATCH;
+      const data = await sendRequest({ body, endpoint, requestType });
       setActivity(data);
       setUpdatedQuestions(data.content);
 
@@ -136,6 +142,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
           updatedQuestions.map((_, index) => {
             return (
               <button
+                type="button"
                 style={{ height: "1rem", width: "1rem" }}
                 key={`b${index}`}
                 onClick={() => {
@@ -160,7 +167,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
               value={title}
               onChange={(event) => {
                 setTitle(event.target.value);
-                let newUpdatedQuestions = [...updatedQuestions];
+                const newUpdatedQuestions = [...updatedQuestions];
                 newUpdatedQuestions[questionIndex].title = event.target.value;
                 saveQuiz(newUpdatedQuestions);
               }}
@@ -180,7 +187,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
                   newChoices[choiceIndex] = event.target.value;
                   setChoices(newChoices);
 
-                  let newUpdatedQuestions = [...updatedQuestions];
+                  const newUpdatedQuestions = [...updatedQuestions];
                   newUpdatedQuestions[questionIndex].choices = newChoices;
                   saveQuiz(newUpdatedQuestions);
                 }}
@@ -201,7 +208,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
                   setAnswers(newAnswers);
                   setSingleSelect(newAnswers.length <= 1);
-                  let newUpdatedQuestions = [...updatedQuestions];
+                  const newUpdatedQuestions = [...updatedQuestions];
                   newUpdatedQuestions[questionIndex].singleSelect = newAnswers.length <= 1;
                   newUpdatedQuestions[questionIndex].answers = newAnswers;
                   saveQuiz(newUpdatedQuestions);
@@ -209,12 +216,13 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
               />
 
               <button
+                type="button"
                 onClick={() => {
-                  let newChoices = [...choices]
+                  const newChoices = [...choices]
                   newChoices.splice(choiceIndex, 1);
 
-                  let newAnswers = []
-                  for (let answer of answers) {
+                  const newAnswers = []
+                  for (const answer of answers) {
                     if (answer > choiceIndex) {
                       newAnswers.push(answer - 1)
                     } else if (answer < choiceIndex) {
@@ -225,7 +233,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
                   setChoices(newChoices);
                   setAnswers(newAnswers);
 
-                  let newUpdatedQuestions = [...updatedQuestions];
+                  const newUpdatedQuestions = [...updatedQuestions];
                   newUpdatedQuestions[questionIndex].choices = newChoices;
                   newUpdatedQuestions[questionIndex].answers = newAnswers;
                   saveQuiz(newUpdatedQuestions);
@@ -238,11 +246,12 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
         {/* "Add Choice" Button */}
         <button
+          type="button"
           onClick={() => {
             const newChoices = [...choices, ""];
             setChoices(newChoices);
 
-            let newUpdatedQuestions = [...updatedQuestions];
+            const newUpdatedQuestions = [...updatedQuestions];
             newUpdatedQuestions[questionIndex].choices = newChoices;
             saveQuiz(newUpdatedQuestions);
           }}
@@ -252,6 +261,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
 
         <>
           <button
+            type="button"
             onClick={() =>
               addQuestion(
                 "New Question Title", // Default title for the new question
@@ -264,6 +274,7 @@ export default function QuizEditor({ activityId }: QuizEditorProp) {
             Add Question
           </button>
           <button
+            type="button"
             onClick={() =>
               deleteQuestion(questionIndex)
             }

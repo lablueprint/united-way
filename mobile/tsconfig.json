@@ -1,15 +1,27 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "jsx": "react",
     "strict": true,
+    "jsx": "preserve",
     "paths": {
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "incremental": true,
+    "module": "esnext",
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/_hooks/useApiAuth.js"
   ]
 }

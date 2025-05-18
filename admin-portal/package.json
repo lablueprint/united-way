@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.1",
-    "axios": "^1.7.8",
+    "axios": "^1.7.9",
+    "i": "^0.3.7",
     "lucide-react": "^0.507.0",
     "next": "^15.1.2",
+    "npm": "^11.3.0",
     "react": "^19.0.0",
+    "react-datetime-picker": "^6.0.1",
     "react-dom": "^19.0.0",
     "react-qr-code": "^2.0.15",
     "react-redux": "^9.2.0"

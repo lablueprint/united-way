@@ -10,14 +10,21 @@ const userSchema = new mongoose.Schema({
 	},
 	email: String,
 	experiencePoints: Number,
+	isTemporary: Boolean,
 	name: String,
 	numStamps: Number,
-	password: String,
-	pastEvents: [String],
 	phoneNumber: String,
 	points: Number,
 	password: String,
-	registeredEvents: [String]
+	pastEvents: [String],
+	preferredLanguage: {
+		type: String,
+		enum: ["EN", "ES"],
+		default: "EN"
+	},
+	profilePicture: String,
+	registeredEvents: [String],
+	dateJoined: Date
 });
 
 module.exports = mongoose.model('User', userSchema);
