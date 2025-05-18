@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '@/app/_styles/EventCarousel.css';
 import Image from 'next/image';
-import placeholder from '../../../public/images/event-img.svg';
 import placeholderTwo from '../../../public/images/single-event.svg';
 import rightArrowDark from '../../../public/images/right-arrow-dark.svg';
 
@@ -26,7 +25,6 @@ interface Props {
   visibleCount?: number;
   startTime?: string;
   endTime?: string;
-  imageURL?: string;
 }
 
 export default function EventCarousel({
@@ -38,67 +36,105 @@ export default function EventCarousel({
 }: Props) {
   const [visibleEvents, setVisibleEvents] = useState<EventData[]>([]);
   const [focusIndex, setFocusIndex] = useState(0);
-  const [nextItemIndex, setNextItemIndex] = useState(visibleCount);
+  const visibleRef = useRef<EventData[]>([]);
 
+  // Sync visibleEvents ref
   useEffect(() => {
-    if (events.length >= visibleCount) {
-      setVisibleEvents(events.slice(0, visibleCount));
-      setFocusIndex(0);
-      setNextItemIndex(visibleCount);
-    }
+    visibleRef.current = visibleEvents;
+  }, [visibleEvents]);
+
+  // Initialize visible window when events load
+  useEffect(() => {
+    if (events.length === 0) return;
+    setVisibleEvents(events.slice(0, visibleCount));
+    setFocusIndex(0);
   }, [events, visibleCount]);
 
+  // Rotation + focus logic
   useEffect(() => {
-    if (visibleEvents.length < visibleCount) return;
+    if (events.length === 0 || visibleEvents.length === 0) return;
 
     const interval = setInterval(() => {
-      setFocusIndex((prev) => {
-        if (prev < visibleCount - 1) {
-          return prev + 1;
-        } else {
-          const nextEvent = events[nextItemIndex % events.length];
-          setVisibleEvents((prevEvents) => [nextEvent, ...prevEvents.slice(0, visibleCount - 1)]);
-          setNextItemIndex((i) => (i + 1) % events.length);
+      setFocusIndex((prevFocus) => {
+        const isAtBottom = prevFocus >= visibleEvents.length - 1;
+
+        if (!isAtBottom) {
+          return prevFocus + 1;
+        }
+
+        // Reset focus
+        if (events.length <= visibleCount) {
           return 0;
         }
+
+        // Rotate visible window forward
+        const currentVisible = visibleRef.current;
+        const first = currentVisible[0];
+        const firstIndex = events.findIndex((e) => e._id === first._id);
+        const newStart = (firstIndex - 1 + events.length) % events.length;
+
+        const newWindow = [];
+        for (let i = 0; i < visibleCount; i++) {
+          newWindow.push(events[(newStart + i) % events.length]);
+        }
+
+        setVisibleEvents(newWindow);
+        return 0;
       });
     }, intervalMs);
 
     return () => clearInterval(interval);
-  }, [visibleEvents, nextItemIndex, events, visibleCount, intervalMs]);
+  }, [events, intervalMs, visibleCount, visibleEvents.length]);
+
+  const featuredEvent = visibleEvents[focusIndex];
 
   return (
     <div className="event-carousel-wrapper">
-        {/* Featured image */}
-        <div className="carousel-img-container">
-            <Image className="carousel-img" fill src={visibleEvents[focusIndex]?.imageURL || placeholderTwo} alt="Featured event thumbnail." />
-        </div>
-        {/* Event slider */}
-        <div className="slider-container">
-            <div className="slider-track">
-                <div className="list-title">
-                <h2 className="subtitle">Events Today</h2>
-                </div>
-                <div>
-                {visibleEvents.map((event, i) => (
-                    <div
-                    key={`${event._id}-${i}`}
-                    className={`event-slide ${i === focusIndex ? 'focused' : ''}`}
-                    >
-                        <div className="event-name-wrapper">
-                            {i === focusIndex && <Image src={rightArrowDark} alt="Right arrow icon" />}
-                            <p className="event-name">{event.name}</p>
-                        </div>
-                        <div className="event-date-time">
-                            <p className="event-date">Today</p>
-                            <p className="event-time">{startTime} - {endTime}</p>
-                        </div>
+      {/* Featured image */}
+      <div className="carousel-img-container">
+        <Image
+          className="carousel-img"
+          fill
+          src={featuredEvent?.imageURL || placeholderTwo}
+          alt="Featured event thumbnail."
+        />
+      </div>
+
+      {/* Event slider */}
+      <div className="slider-container">
+        <div className="slider-track">
+          <div className="list-title">
+            <h2 className="subtitle">Events Today</h2>
+          </div>
+          <div>
+            {visibleEvents.map((event, i) => (
+              <div
+                key={`${event._id}-${i}`}
+                className={`event-slide ${i === focusIndex ? 'focused' : ''}`}
+              >
+                {event.name ? (
+                  <>
+                    <div className="event-name-wrapper">
+                      {i === focusIndex && (
+                        <Image src={rightArrowDark} alt="Right arrow icon" />
+                      )}
+                      <p className="event-name">{event.name}</p>
                     </div>
-                ))}
-                </div>
-            </div>
+                    <div className="event-date-time">
+                      <p className="event-date">Today</p>
+                      <p className="event-time">
+                        {startTime} - {endTime}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="event-placeholder" style={{ height: '48px' }} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
     </div>
-    
   );
 }

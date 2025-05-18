@@ -109,6 +109,10 @@
     border: none;
 }
 
+.button:hover {
+    cursor: pointer;
+}
+
 /* event card */
 
 .event-card {
@@ -220,7 +224,6 @@
 }
 
 .empty-event {
-    width: 100vw;
     height: 30vh;
     display: flex;
     flex-direction: column;

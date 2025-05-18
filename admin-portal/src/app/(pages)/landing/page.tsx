@@ -63,8 +63,7 @@ export default function Landing() {
 
     const copyInput = new Date(inputDate); //prevent mutating original 
     copyInput.setHours(0,0,0,0);
-
-    console.log(copyInput, today);
+    
     return copyInput >= today;
   }
 
@@ -101,10 +100,7 @@ export default function Landing() {
 
   // slider states
   const [allEvents, setAllEvents] = useState<EventData[]>([]);
-  const [visibleEvents, setVisibleEvents] = useState<EventData[]>([]);
-  const [focusIndex, setFocusIndex] = useState(0);
-  const [nextItemIndex, setNextItemIndex] = useState(4); // next event to add at top
-  
+
   const removeFromList = (id: string) => {
     setEventIds(eventIds.filter((eventId) => eventId != id));
   };
@@ -151,9 +147,6 @@ useEffect(() => {
     }
 
     setAllEvents(events);
-    setVisibleEvents(events.slice(0, 4));
-    setFocusIndex(0);
-    setNextItemIndex(4);
   };
 
   if (todayIds.length > 0) {
@@ -162,27 +155,27 @@ useEffect(() => {
 }, [todayIds]);
 
 
-// Auto Scroll for Slider
-useEffect(() => {
-  if (visibleEvents.length < 4) return;
+// // Auto Scroll for Slider
+// useEffect(() => {
+//   if (visibleEvents.length < 4) return;
 
-  const interval = setInterval(() => {
-    setFocusIndex(prev => {
-      if (prev < 3) {
-        return prev + 1; // move focus down
-      } else {
-        // shift window
-        const nextEvent = allEvents[nextItemIndex % allEvents.length];
-        const newVisible = [nextEvent, ...visibleEvents.slice(0, 3)];
-        setVisibleEvents(newVisible);
-        setNextItemIndex(i => (i + 1) % allEvents.length);
-        return 0; // focus resets to top
-      }
-    });
-  }, 2000);
+//   const interval = setInterval(() => {
+//     setFocusIndex(prev => {
+//       if (prev < 3) {
+//         return prev + 1; // move focus down
+//       } else {
+//         // shift window
+//         const nextEvent = allEvents[nextItemIndex % allEvents.length];
+//         const newVisible = [nextEvent, ...visibleEvents.slice(0, 3)];
+//         setVisibleEvents(newVisible);
+//         setNextItemIndex(i => (i + 1) % allEvents.length);
+//         return 0; // focus resets to top
+//       }
+//     });
+//   }, 2000);
 
-  return () => clearInterval(interval);
-}, [visibleEvents, nextItemIndex, allEvents]);
+//   return () => clearInterval(interval);
+// }, [visibleEvents, nextItemIndex, allEvents]);
 
 
 useEffect(() => {
@@ -288,7 +281,7 @@ useEffect(() => {
                       </div>
 
                   ) : (
-                    <EventCarousel events={visibleEvents} intervalMs={2000} visibleCount={4} />
+                    <EventCarousel events={allEvents} intervalMs={2000} visibleCount={4} />
                   )}
                 </div>
               </div>
@@ -319,7 +312,9 @@ useEffect(() => {
               })}
             </div>
           </div>
+          <NoMoreEventsTrigger />
         </div>
+        
         ) : (
           <div className="empty-event">
             <div className="empty-content">
@@ -329,9 +324,22 @@ useEffect(() => {
           </div>
 
         )}
-      
-      <NoMoreEventsTrigger />
-    
+            
+      <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
+        Log out
+      </button>
+      <button onClick={() => setIsEditing(!isEditing)}>
+        {isEditing ? "Cancel Event" : "Create Event"}
+      </button>
+      {isEditing && <EventCreator orgName={orgName} changeState={setIsEditing} />}
+      <div>
+
+        Org: {org.orgId}<br />
+        Auth: {org.authToken}<br />
+        Refresh: {org.refreshToken}<br />
+      </div>
+
     </div>
   );
+  
 }
