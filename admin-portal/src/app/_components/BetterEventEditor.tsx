@@ -13,7 +13,62 @@ interface EventEditorProps {
 }
 
 export default function BetterEventEditor() {
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const [eventTitle, setEventTitle] = useState<string>("");
+    const [eventDescription, setEventDescription] = useState<string>("");
+    const [latitude, setLatitude] = useState<number>(0);
+    const [longitude, setLongitude] = useState<number>(0);
+    const [options, setOptions] = useState<LocationProps[]>([]);
+    const [address, setAddress] = useState<string>("");
+
+    const [isEditingEventTitle, setIsEditingEventTitle] = useState<boolean>(false);
+    const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
+    const [isEditingLocation, setIsEditingLocation] = useState<boolean>(false);
+    const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
+    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken }})
+
+    // Send request with address to Nominatim endpoint and receive back latitude, longitude in JSON
+    // https://nominatim.org/release-docs/develop/api/Search/
+    const getLocationJSON = async (address: string) => {
+        // Convert address to url (aka add +'s in every space)
+        const convertedAddress = address.trim().replaceAll(" ", "+");
+        const url = "https://nominatim.openstreetmap.org/search?q=" + convertedAddress + "&format=json";
+
+        try {
+            const response: AxiosResponse = await axios.get(
+                `${url}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${org.authToken}`
+                    }
+                }
+            );
+            const data = response.data;
+            if (data.length > 0) {
+                // Multiple addresses returned
+                if (data.length > 1) {
+                    const internals = data;
+                    setLatitude(internals.lat);
+                    setLongitude(internals.lon);
+                    setOptions(data);
+                }
+                // Single address returned
+                else {
+                    const internals = data[0];
+                    setOptions([]);
+                    setLatitude(internals.lat);
+                    setLongitude(internals.lon);
+                }
+            }
+            // No address returned
+            else {
+                setLatitude(0);
+                setLongitude(0);
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
     
     return (
         <div>
@@ -50,8 +105,13 @@ export default function BetterEventEditor() {
                 <div className="event-editor-interface">
                     <div className="image-editor-and-tags">
                         <div className="image-editor">
-                            <div className="add_photo">
-                                <Image src={add_photo} alt="Add Photo Icon" width={131} height={131} />
+                            <div className="add-photo-parent">
+                                <div className="add_photo-image">
+                                    <Image src={add_photo} alt="Add Photo Icon" width={60} height={60} />
+                                </div>
+                                <div className="add_photo-subtitle">
+                                    Upload Images Here
+                                </div>
                             </div>
                         </div>
                         <div className="tags-parent">
@@ -63,8 +123,20 @@ export default function BetterEventEditor() {
                     </div>
                     <div className="event-detail-fields">
                         <div className="event-title-and-org">
-                            <div className="event-title-editor-card">
-                                TITLE
+                            <div className="event-name-title">EVENT NAME</div>
+                            <div onClick={() => setIsEditingEventTitle(true)}>
+                                {
+                                    isEditingEventTitle ? 
+                                    <textarea
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {setIsEditingEventTitle(false)}
+                                        }}
+                                        onBlur={() => { setIsEditingEventTitle(false); }}
+                                        className="event-title-editor-card" name="eventTitle" placeholder="TITLE" value={eventTitle} onChange={(event) => {setEventTitle(event.target.value)}}
+                                    />
+                                    :
+                                    <div className="event-title-editor-card">{eventTitle.length == 0 ? (<div className="event-title-editor-card-empty">TITLE</div>) : eventTitle}</div>
+                                }
                             </div>
                             <div className="organization-card-parent">
                                 <div className="org-logo"><Image src={hero} alt="Hero Icon" width={28} height={28} /></div>
@@ -85,20 +157,65 @@ export default function BetterEventEditor() {
                         </div>
                         <div className="description-location-attendees">
                             <div className="description-parent">
-                                <div className="description-title">
-                                    Description
-                                </div>
-                                <div className="description-body">
-                                    Lorem ipsum dolor sit amet consectetur. Laoreet in venenatis non et. Nibh a duis in mattis tempus scelerisque auctor. At et vel purus id nisl posuere. Nec dictumst sollicitudin luctus vitae.
-
-                                    Lorem ipsu
+                                <div className="description-title">DESCRIPTION</div>
+                                <div onClick={() => setIsEditingDescription(true)}>
+                                    {
+                                        isEditingDescription ? 
+                                        <textarea
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {setIsEditingDescription(false)}
+                                            }}
+                                            onBlur={() => { setIsEditingDescription(false); }}
+                                            className="description-body" name="description" placeholder="Description" value={eventDescription} onChange={(event) => {setEventDescription(event.target.value)}}
+                                        />
+                                        :
+                                        <div className="description-body">{eventDescription.length == 0 ? (<div className="description-body-empty">Description</div>) : eventDescription}</div>
+                                    }
                                 </div>
                             </div>
-                            <div className="location">
-                                1113 Murphy Hall, Los Angeles CA
-                            </div>
-                            <div className="attendees-parent">
-                                Maximum Attendees + 1 -
+                            <div className="location-parent">
+                                <div className="location-title">ADDRESS</div>
+                                <div onClick={() => setIsEditingLocation(true)}>
+                                    {
+                                        isEditingLocation ? 
+                                        <textarea
+                                            onChange={(e) => {
+                                                // If an existing timeout exists, kill it (because we're going to set a new one)
+                                                if (timeoutID) {
+                                                    clearTimeout(timeoutID);
+                                                }
+                                                setAddress(e.target.value);
+                                                const newTimeoutID = setTimeout(() => getLocationJSON(e.target.value), 500);
+                                                setTimeoutID(newTimeoutID);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {setIsEditingLocation(false)}
+                                            }}
+                                            onBlur={() => { setIsEditingLocation(false); }}
+                                            className="location" name="location" placeholder="Location" value={address}
+                                        />
+                                        :
+                                        <div className="location">{address.length == 0 ? (<div className="location-empty">Location</div>) : address}</div>
+                                    }
+                                </div>
+                                {/* If multiple results return, this is the modal that pops up */}
+                                <div className="searchOptionsParent">
+                                    <div className="searchOptions">
+                                        {
+                                            options.map((option, index) => (
+                                                <button key={index}
+                                                    onClick={() => {
+                                                        setLatitude(parseFloat(option.lat));
+                                                        setLongitude(parseFloat(option.lon));
+                                                        setAddress(option.display_name);
+                                                        setOptions([]);
+                                                    }}>
+                                                    {option.display_name}
+                                                </button>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
