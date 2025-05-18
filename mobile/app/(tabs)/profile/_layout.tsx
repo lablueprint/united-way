@@ -12,7 +12,7 @@ export default function StackLayout() {
                 }}
             />
             <Stack.Screen
-                name="pictureChanger"
+                name="contact"
                 options={{
                     headerShown: false,
                 }}

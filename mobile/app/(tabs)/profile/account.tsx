@@ -1,12 +1,14 @@
 "use client"
 import React, { useState, useRef, useCallback } from 'react';
-import { View, Text, TextInput, Image, Animated, Easing, Alert, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, Image, Animated, Easing, Alert, TouchableOpacity, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
 import useApiAuth from '@/app/_hooks/useApiAuth';
 import { RequestType } from '@/app/_interfaces/RequestInterfaces';
+
+import { Color, Typography } from '@/app/_styles/global';
 
 interface UserDetails {
   name: string,
@@ -21,7 +23,11 @@ interface UserDetails {
   collectedStamps: string[],
 }
 
-export default function ProfileEditor() {
+
+// TODO: Interests section (requires saving interests from onboarding first)
+//       Setting location  (requires saving location from onboarding first)
+//       Changing email flow
+export default function Account() {
   const [userDetails, setUserDetails] = useState<UserDetails>({ name: "", phoneNumber: "", email: "", password: "", profilePicture: "", dateJoined: "", demographics: { community: "" }, collectedStamps: [], });
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -50,9 +56,6 @@ export default function ProfileEditor() {
     outputRange: ['90deg', '180deg'],
   });
 
-  const navigateToProfile = () => {
-    router.push('/profile/profilePage');
-  }
   const fetchUserDetails = async () => {
     try {
       const body = {};
@@ -60,22 +63,15 @@ export default function ProfileEditor() {
       const endpoint = "users/:id";
       const data = await sendRequest({ body, requestType, endpoint });
       setUserDetails(data);
+      setName(data.name);
+      setPassword(data.password);
+      setEmail(data.email);
+      setCommunity(data.community || "");
       setCollectedStamps(data.collectedStamps || []);
 
     } catch (err) {
       console.log('Error catching event details from event id:', err);
       return err;
-    }
-  }
-
-  const deletePic = async (voidPicture: string) => {
-    try {
-      const body = { profilePicture: voidPicture };
-      const endpoint = "user/:id";
-      const requestType = RequestType.PATCH;
-      await sendRequest({ body, endpoint, requestType });
-    } catch (err) {
-      console.error('Error deleting PFP:', err);
     }
   }
 
@@ -97,10 +93,7 @@ export default function ProfileEditor() {
       const updateData: UserUpdate = {};
 
       if (name.trim() !== '') updateData.name = name;
-      if (phoneNumber.trim() !== '') updateData.phoneNumber = phoneNumber;
       if (email.trim() !== '') updateData.email = email;
-      if (password.trim() !== '') updateData.password = password;
-
       if (community.trim() !== '') {
         updateData.demographics = {
           community: community
@@ -114,8 +107,6 @@ export default function ProfileEditor() {
         await sendRequest({ endpoint, requestType, body });
 
         fetchUserDetails();
-      } else {
-        console.log('No changes to update');
       }
     } catch (err) {
       console.error('Error updating user:', err);
@@ -161,68 +152,82 @@ export default function ProfileEditor() {
   }
 
   return (
-    <View style={styles.container}>
-      {/* <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
-        <Image source={{}}></Image>
-      </TouchableOpacity> */}
-      <View style={styles.topContainer}>
-        <Text style={styles.header}>Account</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backContainer} onPress={() => { router.back(); }}>
+          <Image source={require("../../../assets/images/profile/arrowLeft.png")} style={styles.arrowLeft} />
+        </TouchableOpacity>
+        <Text style={[Typography.h3, styles.headerText]}>MY ACCOUNT</Text>
+      </View>
 
+      <View style={styles.innerContainer}>
         {/* Basic information */}
-        <View>
-          <Text style={styles.basicHeader}>
+        <View style={styles.form}>
+          <Text style={[Typography.h3, styles.basicHeader]}>
             BASIC INFORMATION
           </Text>
           <View style={styles.formContainer}>
-            <Text style={styles.label}>
-              FIRST NAME
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder={userDetails.name}
-              onChangeText={(text) => { setName(text) }}
-              value={name}
-            />
-            <Text style={styles.label}>    Phone Number:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={userDetails.phoneNumber}
-              onChangeText={(text) => setPhoneNumber(text)}
-              value={phoneNumber}
-              keyboardType="phone-pad"
-            />
-            <Text style={styles.label}>    Email:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={userDetails.email}
-              onChangeText={(text) => setEmail(text)}
-              value={email}
-              keyboardType="email-address"
-            />
-            <Text style={styles.label}>    Password:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={"************"}
-              onChangeText={(text) => setPassword(text)}
-              value={password}
-              secureTextEntry
-            />
+            <View style={styles.fieldContainer}>
+              <Text style={[Typography.body2, styles.label]}>
+                NAME
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder={"Name"}
+                onChangeText={(text) => { setName(text) }}
+                value={name}
+                onEndEditing={handleSubmit}
+              />
+            </View>
+            <View style={styles.fieldContainer}>
+              <Text style={[Typography.body2, styles.label]}>
+                E-MAIL
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder={"Email"}
+                onChangeText={(text) => setEmail(text)}
+                value={email}
+                keyboardType="email-address"
+                onEndEditing={handleSubmit}
+              />
+            </View>
+            <View style={styles.fieldContainer}>
+              <Text style={[Typography.body2, styles.label]}>
+                PASSWORD
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder={"Password"}
+                onChangeText={(text) => setPassword(text)}
+                value={"Password"}
+                secureTextEntry
+              />
+            </View>
+            <View style={styles.fieldContainer}>
+              <Text style={[Typography.body2, styles.label]}>
+                LOCATION
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder={"Location"}
+                onChangeText={(text) => setCommunity(text)}
+                value={community}
+                onEndEditing={handleSubmit}
+              />
+            </View>
           </View>
         </View>
 
-        <View>
-          <TouchableOpacity
-            style={styles.expandHeader}
-            onPress={toggleExpand}
-          >
-            <Text style={styles.expandHeaderText}>Advanced</Text>
-            <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
-              <AntDesign name="up" size={20} color="#666666" />
-            </Animated.View>
-          </TouchableOpacity>
+        <View style={styles.divider} />
+
+        <View style={styles.form}>
+          <Text style={[Typography.h3, styles.basicHeader]}>
+            INTERESTS
+          </Text>
         </View>
       </View>
-    </View>
+    </SafeAreaView >
   );
 }
 
@@ -230,25 +235,48 @@ const styles = StyleSheet.create({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-around',
+    width: "100%",
     height: '100%',
-    flexWrap: "wrap",
-    backgroundColor: '#FFFFFF', // Light gray background
+    backgroundColor: "#FFFFFF",
+    rowGap: 44
   },
   header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333333', // Primary color
-    textAlign: 'center',
+    marginHorizontal: 24,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
   },
-  profilePicture: {
-    width: 100, // Size of the profile picture
-    height: 100, // Size of the profile picture
-    borderRadius: 75, // Half of the width/height to make it circular
-    marginBottom: 10, // Spacing below the profile picture
-    borderWidth: 3, // Optional: Add a border
-    borderColor: '#A9A9A9', // Optional: Border color
-    justifyContent: 'center',
+  headerText: {
+    fontSize: 36,
+    color: Color.uwDarkBlue, // Primary color
+  },
+  backContainer: {
+    position: "absolute",
+    left: 0,
+  },
+  arrowLeft: {
+    width: 24, // Size of the picture
+    height: 24, // Size of the picture
+  },
+  divider: {
+    height: 1,
+    width: "100%",
+    backgroundColor: Color.uwDarkBlue,
+    opacity: 0.2,
+  },
+  innerContainer: {
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 20,
+    marginHorizontal: 24,
+  },
+  fieldContainer: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 4
   },
   pictureButtonContainer: {
     flex: 1,
@@ -264,33 +292,38 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   basicHeader: {
-    fontSize: 15,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333333',
+    color: Color.uwDarkBlue,
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    rowGap: 20,
   },
   formContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
     backgroundColor: '#FFFFFF', // White background for the form
     borderRadius: 5,
     padding: 5,
+    rowGap: 12
   },
   label: {
-    width: "50%",
     fontSize: 13,
-    textAlign: 'left',
-    color: '#333333', // Dark gray text
     marginBottom: 5,
+    color: Color.uwDarkBlue,
+    fontWeight: 700,
+    opacity: 0.7
   },
   input: {
-    width: "50%",
-    height: 30,
-    borderColor: '#CCCCCC', // Light gray border
-    borderWidth: 1,
-    borderRadius: 15,
-    paddingHorizontal: 5,
-    marginBottom: 7,
-    backgroundColor: '#FAFAFA', // Light gray background for inputs
+    width: "100%",
+    color: Color.uwDarkBlue, // Light gray border
+    borderRadius: 4,
+    padding: 10,
+    backgroundColor: "rgba(16, 22, 127, 0.08)", // Light gray background for inputs
   },
   buttonContainer: {
     position: 'absolute',
@@ -318,32 +351,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  gridContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    borderRadius: 5,
-    padding: 5,
-  },
-  changeBlock: {
-    width: 100, // Each block takes up 48% of the container width
-    height: 20,
-    borderBlockColor: '#',
-    // aspectRatio: 1, // Makes the blocks square
-    marginBottom: 5, // Adds spacing between rows
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10, // Rounded corners
-    // padding: 5, // Padding inside the block
-  },
-  deleteBlock: {
-    width: 100,
-    height: 20,
-    backgroundColor: '#A9A9A9', // Background color for the block
-    borderRadius: 10, // Rounded corners
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   changePicture: {
     color: '#A9A9A9', // Text color
     fontSize: 10,
@@ -369,52 +376,5 @@ const styles = StyleSheet.create({
     textAlign: "left",
     color: '#333333',
 
-  },
-  stampsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8, // Reduced from 12
-    padding: 8, // Reduced from 12
-  },
-  stampBlock: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 15, // Reduced from 8
-    padding: 8, // Reduced from 12
-    paddingRight: 24, // Reduced from 32
-    minWidth: 80, // Reduced from 100
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  stampText: {
-    fontSize: 12, // Reduced from 14
-    color: '#666666',
-    fontWeight: 'bold',
-  },
-  deleteStampButton: {
-    position: 'absolute',
-    top: -6, // Reduced from -8
-    right: -6, // Reduced from -8
-    backgroundColor: '#f5f5f5',
-    width: 18, // Reduced from 24
-    height: 18, // Reduced from 24
-    borderRadius: 9, // Half of width/height
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1, // Reduced from 2
-    },
-    shadowOpacity: 0.2, // Reduced from 0.25
-    shadowRadius: 2, // Reduced from 3.84
-    elevation: 3, // Reduced from 5
-  },
-  deleteIcon: {
-    fontSize: 10, // Reduced from 12
-    color: '#000000', // Changed to white for better contrast
-    lineHeight: 12, // Reduced from 14
-    textAlign: 'center',
-    fontWeight: 'bold', // Added for better visibility
   },
 });

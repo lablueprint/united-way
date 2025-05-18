@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView, View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Router, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/app/_utils/redux/userSlice';
+import Loader from '@/app/_components/Loader';
 
 import useApiAuth from '@/app/_hooks/useApiAuth';
 import { RequestType } from '@/app/_interfaces/RequestInterfaces';
@@ -56,29 +57,34 @@ interface ToggleInterface {
 
 function ToggleComponent({ source, title, optionA, optionB, selection, toggle }: ToggleInterface) {
     return (
-        <View style={toggleStyles.container}>
-            <View style={toggleStyles.contentContainer}>
-                <Image source={source} style={linkStyles.linkIcon} />
-                <Text style={[Typography.body2, toggleStyles.contentText]}>
-                    {title}
-                </Text>
-            </View>
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity style={[styles.button, selection == false ? toggleStyles.selected : {}]} onPress={() => { toggle(false); }}>
-                    <Text style={[Typography.body2, selection == false ? toggleStyles.selectedText : {}]}>
-                        {optionA}
+        <View>
+            <View style={toggleStyles.container}>
+                <View style={linkStyles.content}>
+                    <Image source={source} style={linkStyles.linkIcon} />
+                    <Text style={[Typography.body2, linkStyles.contentText]}>
+                        {title}
                     </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.button, selection == true ? toggleStyles.selected : {}]} onPress={() => { toggle(true); }}>
-                    <Text style={[Typography.body2, selection == true ? toggleStyles.selectedText : {}]}>
-                        {optionB}
-                    </Text>
-                </TouchableOpacity>
+                </View>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={[styles.button, selection == false ? toggleStyles.selected : {}]} onPress={() => { toggle(false); }}>
+                        <Text style={[Typography.body2, selection == false ? toggleStyles.selectedText : {}]}>
+                            {optionA}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, selection == true ? toggleStyles.selected : {}]} onPress={() => { toggle(true); }}>
+                        <Text style={[Typography.body2, selection == true ? toggleStyles.selectedText : {}]}>
+                            {optionB}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
+            <View style={linkStyles.divider} />
         </View>
     )
 }
 
+// TODO: Edit image through the edit icon (using Expo Photo Library)
+//       Enable in-app notifications
 export default function Profile() {
     const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
     const [lang, setLanguage] = useState(false);
@@ -105,6 +111,19 @@ export default function Profile() {
         }
     }
 
+    useEffect(() => {
+        const patchUserDetails = async () => {
+            const body = {
+                preferredLanguage: lang ? "ES" : "EN"
+            };
+            const endpoint = "users/:id";
+            const requestType = RequestType.PATCH
+            const data = await sendRequest({ body, endpoint, requestType });
+            setUserDetails(data);
+        }
+        patchUserDetails();
+    }, [lang])
+
     useFocusEffect(useCallback(() => {
         fetchUserDetails();
     }, []));
@@ -117,10 +136,9 @@ export default function Profile() {
         }
     };
 
-    console.log(userDetails)
-    if (userDetails == undefined || userDetails.isTemporary == true) {
+    if (userDetails && userDetails.isTemporary == true) {
         return (
-            <View style={guestStyles.container}>
+            <SafeAreaView style={guestStyles.container}>
                 <View style={guestStyles.innerContainer}>
                     <Image
                         source={require("../../../assets/images/profile/signUp.png")}
@@ -152,12 +170,16 @@ export default function Profile() {
                         SIGN UP
                     </Text>
                 </TouchableOpacity>
-            </View>
+            </SafeAreaView>
         )
     }
 
+    if (!userDetails) {
+        return <></>
+    }
+
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={[styles.innerContainer, styles.centerAlignColumnContainer]}>
                 <Text style={[Typography.h3, styles.title]}>PROFILE</Text>
                 <View style={[styles.centerAlignColumnContainer, styles.innerContainerImages]}>
@@ -194,7 +216,7 @@ export default function Profile() {
                     Log out
                 </Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -253,13 +275,12 @@ const styles = StyleSheet.create({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
         alignItems: "center",
-        paddingHorizontal: 24,
         rowGap: 36
     },
     linkContainer: {
-        width: "100%"
+        width: "100%",
+        paddingHorizontal: 24,
     },
     innerContainer: {
         rowGap: 24,
@@ -358,8 +379,10 @@ const linkStyles = StyleSheet.create({
         opacity: 0.6
     },
     divider: {
-        color: Color.uwDarkBlue,
-        opacity: 0.6
+        backgroundColor: Color.uwDarkBlue,
+        opacity: 0.1,
+        height: 1,
+        width: "100%"
     },
     linkIcon: {
         width: 24,

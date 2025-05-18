@@ -56,3 +56,5 @@ export const Typography = StyleSheet.create({
         fontWeight: 700,
     }
 })
+
+export default { Color, Typography }
