@@ -9,6 +9,7 @@ eventRouter.post('/createEvent', eventController.createEvent);
 // Get event routes
 eventRouter.get('/:id', eventController.getEventById);
 eventRouter.get('/', eventController.getAllEvents);
+eventRouter.get('/tag/:tag', eventController.getAllEventsByTag);
 eventRouter.post('/filtered', eventController.getEventsByFilter);
 eventRouter.get('/byDay/:date', eventController.getEventsByDay);
 

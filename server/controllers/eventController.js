@@ -132,6 +132,107 @@ const getAllEvents = async (req, res) =>
   }
 }
 
+const getAllEventsByTag = async (req, res) => {
+  console.log("In getAllEventsByTag");
+  try {
+    const tag = req.params.tag;
+    console.log("The tag: " + tag);
+
+    // Ensure the date is provided
+    if (!tag) {
+      tag = "All";
+    }
+    data_dict = {}
+    // Parse the date and calculate the start and end of the day
+    const todayStart = new Date();
+    const todayEnd = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    todayEnd.setHours(23, 59, 59, 999);
+
+
+    console.log("Start of Date: " + todayStart.toISOString());
+    console.log("End of Date: " + todayEnd.toISOString());
+
+
+    // Query the database for events on the specific day, sorted by date
+    if (tag == "Upcoming") {
+      const events = await Event.find({
+        date: {
+          $gte: todayEnd,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Upcoming"] = events;
+      res.status(200).json({
+        status: "success",
+        message: "Event(s) successfully received.",
+        data: data_dict
+      });
+    }
+    else if (tag == "Current") {
+      const events = await Event.find({
+        date: {
+          $gte: todayStart,
+          $lte: todayEnd,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Current"] = events;
+       res.status(200).json({
+        status: "success",
+        message: "Event(s) successfully received.",
+        data: data_dict
+      });
+    }
+    else if (tag == "Past") {
+      console.log("pastpast past")
+      const events = await Event.find({
+        date: {
+          $lte: todayStart,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Past"] = events;
+      res.status(200).json({
+        status: "success",
+        message: "Event(s) successfully received.",
+        data: data_dict,
+      });
+    }
+    else {
+      const eventsCurrent = await Event.find({
+        date: {
+          $gte: todayStart,
+          $lte: todayEnd,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Current"] = eventsCurrent;
+
+      const eventsUpcoming = await Event.find({
+        date: {
+          $gte: todayEnd,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Upcoming"] = eventsUpcoming;
+
+      const eventsPast = await Event.find({
+        date: {
+          $lte: todayStart,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Past"] = eventsPast;
+      
+      res.status(200).json({
+        status: "success",
+        message: "Event(s) successfully received.",
+        data: data_dict,
+      });
+
+    }
+    console.log(data_dict)
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+}
+
 //
 // TODO: filter by including sub-element matches as well
 // and not just hard equality (i.e. matching those that 
@@ -245,4 +346,5 @@ module.exports = {
   deleteEvent,
   addUserToEvent,
   getEventsByDay,
+  getAllEventsByTag,
 };

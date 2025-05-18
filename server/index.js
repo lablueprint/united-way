@@ -20,7 +20,7 @@ const activityRouter = require('./routes/activityRoutes.js')
 // Connect to the MongoDB database
 async function connectToDatabase() {
   try {
-    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect(uri);
     console.log('Connected to MongoDB');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
