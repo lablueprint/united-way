@@ -186,7 +186,7 @@ export default function EventDetails() {
       <View style={styles.imgContain}>
         <View style={styles.iconContain}>
           <View><TouchableOpacity onPress={() => {
-            router.push({pathname: "/explore"});
+            router.push({ pathname: "/explore" });
           }
           }><Text>back</Text></TouchableOpacity></View>
           <View><Text>share</Text></View>
@@ -219,7 +219,7 @@ export default function EventDetails() {
                 <TouchableOpacity style={styles.infoPill}
                   onPress={() => {
                     router.push({
-                      pathname: `/events/associated-events`,
+                      pathname: `/explore/associated-events`,
                       params:
                       {
                         id: eventData.organizerID,

@@ -159,7 +159,7 @@ export default function EventsFeed() {
     <TouchableOpacity
       style={styles.eventCard}
       onPress={() => router.push({
-        pathname: `/events/[id]`,
+        pathname: `/explore/[id]`,
         params:
         {
           id: item._id,
