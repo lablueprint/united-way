@@ -143,38 +143,52 @@ const UpcomingCalendar = () => {
   const resetTime = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   }
-
-  const getNextMonth = async (up: boolean) => {
+  const getNextMonth = async () => {
     const [startISO, endISO] = selectedWeekRef.current.split('_');
     let startDate = new Date(startISO);
     let endDate = new Date(endISO);
     startDate = resetTime(startDate);
     endDate = resetTime(endDate);
 
-    if (up) {
-      setIndex(indexOfWeek+1);
-      indexRef.current = indexOfWeek + 1;
-      const firstOfMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 1);
-      while (!(firstOfMonth >= startDate && firstOfMonth <= endDate)) {
-        startDate.setDate(startDate.getDate() + 7);
-        endDate.setDate(endDate.getDate() + 7);
-        selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
-        selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
-      }
+    setIndex(indexOfWeek+1);
+    indexRef.current = indexOfWeek + 1;
+    const firstOfMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 1);
+    while (!(firstOfMonth >= startDate && firstOfMonth <= endDate)) {
+      startDate.setDate(startDate.getDate() + 7);
+      endDate.setDate(endDate.getDate() + 7);
+      selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
+      selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
+    }
+    setSelectedWeekLabel(selectedWeekLabelRef.current);
+    setSelectedWeek(selectedWeekRef.current);
+    setEventData({});
+    setSelectedDate(null);
 
-    }
-    else if (!up) {
-      setIndex(indexOfWeek-1);
-      indexRef.current = indexOfWeek - 1;
-      const firstOfMonth = new Date(endDate.getFullYear(), endDate.getMonth() - 1, 1);
+    const [start, end] = selectedWeekRef.current.split('_');
+    const date = new Date(end);
+    const monthYear = date.toLocaleString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    });
+    setCurrentMonth(monthYear)
+  }
+
+  const getPreviousMonth = async () => {
+    const [startISO, endISO] = selectedWeekRef.current.split('_');
+    let startDate = new Date(startISO);
+    let endDate = new Date(endISO);
+    startDate = resetTime(startDate);
+    endDate = resetTime(endDate);
+
+    setIndex(indexOfWeek-1);
+    indexRef.current = indexOfWeek - 1;
+    const firstOfMonth = new Date(endDate.getFullYear(), endDate.getMonth() - 1, 1);
       while (!(firstOfMonth >= startDate && firstOfMonth <= endDate)) {
-        startDate.setDate(startDate.getDate() - 7);
-        endDate.setDate(endDate.getDate() - 7);
-        selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
-        selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
-      }
+      startDate.setDate(startDate.getDate() - 7);
+      endDate.setDate(endDate.getDate() - 7);
+      selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
+      selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
     }
-    else {return;}
     setSelectedWeekLabel(selectedWeekLabelRef.current);
     setSelectedWeek(selectedWeekRef.current);
     setEventData({});
@@ -190,7 +204,6 @@ const UpcomingCalendar = () => {
   }
 
   const handleTabClick = async (tab: string) => {
-    console.log("In handle tab click: ", tab);
     setActiveTab(tab);
     activeTabRef.current= tab
     setListEvents([]);
@@ -202,8 +215,6 @@ const UpcomingCalendar = () => {
   const getAllEvents = async () => {
     let mylistEvents = {}
     try {
-      console.log("In get all events")
-      console.log("Active Tab: ", activeTabRef.current)
       const response: AxiosResponse = await axios.get(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/tag/${activeTabRef.current}`,
         {
@@ -221,7 +232,6 @@ const UpcomingCalendar = () => {
     }
     setListEvents(mylistEvents.data);
     listEventsRef.current = mylistEvents.data;
-    console.log("List Events: ", listEventsRef.current);
   }
 
   const getEventsForWeek = async () => {
@@ -237,7 +247,6 @@ const UpcomingCalendar = () => {
     const [startDateString, endDateString] = week.split("_");
     const startDate = new Date(startDateString);
     const endDate = new Date(endDateString);
-    console.log("Before getEventsForWeek:", week, " ", startDate, " ", endDate);
 
     const newEventData: { [date: string]: Event[] } = {};
 
@@ -263,9 +272,7 @@ const UpcomingCalendar = () => {
       }
     }
     setEventData(newEventData);
-    console.log("Date selected: ", formatDate(startDate), " Event Data: ", newEventData[formatDate(startDate)]);
     if (firstRender == 0) {
-      console.log("FIRST ONE")
       const today = formatDate(new Date())
       let index = 0;
       for (const [key] of Object.entries(newEventData)) {
@@ -274,7 +281,6 @@ const UpcomingCalendar = () => {
         }
         index+=1
       }
-      console.log("Just eventData and other info:", formatDate(new Date(today)), " ", eventData);
       handleDateClick(newEventData[formatDate(new Date(today))], index);
       setFirstRender(1)
     } else {
@@ -314,9 +320,6 @@ const UpcomingCalendar = () => {
     });
 
     setCurrentMonth(monthYear)
-
-    console.log("Selected Week: ", selectedWeekRef);
-    console.log("Selected Week Label: ", selectedWeekLabelRef);
     getAllEvents();
     getEventsForWeek();
     
@@ -328,9 +331,6 @@ const UpcomingCalendar = () => {
     activeTabRef.current = "All";
     
   }, [viewMode])
-
-
-  console.log("Component Render: currentMonth:", currentMonth);
 
   return (
     <div className="events-page">
@@ -399,11 +399,11 @@ const UpcomingCalendar = () => {
       </div>
       <div className = "calendar-body">
       <div className="calendar-navigation">
-        <button className="nav-button" onClick={() => getNextMonth(false)}>
+        <button className="nav-button" onClick={() => getPreviousMonth()}>
           <ChevronLeft size={20} />
         </button>
         <h2 className="month-title">{currentMonth}</h2>
-        <button className="nav-button" onClick={() => getNextMonth(true)}>
+        <button className="nav-button" onClick={() => getNextMonth()}>
           <ChevronRight size={20} />
         </button>
       </div>
@@ -500,7 +500,7 @@ const UpcomingCalendar = () => {
                               <div className = "attend">
                                 
                               <div className="attend-image">
-                              <img src="/attend.png" alt="Attend" />
+                              <img src="/images/attend.svg" />
                               
                               </div>
                               <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
@@ -592,7 +592,8 @@ const UpcomingCalendar = () => {
                               <div className = "attend">
                                 
                               <div className="attend-image">
-                              <img src="/attend.png" alt="Attend" />
+                              <img src="/UpcomingCalendar/images/attend.svg" />
+                              
                               
                               </div>
                               <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
@@ -667,7 +668,7 @@ const UpcomingCalendar = () => {
                               <div className = "attend">
                                 
                               <div className="attend-image">
-                              <img src="/attend.png" alt="Attend" />
+                              <img src="/UpcomingCalendar/images/attend.svg" />
                               
                               </div>
                               <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>

@@ -218,13 +218,12 @@
   }
 
   .attend-image {
-    width: 48.75px;
+    width: 70px;
     height: 24px;
     display: flex;
     margin-top: 0.1rem;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    padding-right: 1.5rem;
 
   }
 
@@ -234,8 +233,6 @@
     width: 100%;
     height: auto;
     object-fit: contain; /* or 'cover' depending on your goal */
-    margin-right: 0.5rem;
-    margin-left: 0.5rem;
   }
 
   .text {
@@ -247,7 +244,8 @@
     letter-spacing: -2%;
     text-align: center;
     color: #10167F66;
-    margin-left: 0.4rem;
+    margin-left: 0.2rem;
+    padding-right: 3rem;
   }
   
   .calendar-grid {
