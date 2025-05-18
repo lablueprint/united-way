@@ -28,6 +28,7 @@ export default function Poll({ activityId, socket, closePoll, showResults }: Pol
         content: {
             question: string;
             options: Choices[];
+            totalVotes: number;
         }[];
         timeStart: Date;
         timeEnd: Date;
@@ -89,7 +90,7 @@ export default function Poll({ activityId, socket, closePoll, showResults }: Pol
                             {
                                 showResults ?
                                 <Text style={styles.optionText}>
-                                    {option.count} votes
+                                    {poll.content[questionIndex].totalVotes > 0 ? `${Math.round((option.count / poll.content[questionIndex].totalVotes) * 100)}%` : '0%'}
                                 </Text>
                                 :
                                 <Button title={option.text} onPress={() => handleVote(poll._id, option.id)} />
@@ -125,7 +126,7 @@ export default function Poll({ activityId, socket, closePoll, showResults }: Pol
                         />
                     }
 
-                    <View style={styles.progressBarContainer}>
+                    {!showResults && <View style={styles.progressBarContainer}>
                         <View
                             style={[
                                 styles.progressBar,
@@ -134,7 +135,7 @@ export default function Poll({ activityId, socket, closePoll, showResults }: Pol
                                 },
                             ]}
                         />
-                    </View>
+                    </View>}
                 </View>
             ) : (
                 <Text style={styles.loadingText}>Loading poll...</Text>

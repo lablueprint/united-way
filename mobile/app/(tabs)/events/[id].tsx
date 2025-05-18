@@ -50,7 +50,7 @@ export default function EventDetails() {
   const [organizationName, setOrganizationName] = useState("");
   const [joinedRaffles, setJoinedRaffles] = useState(false);
   const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
-  const [pollVisible, setPollVisible] = useState(true);
+  const [pollVisible, setPollVisible] = useState(false);
   // const [pollId, setPollId] = useState<string | null>('681450cd93079c13520ccbf7');
   const [pollId, setPollId] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -61,7 +61,7 @@ export default function EventDetails() {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if ((registeredUsers).includes(user.userId)) {
+    if ((registeredUsers).includes(user.userId) && !socketRef.current) {
       socketRef.current = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
       const socket = socketRef.current;
       // Send a message to the server
@@ -230,6 +230,7 @@ export default function EventDetails() {
       Alert.alert('Event started', `The event ${data.name} has started!`);
     });
     socket?.on('event end', (data) => {
+      closePoll();
       console.log('Event ended:', data.name);
       Alert.alert('Event ended', `The event ${data.name} has ended!`);
     });

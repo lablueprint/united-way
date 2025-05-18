@@ -66,8 +66,9 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
                 options: question.options.map((option) => ({
                     id: option.id,
                     text: option.text,
-                    count: 0
-                }))
+                    count: option.count
+                })),
+                totalVotes: question.totalVotes || 0
             }
         });
         if (activityStartTimeDiff > 0) {
@@ -195,6 +196,7 @@ const submitPoll = (socket, responses, poll, eventRooms) => {
     for (let i = 0; i < responses.length; i++) {
         const response = responses[i] - 1; // Adjust for 0-based index
         eventRooms[eventRoom].pollResponses[poll._id][i].options[response].count += 1;
+        eventRooms[eventRoom].pollResponses[poll._id][i].totalVotes += 1;
     }
     console.log(`Client ${socket.id} submitted poll responses: ${responses}`);
     console.log(`Poll responses for event ${eventRoom}:`, JSON.stringify(eventRooms[eventRoom].pollResponses[poll._id]));
