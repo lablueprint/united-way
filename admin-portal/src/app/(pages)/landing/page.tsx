@@ -18,6 +18,10 @@ import { useState, useEffect } from "react";
 import axios, { AxiosResponse } from 'axios';
 import styles from "./page.module.css"
 
+// TO-DO:
+// 1. Link view all events page.
+// 2. Make it so start time/end time and location aren't static.
+// 3. Replace image placeholders with actual event images.
 export default function Landing() {
 
   interface EventData {
