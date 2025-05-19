@@ -1,10 +1,12 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
-import styles from '../_styles/OrganizationProfile.module.css';
+import styles from '../../_styles/OrganizationProfile.module.css';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../_interfaces/AuthInterfaces';
-import { logout } from '../_utils/redux/orgSlice';
+import { RootState } from '../../_interfaces/AuthInterfaces';
+import { logout } from '../../_utils/redux/orgSlice';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface OrgDetails {
   name: string;
@@ -34,7 +36,8 @@ interface UserUpdate {
   phoneNumber?: string;
 }
 
-export default function OrganizationProfile() {
+
+export default function Profile() {
   const dispatch = useDispatch();
   // Individual state variables for each field
   const [name, setName] = useState("");
@@ -49,6 +52,7 @@ export default function OrganizationProfile() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [language, setLanguage] = useState(true);
   const [twoStep, setTwoStep] = useState(false);
+  const router = useRouter();
 
   // State to store original data for comparison
   const [originalData, setOriginalData] = useState<OrgDetails>({
@@ -167,11 +171,10 @@ export default function OrganizationProfile() {
     }
   };
   
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await dispatch(logout());
+    router.push("/");
   };
-
-  console.log(language);
 
   return (
     <div className={styles.bod}>
@@ -394,12 +397,12 @@ export default function OrganizationProfile() {
                     </div>
                   </div>
                   <div className={styles.languageRight}>
-                    <button className={`${language ? "" : "selected"} switchButton`} onClick={() => {setLanguage(false)}}>
+                    <button className={`${language ? "" : styles.selected} ${styles.switchButton}`} onClick={() => {setLanguage(false)}}>
                       <div className={styles.switchHeading}>
                         ES
                       </div>
                     </button>
-                    <button className={`${language ? "selected" : ""} switchButton`} onClick={() => {setLanguage(true)}}>
+                    <button className={`${language ? styles.selected : ""} ${styles.switchButton}`} onClick={() => {setLanguage(true)}}>
                       <div className={styles.switchHeading}>
                         EN
                       </div>    
