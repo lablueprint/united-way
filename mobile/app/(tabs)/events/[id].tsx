@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, StyleSheet, ScrollView, Modal, Alert } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import axios, { AxiosResponse } from 'axios';
 import { useState, useEffect } from 'react';
@@ -9,6 +9,8 @@ import { io, Socket } from "socket.io-client";
 import { useRef } from 'react';
 import Poll from '../../_components/Poll';
 import Announcement from '../../_components/Announcement';
+
+const windowHeight = Dimensions.get('window').height;
 
 interface EventData {
   _id: string;
@@ -53,7 +55,8 @@ export default function EventDetails() {
   const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
   const [pollVisible, setPollVisible] = useState(false);
   const [announcementVisible, setAnnouncementVisible] = useState(false);
-  const [pollId, setPollId] = useState<string | null>(null);
+  const [pollId, setPollId] = useState<string | null>('67aa5b4265470f35b546c36a');
+  const [pollResponses, setPollResponses] =  useState<(number | null)[]>([]);
   const [announcementId, setAnnouncementId] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const { id, origin } = useLocalSearchParams();
@@ -415,7 +418,7 @@ export default function EventDetails() {
             }}
           >
             <View style={styles.modalOverlay}>
-              {pollId && socketRef.current && <Poll activityId={pollId} socket={socketRef.current} closePoll={closePoll} showResults={showResults}/>}
+              {pollId && socketRef.current && <Poll activityId={pollId} socket={socketRef.current} closePoll={closePoll} showResults={showResults} pollResponses={pollResponses} setPollResponses={setPollResponses}/>}
             </View>
           </Modal>
           :
@@ -593,8 +596,8 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   modalOverlay: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    height: windowHeight,
   },
 });

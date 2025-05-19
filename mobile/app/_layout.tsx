@@ -1,24 +1,32 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
-import { Provider, useDispatch } from 'react-redux';
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { Provider } from "react-redux";
 
-import * as SplashScreen from 'expo-splash-screen';
-import * as SecureStore from 'expo-secure-store'
+import * as SplashScreen from "expo-splash-screen";
 
-import 'react-native-reanimated';
+import "react-native-reanimated";
 
-import store from './_utils/redux/reduxStore'
+import store from "./_utils/redux/reduxStore";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    BarlowCondensed: require("../assets/fonts/BarlowCondensed-Regular.ttf"),
+    BarlowCondensedBold: require("../assets/fonts/BarlowCondensed-Bold.ttf"),
+    BarlowCondensedBoldItalic: require("../assets/fonts/BarlowCondensed-BoldItalic.ttf"),
+    BarlowCondensedExtraBold: require("../assets/fonts/BarlowCondensed-ExtraBold.ttf"),
+    BarlowCondensedExtraLight: require("../assets/fonts/BarlowCondensed-ExtraLight.ttf"),
+    BarlowCondensedItalic: require("../assets/fonts/BarlowCondensed-Italic.ttf"),
+    BarlowCondensedLight: require("../assets/fonts/BarlowCondensed-Light.ttf"),
+    BarlowCondensedLightItalic: require("../assets/fonts/BarlowCondensed-LightItalic.ttf"),
+    BarlowCondensedMedium: require("../assets/fonts/BarlowCondensed-Medium.ttf"),
+    BarlowCondensedMediumItalic: require("../assets/fonts/BarlowCondensed-MediumItalic.ttf"),
+    BarlowCondensedSemiBold: require("../assets/fonts/BarlowCondensed-SemiBold.ttf"),
+    BarlowCondensedThin: require("../assets/fonts/BarlowCondensed-Thin.ttf"),
   });
 
   useEffect(() => {

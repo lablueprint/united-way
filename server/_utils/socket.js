@@ -66,17 +66,19 @@ const emitActivity = async (activity, eventRoom, eventRooms, io) => {
             eventRooms[eventRoom].pollResponses = {};
         }
         // Initialize poll responses for the activity
-        eventRooms[eventRoom].pollResponses[activity._id.toString()] = activity.content.map((question) => {
-            return {
-                question: question.question,
-                options: question.options.map((option) => ({
-                    id: option.id,
-                    text: option.text,
-                    count: option.count
-                })),
-                totalVotes: question.totalVotes || 0
-            }
-        });
+        if (Array.isArray(activity.content)) {
+            eventRooms[eventRoom].pollResponses[activity._id.toString()] = activity.content.map((question) => {
+                return {
+                    question: question.question,
+                    options: question.options.map((option) => ({
+                        id: option.id,
+                        text: option.text,
+                        count: option.count
+                    })),
+                    totalVotes: question.totalVotes || 0
+                }
+            });
+        }
         if (activityStartTimeDiff > 0) {
             setTimeout(() => {
                 // Let all clients in the event room know the activity is starting
