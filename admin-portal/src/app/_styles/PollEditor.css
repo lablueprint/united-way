@@ -325,6 +325,18 @@
   text-transform: uppercase;
 }
 
+/* — Poll Controls — */
+
+.pollControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* — Point Value — */
+
 .pointValue {
   display: flex;
   align-items: center;
@@ -372,13 +384,4 @@
   padding: 0.7rem;
   border-color: none;
   background: transparent;
-}
-
-/* — Poll Controls — */
-.pollControls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
 }

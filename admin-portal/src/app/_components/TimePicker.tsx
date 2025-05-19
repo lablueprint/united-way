@@ -29,9 +29,6 @@ export default function TimePicker({ start, end, onChange, label }: TimePickerPr
       newEnd.setDate(newEnd.getDate() + 1);
     }
 
-    console.log("Start UTC:", newStart.toISOString());
-    console.log("End UTC:", newEnd.toISOString());
-
     onChange({ newStart, newEnd });
   };
 
@@ -45,9 +42,6 @@ export default function TimePicker({ start, end, onChange, label }: TimePickerPr
       newEnd.setDate(newEnd.getDate() + 1);
     }
 
-    console.log("Start UTC:", start.toISOString());
-    console.log("End UTC:", newEnd.toISOString());
-
     onChange({ newStart: start, newEnd });
   };
 
@@ -55,7 +49,7 @@ export default function TimePicker({ start, end, onChange, label }: TimePickerPr
     <div className="controlGroup">
       {label && (
         <>
-          <Image src={ClockIcon} alt="Clock" width={24} height={24} />
+          <Image src={ClockIcon} alt="Clock" className="clockIcon" />
           <label>{label}</label>
         </>
       )}
@@ -65,14 +59,12 @@ export default function TimePicker({ start, end, onChange, label }: TimePickerPr
           type="time"
           value={getTimeString(start)}
           onChange={handleStartChange}
-          style={{ width: 100 }}
         />
         <span className="timeRangeSeparator">-</span>
         <input
           type="time"
           value={getTimeString(end)}
           onChange={handleEndChange}
-          style={{ width: 100 }}
         />
       </div>
     </div>

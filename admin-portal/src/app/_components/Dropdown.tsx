@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import '../_styles/Dropdown.css';
-import { Activity, PollContent } from "../_interfaces/EventInterfaces";
+import { PollContent } from "../_interfaces/EventInterfaces";
 
 export interface DropDownProps<Item> {
   title: string;

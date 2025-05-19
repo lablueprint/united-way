@@ -25,10 +25,6 @@
   margin-left: 0.5rem;
 }
 
-.controlGroup img {
-  color: #10167F;
-}
-
 .dateSelect,
 .timeSelect {
   position: relative;
@@ -38,7 +34,7 @@
   border-radius: 0.25rem;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
-  min-width: 150px;
+  min-width: 9.375rem;
 }
 
 .dateSelect:hover,
@@ -144,7 +140,6 @@
   border-radius: 0.5rem;
   padding: 0;
   width: 100%;
-  transition: background 0.2s, color 0.2s;
 }
 
 .day.selected {
@@ -161,107 +156,22 @@
   cursor: default;
 }
 
-/* Time Picker Popup */
-.timePickerPopup {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  background: white;
-  border: 1px solid #E5E7EB;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  width: 300px;
-  max-height: 400px;
-  overflow: hidden;
-}
-
-.timePickerColumns {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-
-.timePickerColumn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid #E5E7EB;
-  max-height: 400px;
-}
-
-.timePickerColumn:last-child {
-  border-right: none;
-}
-
-.timePickerColumnHeader {
-  padding: 0.75rem;
-  font-family: "Helvetica";
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6B7280;
-  text-transform: uppercase;
-  text-align: center;
-  border-bottom: 1px solid #E5E7EB;
-  background-color: #F8F9FF;
-}
-
-.timePickerColumnContent {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #E5E7EB transparent;
-}
-
-.timePickerColumnContent::-webkit-scrollbar {
-  width: 6px;
-}
-
-.timePickerColumnContent::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.timePickerColumnContent::-webkit-scrollbar-thumb {
-  background-color: #E5E7EB;
-  border-radius: 3px;
-}
-
-.timeOption {
-  width: 100%;
-  padding: 0.75rem;
-  border: none;
+.calendarNavButton {
+  width: 0.5rem;
+  height: 0.5rem;
   background: none;
-  font-family: "Helvetica";
-  font-size: 0.875rem;
+  border: none;
   color: #10167F;
+  font-family: "BarlowCondensedBold";
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  transition: all 0.2s ease;
 }
 
-.timeOption:hover {
-  background-color: #F8F9FF;
-}
-
-.timeOption.selected {
-  background-color: #10167F;
-  color: white;
-}
-
-.timeOptionValue {
-  font-family: "Helvetica";
-  font-size: 0.875rem;
-  color: inherit;
-}
-
-.timeOptionPeriod {
-  font-family: "Helvetica";
-  font-size: 0.75rem;
-  opacity: 0.8;
+/* Time Picker */
+.clockIcon {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 /* Click-away handling */
@@ -274,7 +184,6 @@
   z-index: 999;
 }
 
-/* Time Range Picker */
 .timeRangeSelect {
   display: flex;
   align-items: center;
@@ -303,6 +212,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -323,61 +233,15 @@
   font-family: "Helvetica";
   font-size: 1rem;
   color: #10167F4D;
-  opacity: 0.5;
-}
-
-.timePeriod {
-  font-family: "Helvetica";
-  font-size: 0.75rem;
-  color: #10167F4D;
-  opacity: 0.5;
-}
-
-/* Period Toggle */
-.periodToggle {
-  display: flex;
-  width: 100%;
-  border-bottom: 1px solid #E5E7EB;
-}
-
-.periodButton {
-  flex: 1;
-  padding: 0.75rem;
-  border: none;
-  background: none;
-  font-family: "Helvetica";
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6B7280;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.periodButton:first-child {
-  border-top-left-radius: 0.5rem;
-}
-
-.periodButton:last-child {
-  border-top-right-radius: 0.5rem;
-}
-
-.periodButton:hover:not(.selected) {
-  background-color: #F8F9FF;
-  color: #10167F;
 }
 
 /* --- Time Range Picker Modern Styling --- */
 input[type="time"] {
   background: transparent;
   border: transparent;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.8rem;
-  color: #10167F;
+  padding: 0.75rem 1.5rem;
   font-family: "Helvetica";
-  transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
-  min-width: 90px;
   text-align: center;
 }
 
@@ -389,21 +253,4 @@ input[type="time"]:focus {
 input[type="time"]::-webkit-calendar-picker-indicator {
   display: none;
   -webkit-appearance: none;
-}
-
-input[type="time"]::-webkit-calendar-picker-indicator {
-  filter: invert(20%) sepia(100%) saturate(2000%) hue-rotate(210deg);
-  cursor: pointer;
-}
-
-.calendarNavButton {
-  width: 0.5rem;
-  height: 0.5rem;
-  background: none;
-  border: none;
-  color: #10167F;
-  font-family: "BarlowCondensedBold";
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
 }

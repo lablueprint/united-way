@@ -4,9 +4,7 @@ import axios from "axios";
 import QuizEditor from "./QuizEditor";
 import PollEditor from "./PollEditor";
 import AnnouncementEditor from "./AnnouncementEditor";
-import DateTimePicker from "react-datetime-picker";
 import type { Activity } from "../_interfaces/EventInterfaces";
-import "../_styles/DateTimePicker.css";
 import "../_styles/ActivityEditor.css";
 
 type ValuePiece = Date | null;
@@ -34,7 +32,6 @@ export default function ActivityEditor({
   const [activity, setActivity] = useState<Activity | null>(null);
   const [start, setStart]       = useState<Value>(new Date());
   const [end, setEnd]           = useState<Value>(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const didCreateRef            = useRef(false);
 
   useEffect(() => {
@@ -122,19 +119,8 @@ export default function ActivityEditor({
       setActivity({ ...activity, timeStart: newStart, timeEnd: newEnd });
       setStart(newStart);
       setEnd(newEnd);
-      setShowDatePicker(false);
     } catch (e) {
       console.error(e);
-    }
-  };
-
-  const handleTimeChange = (v: Value, isStart: boolean) => {
-    const d = Array.isArray(v) ? v[0] : v;
-    if (!d) return;
-    if (isStart) {
-      setStart(d);
-    } else {
-      setEnd(d);
     }
   };
 
@@ -180,75 +166,7 @@ export default function ActivityEditor({
 
   return (
     <div className="activity-editor">
-      {/* <div className="activity-editor-header">
-        <div className="activity-editor-actions">
-          {activity && (
-            <button
-              onClick={handleDelete}
-              className="activity-editor-delete"
-            >
-              Delete
-            </button>
-          )}
-        </div>
-      </div> */}
-
       {renderEditor()}
-
-      {/* Only show datetime modal for non-poll activities */}
-      {showDatePicker && activity?.type !== "poll" && (
-        <div className="datetime-modal">
-          <div className="datetime-modal-content">
-            <h3 className="datetime-modal-title">
-              Schedule Activity
-            </h3>
-            <div className="datetime-field">
-              <h4 className="datetime-field-label">
-                Start Time
-              </h4>
-              <DateTimePicker 
-                value={start} 
-                onChange={v => handleTimeChange(v, true)}
-                format="y-MM-dd h:mm a"
-                clearIcon={null}
-                calendarIcon={null}
-                autoFocus={false}
-                disableCalendar={false}
-                className="datetime-picker"
-              />
-            </div>
-            <div className="datetime-field">
-              <h4 className="datetime-field-label">
-                End Time
-              </h4>
-              <DateTimePicker 
-                value={end} 
-                onChange={v => handleTimeChange(v, false)}
-                format="y-MM-dd h:mm a"
-                clearIcon={null}
-                calendarIcon={null}
-                autoFocus={false}
-                disableCalendar={false}
-                className="datetime-picker"
-              />
-            </div>
-            <div className="datetime-modal-actions">
-              <button 
-                onClick={() => setShowDatePicker(false)}
-                className="datetime-modal-button datetime-modal-button-cancel"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => updateTime(start as Date, end as Date)}
-                className="datetime-modal-button datetime-modal-button-save"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
