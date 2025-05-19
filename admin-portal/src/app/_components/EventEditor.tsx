@@ -319,7 +319,8 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                 {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
                     <button className="saveButton" onClick={() => {
-                        handlePatch(true)
+                        handlePatch(true);
+                        router.push('/events');
                     }}>
                         SAVE
                     </button>
@@ -342,7 +343,8 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                         CANCEL
                     </button>
                     <button className="bigPillButton" onClick={() => {
-                        handlePatch(false)
+                        handlePatch(false);
+                        router.push('/events');
                     }}>
                         PUBLISH
                     </button>

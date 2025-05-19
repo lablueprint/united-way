@@ -25,7 +25,6 @@ interface Event {
   locationString: string;
 }
 
-
 const UpcomingCalendar = () => {
   const [viewMode, setViewMode] = useState("Default")
   const [selectedWeek, setSelectedWeek] = useState('');
@@ -461,7 +460,7 @@ const UpcomingCalendar = () => {
                                   ) : events.length >= 1 ? (
                                     "•"
                                   ) : (
-                                    <span style={{ visibility: 'hidden' }}>.</span>
+                                    <div style={{ visibility: 'hidden' }}>.</div>
                                   )
                                 ) : null}
                               </p>
@@ -493,18 +492,18 @@ const UpcomingCalendar = () => {
                         <img src={event.image || "/placeholder.svg"} alt="Event" />
                       </div>
                       <div className="event-details-container">
-                        <h3 className="event-title">{event.name}</h3>
+                        <div className="event-title">{event.name}</div>
                         <div className="event-info">
-                          <span className="event-date">
+                          <div className="event-date">
                             {event.date != null
                               ? new Date(event.date).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric'
                               }).toUpperCase()
                               : "No date"}
-                          </span>
-                          <span className="event-separator">|</span>
-                          <span className="event-time">
+                          </div>
+                          <div >|</div>
+                          <div className="event-time">
                             {event.date != null
                               ? new Date(event.date).toLocaleTimeString('en-US', {
                                 hour: 'numeric',
@@ -512,7 +511,7 @@ const UpcomingCalendar = () => {
                                 hour12: true
                               })
                               : "No time"}
-                          </span>
+                          </div>
                           <div className="event-location">
                             {event.locationString == "" ? "No location specified" : event.locationString}
                           </div>
@@ -591,18 +590,18 @@ const UpcomingCalendar = () => {
                                     <img src={event.image || "/placeholder.svg"} alt="Event" />
                                   </div>
                                   <div className="event-details-container">
-                                    <h3 className="event-title">{event.name.toUpperCase()}</h3>
+                                    <div className="event-title">{event.name.toUpperCase()}</div>
                                     <div className="event-info">
-                                      <span className="event-date">
+                                      <div className="event-date">
                                         {event.date != null
                                           ? new Date(event.date).toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric'
                                           }).toUpperCase()
                                           : "No date"}
-                                      </span>
-                                      <span className="event-separator">|</span>
-                                      <span className="event-time">
+                                      </div>
+                                      <div >|</div>
+                                      <div className="event-time">
                                         {event.date != null
                                           ? new Date(event.date).toLocaleTimeString('en-US', {
                                             hour: 'numeric',
@@ -610,7 +609,7 @@ const UpcomingCalendar = () => {
                                             hour12: true
                                           })
                                           : "No time"}
-                                      </span>
+                                      </div>
                                     </div>
                                     <div className="event-location">
                                       {event.locationString == "" ? "No location specified" : event.locationString}
@@ -630,20 +629,20 @@ const UpcomingCalendar = () => {
                             } else if (groupName === "Past") {
                               return (
                                 <div key={event._id} className="event-item past-event">
-                                  <div className="event-details">
-                                    <h3 className="event-title">{event.name}</h3>
-                                    <span className="event-separator">•</span>
+                                  <div className="event-details-content">
+                                    <div className="event-title">{event.name}</div>
+                                    <div >•</div>
                                     <div className="event-info-past">
-                                      <span className="event-date">
+                                      <div className="event-date">
                                         {event.date != null
                                           ? new Date(event.date).toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric'
                                           }).toUpperCase()
                                           : "No date"}
-                                      </span>
-                                      <span className="event-separator">|</span>
-                                      <span className="event-time">
+                                      </div>
+                                      <div >|</div>
+                                      <div className="event-time">
                                         {event.date != null
                                           ? new Date(event.date).toLocaleTimeString('en-US', {
                                             hour: 'numeric',
@@ -651,10 +650,10 @@ const UpcomingCalendar = () => {
                                             hour12: true
                                           })
                                           : "No time"}
-                                      </span>
-                                      <span className="event-location">
+                                      </div>
+                                      <div className="event-location">
                                         {event.locationString == null ? "No location specified" : event.locationString}
-                                      </span>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -666,18 +665,18 @@ const UpcomingCalendar = () => {
                                     <img src={event.image || "/placeholder.svg"} alt="Event" />
                                   </div>
                                   <div className="event-details-container">
-                                    <h3 className="event-title">{event.name}</h3>
+                                    <div className="event-title">{event.name}</div>
                                     <div className="event-info">
-                                      <span className="event-date">
+                                      <div className="event-date">
                                         {event.date != null
                                           ? new Date(event.date).toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric'
                                           }).toUpperCase()
                                           : "No date"}
-                                      </span>
-                                      <span className="event-separator">|</span>
-                                      <span className="event-time">
+                                      </div>
+                                      <div >|</div>
+                                      <div className="event-time">
                                         {event.date != null
                                           ? new Date(event.date).toLocaleTimeString('en-US', {
                                             hour: 'numeric',
@@ -685,7 +684,7 @@ const UpcomingCalendar = () => {
                                             hour12: true
                                           })
                                           : "No time"}
-                                      </span>
+                                      </div>
 
                                     </div>
                                     <div className="event-location">
@@ -705,20 +704,20 @@ const UpcomingCalendar = () => {
                             } else {
                               return (
                                 <div key={event._id} className="event-item">
-                                  <div className="event-details">
-                                    <h3 className="event-title">{event.name}</h3>
-                                    <span className="event-separator">•</span>
+                                  <div className="event-details-content">
+                                    <div className="event-title">{event.name}</div>
+                                    <div>•</div>
                                     <div className="event-info">
-                                      <span className="event-date">
+                                      <div className="event-date">
                                         {event.date != null
                                           ? new Date(event.date).toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric'
                                           }).toUpperCase()
                                           : "No date"}
-                                      </span>
-                                      <span className="event-separator">|</span>
-                                      <span className="event-time">
+                                      </div>
+                                      <div>|</div>
+                                      <div className="event-time">
                                         {event.date != null
                                           ? new Date(event.date).toLocaleTimeString('en-US', {
                                             hour: 'numeric',
@@ -726,11 +725,11 @@ const UpcomingCalendar = () => {
                                             hour12: true
                                           })
                                           : "No time"}
-                                      </span>
-                                      <span className="event-separator">•</span>
-                                      <span className="event-location">
+                                      </div>
+                                      <div >•</div>
+                                      <div className="event-location">
                                         {event.locationString == null ? "No location specified" : event.locationString}
-                                      </span>
+                                      </div>
                                     </div>
                                   </div>
                                   <div className="edit-right-aligned">
