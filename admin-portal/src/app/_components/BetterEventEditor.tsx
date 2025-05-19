@@ -14,7 +14,7 @@ import { eventNames } from 'process';
 import { useRouter } from 'next/navigation';
 
 interface EventEditorProps {
-    eventId: string
+    eventId: string;
 }
 
 export default function BetterEventEditor({ eventId }: EventEditorProps): React.ReactElement {

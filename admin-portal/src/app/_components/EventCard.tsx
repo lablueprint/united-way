@@ -1,6 +1,6 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
-import EventEditor from "./EventEditor";
+import BetterEventEditor from "./BetterEventEditor";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 
@@ -71,7 +71,7 @@ export default function EventCard({ id, removeFromList, orgName }: EventCardProp
                 )}
             </div>
 
-            {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={id} justCreated={false}/>}
+            {isEditing && <BetterEventEditor eventId={id} />}
         </div>
     );
 }

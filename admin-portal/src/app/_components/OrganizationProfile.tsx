@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import EventCard from "./EventCard";
-import EventEditor from "./EventEditor";
+import BetterEventEditor from "./BetterEventEditor";
 import TaskList from "./TaskList";
 import { EventData } from '../_interfaces/EventInterfaces';
 import { useSelector } from 'react-redux';
@@ -143,7 +143,7 @@ export default function OrganizationProfile() {
       }}>
         Create Event
       </button>
-      {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={editingId} justCreated={true}/>}
+      {isEditing && <BetterEventEditor eventId={editingId} />}
       </div>
       <TaskList />
       </>
