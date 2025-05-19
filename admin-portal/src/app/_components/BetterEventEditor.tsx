@@ -34,6 +34,18 @@ export default function BetterEventEditor() {
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken }})
 
+    useEffect(() => {
+        // If an input is followed by a div, make the button open the picker
+        document.querySelectorAll("div").forEach((div) => {
+            div.addEventListener("click", (event) => {
+                const input = (event.currentTarget as HTMLButtonElement).previousElementSibling as HTMLInputElement;
+                if (input?.tagName === "INPUT" && 'showPicker' in input) {
+                    input.showPicker();
+                }
+            });
+        });
+    }, []);
+
     // Send request with address to Nominatim endpoint and receive back latitude, longitude in JSON
     // https://nominatim.org/release-docs/develop/api/Search/
     const getLocationJSON = async (address: string) => {
@@ -145,21 +157,33 @@ export default function BetterEventEditor() {
 
                 <div className="event-editor-interface">
                     <div className="image-editor-and-tags">
-                        <div className="image-editor">
-                            <div className="add-photo-parent" onClick={() => {handleImageChange}}>
-                                <div className="add_photo-image">
-                                    <Image src={add_photo} alt="Add Photo Icon" width={60} height={60} />
-                                </div>
-                                <div className="add_photo-subtitle">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                    />
-                                    Upload Images Here
-                                </div>
-                            </div>
-                        </div>
+                        {/* This setup creates a hidden input that's triggered by clicking the label */}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                            id="imageUpload"  // This ID connects the input to the label
+                        />
+                        {
+                            image ?
+                                <label htmlFor="imageUpload" className="image-editor-with-image">
+                                    <div className="add_photo-image-with-image">
+                                        <Image src={image} alt="Add Photo Icon" width={513} height={450} />
+                                    </div>
+                                </label>
+                            :
+                            <label htmlFor="imageUpload" className="image-editor">
+                                <label htmlFor="imageUpload" className="add-photo-parent"> 
+                                    <div className="add_photo-image">
+                                        <Image src={add_photo} alt="Add Photo Icon" width={60} height={60} />
+                                    </div>
+                                    <div className="add_photo-subtitle">
+                                        Upload Images Here
+                                    </div>
+                                </label>
+                            </label>
+                        }
                         <div className="tags-title">
                             SELECT KEYWORDS
                         </div>

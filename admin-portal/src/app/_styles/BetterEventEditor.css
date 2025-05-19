@@ -167,6 +167,10 @@
     max-width: 32rem;
 }
 
+.hidden {
+    display: none;
+}
+
 .image-editor {
     background-color: #f6f6fa;
     border-radius: 0.5rem;
@@ -174,20 +178,35 @@
     padding: 11rem 14rem 11rem 14rem;
 }
 
+.image-editor-with-image {
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
 .add-photo-parent {
     align-items: center;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
 }
 
 .add-photo-image {
     align-self: "stretch";
+    cursor: pointer;
+    display: flex;
+    object-fit: "contain";
+}
+
+.add-photo-image-with-image {
+    align-self: "stretch";
+    cursor: pointer;
     display: flex;
     object-fit: "contain";
 }
 
 .add_photo-subtitle {
     color: #171885;
+    cursor: pointer;
     font-family: "Helvetica";
     font-size: 1.2rem;
     font-weight: 700;
