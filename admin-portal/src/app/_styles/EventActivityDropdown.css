@@ -96,6 +96,7 @@
 
 .drop_down {
     align-self: "stretch";
+<<<<<<< HEAD
     cursor: pointer;
     display: flex;
     object-fit: "contain";
@@ -104,6 +105,8 @@
 .drop_up {
     align-self: "stretch";
     cursor: pointer;
+=======
+>>>>>>> 664aeaf69c668ddcee5e934a2bf14d60c4724efc
     display: flex;
     object-fit: "contain";
 }
