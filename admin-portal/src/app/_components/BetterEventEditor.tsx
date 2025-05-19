@@ -10,12 +10,15 @@ import Link from 'next/link';
 import AddTagsModal from "./AddTagsModal";
 import { add_photo, down_arrow, calendar, clock, draft, hero, person, right_arrow } from '../../../public/BetterEventEditor/BetterEventEditor-index'
 import '../_styles/BetterEventEditor.css';
+import { eventNames } from 'process';
+import { useRouter } from 'next/navigation';
 
 interface EventEditorProps {
     eventId: string
 }
 
 export default function BetterEventEditor({ eventId }: EventEditorProps): React.ReactElement {
+    const router = useRouter();
     const [eventTitle, setEventTitle] = useState<string>("");
     const [eventDescription, setEventDescription] = useState<string>("");
     const [eventAttendeesCount, setEventAttendeesCount] = useState<number>(0);
@@ -77,6 +80,90 @@ export default function BetterEventEditor({ eventId }: EventEditorProps): React.
             return err;
         }
     };
+
+    const notEmpty = () => {
+        return ((eventTitle.length > 0) &&
+            (eventDescription.length > 0) &&
+            ((tags.length > 0)) &&
+            ((latitude != 0) && (longitude != 0)) &&
+            (eventAttendeesCount > 0))
+            // TODO: Add check for image upload
+    }
+
+    // When creating draft, create array of flags of "TODOs" for a given event
+    // true --> not draft/complete, false --> draft
+    const generateDraftList = () => {
+        const currDraftList = [];
+
+        // Event Name: 0
+        currDraftList.push(eventTitle !== "");
+
+        // Start time, end time, time zone have default vals (they aren't in draft list)
+
+        // Description: 1
+        currDraftList.push(eventDescription !== "");
+
+        // Location: 2
+        currDraftList.push(((latitude != 0) && (longitude != 0)));
+
+        // Tags: 3
+        currDraftList.push((tags.length != 0));
+
+        // TODO: When implemented, add flag for event photo
+
+        return currDraftList
+    }
+
+    // TODO: maybe refresh to populate the event into org upon successful patch?
+    // TODO: Update schema to handle user count?
+    // Creates a JSON and attempts to patch it to DB
+    const handlePatch = async (currIsDraft: boolean) => {
+        try {
+            // TODO: Convert to GMT, figure out how things are stored
+            if ((notEmpty() && !currIsDraft) || currIsDraft) {
+                const selectedTags = tags
+                    .map((isSelected, index) => isSelected ? EventTags[index] : null)
+                    .filter(tag => tag !== null);
+
+                const uploadDraftList = generateDraftList()
+
+                const response: AxiosResponse = await axios.patch(
+                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`,
+                    {
+                        name: eventTitle,
+                        date: eventDate,
+                        duration: 0, // Hardcoded for now
+                        draft: currIsDraft,
+                        draftList: uploadDraftList,
+                        description: eventDescription,
+                        startTime: startTime,
+                        endTime: endTime,
+                        location: {
+                            type: "Point",
+                            coordinates: [longitude, latitude]
+                        },
+                        organizerID: org.orgId,
+                        tags: selectedTags,
+                        registeredUsers: [], // Hardcoded for now
+                        activity: [], // Hardcoded for now
+                        image: "placeholder" // Hardcoded for now
+                    },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${org.authToken}`
+                        }
+                    }
+                );
+                router.push('/event');
+            }
+            else {
+                console.log("Upload Failure: Empty Arguments")
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     // Send request with address to Nominatim endpoint and receive back latitude, longitude in JSON
     // https://nominatim.org/release-docs/develop/api/Search/
@@ -214,8 +301,8 @@ export default function BetterEventEditor({ eventId }: EventEditorProps): React.
                     </div>
                     <div className="cancel-save-publish-parent">
                         <Link className="cancel-button" href="/event">CANCEL</Link>
-                        <div className="save-button">SAVE</div>
-                        <div className="publish-button">PUBLISH</div>
+                        <div className="save-button" onClick={() => {handlePatch(true)}}>SAVE</div>
+                        <div className="publish-button" onClick={() => {handlePatch(false)}}>PUBLISH</div>
                     </div>
                 </div>
 
