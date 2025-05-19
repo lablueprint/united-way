@@ -8,17 +8,16 @@ interface HeaderProps {
     headerText?: string;
     headerDescription?: string;
     button?: React.ReactNode;
-    // onClick?: () => void; //optional function with no args
     breadcrumb?: React.ReactNode;
 }
 
-export default function Header( { headerText, headerDescription, button, breadcrumb }: HeaderProps) {
+export default function Header({ headerText, headerDescription, button, breadcrumb }: HeaderProps) {
     return (
-        <div className="hero">    
+        <div className="hero">
             <div className="heroInfoWrap">
                 <div className="heroBreadcrumb">
                     {breadcrumb}
-                </div>  
+                </div>
                 <div className="heroInfo">
                     <div className="heroHeader">
                         <h1 className="heroHeaderText">{headerText}</h1>

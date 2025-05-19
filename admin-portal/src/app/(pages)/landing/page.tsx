@@ -2,6 +2,7 @@
 import { useDispatch } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
+
 import EventCard from "@/app/_components/EventCard";
 import EventEditor from "@/app/_components/EventEditor";
 import EventCarousel from "@/app/_components/EventCarousel";
