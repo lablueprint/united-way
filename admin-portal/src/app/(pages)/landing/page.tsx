@@ -290,7 +290,7 @@ export default function Landing() {
             <div className={`${styles.eventList} ${styles.upcomingList}`}>
               {upcomingIds.length > 0 && upcomingIds.map((id: string) => {
                 return (
-                  <EventCard id={id} key={id} removeFromList={removeFromList} orgName={orgName} />
+                  <EventCard id={id} key={id} removeFromList={removeFromList} orgName={orgName} onClick={() => router.push(`/landing/${id}`)}/>
                 );
               })}
             </div>
