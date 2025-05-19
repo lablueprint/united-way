@@ -33,3 +33,16 @@ export default function EventEndMarker() {
     </div>
   );
 }
+
+export function VisibleEventEndMarker() {
+  return (
+    <div className='visible'>
+      <div className="empty-event">
+        <div className="content">
+          <Image src={emptyLogo} alt="United Way Sheer Blue Logo" width={80} />
+          <div className="content-text">No events created.</div>
+        </div>
+      </div>
+    </div>
+  );
+}
