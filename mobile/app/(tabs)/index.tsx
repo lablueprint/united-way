@@ -21,6 +21,17 @@ const styles = StyleSheet.create({
   }
 });
 
+//get the user by id and then just take the registeredevents
+    paddingVertical: 72,
+  },
+  header: {
+    textTransform: 'uppercase',
+    fontStyle: 'italic',
+    fontWeight: 700,
+    fontSize: 32,
+  }
+});
+
 export default function HomeScreen() {
   return (
     <View style={styles.container}>

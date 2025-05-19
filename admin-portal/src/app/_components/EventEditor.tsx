@@ -5,6 +5,7 @@ import QRCode from 'react-qr-code';
 import '../_styles/EventEditor.css';
 import { pen, logo } from '../../../public/EventEditor/EventEditor-index'
 import axios, { AxiosResponse } from 'axios';
+import ActivityDropdown from './ActivityDropdown';
 import { useRouter } from 'next/navigation';
 import { RequestType } from '../_interfaces/RequestInterfaces';
 import useApiAuth from '../_hooks/useApiAuth';
@@ -310,6 +311,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                                 <QRCode value={eventId} />
                             </div>
                         </div>
+                        <ActivityDropdown eventId={eventId} isDraft={true} />
                     </div>
                 </div>
             </div>

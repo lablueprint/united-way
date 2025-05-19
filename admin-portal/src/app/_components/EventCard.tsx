@@ -11,9 +11,10 @@ interface EventCardProps {
     id: string;
     removeFromList: (id: string) => void;
     orgName: string;
+    onClick: () => void;
 }
 
-export default function EventCard({ id, removeFromList, orgName }: EventCardProps) {
+export default function EventCard({ id, removeFromList, orgName, onClick }: EventCardProps) {
     // make image static right now? need to add into schema later on?
     const [showButtons, setShowButtons] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -39,8 +40,7 @@ export default function EventCard({ id, removeFromList, orgName }: EventCardProp
     });
     // event schema has the date as a string right now, but needs to be event object
     const location = "Los Angeles, CA";
-    const startTime = "12:00"; // need to figure out am/pm stuff later
-    const endTime = "12:01";
+
     const [org, sendRequest] = useApiAuth();
 
     const deleteEvent = async (e: MouseEvent<HTMLButtonElement>) => {
@@ -92,7 +92,7 @@ export default function EventCard({ id, removeFromList, orgName }: EventCardProp
             setEventData({
                 ...data,
                 date: new Date(data.date)
-              });
+            });
         };
         fetchData();
     }, []);
@@ -100,28 +100,30 @@ export default function EventCard({ id, removeFromList, orgName }: EventCardProp
     const getMonthAbbreviation = (date: Date) => {
         return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
     };
-    
+
     return (
         // Show event name, show buttons on hover
         <div
             className="event-card"
+            onClick={onClick}
         >
-            <Image className="event-image" style={{ objectFit: 'contain' }} src={placeholder} alt="Event thumbnail"/>
-            <div className="event-info">
+            <Image className="event-image" style={{ objectFit: 'contain' }} src={placeholder} alt="Event thumbnail" />
+            <div className="event-content-info">
                 <div className="event-name">{eventData.name}</div>
                 <div className="event-date-time">
-                    <p className="event-date">{getMonthAbbreviation(eventData.date)} {eventData.date.getDate()}</p>
-                    <p className="event-time">{startTime} - {endTime}</p>
+                    <p className="event-card-date">{getMonthAbbreviation(eventData.date)} {eventData.date.getDate()}</p>
+                    <p>|</p>
+                    <p className="event-card-time">{eventData.startTime} - {eventData.endTime} PM</p>
                 </div>
-                <div className="event-location">{location}</div>
+                <div className="event-card-location">{location}</div>
             </div>
 
             {isEditing && <BetterEventEditor eventId={id} />}
         </div>
-        
 
 
-           
-    
+
+
+
     );
 }

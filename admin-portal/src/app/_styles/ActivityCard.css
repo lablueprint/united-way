@@ -87,3 +87,77 @@
     text-overflow: ellipsis;
     word-break: break-word;
 }
+=======
+.activityCard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-style: solid;
+    border-color: rgba(16, 22, 127, 0.2);
+    background-color:rgba(16, 22, 127, 0.06);
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 1.5rem;
+    min-width: 286px;
+}
+
+.icon {
+    width: 54px;
+    height: 54px;
+}
+
+.activityInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.activityInfoWrap {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.activityTitle {
+    text-transform: uppercase;
+    font-family: "BarlowCondensed";
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: rgba(16, 22, 127, 1);
+}
+
+.activityDateTime {
+    display: flex;
+    flex-direction: row;
+    font-weight: 400;
+    font-size: 1rem;
+    color:rgba(16, 22, 127, 1);
+}
+
+.activityDate {
+    text-transform: uppercase;
+    border-right-style: solid;
+    border-right-color: rgba(16, 22, 127, 1);
+    border-right-width: 1px;
+    padding-right: 0.5rem;
+}
+
+.activityTime {
+    padding-left: 0.5rem;
+}
+
+.activityLocation {
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    color: rgba(16, 22, 127, 1);
+}
+
+.editButton.lightButton{
+    background-color: #FFFFFF;
+    padding: 0.75rem 1rem;
+    border-style: solid;
+    border-color: rgba(16, 22, 127, 0.4);
+    border-width: 1px;
+    border-radius: 100px;
+}
