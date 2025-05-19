@@ -1,11 +1,13 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
 import QuizEditor from "./QuizEditor";
 import PollEditor from "./PollEditor";
 import AnnouncementEditor from "./AnnouncementEditor";
 import type { Activity } from "../_interfaces/EventInterfaces";
 import "../_styles/ActivityEditor.css";
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -15,7 +17,7 @@ interface ActivityEditorProps {
   createType?: "poll" | "announcement" | "raffle";
   id?: string;
   onCancel?: () => void;
-  onDeleted?: (id: string) => void; 
+  onDeleted?: (id: string) => void;
   refresh?: number;
   isDraft: boolean;
 }
@@ -30,19 +32,22 @@ export default function ActivityEditor({
   isDraft,
 }: ActivityEditorProps) {
   const [activity, setActivity] = useState<Activity | null>(null);
-  const [start, setStart]       = useState<Value>(new Date());
-  const [end, setEnd]           = useState<Value>(new Date());
-  const didCreateRef            = useRef(false);
+  const [start, setStart] = useState<Value>(new Date());
+  const [end, setEnd] = useState<Value>(new Date());
+  const didCreateRef = useRef(false);
+
+  const [org, sendRequest] = useApiAuth();
 
   useEffect(() => {
     async function fetchActivity() {
       try {
-        const resp = await axios.post(
-          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/filtered`,
-          { eventID: eventId }
-        );
-        const found = (resp.data.data as Activity[]).find(a => a._id === id);
-        if (!found) throw new Error("Activity not found");
+        const body = { eventID: eventId };
+        const requestType = RequestType.POST;
+        const endpoint = "activities/filtered";
+        const data = await sendRequest({ body, requestType, endpoint });
+        const found = (data as Activity[]).find(a => a._id === id);
+        if (!found)
+          throw new Error("Activity not found");
         setActivity(found);
         setStart(new Date(found.timeStart));
         setEnd(new Date(found.timeEnd));
@@ -66,26 +71,25 @@ export default function ActivityEditor({
           ? [{ text: "New Announcement" }]
           : createType === "poll"
             ? {
-                title: "Untitled Page",
-                questions: [{
-                  question: "New Poll Question",
-                  options: [{ id: 0, text: "Choice 1", count: 0 }],
-                }]
-              }
+              title: "Untitled Page",
+              questions: [{
+                question: "New Poll Question",
+                options: [{ id: 0, text: "Choice 1", count: 0 }],
+              }]
+            }
             : [];
 
-      const res = await axios.post<{ data: Activity }>(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/createActivity`,
-        {
-          eventID:  eventId,
-          type:     createType,
-          content:  defaultContent,
-          timeStart: new Date(),
-          timeEnd:   new Date(),
-          active:    true,
-        }
-      );
-      const newAct = res.data.data;
+      const body = {
+        eventID: eventId,
+        type: createType,
+        content: defaultContent,
+        timeStart: new Date(),
+        timeEnd: new Date(),
+        active: true,
+      }
+      const endpoint = "activities/createActivity";
+      const requestType = RequestType.POST;
+      const newAct = await sendRequest({ endpoint, requestType, body });
       setActivity(newAct);
       setStart(new Date(newAct.timeStart));
       setEnd(new Date(newAct.timeEnd));
@@ -97,31 +101,25 @@ export default function ActivityEditor({
   const handleDelete = async () => {
     if (!activity) return;
     if (!confirm("Are you sure you want to delete this activity?")) return;
+    const body = {};
+    const endpoint = `activities/${activity._id}`;
+    const requestType = RequestType.DELETE;
+    await sendRequest({ body, endpoint, requestType });
 
-    try {
-      await axios.delete(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activity._id}`
-      );
-      onDeleted?.(activity._id);
-      onCancel?.()
-    } catch (e) {
-      console.error("Failed to delete:", e);
-    }
+    onDeleted?.(activity._id);
+    onCancel?.()
   };
 
   const updateTime = async (newStart: Date, newEnd: Date) => {
     if (!activity) return;
-    try {
-      await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activity._id}`,
-        { timeStart: newStart, timeEnd: newEnd }
-      );
-      setActivity({ ...activity, timeStart: newStart, timeEnd: newEnd });
-      setStart(newStart);
-      setEnd(newEnd);
-    } catch (e) {
-      console.error(e);
-    }
+
+    const endpoint = `activities/${activity._id}`;
+    const body = { timeStart: newStart, timeEnd: newEnd };
+    const requestType = RequestType.PATCH;
+    await sendRequest({ requestType, body, endpoint });
+    setActivity({ ...activity, timeStart: newStart, timeEnd: newEnd });
+    setStart(newStart);
+    setEnd(newEnd);
   };
 
   const renderEditor = () => {

@@ -21,6 +21,7 @@ import styles from "./page.module.css"
 // 1. Link view all events page.
 // 2. Make it so start time/end time and location aren't static.
 // 3. Replace image placeholders with actual event images.
+// 4. Fix issue where you can continue scrolling after opening 'Create Event'
 export default function Landing() {
 
   interface EventData {

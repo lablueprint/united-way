@@ -7,7 +7,7 @@ interface OrganizationSignUpFormProps {
   id: string;
 }
 
-export default function NewOrganizationForm({ id } : OrganizationSignUpFormProps) {
+export default function NewOrganizationForm({ id }: OrganizationSignUpFormProps) {
   const [community, setCommunity] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [location, setLocation] = useState<string>('');
