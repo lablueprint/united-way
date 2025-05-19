@@ -135,7 +135,7 @@ export default function EventsFeed() {
           <TouchableOpacity>
             <Image source={require("../../assets/images/explore/bookmark.png")} style={styles.bookmarkIcon} />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => { router.push({ pathname: "/profile" }); }}>
             <Image source={require("../../assets/images/explore/profile.png")} style={styles.profileIcon} />
           </TouchableOpacity>
         </View>
