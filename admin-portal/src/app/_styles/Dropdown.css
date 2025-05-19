@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "BarlowCondensedItalic";
+  src: url("./_fonts/BarlowCondensed-Italic.ttf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+}
+
 .dropdownsContainer {
   display: flex;
   flex-direction: column;
@@ -11,7 +18,6 @@
   align-items: center;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  background-color: #10167F0A;
   margin-bottom: 0;
   width: 100%;
 }
@@ -26,10 +32,11 @@
 }
 
 .activityTitle {
-  font-family: Helvetica, sans-serif;
+  font-family: "BarlowCondensedItalic";
   font-size: 1rem;
   color: #10167F;
   margin: 0;
+  text-transform: uppercase;
 }
 
 .activityButtons {
@@ -39,12 +46,12 @@
 
 .addButton {
   font-family: Helvetica, sans-serif;
-  font-size: 1rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   border: 1px solid #10167F33;
   border-radius: 9999px;
-  padding: 0.25rem 0.75rem;
-  color:#10167F33;
+  padding: 0.5rem 1rem;
+  color: #10167F;
   background-color: transparent;
   cursor: pointer;
 }

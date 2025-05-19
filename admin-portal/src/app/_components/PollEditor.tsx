@@ -8,6 +8,9 @@ import Image from 'next/image';
 import TrashCanIcon from "../_styles/_images/trashcan.svg";
 import MoveIcon from "../_styles/_images/move.svg";
 import Draft from "../_styles/_images/draft.svg";
+import StarIcon from "../_styles/_images/star.svg";
+import DatePicker from './DatePicker';
+import TimePicker from './TimePicker';
 
 interface Choice {
   id: number;
@@ -23,6 +26,7 @@ interface Question {
 interface PollContent {
   title: string;
   questions: Question[];
+  pointValue: number;
 }
 
 interface PollEditorProps {
@@ -30,8 +34,8 @@ interface PollEditorProps {
   timeStart: Date;
   timeEnd: Date;
   isDraft: boolean;
-  createPoll: () => void;
-  onSave?: () => void;
+  onDelete?: () => void;
+  updateTime: (newStart: Date, newEnd: Date) => Promise<void>;
 }
 
 export default function PollEditor({
@@ -39,12 +43,14 @@ export default function PollEditor({
   timeStart,
   timeEnd,
   isDraft,
-  createPoll,
-  onSave,
+  onDelete,
+  updateTime,
 }: PollEditorProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [pageTitle, setPageTitle] = useState("");
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [pointValue, setPointValue] = useState(0);
+  
   const org = useSelector((state: RootState) => ({
     authToken: state.auth.authToken,
   }));
@@ -55,6 +61,7 @@ export default function PollEditor({
       if (data.content) {
         setQuestions(data.content.questions || []);
         setPageTitle(data.content.title || "Untitled Page");
+        setPointValue(data.content.pointValue || 0);
       } else {
         setQuestions([
           {
@@ -63,9 +70,38 @@ export default function PollEditor({
           },
         ]);
         setPageTitle("Untitled Page");
+        setPointValue(1);
       }
     })();
   }, [activityId]);
+
+  const handleSave = async () => {
+    try {
+      const updatedContent: PollContent = {
+        title: pageTitle,
+        questions: questions,
+        pointValue
+      };
+
+      await axios.patch(
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
+        {
+          content: updatedContent,
+          timeStart,
+          timeEnd,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${org.authToken}`,
+          },
+        }
+      );
+    } catch (e) {
+      console.error("Failed to patch activity:", e);
+      alert("Failed to save poll.");
+    }
+  };
 
   const handleDragStart = (index: number) => {
     setDraggedIndex(index);
@@ -102,36 +138,6 @@ export default function PollEditor({
       return resp.data.data;
     } catch {
       return { content: [] };
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      const updatedContent: PollContent = {
-        title: pageTitle,
-        questions: questions
-      };
-
-      await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        {
-          content: updatedContent,
-          timeStart,
-          timeEnd,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${org.authToken}`,
-          },
-        }
-      );
-      if (onSave) {
-        onSave();
-      }
-    } catch (e) {
-      console.error("Failed to patch activity:", e);
-      alert("Failed to save poll.");
     }
   };
 
@@ -203,11 +209,8 @@ export default function PollEditor({
       <div className="pollEditorHeader">
         <h1 className="pollEditorHeaderTitle">POLLS</h1>
         <h2 className="pollEditorHeaderSubtitle">
-          View and edit your created polls.
+          View current, published, past, and event drafts.
         </h2>
-        <button className="createPollsButton" onClick={createPoll}>
-          + Create Polls
-        </button>
       </div>
 
       <div className="draftSavePublishBox">
@@ -216,6 +219,11 @@ export default function PollEditor({
           <span>{isDraft ? "Draft" : "Published"}</span>
         </div>
         <div className="savePublishBox">
+          {onDelete && (
+            <button className="deletePollButton" onClick={onDelete}>
+              Cancel
+            </button>
+          )}
           <button className="savePollButton" onClick={handleSave}>
             Save
           </button>
@@ -229,6 +237,70 @@ export default function PollEditor({
           value={pageTitle}
           onChange={(e) => setPageTitle(e.target.value)}
         />
+
+
+        <div className="pollControls">
+          <DatePicker
+            selectedDate={timeStart}
+            onChange={(date) => {
+              const newDateTime = new Date(timeStart);
+              newDateTime.setFullYear(date.getFullYear());
+              newDateTime.setMonth(date.getMonth());
+              newDateTime.setDate(date.getDate());
+              
+              const duration = timeEnd.getTime() - timeStart.getTime();
+              const newEndTime = new Date(newDateTime.getTime() + duration);
+              
+              updateTime(newDateTime, newEndTime);
+            }}
+            label="SCHEDULE START DATE"
+          />
+
+          <TimePicker
+            startTime={timeStart}
+            endTime={timeEnd}
+            onStartTimeChange={(hours: number, minutes: number) => {
+              const newDateTime = new Date(timeStart);
+              newDateTime.setHours(hours);
+              newDateTime.setMinutes(minutes);
+              
+              const duration = timeEnd.getTime() - timeStart.getTime();
+              const newEndTime = new Date(newDateTime.getTime() + duration);
+              
+              updateTime(newDateTime, newEndTime);
+            }}
+            onEndTimeChange={(hours: number, minutes: number) => {
+              const newEndTime = new Date(timeEnd);
+              newEndTime.setHours(hours);
+              newEndTime.setMinutes(minutes);
+              updateTime(timeStart, newEndTime);
+            }}
+            showLabel={true}
+          />
+
+          <div className="controlGroup">
+            <Image src={StarIcon} alt="Star" width={24} height={24} />
+            <label>POINT VALUE</label>
+            <div className="pointValueControl">
+              <button 
+                onClick={() => setPointValue(prev => Math.max(0, prev - 1))}
+                disabled={pointValue <= 0}
+              >
+                −
+              </button>
+              <input
+                type="number"
+                value={pointValue}
+                onChange={(e) => setPointValue(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
+              />
+              <button onClick={() => setPointValue(prev => prev + 1)}>
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="questionList">
           {questions.map((q, qIdx) => (
             <div 
@@ -295,11 +367,7 @@ export default function PollEditor({
       </div>
 
       <div className="questionActions">
-        <button
-          className="addQuestionButton"
-          type="button"
-          onClick={addQuestion}
-        >
+        <button className="addQuestionButton" type="button" onClick={addQuestion}>
           + Add Another Question
         </button>
       </div>

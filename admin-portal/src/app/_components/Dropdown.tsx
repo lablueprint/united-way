@@ -35,7 +35,7 @@ export default function DropDown<Item>({
       <div className="activityHeader">
         <h3 className="activityTitle">{title}</h3>
         <div className="activityButtons">
-          <button className="addButton" type="button" onClick={onCreate}>ADD +</button>
+          <button className="addButton" type="button" onClick={onCreate}>+ ADD</button>
           <button className="expandButton" type="button" onClick={toggle}>
             {open ? <ChevronUp /> : <ChevronDown />}
           </button>

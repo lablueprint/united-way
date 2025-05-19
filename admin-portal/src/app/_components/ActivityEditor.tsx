@@ -120,8 +120,9 @@ export default function ActivityEditor({
         { timeStart: newStart, timeEnd: newEnd }
       );
       setActivity({ ...activity, timeStart: newStart, timeEnd: newEnd });
+      setStart(newStart);
+      setEnd(newEnd);
       setShowDatePicker(false);
-      onCancel?.();
     } catch (e) {
       console.error(e);
     }
@@ -158,8 +159,8 @@ export default function ActivityEditor({
               timeStart={start as Date}
               timeEnd={end as Date}
               isDraft={isDraft}
-              createPoll={() => createActivity("poll")}
-              onSave={() => setShowDatePicker(true)}
+              onDelete={handleDelete}
+              updateTime={updateTime}
             />
           </>
         )}
@@ -194,8 +195,8 @@ export default function ActivityEditor({
 
       {renderEditor()}
 
-      {/* Date/Time Picker Modal */}
-      {showDatePicker && (
+      {/* Only show datetime modal for non-poll activities */}
+      {showDatePicker && activity?.type !== "poll" && (
         <div className="datetime-modal">
           <div className="datetime-modal-content">
             <h3 className="datetime-modal-title">

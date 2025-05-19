@@ -1,0 +1,351 @@
+/* Control Group */
+.controlGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #F5F6FA;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.6rem;
+}
+
+.controlGroup label {
+  font-family: "BarlowCondensedExtraBoldItalic";
+  font-size: 1.5rem;
+  color: #10167F;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dateSelect,
+.timeSelect {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.dateSelect:hover,
+.timeSelect:hover {
+  border-color: #10167F;
+}
+
+.dateSelect span:first-child,
+.timeSelect span:first-child {
+  font-family: "Helvetica";
+  font-size: 0.875rem;
+  color: #10167F;
+}
+
+.dropdownArrow {
+  font-size: 0.4rem;
+  color: #10167F;
+  margin-left: 0.25rem;
+}
+
+/* Calendar Popup */
+.calendarPopup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 300px;
+  padding: 1rem;
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+}
+
+.calendarIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.calendarHeader button {
+  background: none;
+  border: none;
+  color: #10167F;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  width: 32px;
+  height: 32px;
+}
+
+.calendarHeader button:hover {
+  background-color: #F8F9FF;
+}
+
+.calendarHeader span {
+  font-family: "Helvetica";
+  font-weight: bold;
+  color: #10167F;
+  font-size: 1rem;
+}
+
+.calendarDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.dayHeader {
+  text-align: center;
+  font-family: "Helvetica";
+  font-size: 0.75rem;
+  color: #6B7280;
+  padding: 0.25rem;
+  font-weight: 500;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  font-family: "Helvetica";
+  font-size: 0.875rem;
+  color: #10167F;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0;
+  width: 100%;
+}
+
+.day:hover:not(:disabled) {
+  background-color: #F8F9FF;
+}
+
+.day.selected {
+  background-color: #10167F;
+  color: white;
+}
+
+.day:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Time Picker Popup */
+.timePickerPopup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 300px;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.timePickerColumns {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.timePickerColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #E5E7EB;
+  max-height: 400px;
+}
+
+.timePickerColumn:last-child {
+  border-right: none;
+}
+
+.timePickerColumnHeader {
+  padding: 0.75rem;
+  font-family: "Helvetica";
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 1px solid #E5E7EB;
+  background-color: #F8F9FF;
+}
+
+.timePickerColumnContent {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #E5E7EB transparent;
+}
+
+.timePickerColumnContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timePickerColumnContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timePickerColumnContent::-webkit-scrollbar-thumb {
+  background-color: #E5E7EB;
+  border-radius: 3px;
+}
+
+.timeOption {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  background: none;
+  font-family: "Helvetica";
+  font-size: 0.875rem;
+  color: #10167F;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.timeOption:hover {
+  background-color: #F8F9FF;
+}
+
+.timeOption.selected {
+  background-color: #10167F;
+  color: white;
+}
+
+.timeOptionValue {
+  font-family: "Helvetica";
+  font-size: 0.875rem;
+  color: inherit;
+}
+
+.timeOptionPeriod {
+  font-family: "Helvetica";
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Click-away handling */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+/* Time Range Picker */
+.timeRangeSelect {
+  display: flex;
+  align-items: center;
+}
+
+.timeRangeSeparator {
+  font-family: "Helvetica";
+  font-size: 1rem;
+  color: #6B7280;
+}
+
+.timePickerContainer {
+  position: relative;
+}
+
+.timeSelect {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.timeSelect:hover {
+  background: rgba(16, 22, 127, 0.05);
+  border-radius: 0.5rem;
+}
+
+.timeDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.timeValue {
+  font-family: "Helvetica";
+  font-size: 1rem;
+  color: 10167F17;
+  opacity: 0.5;
+}
+
+.timePeriod {
+  font-family: "Helvetica";
+  font-size: 0.75rem;
+  color: 10167F17;
+  opacity: 0.5;
+}
+
+/* Period Toggle */
+.periodToggle {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.periodButton {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  background: none;
+  font-family: "Helvetica";
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.periodButton:first-child {
+  border-top-left-radius: 0.5rem;
+}
+
+.periodButton:last-child {
+  border-top-right-radius: 0.5rem;
+}
+
+.periodButton:hover:not(.selected) {
+  background-color: #F8F9FF;
+  color: #10167F;
+} 
