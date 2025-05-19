@@ -8,7 +8,7 @@ const Event = () => {
   const params = useParams();
   return (
     <>
-        <BetterEventEditor />
+        <BetterEventEditor eventId={String(params.id)}/>
         <EventActivities eventID={String(params.id)}/>
         <div>
           Event ID: {params.id}

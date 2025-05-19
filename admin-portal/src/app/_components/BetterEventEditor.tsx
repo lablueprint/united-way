@@ -1,50 +1,82 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import { LocationProps, EventTags, EventData } from "../_interfaces/EventInterfaces";
 import Image from 'next/image'
+import Link from 'next/link';
 import AddTagsModal from "./AddTagsModal";
 import { add_photo, down_arrow, calendar, clock, draft, hero, person, right_arrow } from '../../../public/BetterEventEditor/BetterEventEditor-index'
 import '../_styles/BetterEventEditor.css';
 
 interface EventEditorProps {
-    orgName: string;
-    justCreated: boolean;
+    eventId: string
 }
 
-export default function BetterEventEditor() {
+export default function BetterEventEditor({ eventId }: EventEditorProps): React.ReactElement {
     const [eventTitle, setEventTitle] = useState<string>("");
     const [eventDescription, setEventDescription] = useState<string>("");
+    const [eventAttendeesCount, setEventAttendeesCount] = useState<number>(0);
     const [latitude, setLatitude] = useState<number>(0);
     const [longitude, setLongitude] = useState<number>(0);
     const [options, setOptions] = useState<LocationProps[]>([]);
     const [address, setAddress] = useState<string>("");
     const [tags, setTags] = useState<boolean[]>(Array(EventTags.length).fill(false));
     const selectedTagColors = ["tag-selected-red", "tag-selected-salmon", "tag-selected-yellow"];
+    const [startTime, setStartTime] = useState('12:00');
+    const [endTime, setEndTime] = useState('12:01');
+    const [eventDate, setEventDate] = useState<Date>(new Date());
+    const [selectedTimeZone, setSelectedTimeZone] = useState('PT');
+    const [isDraft, setIsDraft] = useState(true);
+    const [image, setImage] = useState<string | null>(null);
+    const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
 
     const [isEditingEventTitle, setIsEditingEventTitle] = useState<boolean>(false);
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
     const [isEditingLocation, setIsEditingLocation] = useState<boolean>(false);
     const [isDisplayingTagModal, setIsDisplayingTagModal] = useState<boolean>(false);
-    const [image, setImage] = useState<string | null>(null);
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
+    const [isShowingDatePicker, setIsShowingDatePicker] = useState<boolean>(false);
+    const [isShowingStartTime, setIsShowingStartTime] = useState<boolean>(false);
+    const [isShowingEndTime, setIsShowingEndTime] = useState<boolean>(false);
+    
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken }})
 
+    const dateInputRef = useRef<HTMLInputElement>(null);
+    const startTimeRef = useRef<HTMLInputElement>(null);
+    const endTimeRef = useRef<HTMLInputElement>(null);
+
     useEffect(() => {
-        // If an input is followed by a div, make the button open the picker
-        document.querySelectorAll("div").forEach((div) => {
-            div.addEventListener("click", (event) => {
-                const input = (event.currentTarget as HTMLButtonElement).previousElementSibling as HTMLInputElement;
-                if (input?.tagName === "INPUT" && 'showPicker' in input) {
-                    input.showPicker();
+        (async () => {
+            const eventData = await getEventById();
+            setEventTitle(eventData.name);
+            setIsDraft(eventData.draft);
+            setEventDescription(eventData.description);
+            setEventDate(new Date(eventData.date))
+            setStartTime(eventData.startTime);
+            setEndTime(eventData.endTime);
+            setLatitude(eventData.location.coordinates[0]);
+            setLongitude(eventData.location.coordinates[1]);
+            setTags(eventData.tags);
+        })();
+    }, []);
+
+    const getEventById = async () => {
+        try {
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${org.authToken}`
                 }
             });
-        });
-    }, []);
+            const { data } = response.data;
+            return data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    };
 
     // Send request with address to Nominatim endpoint and receive back latitude, longitude in JSON
     // https://nominatim.org/release-docs/develop/api/Search/
@@ -93,7 +125,6 @@ export default function BetterEventEditor() {
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            setImageFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImage(reader.result as string);
@@ -123,7 +154,39 @@ export default function BetterEventEditor() {
         console.log("Image upload response:", response.data);
         return response.data.imageUrl;
     };
-    
+
+    function formatToAMPM(d: Date): string {
+        const date = new Date(d);
+
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+
+        return `${hours}:${minutesStr} ${ampm}`;
+    }
+
+    const formatDate = (date: Date | null): string => {
+        if (!date) return '--/--/----';
+        
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${month}/${day}/${year}`;
+    }
+
+    const formatTimeToAMPM = (time: string): string => {
+        const [hours, minutes] = time.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${minutes} ${ampm}`;
+    };
+
     return (
         <div>
             {/* Events header */}
@@ -149,7 +212,8 @@ export default function BetterEventEditor() {
                         <div className="draft-indicator-logo"><Image src={draft} alt="Draft Icon" width={24} height={24} /></div>
                         <div className="draft-indicator-text">DRAFT</div>
                     </div>
-                    <div className="save-publish-parent">
+                    <div className="cancel-save-publish-parent">
+                        <Link className="cancel-button" href="/event">CANCEL</Link>
                         <div className="save-button">SAVE</div>
                         <div className="publish-button">PUBLISH</div>
                     </div>
@@ -244,9 +308,9 @@ export default function BetterEventEditor() {
                                         <div className="date-box-vertical-bar"/>
                                     </div>
                                     <div className="attendees-counter">
-                                        <div className="attendees-plus-minus">–</div>
-                                        <div className="attendees-count">0</div>
-                                        <div className="attendees-plus-minus">+</div>
+                                        <div className="attendees-plus-minus" onClick={() => {setEventAttendeesCount(Math.max(eventAttendeesCount - 1, 0))}}>–</div>
+                                        <div className="attendees-count">{eventAttendeesCount}</div>
+                                        <div className="attendees-plus-minus" onClick={() => {setEventAttendeesCount(eventAttendeesCount + 1)}}>+</div>
                                     </div>
                                 </div>
                             </div>
@@ -259,10 +323,25 @@ export default function BetterEventEditor() {
                                     <div className="date-box-title">DATE</div>
                                     <div className="date-box-vertical-bar"/>
                                 </div>
-                                <div className="date-box-date-and-down">
-                                    {/* TODO: EMPTY vs POPULATED DATE */}
-                                    <div className="date-box-empty-date">--/--/----</div>
-                                    <div className="down_arrow"><Image src={down_arrow} alt="Down Arrow Icon" width={15} height={15} /></div>
+                                <div className="date-box-date-and-down" 
+                                    onClick={() => {
+                                        dateInputRef.current?.showPicker();
+                                        setIsShowingDatePicker(true);
+                                    }}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault(); // Prevent focus from being lost
+                                    }}>
+                                    <input
+                                        ref={dateInputRef}
+                                        type="date"
+                                        onChange={(e) => setEventDate(new Date(e.target.value))}
+                                        className="date-input"
+                                        value={eventDate.toISOString().split('T')[0]}
+                                        onBlur={() => setIsShowingDatePicker(false)}
+                                    />
+                                    <div className="down_arrow">
+                                        <Image src={down_arrow} alt="Down Arrow Icon" width={15} height={15} />
+                                    </div>
                                 </div>
                             </div>
                             <div className="time-box-parent">
@@ -271,10 +350,34 @@ export default function BetterEventEditor() {
                                     <div className="time-box-title">TIME</div>
                                     <div className="date-box-vertical-bar"/>
                                 </div>
-                                <div className="time-box-time-and-down">
-                                    {/* TODO: EMPTY vs POPULATED TIME */}
-                                    <div className="time-box-empty-time">0:00 - 0:00PM</div>
-                                    <div className="down_arrow"><Image src={down_arrow} alt="Down Arrow Icon" width={15} height={15} /></div>
+                                <div className="time-box-time-and-down" 
+                                    onClick={(e) => {
+                                        if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('time-display')) {
+                                            !isShowingStartTime ? startTimeRef.current?.showPicker() : endTimeRef.current?.showPicker();
+                                            setIsShowingStartTime(!isShowingStartTime);
+                                        }
+                                    }}
+                                    onMouseDown={(e) => e.preventDefault()}>
+                                    <div className="time-display">{`${formatTimeToAMPM(startTime)} - ${formatTimeToAMPM(endTime)}`}</div>
+                                    <input
+                                        ref={startTimeRef}
+                                        type="time"
+                                        onChange={(e) => setStartTime(e.target.value)}
+                                        onBlur={() => setIsShowingStartTime(false)}
+                                        className="time-input"
+                                        value={startTime}
+                                    />
+                                    <input
+                                        ref={endTimeRef}
+                                        type="time"
+                                        onChange={(e) => setEndTime(e.target.value)}
+                                        onBlur={() => setIsShowingEndTime(false)}
+                                        className="time-input"
+                                        value={endTime}
+                                    />
+                                    <div className="down_arrow">
+                                        <Image src={down_arrow} alt="Down Arrow Icon" width={15} height={15} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -293,7 +396,13 @@ export default function BetterEventEditor() {
                                             className="description-body" name="description" placeholder="Description" value={eventDescription} onChange={(event) => {setEventDescription(event.target.value)}}
                                         />
                                         :
-                                        <div className="description-body">{eventDescription.length == 0 ? (<div className="description-body-empty">Description</div>) : eventDescription}</div>
+                                        <div className="description-body">
+                                            {(eventDescription?.length ?? 0) === 0 ? 
+                                                (<div className="description-body-empty">Description</div>) 
+                                                : 
+                                                eventDescription
+                                            }
+                                        </div>
                                     }
                                 </div>
                             </div>

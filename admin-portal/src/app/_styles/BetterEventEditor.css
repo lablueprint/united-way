@@ -127,9 +127,20 @@
     font-weight: 700;
 }
 
-.save-publish-parent {
+.cancel-save-publish-parent {
     display: flex;
     gap: 1.5rem;
+}
+
+.cancel-button {
+    background-color:rgb(255, 255, 255) !important;
+    color: #171885 !important;
+    cursor: pointer;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem 0.75rem 1.25rem;
 }
 
 .save-button {
@@ -434,7 +445,10 @@
     align-items: center;
     display: flex;
     gap: 0.625rem;
+    -ms-user-select: none; /* IE 10 and IE 11 */
     padding: 0rem 2rem 0rem 2rem;
+    -webkit-user-select: none; /* Safari */
+    user-select: none; /* Standard syntax */
 }
 
 .attendees-plus-minus {
@@ -445,6 +459,9 @@
     font-size: 1.25rem;
     font-weight: italics;
     font-weight: 600;
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    -webkit-user-select: none; /* Safari */
+    user-select: none; /* Standard syntax */
 }
 
 .attendees-count {
@@ -466,7 +483,6 @@
     align-items: center;
     background-color: #f5f6fa;
     border-radius: 0.5rem;
-    cursor: pointer;
     display: flex;
     justify-content: space-between;
     padding: 0.5rem;
@@ -506,8 +522,32 @@
 .date-box-date-and-down {
     align-items: center;
     align-text: center;
+    cursor: pointer;
     display: flex;
     gap: 0.625rem;
+    position: relative;
+}
+
+.date-input {
+    background: transparent;
+    border: none;
+    color: #9ea2cc;
+    cursor: pointer;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+    width: 6rem;
+    padding: 0;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+input[type="date"] {
+    position: static;
+    z-index: auto;
+    margin: 0;
 }
 
 .date-box-empty-date {
@@ -560,14 +600,30 @@
     font-weight: 600;
 }
 
-.time-box-time-and-down {
-    align-items: center;
-    align-text: center;
-    display: flex;
-    gap: 0.625rem;
+.time-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
 }
 
-.time-box-empty-time {
+.time-display {
+    color: #9ea2cc;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.time-box-time-and-down {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    gap: 0.625rem;
+    position: relative;
+}
+
+.time-box-time {
     color: #9ea2cc;
     display: flex;
     font-family: "Helvetica";
