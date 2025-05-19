@@ -154,7 +154,7 @@
 }
 
 .questionPanel {
-  border: 1px solid #10167F29;
+  border: 1px solid #10167F66;
   border-radius: 1rem;
   padding: 1.5rem;
   background-color: white;
@@ -230,7 +230,6 @@
 .optionRow {
   display: flex;
   align-items: center;
-  margin-left: 2rem;
   padding: 0.5rem 1rem;
   border-radius: 0.75rem;
   transition: all 0.2s ease;
@@ -269,7 +268,6 @@
   background: transparent;
   border: none;
   padding: 0.75rem 1rem;
-  margin-left: 2rem;
   border-radius: 0.75rem;
   width: calc(100% - 2rem);
   text-align: left;
@@ -306,12 +304,15 @@
 .questionActions {
   display: flex;
   justify-content: flex-end;
+  margin-left: 6rem;
   margin-right: 6rem;
+  border-bottom: 1px solid #10167F66;
+  margin-bottom: 4rem;
 }
 
 .addQuestionButton {
   margin-top: 2rem;
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.5rem 1rem;

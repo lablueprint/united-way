@@ -7,7 +7,7 @@ import "../_styles/DateTimePickers.css";
 interface TimePickerProps {
   start: Date;
   end: Date;
-  onChange: (result: { newStart: Date, newEnd: Date }) => void;
+  onChange: (result: { newStart: Date; newEnd: Date }) => void;
   label?: string;
 }
 
@@ -20,22 +20,34 @@ export default function TimePicker({ start, end, onChange, label }: TimePickerPr
   const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const [hour, minute] = e.target.value.split(':').map(Number);
     if (isNaN(hour) || isNaN(minute)) return;
-    const newStart = new Date(start.getTime());
-    newStart.setHours(hour, minute, 0, 0);
+
+    const newStart = new Date(start.getFullYear(), start.getMonth(), start.getDate(), hour, minute, 0, 0);
     const duration = end.getTime() - start.getTime();
-    const newEnd = new Date(newStart.getTime() + duration);
+    let newEnd = new Date(newStart.getTime() + duration);
+
+    if (duration < 0) {
+      newEnd.setDate(newEnd.getDate() + 1);
+    }
+
+    console.log("Start UTC:", newStart.toISOString());
+    console.log("End UTC:", newEnd.toISOString());
+
     onChange({ newStart, newEnd });
   };
 
-  // When end time changes, just update end, and if end <= start, add a day
   const handleEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const [hour, minute] = e.target.value.split(':').map(Number);
     if (isNaN(hour) || isNaN(minute)) return;
-    let newEnd = new Date(end.getTime());
-    newEnd.setHours(hour, minute, 0, 0);
+
+    let newEnd = new Date(start.getFullYear(), start.getMonth(), start.getDate(), hour, minute, 0, 0);
+
     if (newEnd <= start) {
       newEnd.setDate(newEnd.getDate() + 1);
     }
+
+    console.log("Start UTC:", start.toISOString());
+    console.log("End UTC:", newEnd.toISOString());
+
     onChange({ newStart: start, newEnd });
   };
 
@@ -47,6 +59,7 @@ export default function TimePicker({ start, end, onChange, label }: TimePickerPr
           <label>{label}</label>
         </>
       )}
+
       <div className="timeRangeSelect">
         <input
           type="time"

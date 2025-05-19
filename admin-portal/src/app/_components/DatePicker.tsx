@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import CalendarIcon from "../_styles/_images/calendar.svg";
+import PrevIcon from "../_styles/_images/previous.svg";
+import NextIcon from "../_styles/_images/next.svg";
 import "../_styles/DateTimePickers.css";
 
 interface DatePickerProps {
@@ -35,15 +37,13 @@ export default function DatePicker({ start, end, onChange, label }: DatePickerPr
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const days = [];
-    
-    for (let i = 0; i < firstDay.getDay(); i++) {
+    const offset = (firstDay.getDay() + 6) % 7;
+    for (let i = 0; i < offset; i++) {
       days.push(null);
     }
-    
     for (let i = 1; i <= lastDay.getDate(); i++) {
       days.push(new Date(year, month, i));
     }
-    
     return days;
   };
 
@@ -83,18 +83,20 @@ export default function DatePicker({ start, end, onChange, label }: DatePickerPr
       {showCalendar && (
         <div className="calendarPopup" onClick={e => e.stopPropagation()}>
           <div className="calendarHeader">
-            <button onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}>
-              ←
-            </button>
             <span>
               {currentMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}
             </span>
-            <button onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}>
-              →
-            </button>
+            <div className="calendarHeaderButtons">
+              <button className="calendarNavButton" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}>
+                <Image src={PrevIcon} alt="Previous" />
+              </button>
+              <button className="calendarNavButton" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}>
+                <Image src={NextIcon} alt="Next" />
+              </button>
+            </div>
           </div>
           <div className="calendarDays">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(day => (
               <div key={day} className="dayHeader">{day}</div>
             ))}
           </div>
