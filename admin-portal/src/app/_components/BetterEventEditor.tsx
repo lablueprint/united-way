@@ -5,7 +5,7 @@ import { RootState } from '../_interfaces/AuthInterfaces';
 import { LocationProps, EventTags, EventData } from "../_interfaces/EventInterfaces";
 import Image from 'next/image'
 import AddTagsModal from "./AddTagsModal";
-import { add_photo, down_arrow, draft, hero, right_arrow} from '../../../public/BetterEventEditor/BetterEventEditor-index'
+import { add_photo, down_arrow, draft, hero, right_arrow } from '../../../public/BetterEventEditor/BetterEventEditor-index'
 import '../_styles/BetterEventEditor.css';
 
 interface EventEditorProps {

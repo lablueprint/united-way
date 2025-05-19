@@ -1,4 +1,3 @@
-/* TODO: Import fonts from file */
 @font-face {
     font-family: "Barlow";
     font-style: italics;
@@ -202,7 +201,6 @@
     font-size: 1.25rem;
     font-weight: 600;
     font-weight: italic;
-    /* margin-bottom: 1rem; */
 }
 
 .tags-parent {
@@ -339,11 +337,10 @@
 
 .organization-card-parent {
     align-items: center;
-    background-color: #f5f6fa;
     border-radius: 1rem;
     display: flex;
     gap: 0.5rem;
-    padding: 0.4rem 0.6rem 0.4rem 0.6rem;
+    padding: 0.4rem 0.6rem 0rem 0.6rem;
 }
 
 .org-logo {

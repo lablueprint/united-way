@@ -17,6 +17,7 @@ export interface Activity {
     timeStart: Date;
     timeEnd: Date;
     active: boolean;
+    title: string;
 }
 
 export const EventTags: string[] = [
