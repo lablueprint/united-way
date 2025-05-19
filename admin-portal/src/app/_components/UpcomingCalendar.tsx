@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import axios, { AxiosResponse } from "axios";
-import { useSelector } from 'react-redux';
-import { RootState } from '../_interfaces/AuthInterfaces';
 import "../_styles/UpcomingCalendar.css"
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Edit } from "lucide-react"
-import { RequestType } from "../_interfaces/RequestInterfaces";
-import useApiAuth from "../_hooks/useApiAuth";
 import { useRouter } from 'next/navigation';
 
+import { RequestType } from "../_interfaces/RequestInterfaces";
+import useApiAuth from "../_hooks/useApiAuth";
 
+import { VisibleEventEndMarker } from "./EventEndMarker";
 
 interface Event {
   organizerId: string;
@@ -486,7 +485,7 @@ const UpcomingCalendar = () => {
                 ) : !Array.isArray(selectedDate) ? (
                   <p>Unexpected error</p>
                 ) : selectedDate.length === 0 ? (
-                  <p>No events on this day</p>
+                  <VisibleEventEndMarker />
                 ) : (
                   selectedDate.map((event) => (
                     <div key={event._id} className="current-item-container">
@@ -565,180 +564,189 @@ const UpcomingCalendar = () => {
                 </div>
               </div>
               <div className="list-current-container">
-                {listEventsRef.current == null || listEventsRef.current?.length == 0 ? (
-                  <div>No events found</div>
-                ) : (
-                  Object.entries(listEventsRef.current).map(([groupName, events]) => (
-                    <div key={groupName} className='event-content-container'>
-                      <div className="event-header">
-                        <div className="current-title">{`${groupName.toUpperCase()} EVENTS`}</div>
-                        <div className="event-count">{`${listEventsRef.current[groupName].length}`}</div>
-                      </div>
-                      <div className={`list-group-container ${groupName.toLowerCase()}`}>
-                        {events.map((event: Event, index) => {
-                          if (groupName === "Current") {
-                            return (
-                              <div key={event.id || index} className="current-item-container">
-                                <div className="event-image">
-                                  <img src={event.image || "/placeholder.svg"} alt="Event" />
-                                </div>
-                                <div className="event-details-container">
-                                  <h3 className="event-title">{event.name.toUpperCase()}</h3>
-                                  <div className="event-info">
-                                    <span className="event-date">
-                                      {event.date != null
-                                        ? new Date(event.date).toLocaleDateString('en-US', {
-                                          month: 'short',
-                                          day: 'numeric'
-                                        }).toUpperCase()
-                                        : "No date"}
-                                    </span>
-                                    <span className="event-separator">|</span>
-                                    <span className="event-time">
-                                      {event.date != null
-                                        ? new Date(event.date).toLocaleTimeString('en-US', {
-                                          hour: 'numeric',
-                                          minute: '2-digit',
-                                          hour12: true
-                                        })
-                                        : "No time"}
-                                    </span>
-                                  </div>
-                                  <div className="event-location">
-                                    {event.locationString == "" ? "No location specified" : event.locationString}
-                                  </div>
-                                  <div className="attend">
-
-                                    <div className="attend-image">
-                                      <img src="/UpcomingCalendar/images/attend.svg" />
-
-
-                                    </div>
-                                    <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          } else if (groupName === "Past") {
-                            return (
-                              <div key={event._id} className="event-item past-event">
-                                <div className="event-details">
-                                  <h3 className="event-title">{event.name}</h3>
-                                  <span className="event-separator">•</span>
-                                  <div className="event-info-past">
-                                    <span className="event-date">
-                                      {event.date != null
-                                        ? new Date(event.date).toLocaleDateString('en-US', {
-                                          month: 'short',
-                                          day: 'numeric'
-                                        }).toUpperCase()
-                                        : "No date"}
-                                    </span>
-                                    <span className="event-separator">|</span>
-                                    <span className="event-time">
-                                      {event.date != null
-                                        ? new Date(event.date).toLocaleTimeString('en-US', {
-                                          hour: 'numeric',
-                                          minute: '2-digit',
-                                          hour12: true
-                                        })
-                                        : "No time"}
-                                    </span>
-                                    <span className="event-location">
-                                      {event.locationString == null ? "No location specified" : event.locationString}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          } else if (groupName === "Upcoming") {
-                            return (
-                              <div key={event._id} className="current-item-container">
-                                <div className="event-image">
-                                  <img src={event.image || "/placeholder.svg"} alt="Event" />
-                                </div>
-                                <div className="event-details-container">
-                                  <h3 className="event-title">{event.name}</h3>
-                                  <div className="event-info">
-                                    <span className="event-date">
-                                      {event.date != null
-                                        ? new Date(event.date).toLocaleDateString('en-US', {
-                                          month: 'short',
-                                          day: 'numeric'
-                                        }).toUpperCase()
-                                        : "No date"}
-                                    </span>
-                                    <span className="event-separator">|</span>
-                                    <span className="event-time">
-                                      {event.date != null
-                                        ? new Date(event.date).toLocaleTimeString('en-US', {
-                                          hour: 'numeric',
-                                          minute: '2-digit',
-                                          hour12: true
-                                        })
-                                        : "No time"}
-                                    </span>
-
-                                  </div>
-                                  <div className="event-location">
-                                    {event.locationString == "" ? "No location specified" : event.locationString}
-                                  </div>
-                                  <div className="attend">
-
-                                    <div className="attend-image">
-                                      <img src="/UpcomingCalendar/images/attend.svg" />
-
-                                    </div>
-                                    <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <div key={event._id} className="event-item">
-                                <div className="event-details">
-                                  <h3 className="event-title">{event.name}</h3>
-                                  <span className="event-separator">•</span>
-                                  <div className="event-info">
-                                    <span className="event-date">
-                                      {event.date != null
-                                        ? new Date(event.date).toLocaleDateString('en-US', {
-                                          month: 'short',
-                                          day: 'numeric'
-                                        }).toUpperCase()
-                                        : "No date"}
-                                    </span>
-                                    <span className="event-separator">|</span>
-                                    <span className="event-time">
-                                      {event.date != null
-                                        ? new Date(event.date).toLocaleTimeString('en-US', {
-                                          hour: 'numeric',
-                                          minute: '2-digit',
-                                          hour12: true
-                                        })
-                                        : "No time"}
-                                    </span>
-                                    <span className="event-separator">•</span>
-                                    <span className="event-location">
-                                      {event.locationString == null ? "No location specified" : event.locationString}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="edit-right-aligned">
-                                  <button className="edit-button">
-                                    <Edit size={16} />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          }
-                        })}
-                      </div>
+                {listEventsRef.current == null ||
+                  (Object.keys(listEventsRef.current).length === 1 &&
+                    (
+                      listEventsRef.current["Upcoming"]?.length == 0 ||
+                      listEventsRef.current["Past"]?.length == 0 ||
+                      listEventsRef.current["Current"]?.length == 0
+                    ))
+                  ? (
+                    <div>
+                      <VisibleEventEndMarker />
                     </div>
-                  ))
+                  ) : (
+                    Object.entries(listEventsRef.current).map(([groupName, events]) => (
+                      <div key={groupName} className='event-content-container'>
+                        <div className="event-header">
+                          <div className="current-title">{`${groupName.toUpperCase()} EVENTS`}</div>
+                          <div className="event-count">{`${listEventsRef.current[groupName].length}`}</div>
+                        </div>
+                        <div className={`list-group-container ${groupName.toLowerCase()}`}>
+                          {events.map((event: Event, index) => {
+                            if (groupName === "Current") {
+                              return (
+                                <div key={event.id || index} className="current-item-container">
+                                  <div className="event-image">
+                                    <img src={event.image || "/placeholder.svg"} alt="Event" />
+                                  </div>
+                                  <div className="event-details-container">
+                                    <h3 className="event-title">{event.name.toUpperCase()}</h3>
+                                    <div className="event-info">
+                                      <span className="event-date">
+                                        {event.date != null
+                                          ? new Date(event.date).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric'
+                                          }).toUpperCase()
+                                          : "No date"}
+                                      </span>
+                                      <span className="event-separator">|</span>
+                                      <span className="event-time">
+                                        {event.date != null
+                                          ? new Date(event.date).toLocaleTimeString('en-US', {
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true
+                                          })
+                                          : "No time"}
+                                      </span>
+                                    </div>
+                                    <div className="event-location">
+                                      {event.locationString == "" ? "No location specified" : event.locationString}
+                                    </div>
+                                    <div className="attend">
 
-                )}
+                                      <div className="attend-image">
+                                        <img src="/UpcomingCalendar/images/attend.svg" />
+
+
+                                      </div>
+                                      <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            } else if (groupName === "Past") {
+                              return (
+                                <div key={event._id} className="event-item past-event">
+                                  <div className="event-details">
+                                    <h3 className="event-title">{event.name}</h3>
+                                    <span className="event-separator">•</span>
+                                    <div className="event-info-past">
+                                      <span className="event-date">
+                                        {event.date != null
+                                          ? new Date(event.date).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric'
+                                          }).toUpperCase()
+                                          : "No date"}
+                                      </span>
+                                      <span className="event-separator">|</span>
+                                      <span className="event-time">
+                                        {event.date != null
+                                          ? new Date(event.date).toLocaleTimeString('en-US', {
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true
+                                          })
+                                          : "No time"}
+                                      </span>
+                                      <span className="event-location">
+                                        {event.locationString == null ? "No location specified" : event.locationString}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            } else if (groupName === "Upcoming") {
+                              return (
+                                <div key={event._id} className="current-item-container">
+                                  <div className="event-image">
+                                    <img src={event.image || "/placeholder.svg"} alt="Event" />
+                                  </div>
+                                  <div className="event-details-container">
+                                    <h3 className="event-title">{event.name}</h3>
+                                    <div className="event-info">
+                                      <span className="event-date">
+                                        {event.date != null
+                                          ? new Date(event.date).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric'
+                                          }).toUpperCase()
+                                          : "No date"}
+                                      </span>
+                                      <span className="event-separator">|</span>
+                                      <span className="event-time">
+                                        {event.date != null
+                                          ? new Date(event.date).toLocaleTimeString('en-US', {
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true
+                                          })
+                                          : "No time"}
+                                      </span>
+
+                                    </div>
+                                    <div className="event-location">
+                                      {event.locationString == "" ? "No location specified" : event.locationString}
+                                    </div>
+                                    <div className="attend">
+
+                                      <div className="attend-image">
+                                        <img src="/UpcomingCalendar/images/attend.svg" />
+
+                                      </div>
+                                      <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={event._id} className="event-item">
+                                  <div className="event-details">
+                                    <h3 className="event-title">{event.name}</h3>
+                                    <span className="event-separator">•</span>
+                                    <div className="event-info">
+                                      <span className="event-date">
+                                        {event.date != null
+                                          ? new Date(event.date).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric'
+                                          }).toUpperCase()
+                                          : "No date"}
+                                      </span>
+                                      <span className="event-separator">|</span>
+                                      <span className="event-time">
+                                        {event.date != null
+                                          ? new Date(event.date).toLocaleTimeString('en-US', {
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true
+                                          })
+                                          : "No time"}
+                                      </span>
+                                      <span className="event-separator">•</span>
+                                      <span className="event-location">
+                                        {event.locationString == null ? "No location specified" : event.locationString}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="edit-right-aligned">
+                                    <button className="edit-button">
+                                      <Edit size={16} />
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            }
+                          })}
+                        </div>
+                      </div>
+                    ))
+
+                  )}
                 <div className="current-item"></div>
               </div>
 
