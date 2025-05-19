@@ -241,7 +241,6 @@ const styles = StyleSheet.create({
   },
   createAccountLabel: {
     fontSize: 14,
-    marginBottom: 8,
     color: "white",
     fontWeight: "bold",
     fontFamily: "Helvetica",

@@ -6,15 +6,15 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  ImageBackground,
   Image,
+  ImageBackground,
 } from "react-native";
-import { useRouter, Redirect, Link } from 'expo-router';
-import axios, { AxiosResponse } from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import { useDispatch } from 'react-redux';
-import { login } from '../_utils/redux/userSlice';
-import { useLocalSearchParams } from 'expo-router';
+import { useRouter, Redirect, Link } from "expo-router";
+import axios, { AxiosResponse } from "axios";
+import * as SecureStore from "expo-secure-store";
+import { useDispatch } from "react-redux";
+import { login } from "../_utils/redux/userSlice";
+import { useLocalSearchParams } from "expo-router";
 
 enum SignUpState {
   SignUpForm, // 0
@@ -26,12 +26,15 @@ export default function SignUpScreen() {
   // Signup form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   // 2FA fields
   const [code, setCode] = useState("");
   const [hashedCode, setHashedCode] = useState("");
 
-  const [storedUser, setStoredUser] = useState<{ userId: string, authToken: string, refreshToken: string }>({});
+  const [storedUser, setStoredUser] = useState<{
+    userId: string;
+    authToken: string;
+    refreshToken: string;
+  }>({});
 
   // State to control the flow: 0 = Signup form; 1 = Two-Factor Verification
   const [state, setState] = useState(SignUpState.SignUpForm);
@@ -172,15 +175,24 @@ export default function SignUpScreen() {
             email: email,
             password: password,
             dateJoined: formattedDate,
-            profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
+            profilePicture:
+              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s",
           }
         );
-        dispatch(login({
-          userId: response.data.data._id,
-          authToken: response.data.authToken,
-          refreshToken: response.data.refreshToken
-        }));
-        router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken } });
+        dispatch(
+          login({
+            userId: response.data.data._id,
+            authToken: response.data.authToken,
+            refreshToken: response.data.refreshToken,
+          })
+        );
+        router.push({
+          pathname: "/onboarding",
+          params: {
+            id: response.data.data._id,
+            authToken: response.data.authToken,
+          },
+        });
       } else {
         const response: AxiosResponse = await axios.patch(
           `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
@@ -188,10 +200,14 @@ export default function SignUpScreen() {
             email: email,
             password: password,
             dateJoined: formattedDate,
-            profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
+            profilePicture:
+              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s",
           }
         );
-        router.push({ pathname: "/onboarding", params: { id: tempId, authToken: storedUser.authToken } })
+        router.push({
+          pathname: "/onboarding",
+          params: { id: tempId, authToken: storedUser.authToken },
+        });
       }
     } catch (err) {
       console.error(err);
@@ -201,22 +217,10 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={require("../../assets/images/onboarding/splash.png")}
-        style={styles.background}
-      >
-        {state === 0 ? (
-          // Signup Form
-          <View style={styles.formContainer}>
-            <Image
-              source={require("../../assets/images/onboarding/uw-logo.png")}
-              style={styles.logo}
-          {/* {
-            tempId != 
-          } */}
-          <Text style={styles.title}>
-            Sign up
-          </Text>
+      {state === 0 ? (
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Sign up</Text>
+
           <View style={styles.inputGroup}>
             <Text style={styles.label}>EMAIL</Text>
             <TextInput
@@ -227,93 +231,49 @@ export default function SignUpScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
             />
-            <View style={styles.formBox}>
-              <Text style={styles.title}>Sign Up</Text>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>EMAIL</Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={setEmail}
-                  value={email}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>PASSWORD</Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={setPassword}
-                  value={password}
-                  secureTextEntry
-                />
-              </View>
-              <TouchableOpacity
-                style={styles.signUpButton}
-                onPress={handleSignUp}
-              >
-                <Text style={styles.signUpButtonText}>Sign Up</Text>
-                {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
-              </TouchableOpacity>
-
-              <View style={styles.loginSection}>
-                <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
-                <Link style={styles.loginLink} href="/sign-in">
-                  SIGN IN
-                </Link>
-              </View>
-            </View>
           </View>
-        ) : (
-          <View>
-            <Text style={styles.title}>2-Step Verification</Text>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>PASSWORD</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter verification code"
-              value={code}
-              onChangeText={setCode}
-              keyboardType="number-pad"
+              placeholder="Password"
+              onChangeText={setPassword}
+              value={password}
+              secureTextEntry
             />
-            <TouchableOpacity style={styles.button} onPress={verifyOTP}>
-              <Text style={styles.buttonText}>Verify</Text>
-            </TouchableOpacity>
           </View>
+
           <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-            <Text style={styles.signUpButtonText} >Sign up</Text>
-            {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
+            <Text style={styles.signUpButtonText}>Sign up</Text>
           </TouchableOpacity>
 
-          {tempId != undefined ?
-            <></> : (
-              <View>
-                <View style={styles.loginSection}>
-                  <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
-                  <Link style={styles.loginLink} href="/sign-in">
-                    Already have an account? Sign in
-                  </Link>
-                </View>
-                <View style={styles.skipSection}>
-                  <Text style={styles.skipLabel}>DON'T WANNA MAKE AN ACCOUNT?</Text>
-                  <Link style={styles.skipLink} href="/">
-                    Continue to dashboard </Link>
-                </View>
-              </View>
-            )}
-
-        {/* Language selector */}
-        <View style={styles.languageContainer}>
-          <TouchableOpacity style={styles.languageButton}>
-            <Text style={styles.languageText}>ES</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.languageButton, styles.languageButtonActive]}
-          >
-            <Text style={[styles.languageText, styles.languageTextActive]}>
-              EN
-            </Text>
+          {tempId != undefined ? (
+            <></>
+          ) : (
+            <View style={styles.loginSection}>
+              <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
+              <Link style={styles.loginLink} href="/sign-in">
+                SIGN IN
+              </Link>
+            </View>
+          )}
+        </View>
+      ) : (
+        <View style={{ marginHorizontal: 50 }}>
+          <Text style={styles.title}>2-Step Verification</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter verification code"
+            value={code}
+            onChangeText={setCode}
+            keyboardType="number-pad"
+          />
+          <TouchableOpacity style={styles.button} onPress={verifyOTP}>
+            <Text style={styles.buttonText}>Verify</Text>
           </TouchableOpacity>
         </View>
-      </ImageBackground>
+      )}
     </View>
   );
 }
