@@ -19,7 +19,6 @@ This will directly install the requisite dependencies that are listed within `pa
   # Installing dependencies
   cd admin-portal
   npm i
-
   # Running the development build
   npm run dev
   # OR
@@ -32,7 +31,6 @@ This will directly install the requisite dependencies that are listed within `pa
 ```shell
   cd mobile
   npm i
-
   # Running the Expo Go
   npx expo start --tunnel
   # OR

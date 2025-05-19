@@ -9,11 +9,12 @@ import {
   ImageBackground,
   Image,
 } from "react-native";
-import { useRouter, Redirect, Link } from "expo-router";
-import axios, { AxiosResponse } from "axios";
-import * as SecureStore from "expo-secure-store";
-import { useDispatch } from "react-redux";
-import { login } from "../_utils/redux/userSlice";
+import { useRouter, Redirect, Link } from 'expo-router';
+import axios, { AxiosResponse } from 'axios';
+import * as SecureStore from 'expo-secure-store';
+import { useDispatch } from 'react-redux';
+import { login } from '../_utils/redux/userSlice';
+import { useLocalSearchParams } from 'expo-router';
 
 enum SignUpState {
   SignUpForm, // 0
@@ -21,12 +22,16 @@ enum SignUpState {
 }
 
 export default function SignUpScreen() {
-  // SignUp form fields
+  const { tempId } = useLocalSearchParams();
+  // Signup form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   // 2FA fields
   const [code, setCode] = useState("");
   const [hashedCode, setHashedCode] = useState("");
+
+  const [storedUser, setStoredUser] = useState<{ userId: string, authToken: string, refreshToken: string }>({});
 
   // State to control the flow: 0 = Signup form; 1 = Two-Factor Verification
   const [state, setState] = useState(SignUpState.SignUpForm);
@@ -38,7 +43,11 @@ export default function SignUpScreen() {
   useEffect(() => {
     const checkUser = async () => {
       const storedUser = await SecureStore.getItemAsync("user");
-      if (storedUser) {
+      if (storedUser != null) {
+        setStoredUser(JSON.parse(storedUser));
+      }
+
+      if (tempId == undefined && storedUser) {
         const parsedUser = JSON.parse(storedUser);
         dispatch(
           login({
@@ -156,31 +165,34 @@ export default function SignUpScreen() {
       // Format as YYYY-MM-DD
       const formattedDate = `${year}-${month}-${day}`;
 
-      const response: AxiosResponse = await axios.post(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
-        {
-          email: email,
-          password: password,
-          dateJoined: formattedDate,
-          profilePicture:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s",
-        }
-      );
-
-      dispatch(
-        login({
+      if (tempId == undefined) {
+        const response: AxiosResponse = await axios.post(
+          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
+          {
+            email: email,
+            password: password,
+            dateJoined: formattedDate,
+            profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
+          }
+        );
+        dispatch(login({
           userId: response.data.data._id,
           authToken: response.data.authToken,
-          refreshToken: response.data.refreshToken,
-        })
-      );
-      router.push({
-        pathname: "/onboarding",
-        params: {
-          id: response.data.data._id,
-          authToken: response.data.authToken,
-        },
-      });
+          refreshToken: response.data.refreshToken
+        }));
+        router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken } });
+      } else {
+        const response: AxiosResponse = await axios.patch(
+          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
+          {
+            email: email,
+            password: password,
+            dateJoined: formattedDate,
+            profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
+          }
+        );
+        router.push({ pathname: "/onboarding", params: { id: tempId, authToken: storedUser.authToken } })
+      }
     } catch (err) {
       console.error(err);
       Alert.alert("Error creating user.");
@@ -199,6 +211,21 @@ export default function SignUpScreen() {
             <Image
               source={require("../../assets/images/onboarding/uw-logo.png")}
               style={styles.logo}
+          {/* {
+            tempId != 
+          } */}
+          <Text style={styles.title}>
+            Sign up
+          </Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>EMAIL</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              onChangeText={setEmail}
+              value={email}
+              keyboardType="email-address"
+              autoCapitalize="none"
             />
             <View style={styles.formBox}>
               <Text style={styles.title}>Sign Up</Text>
@@ -251,7 +278,27 @@ export default function SignUpScreen() {
               <Text style={styles.buttonText}>Verify</Text>
             </TouchableOpacity>
           </View>
-        )}
+          <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+            <Text style={styles.signUpButtonText} >Sign up</Text>
+            {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
+          </TouchableOpacity>
+
+          {tempId != undefined ?
+            <></> : (
+              <View>
+                <View style={styles.loginSection}>
+                  <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
+                  <Link style={styles.loginLink} href="/sign-in">
+                    Already have an account? Sign in
+                  </Link>
+                </View>
+                <View style={styles.skipSection}>
+                  <Text style={styles.skipLabel}>DON'T WANNA MAKE AN ACCOUNT?</Text>
+                  <Link style={styles.skipLink} href="/">
+                    Continue to dashboard </Link>
+                </View>
+              </View>
+            )}
 
         {/* Language selector */}
         <View style={styles.languageContainer}>

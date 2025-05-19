@@ -1,87 +1,105 @@
 import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ImageBackground,
-  Image,
+    StyleSheet,
+    View,
+    Text,
+    TouchableOpacity,
+    SafeAreaView,
+    StatusBar,
+    ImageBackground,
+    Image,
 } from "react-native";
 import React from "react";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import { useDispatch } from 'react-redux';
+import { login } from '../_utils/redux/userSlice';
+import axios from "axios";
 
 export default function SignUpScreen() {
-  const handleSignIn = async () => {
-    router.push({ pathname: "/sign-in", params: {} });
-  };
-  const router = useRouter();
+    const dispatch = useDispatch();
+    const handleSignIn = async () => {
+        router.push({ pathname: "/sign-in", params: {} });
+    };
+    const router = useRouter();
 
-  const handleSignUp = async () => {
-    router.push({ pathname: "/sign-up" });
-  };
+    const handleSignUp = async () => {
+        router.push({ pathname: "/sign-up" });
+    };
 
-  return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require("../../assets/images/onboarding/splash.png")}
-        style={styles.background}
-      >
-        <StatusBar barStyle="dark-content" />
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.content}>
-            {/* Main content */}
-            <View style={styles.mainContent}>
-              <Image
-                source={require("../../assets/images/onboarding/uw-logo.png")}
-                style={styles.logo}
-              />
-              <Text style={styles.smallText}>UNITED WAY</Text>
-              <Text style={styles.title}>
-                Explore upcoming community events
-              </Text>
+    const handleTempLogin = async () => {
+        const response: AxiosResponse = await axios.post(
+            `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
+            {
+                isTemporary: true
+            }
+        );
+        const content = response.data;
+        dispatch(login({
+            userId: content.data._id,
+            authToken: content.authToken,
+            refreshToken: content.refreshToken
+        }))
+        router.push({ pathname: "/(tabs)" });
+    }
 
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.signUpButton}
-                  onPress={handleSignUp}
-                >
-                  <Text style={styles.signUpButtonText}>Sign Up</Text>
-                </TouchableOpacity>
+    return (
+        <View style={styles.container}>
+            <ImageBackground
+                source={require("../../assets/images/onboarding/splash.png")}
+                style={styles.background}
+            >
+                <StatusBar barStyle="dark-content" />
+                <SafeAreaView style={styles.safeArea}>
+                    <View style={styles.content}>
+                        {/* Main content */}
+                        <View style={styles.mainContent}>
+                            <Image
+                                source={require("../../assets/images/onboarding/uw-logo.png")}
+                                style={styles.logo}
+                            />
+                            <Text style={styles.smallText}>UNITED WAY</Text>
+                            <Text style={styles.title}>
+                                Explore upcoming community events
+                            </Text>
 
-                <TouchableOpacity
-                  style={styles.signInButton}
-                  onPress={handleSignIn}
-                >
-                  <Text style={styles.signInButtonText}>Sign In</Text>
-                </TouchableOpacity>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={styles.signUpButton}
+                                    onPress={handleSignUp}
+                                >
+                                    <Text style={styles.signUpButtonText}>Sign Up</Text>
+                                </TouchableOpacity>
 
-                <View style={styles.skipSection}>
-                  <Link style={styles.skipLink} href="/">
-                    GET STARTED WITHOUT AN ACCOUNT
-                  </Link>
-                </View>
-              </View>
-            </View>
+                                <TouchableOpacity
+                                    style={styles.signInButton}
+                                    onPress={handleSignIn}
+                                >
+                                    <Text style={styles.signInButtonText}>Sign In</Text>
+                                </TouchableOpacity>
 
-            {/* Language selector */}
-            <View style={styles.languageContainer}>
-              <TouchableOpacity style={styles.languageButton}>
-                <Text style={styles.languageText}>ES</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.languageButton, styles.languageButtonActive]}
-              >
-                <Text style={[styles.languageText, styles.languageTextActive]}>
-                  EN
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
-  );
+                                <TouchableOpacity style={styles.signInButton} onPress={handleTempLogin}>
+                                    <Text>Get Started Without An Account</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        {/* Language selector */}
+                        <View style={styles.languageContainer}>
+                            <TouchableOpacity style={styles.languageButton}>
+                                <Text style={styles.languageText}>ES</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.languageButton, styles.languageButtonActive]}
+                            >
+                                <Text style={[styles.languageText, styles.languageTextActive]}>
+                                    EN
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View >
+                </SafeAreaView >
+            </ImageBackground >
+        </View >
+    );
 }
 
 const styles = StyleSheet.create({
