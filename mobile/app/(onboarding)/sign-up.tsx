@@ -217,63 +217,92 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
-      {state === 0 ? (
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Sign up</Text>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>EMAIL</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              onChangeText={setEmail}
-              value={email}
-              keyboardType="email-address"
-              autoCapitalize="none"
+      <ImageBackground
+        source={require("../../assets/images/onboarding/splash.png")}
+        style={styles.background}
+      >
+        {state === 0 ? (
+          <View style={styles.formContainer}>
+            <Image
+              source={require("../../assets/images/onboarding/uw-logo.png")}
+              style={styles.logo}
             />
-          </View>
+            <Text style={styles.title}>SIGN UP</Text>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>PASSWORD</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              onChangeText={setPassword}
-              value={password}
-              secureTextEntry
-            />
-          </View>
-
-          <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-            <Text style={styles.signUpButtonText}>Sign up</Text>
-          </TouchableOpacity>
-
-          {tempId != undefined ? (
-            <></>
-          ) : (
-            <View style={styles.loginSection}>
-              <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
-              <Link style={styles.loginLink} href="/sign-in">
-                SIGN IN
-              </Link>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>EMAIL</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setEmail}
+                value={email}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
             </View>
-          )}
-        </View>
-      ) : (
-        <View style={{ marginHorizontal: 50 }}>
-          <Text style={styles.title}>2-Step Verification</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter verification code"
-            value={code}
-            onChangeText={setCode}
-            keyboardType="number-pad"
-          />
-          <TouchableOpacity style={styles.button} onPress={verifyOTP}>
-            <Text style={styles.buttonText}>Verify</Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>PASSWORD</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setPassword}
+                value={password}
+                secureTextEntry
+              />
+            </View>
+
+            <TouchableOpacity
+              style={styles.signUpButton}
+              onPress={handleSignUp}
+            >
+              <Text style={styles.signUpButtonText}>SIGN UP</Text>
+            </TouchableOpacity>
+
+            {tempId != undefined ? (
+              <></>
+            ) : (
+              <View style={styles.loginSection}>
+                <Text style={[styles.loginLabel, { flex: 1 }]}>
+                  ALREADY HAVE AN ACCOUNT?
+                </Text>
+                <Link
+                  style={[styles.loginLink, { flex: 1, textAlign: "right" }]}
+                  href="/sign-in"
+                >
+                  SIGN IN
+                </Link>
+              </View>
+            )}
+          </View>
+        ) : (
+          <View style={{ marginHorizontal: 50 }}>
+            <Text style={styles.title}>2-Step Verification</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter verification code"
+              value={code}
+              onChangeText={setCode}
+              keyboardType="number-pad"
+            />
+            <TouchableOpacity style={styles.button} onPress={verifyOTP}>
+              <Text style={styles.buttonText}>Verify</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Language selector */}
+        <View style={styles.languageContainer}>
+          <TouchableOpacity style={styles.languageButton}>
+            <Text style={styles.languageText}>ES</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.languageButton, styles.languageButtonActive]}
+          >
+            <Text style={[styles.languageText, styles.languageTextActive]}>
+              EN
+            </Text>
           </TouchableOpacity>
         </View>
-      )}
+      </ImageBackground>
     </View>
   );
 }
@@ -339,6 +368,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 50,
     marginTop: 16,
+    width: "100%",
   },
   signUpButtonText: {
     color: "#10167F",

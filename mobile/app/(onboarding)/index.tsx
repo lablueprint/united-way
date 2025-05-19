@@ -78,11 +78,10 @@ export default function SignUpScreen() {
                   <Text style={styles.signInButtonText}>Sign In</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.skipLink}
-                  onPress={handleTempLogin}
-                >
-                  <Text>GET STARTED WITHOUT AN ACCOUNT</Text>
+                <TouchableOpacity onPress={handleTempLogin}>
+                  <Text style={styles.skipLink}>
+                    GET STARTED WITHOUT AN ACCOUNT
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -220,10 +219,8 @@ const styles = StyleSheet.create({
   languageTextActive: {
     color: "white",
   },
-  skipSection: {
-    alignItems: "center",
-  },
   skipLink: {
+    textAlign: "center",
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
