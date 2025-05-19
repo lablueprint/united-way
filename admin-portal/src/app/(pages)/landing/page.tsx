@@ -248,14 +248,14 @@ export default function Landing() {
                   {todayIds.length == 1 ? (
                     <div className="single event-today">
                       <Image className="single-event-img" src={single} alt="Event thumbnail" />
-                      <div className="event-info">
+                      <div className="landing-event">
                         <div className="event-date-time">
                           <p className="event-date">Today</p>
                           <p className="event-time">{startTime} - {endTime}</p>
                         </div>
                         <div className="event-name">{eventData.name}</div>
                         <div className="event-details">
-                          <div className="event-location">{location}</div>
+                          <div className="event-card-location">{location}</div>
                           <div className="event-attendees">
                             <Image src={attendee} alt="Attendee icon" />
                             <p className="attendee-info">{eventData.registeredUsers.length} Attendees</p>
@@ -291,7 +291,7 @@ export default function Landing() {
             <div className={`${styles.eventList} ${styles.upcomingList}`}>
               {upcomingIds.length > 0 && upcomingIds.map((id: string) => {
                 return (
-                  <EventCard id={id} key={id} removeFromList={removeFromList} orgName={orgName} />
+                  <EventCard id={id} key={id} removeFromList={removeFromList} orgName={orgName} onClick={() => router.push(`/landing/${id}`)} />
                 );
               })}
             </div>
