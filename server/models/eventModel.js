@@ -60,6 +60,10 @@ const eventSchema = new mongoose.Schema({
     required: true,
     type: [String],
   },
+  locationString: {
+    required: false,
+    type: [String],
+  },
   imageURL: {
     type: String,
   },

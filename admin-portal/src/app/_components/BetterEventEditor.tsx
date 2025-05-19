@@ -159,7 +159,7 @@ export default function BetterEventEditor({ eventId }: EventEditorProps): React.
                         }
                     }
                 );
-                router.push('/event');
+                router.push('/events');
             }
             else {
                 console.log("Upload Failure: Empty Arguments")
@@ -304,7 +304,7 @@ export default function BetterEventEditor({ eventId }: EventEditorProps): React.
                         <div className="draft-indicator-text">DRAFT</div>
                     </div>
                     <div className="cancel-save-publish-parent">
-                        <Link className="cancel-button" href="/event">CANCEL</Link>
+                        <Link className="cancel-button" href="/events">CANCEL</Link>
                         <div className="save-button" onClick={() => {handlePatch(true)}}>SAVE</div>
                         <div className="publish-button" onClick={() => {handlePatch(false)}}>PUBLISH</div>
                     </div>

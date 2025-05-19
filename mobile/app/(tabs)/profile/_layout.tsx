@@ -8,16 +8,17 @@ export default function StackLayout() {
                 name="profilePage"
                 options={{
                     headerShown: false,
+                    animation: "slide_from_left"
                 }}
             />
             <Stack.Screen
-                name="pictureChanger"
+                name="contact"
                 options={{
                     headerShown: false,
                 }}
             />
             <Stack.Screen
-                name="profileEditor"
+                name="account"
                 options={{
                     headerShown: false,
                 }}

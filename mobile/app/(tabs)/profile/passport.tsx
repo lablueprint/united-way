@@ -1,9 +1,10 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
-import axios from "axios";
-import { useSelector } from 'react-redux';
 import DropDownPicker from 'react-native-dropdown-picker';
+
+import useApiAuth from '@/app/_hooks/useApiAuth';
+import { RequestType } from '@/app/_interfaces/RequestInterfaces';
 
 interface Event {
   _id: string;
@@ -12,7 +13,6 @@ interface Event {
 }
 
 export default function Passport() {
-  const user = useSelector((state: any) => { return { userId: state.auth.userId, authToken: state.auth.authToken } });
   const [userEventDetails, setUserEventsDetails] = useState<string[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
@@ -22,6 +22,7 @@ export default function Passport() {
     { label: 'Least Recent', value: 'leastRecent' },
   ]);
   const [sortOrder, setSortOrder] = useState<'mostRecent' | 'leastRecent'>('mostRecent');
+  const [user, sendRequest] = useApiAuth();
 
   useEffect(() => {
     fetchUserEventDetails();
@@ -38,19 +39,14 @@ export default function Passport() {
   }, [sortOrder]);
 
   const fetchUserEventDetails = async () => {
-    console.log("in fetch user event details");
     try {
-      console.log(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`)
-      const response = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': 'application/json'
-          },
-        }
-      );
-      setUserEventsDetails(response.data.data.registeredEvents || []);
-      const eventIDs = response.data.data.registeredEvents;
+      const body = {};
+      const endpoint = "users/:id";
+      const requestType = RequestType.GET;
+      const data = await sendRequest({ body, endpoint, requestType });
+      setUserEventsDetails(data.registeredEvents || []);
+
+      const eventIDs = data.registeredEvents;
       let eventData = [];
       for (let i = 0; i < eventIDs.length; i++) {
         const event = await fetchUserEvent(eventIDs[i]);
@@ -67,15 +63,11 @@ export default function Passport() {
 
   const fetchUserEvent = async (eventId: string) => {
     try {
-      const response = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/events/${eventId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${user.authToken}`,
-            'Content-Type': 'application/json'
-          },
-        }
-      );
-      return response.data.data;
+      const body = {};
+      const requestType = RequestType.GET;
+      const endpoint = `events/${eventId}`;
+      const data = await sendRequest({ body, requestType, endpoint });
+      return data;
     } catch (err) {
       console.error('Error fetching events:', err);
       return null;

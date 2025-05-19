@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios, { AxiosResponse } from "axios";
 import { EventTags } from "../_interfaces/EventInterfaces";
-import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import QRCode from 'react-qr-code';
 import '../_styles/EventEditor.css';
 import { pen, logo } from '../../../public/EventEditor/EventEditor-index'
+import axios, { AxiosResponse } from 'axios';
+import { useRouter } from 'next/navigation';
+import { RequestType } from '../_interfaces/RequestInterfaces';
+import useApiAuth from '../_hooks/useApiAuth';
 
 interface EventEditorProps {
     orgName: string;
@@ -42,7 +44,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
     // This timer will start when the user stops typing and reset once the user starts typing again
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const [org, sendRequest] = useApiAuth();
 
     const timeZones = [
         { label: "Pacific Time (PT) America/Los Angeles", value: "PT" },
@@ -50,22 +52,30 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
         { label: "Central Time (CT) America/Chicago", value: "CT" },
         { label: "Eastern Time (ET) America/New York", value: "ET" },
     ];
+    const router = useRouter();
 
     useEffect(() => {
         (async () => {
             // Parse the event's JSON from db
             // NOTE: This pings the database twice for some reason, doesnt affect correction though, so whatevs
             // NOTE: We can ignore the draft list as we can generate a new one
+
             const eventData = await getEventById();
-            setUpdatedName(eventData.name)
+            setUpdatedName(eventData.name ?? "");
             setUpdatedDate(new Date(eventData.date))
             // We dont use Duration?
             setIsDraft(eventData.draft)
             setUpdatedDescription(eventData.description)
             setStartTime(eventData.startTime)
             setEndTime(eventData.endTime)
-            setLatitude(eventData.location.coordinates[0])
-            setLongitude(eventData.location.coordinates[1])
+            if (eventData.location?.coordinates?.length === 2) {
+                setLatitude(eventData.location.coordinates[0]);
+                setLongitude(eventData.location.coordinates[1]);
+            } else {
+                console.warn('Missing or malformed coordinates in eventData:', eventData.location);
+                setLatitude(0); // or some default/fallback
+                setLongitude(0);
+            }
             setUpdatedTags(eventData.tags)
             // TODO: No registeredUsers, activity, image for now ... .. . ...
         })();
@@ -153,35 +163,28 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
 
                 const uploadDraftList = generateDraftList()
 
-                const response: AxiosResponse = await axios.patch(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`,
-                    {
-                        name: updatedName,
-                        date: updatedDate,
-                        duration: 0, // Hardcoded for now
-                        draft: currIsDraft,
-                        draftList: uploadDraftList,
-                        description: updatedDescription,
-                        startTime: startTime,
-                        endTime: endTime,
-                        location: {
-                            type: "Point",
-                            coordinates: [currLongitude, currLatitude]
-                        },
-                        organizerID: org.orgId,
-                        tags: selectedTags,
-                        registeredUsers: [], // Hardcoded for now
-                        activity: [], // Hardcoded for now
-                        image: "placeholder" // Hardcoded for now
+                const body = {
+                    name: updatedName,
+                    date: updatedDate,
+                    duration: 0, // Hardcoded for now
+                    draft: currIsDraft,
+                    draftList: uploadDraftList,
+                    description: updatedDescription,
+                    startTime: startTime,
+                    endTime: endTime,
+                    location: {
+                        type: "Point",
+                        coordinates: [currLongitude, currLatitude]
                     },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${org.authToken}`
-                        }
-                    }
-                );
-                setSubmissionStatus(`Success!: ${response.data.message}`);
+                    organizerID: org.orgId,
+                    tags: selectedTags,
+                    registeredUsers: [], // Hardcoded for now
+                    activity: [], // Hardcoded for now
+                    image: "placeholder" // Hardcoded for now
+                };
+                const endpoint = `events/${eventId}`;
+                const requestType = RequestType.PATCH;
+                await sendRequest({ requestType, endpoint, body });
                 changeState(false);
             }
             else {
@@ -208,13 +211,10 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
 
     const getEventById = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${org.authToken}`
-                }
-            });
-            const { data } = response.data;
+            const requestType: RequestType = RequestType.GET;
+            const body = {};
+            const endpoint = `events/${eventId}`;
+            const data = await sendRequest({ requestType, body, endpoint })
             return data;
         } catch (err) {
             console.log(err);
@@ -319,31 +319,28 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                 {/* Cancel and Publish Buttons */}
                 <div className="goToTheRight">
                     <button className="saveButton" onClick={() => {
-                        handlePatch(true)
+                        handlePatch(true);
+                        router.push('/events');
                     }}>
                         SAVE
                     </button>
-                    <button className="bigPillButton" onClick={() => {
+                    <button className="bigPillButton" onClick={async () => {
                         changeState(false)
                         // If event just created, delete the event
                         // NOTE: This is not async, might cause problems later
                         if (justCreated) {
-                            try {
-                                axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`, {
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "Authorization": `Bearer ${org.authToken}`
-                                    }
-                                });
-                            } catch (err) {
-                                console.log(err);
-                            }
+                            const requestType: RequestType = RequestType.DELETE;
+                            const body = {};
+                            const endpoint = `events/${eventId}`;
+                            await sendRequest({ requestType, body, endpoint });
                         }
+                        router.push('/events');
                     }}>
                         CANCEL
                     </button>
                     <button className="bigPillButton" onClick={() => {
-                        handlePatch(false)
+                        handlePatch(false);
+                        router.push('/events');
                     }}>
                         PUBLISH
                     </button>
@@ -401,7 +398,11 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                             type="date"
                             id="hiddenDateInput"
                             className="hiddenModal flexIt"
-                            value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''}
+                            value={
+                                updatedDate instanceof Date && !isNaN(updatedDate.getTime())
+                                    ? updatedDate.toISOString().split('T')[0]
+                                    : ''
+                            }
                             onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value))) }}
                         />
                     </div>
@@ -511,7 +512,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                         EventTags.map((tagName, index) => {
                             return (
                                 <button
-                                    className={updatedTags[index] ? "tagPillSelected" : "tagPillNotSelected"}
+                                    className={updatedTags != null && updatedTags[index] ? "tagPillSelected" : "tagPillNotSelected"}
                                     key={index}
                                     onClick={() => {
                                         const newTags = [...updatedTags];

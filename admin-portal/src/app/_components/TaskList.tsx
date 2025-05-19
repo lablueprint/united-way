@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosResponse } from "axios";
-import { useSelector } from 'react-redux';
-import { RootState } from '../_interfaces/AuthInterfaces';
 import { EventData } from '../_interfaces/EventInterfaces'
 
 import Image from 'next/image'
 import { pencil, publish, location } from '../../../public/TaskList/TaskList-index'
 import '../_styles/TaskList.css';
 
+import useApiAuth from '../_hooks/useApiAuth';
+import { RequestType } from '../_interfaces/RequestInterfaces';
+
 
 export default function TaskList() {
     const [draftCount, setDraftCount] = useState<number>(0);
     const [allDrafts, setAllDrafts] = useState<EventData[]>();
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-
-    useEffect(() => {
-        console.log('allDrafts updated:', allDrafts);
-    }, [allDrafts]);
+    const [org, sendRequest] = useApiAuth();
 
     // Load in all drafts, draftCount on rendering TaskList
     useEffect(() => {
@@ -29,19 +25,13 @@ export default function TaskList() {
 
     const getOrganizerDrafts = async () => {
         try {
-            const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/filtered`,
-                {
-                    organizerID: org.orgId,
-                    draft: true
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${org.authToken}`
-                    }
-                },
-            );
-            const { data } = response.data;
+            const endpoint = "events/filtered";
+            const requestType = RequestType.POST;
+            const body = {
+                organizerID: org.orgId,
+                draft: true
+            }
+            const data = await sendRequest({ requestType, body, endpoint });
             return data;
         }
         catch (err) {
