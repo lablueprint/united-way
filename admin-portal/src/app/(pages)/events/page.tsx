@@ -1,5 +1,5 @@
 "use client";
-import {useState} from 'react';
+import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
@@ -18,8 +18,7 @@ export default function Events() {
 
   return (
     <div>
-        <UpcomingCalendar />
-    
+      <UpcomingCalendar />
     </div>
   );
 }

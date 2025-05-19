@@ -19,13 +19,13 @@ eventRouter.post("/orgs/:id/createEvent", eventController.createEvent);
 // Get event routes
 eventRouter.get('/:id', eventController.getEventById);
 eventRouter.get('/', eventController.getAllEvents);
-eventRouter.get('/tag/:tag', eventController.getAllEventsByTag);
 eventRouter.post('/filtered', eventController.getEventsByFilter);
 eventRouter.get('/byDay/:date', eventController.getEventsByDay);
 eventRouter.get("/:id", eventController.getEventById);
 eventRouter.get("/", eventController.getAllEvents);
 eventRouter.get("/orgs/:id", eventController.getEventsByOrganization);
 eventRouter.post("/filtered", eventController.getEventsByFilter);
+eventRouter.post('/tag/:tag', eventController.getAllEventsByTag);
 
 // Update and delete routes
 eventRouter.patch("/:id", eventController.editEventDetails);

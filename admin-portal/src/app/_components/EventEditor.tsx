@@ -59,7 +59,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
             // Parse the event's JSON from db
             // NOTE: This pings the database twice for some reason, doesnt affect correction though, so whatevs
             // NOTE: We can ignore the draft list as we can generate a new one
-            
+
             const eventData = await getEventById();
             setUpdatedName(eventData.name ?? "");
             setUpdatedDate(new Date(eventData.date))
@@ -71,11 +71,11 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
             if (eventData.location?.coordinates?.length === 2) {
                 setLatitude(eventData.location.coordinates[0]);
                 setLongitude(eventData.location.coordinates[1]);
-              } else {
+            } else {
                 console.warn('Missing or malformed coordinates in eventData:', eventData.location);
                 setLatitude(0); // or some default/fallback
                 setLongitude(0);
-              }
+            }
             setUpdatedTags(eventData.tags)
             // TODO: No registeredUsers, activity, image for now ... .. . ...
         })();
@@ -402,9 +402,9 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                             className="hiddenModal flexIt"
                             value={
                                 updatedDate instanceof Date && !isNaN(updatedDate.getTime())
-                                  ? updatedDate.toISOString().split('T')[0]
-                                  : ''
-                              }
+                                    ? updatedDate.toISOString().split('T')[0]
+                                    : ''
+                            }
                             onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value))) }}
                         />
                     </div>
@@ -510,7 +510,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
 
                 {/* Keyword Buttons */}
                 <div className="tagOptions flexIt">
-                    {   
+                    {
                         EventTags.map((tagName, index) => {
                             return (
                                 <button

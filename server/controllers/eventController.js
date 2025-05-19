@@ -272,6 +272,7 @@ const getEventsByOrganization = async (req, res) => {
 const getAllEventsByTag = async (req, res) => {
   try {
     const tag = req.params.tag;
+    const orgId = req.body.orgId;
 
     // Ensure the date is provided
     if (!tag) {
@@ -288,6 +289,7 @@ const getAllEventsByTag = async (req, res) => {
     // Query the database for events on the specific day, sorted by date
     if (tag == "Upcoming") {
       const events = await Event.find({
+        organizerID: orgId,
         date: {
           $gte: todayEnd,
         },
@@ -301,6 +303,7 @@ const getAllEventsByTag = async (req, res) => {
     }
     else if (tag == "Current") {
       const events = await Event.find({
+        organizerID: orgId,
         date: {
           $gte: todayStart,
           $lte: todayEnd,
@@ -315,6 +318,7 @@ const getAllEventsByTag = async (req, res) => {
     }
     else if (tag == "Past") {
       const events = await Event.find({
+        organizerID: orgId,
         date: {
           $lte: todayStart,
         },
@@ -328,6 +332,7 @@ const getAllEventsByTag = async (req, res) => {
     }
     else {
       const eventsCurrent = await Event.find({
+        organizerID: orgId,
         date: {
           $gte: todayStart,
           $lte: todayEnd,
@@ -336,6 +341,7 @@ const getAllEventsByTag = async (req, res) => {
       data_dict["Current"] = eventsCurrent;
 
       const eventsUpcoming = await Event.find({
+        organizerID: orgId,
         date: {
           $gte: todayEnd,
         },
@@ -343,6 +349,7 @@ const getAllEventsByTag = async (req, res) => {
       data_dict["Upcoming"] = eventsUpcoming;
 
       const eventsPast = await Event.find({
+        organizerID: orgId,
         date: {
           $lte: todayStart,
         },

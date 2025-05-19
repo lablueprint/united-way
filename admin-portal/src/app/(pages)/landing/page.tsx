@@ -25,14 +25,10 @@ export default function Landing() {
       >
         Example HTTP Request button
       </button><br />
-      {/* Org: {org.orgId}<br /> */}
-      {/* Auth: {org.authToken}<br />
-      Refresh: {org.refreshToken}<br /> */}
-      
+
       <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
         Log out
       </button>
-      {/* <div>Result: {responseValue}</div> */}
     </div>
   );
 }
