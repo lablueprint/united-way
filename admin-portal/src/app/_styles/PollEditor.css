@@ -21,7 +21,6 @@
 /* — Header section — */
 .pollEditorHeader {
   position: relative;
-  background-color: #0D1143;
   color: #FFFFFF;
   font-family: "BarlowCondensedExtraBoldItalic";
   width: 100%;
@@ -32,6 +31,10 @@
   justify-content: center;
   padding-left: 6rem;
   padding-right: 6rem;
+  background-image: url('./_images/banner-logo.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   position: relative;
 }
 
@@ -357,15 +360,15 @@
   border-color: transparent;
 }
 
-.pointValueControl input {
+.pointValueDisplay {
   width: 3rem;
   text-align: center;
   border: none;
   font-family: "Helvetica";
   font-size: 1rem;
   font-weight: bold;
-  color: #10167F;
-  padding: 0.5rem;
+  color: #10167F4D;
+  padding: 0.7rem;
   border-color: none;
   background: transparent;
 }

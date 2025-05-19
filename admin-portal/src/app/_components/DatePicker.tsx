@@ -5,14 +5,15 @@ import CalendarIcon from "../_styles/_images/calendar.svg";
 import "../_styles/DateTimePickers.css";
 
 interface DatePickerProps {
-  selectedDate: Date;
-  onChange: (date: Date) => void;
+  start: Date;
+  end: Date;
+  onChange: (result: { newStart: Date, newEnd: Date }) => void;
   label?: string;
 }
 
-export default function DatePicker({ selectedDate, onChange, label }: DatePickerProps) {
+export default function DatePicker({ start, end, onChange, label }: DatePickerProps) {
   const [showCalendar, setShowCalendar] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
+  const [currentMonth, setCurrentMonth] = useState(new Date(start));
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -47,7 +48,11 @@ export default function DatePicker({ selectedDate, onChange, label }: DatePicker
   };
 
   const handleDateSelect = (date: Date) => {
-    onChange(date);
+    const newStart = new Date(date);
+    newStart.setHours(start.getHours(), start.getMinutes(), 0, 0);
+    const duration = end.getTime() - start.getTime();
+    const newEnd = new Date(newStart.getTime() + duration);
+    onChange({ newStart, newEnd });
     setShowCalendar(false);
   };
 
@@ -67,7 +72,7 @@ export default function DatePicker({ selectedDate, onChange, label }: DatePicker
         }}
       >
         <span>
-          {selectedDate.toLocaleDateString('en-US', { 
+          {start.toLocaleDateString('en-US', { 
             month: 'short', 
             day: 'numeric', 
             year: 'numeric' 
@@ -97,7 +102,7 @@ export default function DatePicker({ selectedDate, onChange, label }: DatePicker
             {generateCalendarDays().map((date, index) => (
               <button
                 key={index}
-                className={`day ${date && date.toDateString() === selectedDate.toDateString() ? 'selected' : ''}`}
+                className={`day ${date && date.toDateString() === start.toDateString() ? 'selected' : ''}`}
                 onClick={() => date && handleDateSelect(date)}
                 disabled={!date}
               >

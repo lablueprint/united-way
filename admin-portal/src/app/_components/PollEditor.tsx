@@ -111,7 +111,6 @@ export default function PollEditor({
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === index) return;
 
-    // Reorder the questions
     setQuestions(prev => {
       const newQuestions = [...prev];
       const [draggedQuestion] = newQuestions.splice(draggedIndex, 1);
@@ -238,44 +237,19 @@ export default function PollEditor({
           onChange={(e) => setPageTitle(e.target.value)}
         />
 
-
         <div className="pollControls">
           <DatePicker
-            selectedDate={timeStart}
-            onChange={(date) => {
-              const newDateTime = new Date(timeStart);
-              newDateTime.setFullYear(date.getFullYear());
-              newDateTime.setMonth(date.getMonth());
-              newDateTime.setDate(date.getDate());
-              
-              const duration = timeEnd.getTime() - timeStart.getTime();
-              const newEndTime = new Date(newDateTime.getTime() + duration);
-              
-              updateTime(newDateTime, newEndTime);
-            }}
+            start={timeStart}
+            end={timeEnd}
+            onChange={({ newStart, newEnd }) => updateTime(newStart, newEnd)}
             label="SCHEDULE START DATE"
           />
 
           <TimePicker
-            startTime={timeStart}
-            endTime={timeEnd}
-            onStartTimeChange={(hours: number, minutes: number) => {
-              const newDateTime = new Date(timeStart);
-              newDateTime.setHours(hours);
-              newDateTime.setMinutes(minutes);
-              
-              const duration = timeEnd.getTime() - timeStart.getTime();
-              const newEndTime = new Date(newDateTime.getTime() + duration);
-              
-              updateTime(newDateTime, newEndTime);
-            }}
-            onEndTimeChange={(hours: number, minutes: number) => {
-              const newEndTime = new Date(timeEnd);
-              newEndTime.setHours(hours);
-              newEndTime.setMinutes(minutes);
-              updateTime(timeStart, newEndTime);
-            }}
-            showLabel={true}
+            start={timeStart}
+            end={timeEnd}
+            onChange={({ newStart, newEnd }) => updateTime(newStart, newEnd)}
+            label="SCHEDULE TIME"
           />
 
           <div className="controlGroup">
@@ -288,12 +262,7 @@ export default function PollEditor({
               >
                 −
               </button>
-              <input
-                type="number"
-                value={pointValue}
-                onChange={(e) => setPointValue(Math.max(0, parseInt(e.target.value) || 0))}
-                min="0"
-              />
+              <span className="pointValueDisplay">{pointValue}</span>
               <button onClick={() => setPointValue(prev => prev + 1)}>
                 +
               </button>

@@ -24,7 +24,7 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.25rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.5rem;
   cursor: pointer;
   min-width: 150px;
 }
@@ -38,7 +38,7 @@
 .timeSelect span:first-child {
   font-family: "Helvetica";
   font-size: 0.875rem;
-  color: #10167F;
+  color: #10167F4D;
 }
 
 .dropdownArrow {
@@ -306,14 +306,14 @@
 .timeValue {
   font-family: "Helvetica";
   font-size: 1rem;
-  color: 10167F17;
+  color: #10167F4D;
   opacity: 0.5;
 }
 
 .timePeriod {
   font-family: "Helvetica";
   font-size: 0.75rem;
-  color: 10167F17;
+  color: #10167F4D;
   opacity: 0.5;
 }
 
