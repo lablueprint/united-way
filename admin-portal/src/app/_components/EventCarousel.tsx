@@ -37,7 +37,7 @@ export default function EventCarousel({
   const [focusIndex, setFocusIndex] = useState(0);
   const [pageIndex, setPageIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
-  
+
   const totalPages = Math.ceil(events.length / visibleCount);
 
   // Initialize first page on load
@@ -52,46 +52,46 @@ export default function EventCarousel({
 
   // Auto scroll and rotate pages
   // Auto scroll and rotate pages
-useEffect(() => {
-  if (events.length === 0) return;
+  useEffect(() => {
+    if (events.length === 0) return;
 
-  const totalPages = Math.ceil(events.length / visibleCount);
+    const totalPages = Math.ceil(events.length / visibleCount);
 
-  const interval = setInterval(() => {
-    if (totalPages <= 1) {
-      setFocusIndex((prev) =>
-        prev < visibleEvents.length - 1 ? prev + 1 : 0
-      );
-      return;
-    }
-
-    setFocusIndex((prevFocus) => {
-      const isAtBottom = prevFocus >= visibleEvents.length - 1;
-
-      if (!isAtBottom) {
-        return prevFocus + 1;
+    const interval = setInterval(() => {
+      if (totalPages <= 1) {
+        setFocusIndex((prev) =>
+          prev < visibleEvents.length - 1 ? prev + 1 : 0
+        );
+        return;
       }
 
-      setTransitioning(true);
+      setFocusIndex((prevFocus) => {
+        const isAtBottom = prevFocus >= visibleEvents.length - 1;
 
-      setTimeout(() => {
-        const nextPage = (pageIndex + 1) % totalPages;
-        const start = nextPage * visibleCount;
-        const end = start + visibleCount;
-        const nextVisibleEvents = events.slice(start, end);
+        if (!isAtBottom) {
+          return prevFocus + 1;
+        }
 
-        setVisibleEvents(nextVisibleEvents);
-        setPageIndex(nextPage);
-        setFocusIndex(0);
-        setTransitioning(false);
-      }, 300);
+        setTransitioning(true);
 
-      return prevFocus;
-    });
-  }, intervalMs);
+        setTimeout(() => {
+          const nextPage = (pageIndex + 1) % totalPages;
+          const start = nextPage * visibleCount;
+          const end = start + visibleCount;
+          const nextVisibleEvents = events.slice(start, end);
 
-  return () => clearInterval(interval);
-}, [events, intervalMs, visibleCount, pageIndex, visibleEvents.length]);
+          setVisibleEvents(nextVisibleEvents);
+          setPageIndex(nextPage);
+          setFocusIndex(0);
+          setTransitioning(false);
+        }, 300);
+
+        return prevFocus;
+      });
+    }, intervalMs);
+
+    return () => clearInterval(interval);
+  }, [events, intervalMs, visibleCount, pageIndex, visibleEvents.length]);
 
   const featuredEvent = visibleEvents[focusIndex];
 
