@@ -202,7 +202,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 24,
         padding: 24,
-        shadowRadius: 3,
         height: height * 0.84,
     },
     questionText: {

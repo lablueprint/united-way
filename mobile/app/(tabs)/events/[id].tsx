@@ -55,7 +55,7 @@ export default function EventDetails() {
   const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
   const [pollVisible, setPollVisible] = useState(false);
   const [announcementVisible, setAnnouncementVisible] = useState(false);
-  const [pollId, setPollId] = useState<string | null>('67aa5b4265470f35b546c36a');
+  const [pollId, setPollId] = useState<string | null>(null);
   const [pollResponses, setPollResponses] =  useState<(number | null)[]>([]);
   const [announcementId, setAnnouncementId] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -431,7 +431,7 @@ export default function EventDetails() {
             visible={announcementVisible}
             onRequestClose={() => {
               Alert.alert("Modal has been closed.");
-              setPollVisible(!announcementVisible);
+              setAnnouncementVisible(!announcementVisible);
             }}
           >
             <View style={styles.modalOverlay}>

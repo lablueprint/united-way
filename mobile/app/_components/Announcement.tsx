@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Button } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Button, Dimensions, TouchableOpacity, Image } from "react-native";
 import axios from "axios";
+import { Typography } from '../_styles/globals';
+
+const height = Dimensions.get('window').height;
+const width = Dimensions.get('window').width;
 
 interface AnnouncementProps {
   activityId: string;
@@ -43,48 +47,64 @@ export default function Announcement({ activityId, closeAnnouncement }: Announce
 
   return (
     <View key={announcement._id} style={styles.card}>
-      <Text style={styles.timeText}>
+      {/* <Text style={styles.timeText}>
         Aired on: {new Date(announcement.timeStart).toLocaleString()}
-      </Text>
-
+      </Text> */}
+      <View style={styles.header}>
+        <Text style={[Typography.h3, styles.headingText]}>
+          ANNOUNCEMENT
+        </Text>
+        <TouchableOpacity onPress={closeAnnouncement}>
+          <Image style={styles.icon} source={require('../../assets/activities/close_blue.png')} />
+        </TouchableOpacity>
+      </View>
       {announcement.content.map((textObj, index) => (
-        <Text key={index} style={styles.announcementText}>
+        <Text key={index} style={[Typography.body2, styles.announcementText]}>
           {textObj.text}
         </Text>
       ))}
-      <Button
-        title="Close"
-        onPress={() => {closeAnnouncement()}}
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#1e1e1e",
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    padding: 24,
+    borderRadius: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
-    marginBottom: 10,
+    width: width - 48,
   },
   timeText: {
     fontSize: 14,
     color: "#fff",
     marginBottom: 10,
   },
+  headingText: {
+    fontSize: 26,
+    color: "#10167F",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   announcementText: {
     fontSize: 16,
-    color: "#fff",
-    marginBottom: 10,
+    marginTop: 16,
+    color: "#10167F99",
   },
   loadingText: {
     fontSize: 16,
     color: "#aaa",
     textAlign: "center",
     marginTop: 20,
+  },
+  icon: {
+    height: 30,
+    width: 30,
   },
 });
