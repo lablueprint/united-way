@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import axios, { AxiosResponse } from "axios";
-import { View, Text, Image, Button , TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { Router, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { logout } from '@/app/_utils/redux/userSlice';
+import Loader from '@/app/_components/Loader';
+
+import useApiAuth from '@/app/_hooks/useApiAuth';
+import { RequestType } from '@/app/_interfaces/RequestInterfaces';
+
+import { Color, Typography } from '@/app/_styles/global'
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 interface UserDetails {
     name: string,
@@ -12,174 +19,409 @@ interface UserDetails {
     password: string,
     profilePicture: string,
     dateJoined: string,
+    isTemporary: boolean,
 }
 
-export default function UserPage() {
-    const [userDetails, setUserDetails] = useState<UserDetails>({name: "Subaru", phoneNumber: "", email: "", password: "", profilePicture: "", dateJoined: ""});
+interface LinkInterface {
+    source: number,
+    title: string,
+    router: Router,
+    path: string
+}
+
+function LinkComponent({ source, title, router, path }: LinkInterface) {
+    return (
+        <View>
+            <TouchableOpacity style={linkStyles.container} onPress={() => { router.push(path); }}>
+                <View style={linkStyles.content}>
+                    <Image source={source} style={linkStyles.linkIcon} />
+                    <Text style={[Typography.body2, linkStyles.contentText]}>
+                        {title}
+                    </Text>
+                </View>
+                <Image source={require("../../../assets/images/profile/arrowRight.png")} style={linkStyles.arrowRight} />
+            </TouchableOpacity>
+            <View style={linkStyles.divider}></View>
+        </View>
+    )
+}
+
+interface ToggleInterface {
+    source: number,
+    title: string,
+    optionA: string,
+    optionB: string
+    selection: boolean,
+    toggle: (value: boolean) => void
+}
+
+function ToggleComponent({ source, title, optionA, optionB, selection, toggle }: ToggleInterface) {
+    return (
+        <View>
+            <View style={toggleStyles.container}>
+                <View style={linkStyles.content}>
+                    <Image source={source} style={linkStyles.linkIcon} />
+                    <Text style={[Typography.body2, linkStyles.contentText]}>
+                        {title}
+                    </Text>
+                </View>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={[styles.button, selection == false ? toggleStyles.selected : {}]} onPress={() => { toggle(false); }}>
+                        <Text style={[Typography.body2, selection == false ? toggleStyles.selectedText : {}]}>
+                            {optionA}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, selection == true ? toggleStyles.selected : {}]} onPress={() => { toggle(true); }}>
+                        <Text style={[Typography.body2, selection == true ? toggleStyles.selectedText : {}]}>
+                            {optionB}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View style={linkStyles.divider} />
+        </View>
+    )
+}
+
+// TODO: Edit image through the edit icon (using Expo Photo Library)
+//       Enable in-app notifications
+export default function Profile() {
+    const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
+    const [lang, setLanguage] = useState(false);
+    const [notif, setNotif] = useState(false);
+    const [user, sendRequest] = useApiAuth();
+
+    const dispatch = useDispatch();
     const router = useRouter();
 
-    const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const dispatchLogout = async () => {
+        await dispatch(logout());
+    }
 
     const fetchUserDetails = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${user.userId}`,
-            {
-                headers: {
-                      'Authorization': `Bearer ${user.authToken}`,
-                    },
-            }
-        );
-            const { data } = response.data;
+            const body = {};
+            const endpoint = "users/:id";
+            const requestType = RequestType.GET
+            const data = await sendRequest({ body, endpoint, requestType })
             setUserDetails(data);
         } catch (err) {
             console.log('Error catching event details from event id:', err);
             return err;
         }
     }
-    useFocusEffect (() => {
-        fetchUserDetails();
-    });
 
-    console.log(user.authToken);
+    useEffect(() => {
+        const patchUserDetails = async () => {
+            const body = {
+                preferredLanguage: lang ? "ES" : "EN"
+            };
+            const endpoint = "users/:id";
+            const requestType = RequestType.PATCH
+            const data = await sendRequest({ body, endpoint, requestType });
+            setUserDetails(data);
+        }
+        patchUserDetails();
+    }, [lang])
+
+    useFocusEffect(useCallback(() => {
+        fetchUserDetails();
+    }, []));
 
     const navigateTo = (route: string) => {
         if (userDetails) {
             const userDetailsString = JSON.stringify(userDetails);
             const encodedDetails = encodeURIComponent(userDetailsString);
-            router.push(`${route}?details=${encodedDetails}`);
+            router.push(`${route} ? details = ${encodedDetails}`);
         }
     };
 
+    if (userDetails && userDetails.isTemporary == true) {
+        return (
+            <SafeAreaView style={guestStyles.container}>
+                <View style={guestStyles.innerContainer}>
+                    <Image
+                        source={require("../../../assets/images/profile/signUp.png")}
+                        style={{ width: 220, height: 151 }}
+                    />
+                    <View style={guestStyles.innerContent}>
+                        <View>
+                            <Text style={[Typography.h3, guestStyles.orgText]}>
+                                UNITED WAY
+                            </Text>
+                            <Text style={[Typography.h3, guestStyles.contentText]}>
+                                SIGN UP TODAY TO GAIN ACCESS TO YOUR PROFILE
+                            </Text>
+                        </View>
+                        <Text style={[Typography.body2, guestStyles.bodyText]}>
+                            We noticed you haven’t made an account with us yet.
+                            Join us for easy rewards, event customization, profiles and
+                            more!
+                        </Text>
+                    </View>
+                </View>
+                <TouchableOpacity style={guestStyles.signUpButton} onPress={() => {
+                    router.push({
+                        pathname: "/(onboarding)/sign-up",
+                        params: { tempId: user.userId }
+                    });
+                }}>
+                    <Text style={[Typography.h3, guestStyles.signUpText]}>
+                        SIGN UP
+                    </Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        )
+    }
+
+    if (!userDetails) {
+        return <></>
+    }
+
     return (
-        <View style={styles.container}>
-            <View style={styles.curveContainer}>
-                <View style={styles.curve} />
+        <SafeAreaView style={styles.container}>
+            <View style={[styles.innerContainer, styles.centerAlignColumnContainer]}>
+                <Text style={[Typography.h3, styles.title]}>PROFILE</Text>
+                <View style={[styles.centerAlignColumnContainer, styles.innerContainerImages]}>
+                    <View style={[styles.imageContainer]}>
+                        <Image
+                            source={{ uri: userDetails.profilePicture }}
+                            style={styles.profilePicture}
+                        />
+                        <Image
+                            source={
+                                require("../../../assets/images/profile/editProfilePicture.png")
+                            }
+                            style={styles.editProfilePicture}
+                        />
+                    </View>
+                    <View style={[styles.innerContainerDetails, styles.centerAlignColumnContainer]}>
+                        <Text style={[Typography.h3, styles.name]}>{userDetails.name}</Text>
+                        <View style={[styles.centerAlignColumnContainer]}>
+                            <Text style={styles.header1}>{"Member since"}</Text>
+                            <Text style={styles.header2}>{userDetails.dateJoined.split('T')[0]}</Text>
+                        </View>
+                    </View>
+                </View>
             </View>
-            <Text style={styles.title}>Profile</Text>
-            <Image
-                source={{uri: userDetails.profilePicture}}
-                style={styles.profilePicture}
-            />
-            <Text style={styles.title}>{userDetails.name}</Text>
-            <Text style={styles.header1}>{"Member since"}</Text>
-            <Text style={styles.header2}>{userDetails.dateJoined.split('T')[0]}</Text>
-            <View style={styles.gridContainer}>
-                {/* My Account Block */}
-                <TouchableOpacity
-                    style={styles.block}
-                    onPress={() => navigateTo('/profile/editing')}
-                >
-                    <Image source={{uri: "https://static.thenounproject.com/png/4188546-200.png" }} style={styles.icon} />
-                    <Text style={styles.blockText}>My Account</Text>
-                    <Text style={styles.blockHeading}>Lets Personalize!</Text>
-                </TouchableOpacity>
-
-                {/* English or Español Block */}
-                <TouchableOpacity
-                    style={styles.block}
-                    onPress={() => console.log('Language selection pressed')}
-                >
-                    <Image source={{uri: "https://cdn-icons-png.flaticon.com/512/546/546310.png" }} style={styles.icon} />
-                    <Text style={styles.blockText}>Language</Text>
-                    <Text style={styles.blockHeading}>English or Espanol</Text>
-                </TouchableOpacity>
-
-                {/* Passport Block */}
-                <TouchableOpacity
-                    style={styles.block}
-                >
-                    <Image source={{uri: "https://cdn-icons-png.flaticon.com/512/3596/3596115.png" }} style={styles.icon} />
-                    <Text style={styles.blockText}>Privacy</Text>
-                    <Text style={styles.blockHeading}>Protect your information!</Text>
-                </TouchableOpacity>
-
-                {/* Passport Block (Duplicate) */}
-                <TouchableOpacity
-                    style={styles.block}
-                    onPress={() => navigateTo('/profile/passport')}
-                >
-                    <Image source={{uri: "https://static.thenounproject.com/png/1689194-200.png" }} style={styles.icon} />
-                    <Text style={styles.blockText}>Passport</Text>
-                    <Text style={styles.blockHeading}>See your past events!</Text>
-                </TouchableOpacity>
+            <View style={styles.linkContainer}>
+                <LinkComponent source={require("../../../assets/images/profile/myAccount.png")} title="My account" router={router} path="/profile/account" />
+                <ToggleComponent source={require("../../../assets/images/profile/language.png")} title="Language" optionA="EN" optionB="ES" selection={lang} toggle={setLanguage} />
+                <LinkComponent source={require("../../../assets/images/profile/passport.png")} title="Passport" router={router} path="/profile/passport" />
+                <LinkComponent source={require("../../../assets/images/profile/contact.png")} title="Contact us" router={router} path="/profile/contact" />
+                <ToggleComponent source={require("../../../assets/images/profile/notifications.png")} title="Notifications" optionA="OFF" optionB="ON" selection={notif} toggle={setNotif} />
             </View>
-        </View>
+            <TouchableOpacity style={styles.logout} onPress={() => { dispatchLogout(); router.push("/(onboarding)") }}>
+                <Text style={[Typography.button, styles.logoutText]}>
+                    Log out
+                </Text>
+            </TouchableOpacity>
+        </SafeAreaView>
     );
 }
 
+const guestStyles = StyleSheet.create({
+    container: {
+        paddingHorizontal: 24,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        rowGap: 40,
+        backgroundColor: Color.uwLightBlue
+    },
+    innerContainer: {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        rowGap: 64
+    },
+    innerContent: {
+        width: "100%"
+    },
+    orgText: {
+        fontSize: 16,
+        color: Color.uwDarkBlue
+    },
+    contentText: {
+        color: Color.uwDarkBlue,
+        lineHeight: 45,
+        paddingVertical: 10
+    },
+    bodyText: {
+        color: "#10167F",
+        opacity: 0.6
+    },
+    signUpButton: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: Color.uwDarkBlue,
+        borderRadius: 100,
+        width: "100%",
+        padding: 14
+    },
+    signUpText: {
+        color: "#FFFFFF",
+        fontSize: 24
+    }
+});
+
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        padding: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#A9A9A9',
+        backgroundColor: "#FFFFFF",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        rowGap: 36
     },
-    curveContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 510, // Height of the curved section
-        overflow: 'hidden', // Ensures the curve doesn't overflow
+    linkContainer: {
+        width: "100%",
+        paddingHorizontal: 24,
     },
-    curve: {
-        backgroundColor: '#FFFFFF', // Grey color for the curve
-        height: 600, // Double the height to create a smooth curve
-        borderRadius: 300, // Half of the height to create a circular curve
-        transform: [{ scaleX: 2 }], // Stretch horizontally to create a smooth curve
+    innerContainer: {
+        rowGap: 24,
+    },
+    innerContainerImages: {
+        rowGap: 12
+    },
+    innerContainerDetails: {
+        rowGap: 8
+    },
+    centerAlignColumnContainer: {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    imageContainer: {
+        position: "relative"
     },
     profilePicture: {
-        width: 150, // Size of the profile picture
-        height: 150, // Size of the profile picture
-        borderRadius: 75, // Half of the width/height to make it circular
-        marginBottom: 1, // Spacing below the profile picture
-        borderWidth: 3, // Optional: Add a border
-        borderColor: '#000000', // Optional: Border color
+        height: 136,
+        width: 136,
+        borderRadius: 68
+    },
+    editProfilePicture: {
+        height: 37,
+        width: 37,
+        position: "absolute",
+        right: 0,
+        bottom: 0
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 1,
+        fontSize: 40,
+        color: Color.uwDarkBlue
+    },
+    name: {
+        fontSize: 32,
+        textTransform: "uppercase",
+        color: Color.uwDarkBlue
     },
     header1: {
-        fontSize: 12,
-        marginBottom: 1,
+        fontSize: 16,
+        color: Color.uwDarkBlue,
+        opacity: .6
     },
     header2: {
-        fontSize: 12,
-        marginBottom: 10,
+        fontSize: 16,
+        color: Color.uwDarkBlue,
     },
     icon: {
-        width: 50, // Adjust the size of the icon as needed
-        height: 50, // Adjust the size of the icon as needed
-        marginBottom: 10, // Spacing between the icon and the text
-    },
-    gridContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        width: '100%',
-    },
-    block: {
-        width: '48%', // Each block takes up 48% of the container width
-        aspectRatio: 1, // Makes the blocks square
-        marginBottom: 10, // Adds spacing between rows
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#A9A9A9', // Background color for the block
-        borderRadius: 10, // Rounded corners
-        padding: 10, // Padding inside the block
-    },
-    blockText: {
-        color: '#000000', // Text color
-        fontSize: 16,
-        fontWeight: 'bold',
-        textAlign: 'center',
     },
     blockHeading: {
         color: '#000000', // Text color
         fontSize: 10,
         textAlign: 'center',
     },
+    logout: {
+        paddingVertical: 14,
+        paddingHorizontal: 24,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "rgba(16, 22, 127, 0.4)",
+    },
+    logoutText: {
+        color: Color.uwDarkBlue
+    },
+    buttonContainer: {
+        display: "flex",
+        flexDirection: "row",
+        columnGap: 2,
+    },
+    button: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 3
+    }
 });
+
+const linkStyles = StyleSheet.create({
+    container: {
+        display: "flex",
+        flexDirection: "row",
+        width: "100%",
+        justifyContent: "space-between",
+        alignItems: "center",
+        height: 44
+    },
+    content: {
+        display: "flex",
+        flexDirection: "row",
+        columnGap: 12,
+        alignItems: "center"
+    },
+    contentText: {
+        color: Color.uwDarkBlue,
+        opacity: 0.6
+    },
+    divider: {
+        backgroundColor: Color.uwDarkBlue,
+        opacity: 0.1,
+        height: 1,
+        width: "100%"
+    },
+    linkIcon: {
+        width: 24,
+        height: 24
+    },
+    arrowRight: {
+        width: 16,
+        height: 16
+    }
+})
+
+const toggleStyles = StyleSheet.create({
+    container: {
+        display: "flex",
+        flexDirection: "row",
+        width: "100%",
+        justifyContent: "space-between",
+        alignItems: "center",
+        height: 44
+    },
+    contentContainer: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        columnGap: 12,
+    },
+    contentText: {
+        color: Color.uwDarkBlue,
+        opacity: 0.6
+    },
+    buttonContainer: {
+        width: 43,
+        height: 27
+    },
+    selected: {
+        backgroundColor: Color.uwDarkBlue,
+    },
+    selectedText: {
+        color: "#FFFFFF"
+    }
+})

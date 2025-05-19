@@ -1,15 +1,16 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import styles from '../_styles/NavBar.module.css';
 import Image from 'next/image'
+
+import "../_styles/NavBar.css"
 
 export default function NavigationBar() {
     const router = useRouter();
 
     return (
-        <div className={styles.body}>
-            <div className={styles.leftContainer}>
-                <div className={styles.logoContainer}>
+        <div className="body">
+            <div className="leftContainer">
+                <div className="logoContainer">
                     <Image
                         src="/uwlogo.svg"
                         width={149}
@@ -17,14 +18,14 @@ export default function NavigationBar() {
                         alt="UW Logo"
                     />
                 </div>
-                <div className={styles.tabContainer}>
-                    <button className={styles.tabHeader} onClick={() => { router.push('/landing'); }}>Home</button>
-                    <button className={styles.tabHeader} onClick={() => { router.push('/events'); }}>Events</button>
-                    <button className={styles.tabHeader} onClick={() => { router.push('/rewards'); }}>Rewards</button>
+                <div className="tabContainer">
+                    <button className="tabHeader" onClick={() => { router.push('/landing'); }}>Home</button>
+                    <button className="tabHeader" onClick={() => { router.push('/events'); }}>Events</button>
+                    <button className="tabHeader" onClick={() => { router.push('/rewards'); }}>Rewards</button>
                 </div>
             </div>
-            <div className={styles.rightContainer}>
-                <button className={styles.tabHeader} onClick={() => { router.push('/profile'); }}> 
+            <div className="rightContainer">
+                <button className="tabHeader" onClick={() => { router.push('/profile'); }}>
                     <Image
                         src="/profilelogo.svg"
                         width={32}
@@ -32,7 +33,7 @@ export default function NavigationBar() {
                         alt="UW Logo"
                     />
                 </button>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }
