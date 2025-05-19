@@ -2,9 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  reactStrictMode: false,
   env: {
-    IP_ADDRESS: "172.26.238.156",
-    PORT: "4000",
+    IP_ADDRESS: "",
+    PORT: "",
   },
 };
 
