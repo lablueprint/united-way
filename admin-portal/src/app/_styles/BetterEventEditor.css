@@ -119,6 +119,7 @@
 }
 
 .draft-indicator-text {
+    align-items: center;
     color: #595959;
     display: flex;
     font-family: "Helvetica";
@@ -132,9 +133,11 @@
 }
 
 .save-button {
-    background-color: #e7e8f3;
-    border-radius: 1rem;
-    color: #171885;
+    background-color:rgb(255, 255, 255) !important;
+    border-color: #6c70b0 !important;
+    border-style: solid;
+    border-radius: 4.75rem;
+    color: #171885 !important;
     cursor: pointer;
     display: flex;
     font-family: "Helvetica";
@@ -144,8 +147,9 @@
 }
 
 .publish-button {
+    align-items: center;
     background-color: #171885;
-    border-radius: 1rem;
+    border-radius: 4.75rem;
     color: #e7e8f3;
     cursor: pointer;
     display: flex;
@@ -225,7 +229,7 @@
 .tags-parent {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .tags-container {
@@ -354,12 +358,22 @@
     color:rgb(117, 117, 117);
 }
 
-.organization-card-parent {
+.organization-attendees-grandparent {
     align-items: center;
     border-radius: 1rem;
     display: flex;
     gap: 0.5rem;
+    justify-content: space-between;
     padding: 0.4rem 0.6rem 0rem 0.6rem;
+}
+
+.org-box-parent {
+    align-text: center;
+    align-items: center;
+    display: flex;
+    gap: 0.625rem;
+    padding: 0.3rem;
+    width: 48%;
 }
 
 .org-logo {
@@ -384,31 +398,124 @@
     text-decoration: underline;
 }
 
-.time-card-parent {
-    align-items: center;
+.attendees-parent {
     align-text: center;
+    align-items: center;
     background-color: #f5f6fa;
     border-radius: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    width: 48%;
+}
+
+.attendees-image-and-title {
+    display: flex;
+    gap: 0.65rem;
+}
+
+.attendees-image {
+    align-self: "stretch";
+    align-items: center;
+    display: flex;
+    object-fit: "contain";
+}
+
+.attendees-box-title {
     color: #171885;
+    display: flex;
+    font-family: "Barlow";
+    font-size: 1.25rem;
+    font-weight: italics;
+    font-weight: 600;
+}
+
+.attendees-counter {
+    align-items: center;
+    display: flex;
+    gap: 0.625rem;
+    padding: 0rem 2rem 0rem 2rem;
+}
+
+.attendees-plus-minus {
+    color: #6c70b0;
+    cursor: pointer;
+    display: flex;
+    font-family: "Barlow";
+    font-size: 1.25rem;
+    font-weight: italics;
+    font-weight: 600;
+}
+
+.attendees-count {
+    color: #b1b3d5;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.date-time-grandparent {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+}
+
+.date-box-parent {
+    align-text: center;
+    align-items: center;
+    background-color: #f5f6fa;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    width: 48%;
+}
+
+.date-image-and-title {
+    display: flex;
+    gap: 0.65rem;
+}
+
+.calendar-image {
+    align-self: "stretch";
+    align-items: center;
+    display: flex;
+    object-fit: "contain";
+}
+
+.date-box-title {
+    color: #171885;
+    display: flex;
+    font-family: "Barlow";
+    font-size: 1.25rem;
+    font-weight: italics;
+    font-weight: 600;
+}
+
+.date-box-vertical-bar {
+    background-color: #9ea2cc;
+    align-self: center;
+    display: flex;
+    height: 0.625rem;
+    margin-top: 0.2rem;
+    width: 0.1rem;
+}
+
+.date-box-date-and-down {
+    align-items: center;
+    align-text: center;
+    display: flex;
+    gap: 0.625rem;
+}
+
+.date-box-empty-date {
+    color: #9ea2cc;
     display: flex;
     font-family: "Helvetica";
     font-size: 1rem;
     font-weight: 400;
-    gap: 0.625rem;
-    padding: 0.625rem 0.625rem 0.625rem 0.625rem;
-}
-
-.event-date {
-    cursor: pointer;
-}
-
-.start-end-time {
-    cursor: pointer;
-    margin-left: 1rem;
-}
-
-.timezone {
-    cursor: pointer;
 }
 
 .down_arrow {
@@ -418,6 +525,54 @@
     object-fit: "contain";
     padding-bottom: 0.5rem;
     padding-top: 0.5rem;
+}
+
+.time-box-parent {
+    align-text: center;
+    align-items: center;
+    background-color: #f5f6fa;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    width: 48%;
+}
+
+.time-image-and-title {
+    display: flex;
+    gap: 0.65rem;
+}
+
+.clock-image {
+    align-self: "stretch";
+    align-items: center;
+    display: flex;
+    object-fit: "contain";
+}
+
+.time-box-title {
+    color: #171885;
+    display: flex;
+    font-family: "Barlow";
+    font-size: 1.25rem;
+    font-weight: italics;
+    font-weight: 600;
+}
+
+.time-box-time-and-down {
+    align-items: center;
+    align-text: center;
+    display: flex;
+    gap: 0.625rem;
+}
+
+.time-box-empty-time {
+    color: #9ea2cc;
+    display: flex;
+    font-family: "Helvetica";
+    font-size: 1rem;
+    font-weight: 400;
 }
 
 .description-location-attendees {

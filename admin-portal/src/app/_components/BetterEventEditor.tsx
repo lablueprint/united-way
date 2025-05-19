@@ -7,7 +7,7 @@ import { RootState } from '../_interfaces/AuthInterfaces';
 import { LocationProps, EventTags, EventData } from "../_interfaces/EventInterfaces";
 import Image from 'next/image'
 import AddTagsModal from "./AddTagsModal";
-import { add_photo, down_arrow, draft, hero, right_arrow } from '../../../public/BetterEventEditor/BetterEventEditor-index'
+import { add_photo, down_arrow, calendar, clock, draft, hero, person, right_arrow } from '../../../public/BetterEventEditor/BetterEventEditor-index'
 import '../_styles/BetterEventEditor.css';
 
 interface EventEditorProps {
@@ -150,8 +150,8 @@ export default function BetterEventEditor() {
                         <div className="draft-indicator-text">DRAFT</div>
                     </div>
                     <div className="save-publish-parent">
-                        <div className="save-button">Save</div>
-                        <div className="publish-button">Publish</div>
+                        <div className="save-button">SAVE</div>
+                        <div className="publish-button">PUBLISH</div>
                     </div>
                 </div>
 
@@ -229,23 +229,56 @@ export default function BetterEventEditor() {
                                     <div className="event-title-editor-card">{eventTitle.length == 0 ? (<div className="event-title-editor-card-empty">TITLE</div>) : eventTitle}</div>
                                 }
                             </div>
-                            <div className="organization-card-parent">
-                                <div className="org-logo"><Image src={hero} alt="Hero Icon" width={28} height={28} /></div>
-                                <div className="org-info">
-                                    Hosted by
-                                    <div className="org-name">United Way</div>
+                            <div className="organization-attendees-grandparent">
+                                <div className="org-box-parent">
+                                    <div className="org-logo"><Image src={hero} alt="Hero Icon" width={28} height={28} /></div>
+                                    <div className="org-info">
+                                        Hosted by
+                                        <div className="org-name">United Way</div>
+                                    </div>
+                                </div>
+                                <div className="attendees-parent">
+                                    <div className="attendees-image-and-title">
+                                        <div className="attendees-image"><Image src={person} alt="Attendees Icon" width={15} height={17} /></div>
+                                        <div className="attendees-box-title">MAX ATTENDEES</div>
+                                        <div className="date-box-vertical-bar"/>
+                                    </div>
+                                    <div className="attendees-counter">
+                                        <div className="attendees-plus-minus">–</div>
+                                        <div className="attendees-count">0</div>
+                                        <div className="attendees-plus-minus">+</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="time-card-parent">
-                            <div className="event-date">Wed, January 22 </div>
-                            <div className="start-end-time">
-                                0:00 – 0:00
+
+                        <div className="date-time-grandparent">
+                            <div className="date-box-parent">
+                                <div className="date-image-and-title">
+                                    <div className="calendar-image"><Image src={calendar} alt="Calendar Icon" width={15} height={17} /></div>
+                                    <div className="date-box-title">DATE</div>
+                                    <div className="date-box-vertical-bar"/>
+                                </div>
+                                <div className="date-box-date-and-down">
+                                    {/* TODO: EMPTY vs POPULATED DATE */}
+                                    <div className="date-box-empty-date">--/--/----</div>
+                                    <div className="down_arrow"><Image src={down_arrow} alt="Down Arrow Icon" width={15} height={15} /></div>
+                                </div>
                             </div>
-                            <div>•</div>
-                            <div className="timezone">PT</div>
-                            <div className="down_arrow"><Image src={down_arrow} alt="Down Arrow Icon" width={10} height={10} /></div>
+                            <div className="time-box-parent">
+                                <div className="time-image-and-title">
+                                    <div className="clock-image"><Image src={clock} alt="Clock Icon" width={15} height={17} /></div>
+                                    <div className="time-box-title">TIME</div>
+                                    <div className="date-box-vertical-bar"/>
+                                </div>
+                                <div className="time-box-time-and-down">
+                                    {/* TODO: EMPTY vs POPULATED TIME */}
+                                    <div className="time-box-empty-time">0:00 - 0:00PM</div>
+                                    <div className="down_arrow"><Image src={down_arrow} alt="Down Arrow Icon" width={15} height={15} /></div>
+                                </div>
+                            </div>
                         </div>
+
                         <div className="description-location-attendees">
                             <div className="description-parent">
                                 <div className="description-title">DESCRIPTION</div>
