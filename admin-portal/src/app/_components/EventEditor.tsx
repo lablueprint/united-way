@@ -329,14 +329,10 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                         // If event just created, delete the event
                         // NOTE: This is not async, might cause problems later
                         if (justCreated) {
-                            try {
-                                const requestType: RequestType = RequestType.DELETE;
-                                const body = {};
-                                const endpoint = `events/${eventId}`;
-                                await sendRequest({ requestType, body, endpoint });
-                            } catch (err) {
-                                console.log(err);
-                            }
+                            const requestType: RequestType = RequestType.DELETE;
+                            const body = {};
+                            const endpoint = `events/${eventId}`;
+                            await sendRequest({ requestType, body, endpoint });
                         }
                         router.push('/events');
                     }}>

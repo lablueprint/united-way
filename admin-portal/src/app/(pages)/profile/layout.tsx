@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import React, { useEffect, useState } from 'react';
 import { login } from '../../_utils/redux/orgSlice';
+import Header from '@/app/_components/Header';
 
 export default function PagesLayout({
     children,
@@ -35,7 +36,10 @@ export default function PagesLayout({
 
     return (
         <div>
-            {signedIn ? children : <></>}
+            <Header />
+            {signedIn ?
+                children
+                : <></>}
         </div>
     );
 }
