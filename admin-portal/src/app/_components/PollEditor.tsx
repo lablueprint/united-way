@@ -1,5 +1,14 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { RootState } from "../_interfaces/AuthInterfaces";
+import "../_styles/PollEditor.css";
+import Image from 'next/image';
+import TrashCanIcon from "../_styles/_images/trashcan.svg";
+import MoveIcon from "../_styles/_images/move.svg";
+import Draft from "../_styles/_images/draft.svg";
+import StarIcon from "../_styles/_images/star.svg";
+import DatePicker from './DatePicker';
+import TimePicker from './TimePicker';
 
 import useApiAuth from "../_hooks/useApiAuth";
 import { RequestType } from "../_interfaces/RequestInterfaces";
@@ -15,179 +24,311 @@ interface Question {
   options: Choice[];
 }
 
+interface PollContent {
+  title: string;
+  questions: Question[];
+  pointValue: number;
+}
+
 interface PollEditorProps {
   activityId: string;
   timeStart: Date;
   timeEnd: Date;
+  isDraft: boolean;
+  onDelete?: () => void;
+  updateTime: (newStart: Date, newEnd: Date) => Promise<void>;
 }
 
-export default function PollEditor({ activityId, timeStart, timeEnd }: PollEditorProps) {
+export default function PollEditor({
+  activityId,
+  timeStart,
+  timeEnd,
+  isDraft,
+  onDelete,
+  updateTime,
+}: PollEditorProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [questionIndex, setQuestionIndex] = useState<number>(0);
-  const [questionText, setQuestionText] = useState<string>("");
-  const [choices, setChoices] = useState<Choice[]>([]);
+  const [pageTitle, setPageTitle] = useState("");
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [pointValue, setPointValue] = useState(0);
+
   const [org, sendRequest] = useApiAuth();
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      const activityData = await getActivityById(activityId);
-      setQuestions(activityData.content);
-
-      if (!activityData.content || activityData.content.length === 0) {
-        setQuestionText("New Poll Question");
-        setChoices([{ id: 1, text: "", count: 0 }]);
-        setQuestionIndex(0);
+    (async () => {
+      const data = await getActivityById(activityId);
+      if (data.content) {
+        setQuestions(data.content.questions || []);
+        setPageTitle(data.content.title || "Untitled Page");
+        setPointValue(data.content.pointValue || 0);
       } else {
-        const firstQuestion = activityData.content[0];
-        setQuestionText(firstQuestion.question);
-        setChoices(firstQuestion.options);
-        setQuestionIndex(0);
+        setQuestions([
+          {
+            question: "New Poll Question",
+            options: [{ id: 1, text: "Choice 1", count: 0 }],
+          },
+        ]);
+        setPageTitle("Untitled Page");
+        setPointValue(1);
       }
-    };
-    fetchQuestions();
+    })();
   }, [activityId]);
 
-  const getActivityById = async (activityId: string) => {
+  const handleSave = async () => {
     try {
-      const body = {};
-      const requestType = RequestType.GET;
+      const updatedContent: PollContent = {
+        title: pageTitle,
+        questions: questions,
+        pointValue
+      };
+
+      const requestType = RequestType.PATCH;
       const endpoint = `activities/${activityId}`;
-      return await sendRequest({ body, requestType, endpoint });
-    } catch (err) {
-      console.error(err);
+      const body = {
+        content: updatedContent,
+        timeStart,
+        timeEnd,
+      };
+      await sendRequest({ requestType, endpoint, body })
+    } catch (e) {
+      console.error("Failed to patch activity:", e);
+      alert("Failed to save poll.");
+    }
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    setQuestions(prev => {
+      const newQuestions = [...prev];
+      const [draggedQuestion] = newQuestions.splice(draggedIndex, 1);
+      newQuestions.splice(index, 0, draggedQuestion);
+      return newQuestions;
+    });
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const getActivityById = async (id: string) => {
+    try {
+      const requestType = RequestType.GET;
+      const endpoint = `activities/${id}`;
+      const body = {}
+      const data = await sendRequest({ requestType, endpoint, body });
+      return data;
+    } catch {
       return { content: [] };
     }
   };
 
-  const savePoll = async (updatedQuestions: Question[]) => {
-    try {
-      const body = {
-        content: updatedQuestions,
-        timeStart,
-        timeEnd,
-      };
-      const requestType = RequestType.PATCH;
-      const endpoint = `activities/${activityId}`;
-      const data = await sendRequest({ body, requestType, endpoint });
-      setQuestions(data.content);
-      return data;
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const updateQuestionText = (qIdx: number, text: string) =>
+    setQuestions((prev) =>
+      prev.map((q, i) => (i === qIdx ? { ...q, question: text } : q))
+    );
 
-  const addQuestion = async () => {
-    const newQuestion: Question = {
-      question: "New Poll Question",
-      options: [{ id: 1, text: "", count: 0 }],
-    };
-    const updatedQuestions = [...questions, newQuestion];
-    const data = await savePoll(updatedQuestions);
-    const idx = data.content.length - 1;
-    setQuestionIndex(idx);
-    setQuestionText(data.content[idx].question);
-    setChoices(data.content[idx].options);
-  };
+  const deleteQuestion = (qIdx: number) =>
+    setQuestions((prev) => prev.filter((_, i) => i !== qIdx));
 
-  const deleteQuestion = async (index: number) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions.splice(index, 1);
-    const data = await savePoll(updatedQuestions);
-    const nextIndex = updatedQuestions.length - 1 < index ? updatedQuestions.length - 1 : index;
-    if (data.content.length > 0) {
-      setQuestionIndex(nextIndex);
-      setQuestionText(data.content[nextIndex].question);
-      setChoices(data.content[nextIndex].options);
-    } else {
-      setQuestionText("New Poll Question");
-      setChoices([{ id: 1, text: "", count: 0 }]);
-    }
-  };
+  const addQuestion = () =>
+    setQuestions((prev) => [
+      ...prev,
+      {
+        question: "New Poll Question",
+        options: [{ id: 1, text: "Choice 1", count: 0 }],
+      },
+    ]);
 
-  const handleUpdateQuestionText = async (text: string) => {
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].question = text;
-    setQuestionText(text);
-    await savePoll(newQuestions);
-  };
+  const updateChoiceText = (qIdx: number, cIdx: number, text: string) =>
+    setQuestions((prev) =>
+      prev.map((q, i) =>
+        i !== qIdx
+          ? q
+          : {
+            ...q,
+            options: q.options.map((c, j) =>
+              j !== cIdx ? c : { ...c, text }
+            ),
+          }
+      )
+    );
 
-  const handleUpdateChoice = async (choiceIndex: number, value: string) => {
-    const newChoices = [...choices];
-    newChoices[choiceIndex].text = value;
-    setChoices(newChoices);
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].options = newChoices;
-    await savePoll(newQuestions);
-  };
+  const deleteChoice = (qIdx: number, cIdx: number) =>
+    setQuestions((prev) =>
+      prev.map((q, i) =>
+        i !== qIdx
+          ? q
+          : { ...q, options: q.options.filter((_, j) => j !== cIdx) }
+      )
+    );
 
-  const handleAddChoice = async () => {
-    const newChoice: Choice = {
-      id: choices.length ? Math.max(...choices.map((c) => c.id)) + 1 : 1,
-      text: "",
-      count: 0,
-    };
-    const newChoices = [...choices, newChoice];
-    setChoices(newChoices);
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].options = newChoices;
-    await savePoll(newQuestions);
-  };
+  const addChoice = (qIdx: number) =>
+    setQuestions((prev) =>
+      prev.map((q, i) =>
+        i !== qIdx
+          ? q
+          : {
+            ...q,
+            options: [
+              ...q.options,
+              {
+                id: q.options.length
+                  ? Math.max(...q.options.map((c) => c.id)) + 1
+                  : 1,
+                text: `Choice ${q.options.length + 1}`,
+                count: 0,
+              },
+            ],
+          }
+      )
+    );
 
-  const handleDeleteChoice = async (choiceIndex: number) => {
-    const newChoices = [...choices];
-    newChoices.splice(choiceIndex, 1);
-    setChoices(newChoices);
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].options = newChoices;
-    await savePoll(newQuestions);
-  };
-
-  if (questions.length === 0) return <div />;
+  if (!questions.length) return null;
 
   return (
-    <div>
-      {questions.map((_, index) => (
-        <button
-          type="button"
-          key={`nav-${index}`}
-          onClick={() => {
-            setQuestionIndex(index);
-            setQuestionText(questions[index].question);
-            setChoices(questions[index].options);
-          }}
-        >
-          {index + 1}
-        </button>
-      ))}
-
-      <div>
-        <label>
-          Question:
-          <input
-            type="text"
-            value={questionText}
-            onChange={(e) => handleUpdateQuestionText(e.target.value)}
-          />
-        </label>
+    <div className="pollEditor">
+      <div className="pollEditorHeader">
+        <h1 className="pollEditorHeaderTitle">POLLS</h1>
+        <h2 className="pollEditorHeaderSubtitle">
+          View current, published, past, and event drafts.
+        </h2>
       </div>
 
-      {choices.map((choice, i) => (
-        <div key={`choice-${i}`}>
-          <input
-            type="text"
-            value={choice.text}
-            onChange={(e) => handleUpdateChoice(i, e.target.value)}
-          />
-          <button type="button" onClick={() => handleDeleteChoice(i)}>
-            Remove choice
+      <div className="draftSavePublishBox">
+        <div className="draftButton">
+          <Image src={Draft} alt="Draft status" />
+          <span>{isDraft ? "Draft" : "Published"}</span>
+        </div>
+        <div className="savePublishBox">
+          {onDelete && (
+            <button className="deletePollButton" onClick={onDelete}>
+              Cancel
+            </button>
+          )}
+          <button className="savePollButton" onClick={handleSave}>
+            Save
           </button>
         </div>
-      ))}
+      </div>
 
-      <button type="button" onClick={handleAddChoice}>Add Choice</button>
+      <div className="questionBox">
+        <input
+          className="pollTitle"
+          type="text"
+          value={pageTitle}
+          onChange={(e) => setPageTitle(e.target.value)}
+        />
 
-      <button type="button" onClick={addQuestion}>Add Question</button>
-      <button type="button" onClick={() => deleteQuestion(questionIndex)}>Delete Question</button>
+        <div className="pollControls">
+          <DatePicker
+            start={timeStart}
+            end={timeEnd}
+            onChange={({ newStart, newEnd }) => updateTime(newStart, newEnd)}
+            label="SCHEDULE START DATE"
+          />
+
+          <TimePicker
+            start={timeStart}
+            end={timeEnd}
+            onChange={({ newStart, newEnd }) => updateTime(newStart, newEnd)}
+            label="SCHEDULE TIME"
+          />
+
+          <div className="controlGroup">
+            <Image src={StarIcon} alt="Star" width={24} height={24} />
+            <label>POINT VALUE</label>
+            <div className="pointValueControl">
+              <button
+                onClick={() => setPointValue(prev => Math.max(0, prev - 1))}
+                disabled={pointValue <= 0}
+              >
+                −
+              </button>
+              <span className="pointValueDisplay">{pointValue}</span>
+              <button onClick={() => setPointValue(prev => prev + 1)}>
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="questionList">
+          {questions.map((q, qIdx) => (
+            <div
+              key={qIdx}
+              className="questionPanel"
+              onDragOver={(e) => handleDragOver(e, qIdx)}
+            >
+              <div className="questionHeader">
+                <label className="questionLabel">Question {qIdx + 1}:</label>
+                <input
+                  className="questionInput"
+                  type="text"
+                  value={q.question}
+                  onChange={(e) => updateQuestionText(qIdx, e.target.value)}
+                />
+                <div className="questionToolbar">
+                  <button onClick={() => deleteQuestion(qIdx)}>
+                    <Image src={TrashCanIcon} alt="Delete" />
+                  </button>
+                  <div
+                    className="dragHandle"
+                    draggable
+                    onDragStart={() => handleDragStart(qIdx)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <Image src={MoveIcon} alt="Move" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="optionList">
+                {q.options.map((choice, cIdx) => (
+                  <div key={cIdx} className="optionRow">
+                    <input type="radio" disabled />
+                    <input
+                      className="optionInput"
+                      type="text"
+                      value={choice.text}
+                      onChange={(e) =>
+                        updateChoiceText(qIdx, cIdx, e.target.value)
+                      }
+                    />
+                    <button
+                      className="removeOptionButton"
+                      onClick={() => deleteChoice(qIdx, cIdx)}
+                    >
+                      ✖️
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  className="addOptionButton optionRow"
+                  type="button"
+                  onClick={() => addChoice(qIdx)}
+                >
+                  <input type="radio" disabled />
+                  <span className="optionText">Add Another Choice</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="questionActions">
+        <button className="addQuestionButton" type="button" onClick={addQuestion}>
+          + Add Another Question
+        </button>
+      </div>
     </div>
   );
 }
