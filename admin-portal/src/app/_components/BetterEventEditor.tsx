@@ -62,6 +62,9 @@ export default function BetterEventEditor({ eventId }: EventEditorProps): React.
             setLatitude(eventData.location.coordinates[0]);
             setLongitude(eventData.location.coordinates[1]);
             setTags(eventData.tags);
+            setImage(eventData.imageURL);
+            // TODO: Fix userCount PATCH
+            setEventAttendeesCount(eventData.userCount ?? 0);
         })();
     }, []);
 
@@ -146,7 +149,8 @@ export default function BetterEventEditor({ eventId }: EventEditorProps): React.
                         tags: selectedTags,
                         registeredUsers: [], // Hardcoded for now
                         activity: [], // Hardcoded for now
-                        image: "placeholder" // Hardcoded for now
+                        imageURL: image,
+                        userCount: eventAttendeesCount,
                     },
                     {
                         headers: {

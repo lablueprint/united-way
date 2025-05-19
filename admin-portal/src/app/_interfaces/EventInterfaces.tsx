@@ -47,6 +47,8 @@ export interface EventData {
     };
     organizerId: string;
     tags: string[];
+    imageUrl: string;
+    userCount: number;
     registeredUsers: string[];
     activities: Activity[];
 }

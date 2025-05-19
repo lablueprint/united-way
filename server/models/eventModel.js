@@ -63,6 +63,9 @@ const eventSchema = new mongoose.Schema({
   imageURL: {
     type: String,
   },
+  userCount: {
+    type: Number,
+  },
   key: {
     type: String,
   }
