@@ -1,6 +1,7 @@
 "use client"
 import React from 'react';
 import NavigationBar from '../_components/NavBar';
+import Footer from '../_components/Footer';
 
 export default function PagesLayout({
     children,
@@ -10,8 +11,9 @@ export default function PagesLayout({
 
     return (
         <div>
-            <NavigationBar></NavigationBar>
+            <NavigationBar />
             {children}
+            <Footer />
         </div>
     );
 }

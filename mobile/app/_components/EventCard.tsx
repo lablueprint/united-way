@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, ImageBackground } from 'react-native'
 
 interface EventCardProps {
   title: string;
@@ -9,15 +9,23 @@ interface EventCardProps {
 const EventCard = ({ title, date }: EventCardProps) => {
   return (
     <View style={styles.card}>
+         <ImageBackground
+        source={require('../../assets/images/eventCard/bg1.png')} // Use PNG or JPG. SVGs are tricky (see below)
+        style={styles.topCard}
+        imageStyle={styles.imageStyle}
+      >
         <View style = {styles.topCard}>
             <View style={styles.textContainer}>
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.date}>{date}</Text>
             </View>
         </View>
+      </ImageBackground>
+        
         <View style = {styles.bottomCard}>
         <View style={styles.bottomContent}>
-          <View style={styles.circle} />
+          <View/>
+          <ImageBackground imageStyle={{ borderRadius: 30 }} source={require('../../assets/images/eventCard/uw_colored_logo.png')} style={styles.circle} ></ImageBackground>
           <Text style={styles.uwtext}>UNITED WAY OF GREATER LOS ANGELES</Text>
         </View>
         </View>
@@ -83,7 +91,9 @@ const styles = StyleSheet.create({
     },
     topCard: {
       height: 156,
-      backgroundColor: '#FFA500',
+      backgroundImage: 'url(../../assets/images/eventCard/bg1.svg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
       borderTopLeftRadius: 8,
       borderTopRightRadius: 8,
     },
@@ -104,12 +114,19 @@ const styles = StyleSheet.create({
     },
     uwtext: {
         fontFamily: 'BarlowCondensed-Italic', // This assumes you've loaded the italic variant
+        fontStyle: 'italic',
         fontWeight: '600',
-        fontSize: 13,
+        fontSize: 18,
         lineHeight: 18, // 100% of 18px
         letterSpacing: 0,
         marginTop: 8,
         marginLeft: 4,
         color: '#10167F',
-    }
+    },
+    imageStyle: {
+        resizeMode: 'cover',
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
+    },
+    
   });

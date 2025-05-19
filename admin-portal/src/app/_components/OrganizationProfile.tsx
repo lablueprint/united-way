@@ -18,7 +18,6 @@ export default function OrganizationProfile() {
   const [org, sendRequest] = useApiAuth()
   const dispatch = useDispatch();
 
-
   useEffect(() => {
     // Get all events
     const getOrganizerEvents = async () => {

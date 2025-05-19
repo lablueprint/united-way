@@ -16,3 +16,5 @@ export interface Response {
     message: string,
     data: object
 }
+
+export default { Request, Response, RequestType }

@@ -32,7 +32,6 @@ const styles = StyleSheet.create({
     color: "black",
   },
   eventCard: {
-    backgroundColor: "#f5f5f5",
     marginHorizontal: 20,
     marginVertical: 8,
     padding: 16,
@@ -157,11 +156,12 @@ export default function EventsFeed() {
   // Render each event item
   // The location is hardcoded to "LOS ANGELES, CA" for now
   const renderItem = ({ item }: { item: Event }) => (
-    <View style={{ backgroundColor: '#E7F3FE'}} ><EventCard title = {item.name} date = {formatEventDate(item.date, item.duration)[1]}/>
-    {/* <TouchableOpacity
+    
+    <TouchableOpacity
+      
       style={styles.eventCard}
       onPress={() => router.push({
-        pathname: `/events/[id]`,
+        pathname: `/explore/[id]`,
         params:
         {
           id: item._id,
@@ -169,16 +169,17 @@ export default function EventsFeed() {
         }
       })}
     >
-      <Image source={{ uri: item.imageURL }} style={styles.eventImage} />
+      <View style={{ backgroundColor: '#E7F3FE'}} ><EventCard title = {item.name} date = {formatEventDate(item.date, item.duration)[1]}/></View>
+      {/* <Image source={{ uri: item.imageURL }} style={styles.eventImage} />
       <View style={styles.eventContent}>
         <Text style={styles.eventTitle}>{item.name}</Text>
         <Text style={styles.eventInfo}>
           {formatEventDate(item.date, item.duration)[0]}
         </Text>
         <Text style={styles.eventInfo}>LOS ANGELES, CA</Text>
-      </View>
-    </TouchableOpacity > */}
-    </View>
+      </View> */}
+    </TouchableOpacity >
+    
   );
 
   return (
