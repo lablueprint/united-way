@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,25 +6,27 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-} from 'react-native';
-import { useRouter, Redirect, Link } from 'expo-router';
-import axios, { AxiosResponse } from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import { useDispatch } from 'react-redux';
-import { login } from '../_utils/redux/userSlice';
+  ImageBackground,
+  Image,
+} from "react-native";
+import { useRouter, Redirect, Link } from "expo-router";
+import axios, { AxiosResponse } from "axios";
+import * as SecureStore from "expo-secure-store";
+import { useDispatch } from "react-redux";
+import { login } from "../_utils/redux/userSlice";
 
 enum SignUpState {
   SignUpForm, // 0
-  TwoFactor   // 1
+  TwoFactor, // 1
 }
 
 export default function SignUpScreen() {
-  // Signup form fields
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // SignUp form fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   // 2FA fields
-  const [code, setCode] = useState('');
-  const [hashedCode, setHashedCode] = useState('');
+  const [code, setCode] = useState("");
+  const [hashedCode, setHashedCode] = useState("");
 
   // State to control the flow: 0 = Signup form; 1 = Two-Factor Verification
   const [state, setState] = useState(SignUpState.SignUpForm);
@@ -38,11 +40,13 @@ export default function SignUpScreen() {
       const storedUser = await SecureStore.getItemAsync("user");
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
-        dispatch(login({
-          userId: parsedUser.userId,
-          authToken: parsedUser.authToken,
-          refreshToken: parsedUser.refreshToken,
-        }));
+        dispatch(
+          login({
+            userId: parsedUser.userId,
+            authToken: parsedUser.authToken,
+            refreshToken: parsedUser.refreshToken,
+          })
+        );
         router.push("/(tabs)");
       }
     };
@@ -56,16 +60,20 @@ export default function SignUpScreen() {
 
   // Validate password: at least 12 characters, including uppercase, lowercase, symbol, and number
   const validatePassword = () => {
-    return password.match(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{12,}$/);
+    return password.match(
+      /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{12,}$/
+    );
   };
 
   // Check overall input validity
   const validateInputs = () => {
     if (!validateEmail()) {
-      Alert.alert('Enter a valid email.');
+      Alert.alert("Enter a valid email.");
       return false;
     } else if (!validatePassword()) {
-      Alert.alert('Enter a valid password. Your password must contain at least 12 characters including an uppercase letter, a lowercase letter, a symbol, and a number.');
+      Alert.alert(
+        "Enter a valid password. Your password must contain at least 12 characters including an uppercase letter, a lowercase letter, a symbol, and a number."
+      );
       return false;
     }
     return true;
@@ -74,7 +82,9 @@ export default function SignUpScreen() {
   // Check if email already exists in the database
   const userExists = async (): Promise<any> => {
     try {
-      const response: AxiosResponse = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`);
+      const response: AxiosResponse = await axios.get(
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`
+      );
       return response.data.data;
     } catch (err) {
       console.error(err);
@@ -82,12 +92,12 @@ export default function SignUpScreen() {
   };
 
   // STEP 1: Handle signup – validate inputs and check for existing user
-  const handleSignup = async () => {
+  const handleSignUp = async () => {
     if (!validateInputs()) return;
 
     const existingUser = await userExists();
     if (existingUser) {
-      Alert.alert('This email is already associated with an account.');
+      Alert.alert("This email is already associated with an account.");
       return;
     }
     // Email is not in use; proceed with sending OTP for 2FA
@@ -99,17 +109,17 @@ export default function SignUpScreen() {
     try {
       const response: AxiosResponse = await axios.post(
         `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/sendOTP`,
-        { email }  // sending the email to the backend
+        { email } // sending the email to the backend
       );
       if (response.data) {
-        setHashedCode(response.data);  // store hashed OTP returned from backend
-        setState(SignUpState.TwoFactor);  // move to OTP verification step
+        setHashedCode(response.data); // store hashed OTP returned from backend
+        setState(SignUpState.TwoFactor); // move to OTP verification step
       } else {
         Alert.alert("Error: OTP not received.");
       }
     } catch (err) {
-      console.error('Error sending OTP:', err);
-      Alert.alert('Error sending OTP.');
+      console.error("Error sending OTP:", err);
+      Alert.alert("Error sending OTP.");
     }
   };
 
@@ -127,7 +137,7 @@ export default function SignUpScreen() {
         Alert.alert("Invalid OTP. Please try again.");
       }
     } catch (err) {
-      console.error('Error verifying OTP:', err);
+      console.error("Error verifying OTP:", err);
       Alert.alert("Error verifying OTP.");
     }
   };
@@ -140,8 +150,8 @@ export default function SignUpScreen() {
 
       // Extract year, month, and day
       const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so add 1
-      const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits for day
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed, so add 1
+      const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits for day
 
       // Format as YYYY-MM-DD
       const formattedDate = `${year}-${month}-${day}`;
@@ -152,16 +162,25 @@ export default function SignUpScreen() {
           email: email,
           password: password,
           dateJoined: formattedDate,
-          profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s"
+          profilePicture:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxuutX8HduKl2eiBeqSWo1VdXcOS9UxzsKhQ&s",
         }
       );
 
-      dispatch(login({
-        userId: response.data.data._id,
-        authToken: response.data.authToken,
-        refreshToken: response.data.refreshToken
-      }));
-      router.push({ pathname: "/onboarding", params: { id: response.data.data._id, authToken: response.data.authToken } });
+      dispatch(
+        login({
+          userId: response.data.data._id,
+          authToken: response.data.authToken,
+          refreshToken: response.data.refreshToken,
+        })
+      );
+      router.push({
+        pathname: "/onboarding",
+        params: {
+          id: response.data.data._id,
+          authToken: response.data.authToken,
+        },
+      });
     } catch (err) {
       console.error(err);
       Alert.alert("Error creating user.");
@@ -170,72 +189,84 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
-      {state === 0 ? (
-        // Signup Form
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>
-            Sign up
-          </Text>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>EMAIL</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              onChangeText={setEmail}
-              value={email}
-              keyboardType="email-address"
-              autoCapitalize="none"
+      <ImageBackground
+        source={require("../../assets/images/onboarding/splash.png")}
+        style={styles.background}
+      >
+        {state === 0 ? (
+          // Signup Form
+          <View style={styles.formContainer}>
+            <Image
+              source={require("../../assets/images/onboarding/uw-logo.png")}
+              style={styles.logo}
             />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>PASSWORD</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              onChangeText={setPassword}
-              value={password}
-              secureTextEntry
-            />
-          </View>
-          <TouchableOpacity style={styles.signUpButton} onPress={handleSignup}>
-            <Text style={styles.signUpButtonText} >Sign up</Text>
-            {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
-          </TouchableOpacity>
-          <View style={styles.loginSection}>
-            <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
-            <Link style={styles.loginLink} href="/sign-in">
-              Already have an account? Sign in
-            </Link>
-          </View>
-          <View style={styles.skipSection}>
-            <Text style={styles.skipLabel}>DON'T WANNA MAKE AN ACCOUNT?</Text>
-            <Link style={styles.skipLink} href="/">
-              Continue to dashboard </Link>
-          </View>
+            <View style={styles.formBox}>
+              <Text style={styles.title}>Sign Up</Text>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>EMAIL</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={setEmail}
+                  value={email}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>PASSWORD</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={setPassword}
+                  value={password}
+                  secureTextEntry
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.signUpButton}
+                onPress={handleSignUp}
+              >
+                <Text style={styles.signUpButtonText}>Sign Up</Text>
+                {/*make it onPress handleAddUser right now it temporarily goes to two factor auth */}
+              </TouchableOpacity>
 
-          {/* Super special dev button */}
-          {/* <Link href="/(tabs)" style={styles.text}>
-                    Skip this and go home
-                </Link> */}
-        </View>
-      ) : (
-        // Two-Factor Verification Form
-        <View style={{
-          marginHorizontal: 50,
-        }}>
-          <Text style={styles.title}>2-Step Verification</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter verification code"
-            value={code}
-            onChangeText={setCode}
-            keyboardType="number-pad"
-          />
-          <TouchableOpacity style={styles.button} onPress={verifyOTP}>
-            <Text style={styles.buttonText}>Verify</Text>
+              <View style={styles.loginSection}>
+                <Text style={styles.loginLabel}>ALREADY HAVE AN ACCOUNT?</Text>
+                <Link style={styles.loginLink} href="/sign-in">
+                  SIGN IN
+                </Link>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View>
+            <Text style={styles.title}>2-Step Verification</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter verification code"
+              value={code}
+              onChangeText={setCode}
+              keyboardType="number-pad"
+            />
+            <TouchableOpacity style={styles.button} onPress={verifyOTP}>
+              <Text style={styles.buttonText}>Verify</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Language selector */}
+        <View style={styles.languageContainer}>
+          <TouchableOpacity style={styles.languageButton}>
+            <Text style={styles.languageText}>ES</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.languageButton, styles.languageButtonActive]}
+          >
+            <Text style={[styles.languageText, styles.languageTextActive]}>
+              EN
+            </Text>
           </TouchableOpacity>
         </View>
-      )}
+      </ImageBackground>
     </View>
   );
 }
@@ -243,95 +274,129 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    justifyContent: 'center',
+    backgroundColor: "white",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+  background: {
+    flex: 1,
+    resizeMode: "cover",
   },
-  input: {
-    backgroundColor: '#F5F5F5',
-    padding: 16,
-    borderRadius: 8,
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  button: {
-    backgroundColor: 'black',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
   formContainer: {
     flex: 1,
-    padding: 20,
-    marginTop: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 40,
   },
-
+  logo: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
+    marginBottom: 10,
+    alignSelf: "center",
+  },
+  formBox: {
+    width: "100%",
+    maxWidth: 400,
+  },
+  title: {
+    color: "white",
+    fontSize: 60,
+    fontFamily: "BarlowCondensedBoldItalic",
+    textTransform: "uppercase",
+    textAlign: "center",
+    letterSpacing: -0.02 * 48,
+    marginBottom: 40,
+  },
   inputGroup: {
+    width: "100%",
     marginBottom: 24,
   },
   label: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.7)",
     marginBottom: 8,
+    fontFamily: "Helvetica",
+    fontWeight: "bold",
   },
-  profileContainer: {
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  chatBubble: {
-    backgroundColor: '#007AFF',
-    borderRadius: 30,
-    padding: 3,
-  },
-  profileImage: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-  },
-  signUpButton: {
-    backgroundColor: 'black',
+  input: {
+    color: "white",
+    backgroundColor: "rgba(81, 84, 125, 0.9)",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    fontSize: 18,
+    fontFamily: "Helvetica",
+    fontWeight: "bold",
+  },
+  signUpButton: {
+    backgroundColor: "rgb(255, 255, 255)",
+    padding: 16,
+    borderRadius: 50,
     marginTop: 16,
   },
   signUpButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    color: "#10167F",
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    fontFamily: "Helvetica",
+    lineHeight: 24,
+    textTransform: "uppercase",
+  },
+  button: {
+    backgroundColor: "rgb(4, 52, 110)",
+    padding: 16,
+    borderRadius: 50,
+    marginTop: 16,
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    fontFamily: "Helvetica",
+    lineHeight: 24,
+    textTransform: "uppercase",
   },
   loginSection: {
-    marginTop: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 16,
   },
   loginLabel: {
-    fontSize: 14,
-    marginBottom: 8,
+    color: "#fff",
+    fontFamily: "Helvetica",
+    fontWeight: "bold",
   },
   loginLink: {
-    color: '#666',
-    textDecorationLine: 'underline',
+    color: "#fff",
+    textDecorationLine: "underline",
+    fontFamily: "Helvetica",
+    fontWeight: "bold",
   },
-  skipSection: {
-    marginTop: 40,
+  languageContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 40,
+    marginTop: 20,
+    backgroundColor: "#F2F2F2",
+    borderRadius: 8,
+    padding: 2,
+    alignSelf: "center",
   },
-  skipLabel: {
-    fontSize: 14,
-    marginBottom: 8,
+  languageButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
   },
-  skipLink: {
-    color: '#666',
-    textDecorationLine: 'underline',
+  languageButtonActive: {
+    backgroundColor: "#10167F",
+  },
+  languageText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  languageTextActive: {
+    color: "white",
   },
 });

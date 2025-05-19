@@ -9,7 +9,7 @@ import {
   Image,
 } from "react-native";
 import React from "react";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 export default function SignUpScreen() {
   const handleSignIn = async () => {
@@ -55,6 +55,12 @@ export default function SignUpScreen() {
                 >
                   <Text style={styles.signInButtonText}>Sign In</Text>
                 </TouchableOpacity>
+
+                <View style={styles.skipSection}>
+                  <Link style={styles.skipLink} href="/">
+                    GET STARTED WITHOUT AN ACCOUNT
+                  </Link>
+                </View>
               </View>
             </View>
 
@@ -136,10 +142,10 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    gap: 12,
+    gap: 10,
   },
   signUpButton: {
-    backgroundColor: "rgb(4, 52, 110)",
+    backgroundColor: "rgba(4, 52, 110, 0.9)",
     padding: 16,
     borderRadius: 50,
   },
@@ -170,7 +176,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 20,
-    marginTop: 15,
+    marginTop: 20,
     backgroundColor: "#F2F2F2",
     borderRadius: 8,
     padding: 2,
@@ -190,5 +196,14 @@ const styles = StyleSheet.create({
   },
   languageTextActive: {
     color: "white",
+  },
+  skipSection: {
+    alignItems: "center",
+  },
+  skipLink: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+    fontFamily: "Helvetica",
   },
 });
