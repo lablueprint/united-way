@@ -245,11 +245,6 @@ input[type="time"] {
   text-align: center;
 }
 
-input[type="time"]:focus {
-  border-color: #10167F;
-  box-shadow: 0 0 0 2px #10167F22;
-}
-
 input[type="time"]::-webkit-calendar-picker-indicator {
   display: none;
   -webkit-appearance: none;
