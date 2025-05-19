@@ -1,3 +1,72 @@
+:root {
+  --uw-dark-blue: #10167F;
+  --uw-light-blue: #E7F3FE;
+  --uw-red: #D85747;
+  --uw-yellow: #FBA541;
+  --white: #ffffff;
+}
+
+@font-face {
+  font-family: "BarlowCondensed";
+  src: url("../app/_styles/_fonts/BarlowCondensed-SemiBoldItalic.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italics;
+}
+
+@font-face {
+  font-family: "BarlowCondensed";
+  src: url("../app/_styles/_fonts/BarlowCondensed-BoldItalic.ttf") format("opentype");
+  font-weight: bold;
+  font-style: italics;
+}
+
+@font-face {
+  font-family: "BarlowCondensed";
+  src: url("../app/_styles/_fonts/BarlowCondensed-SemiBold.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italics;
+}
+
+@font-face {
+  font-family: "BarlowCondensed";
+  src: url("../app/_styles/_fonts/BarlowCondensed-Bold.ttf") format("opentype");
+  font-weight: bold;
+  font-style: italics;
+}
+
+@font-face {
+  font-family: "BarlowCondensed";
+  src: url("../app/_styles/_fonts/BarlowCondensed-ExtraBoldItalic.ttf") format("truetype");
+  font-weight: bolder;
+  font-style: italics;
+}
+
+.heading3 {
+  font-family: "BarlowCondensed";
+  font-weight: bold;
+  font-style: italic;
+  font-size: 3rem;
+}
+
+.heading4 {
+  font-family: "BarlowCondensed";
+  font-weight: bold;
+  font-style: italic;
+  font-size: 1.75rem;
+}
+
+.label {
+  font-family: Helvetica, sans-serif;
+  font-style: bold;
+  font-size: 1rem;
+}
+
+.body3 {
+  font-family: Helvetica, sans-serif;
+  font-size: 1rem;
+  font-style: normal;
+}
+
 html,
 body {
   max-width: 100vw;

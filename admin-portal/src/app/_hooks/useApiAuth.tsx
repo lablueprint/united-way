@@ -73,6 +73,7 @@ function useApiAuth() {
                             return response.data.data;
                         });
                     }
+                    return {};
                 }
             }
             case RequestType.PATCH: {
@@ -102,6 +103,7 @@ function useApiAuth() {
                             return response.data.data;
                         });
                     }
+                    return {};
                 }
             }
             case RequestType.POST: {
@@ -131,6 +133,7 @@ function useApiAuth() {
                             return response.data.data;
                         });
                     }
+                    return {};
                 }
             }
             case RequestType.DELETE: {
@@ -145,6 +148,7 @@ function useApiAuth() {
                     return data;
                 } catch (error) {
                     console.error(error);
+                    console.log(error.response.data)
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {
                             response = await axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/${expandId(endpoint)}`, {
@@ -157,6 +161,7 @@ function useApiAuth() {
                             return response.data.data;
                         });
                     }
+                    return {};
                 }
             }
         }
