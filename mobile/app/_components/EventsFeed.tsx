@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 
 import useApiAuth from "../_hooks/useApiAuth";
 import { RequestType } from "../_interfaces/RequestInterfaces";
+import EventCard from "./EventCard";
 
 // Event interface from schema
 interface Event {
@@ -150,13 +151,14 @@ export default function EventsFeed() {
       hour12: true,
     });
 
-    return `${month} ${day} | ${time} - ${endTime}`;
+    return [`${month} ${day} | ${time} - ${endTime}`, `${month} ${day}`];
   };
 
   // Render each event item
   // The location is hardcoded to "LOS ANGELES, CA" for now
   const renderItem = ({ item }: { item: Event }) => (
-    <TouchableOpacity
+    <View style={{ backgroundColor: '#E7F3FE'}} ><EventCard title = {item.name} date = {formatEventDate(item.date, item.duration)[1]}/>
+    {/* <TouchableOpacity
       style={styles.eventCard}
       onPress={() => router.push({
         pathname: `/events/[id]`,
@@ -171,18 +173,21 @@ export default function EventsFeed() {
       <View style={styles.eventContent}>
         <Text style={styles.eventTitle}>{item.name}</Text>
         <Text style={styles.eventInfo}>
-          {formatEventDate(item.date, item.duration)}
+          {formatEventDate(item.date, item.duration)[0]}
         </Text>
         <Text style={styles.eventInfo}>LOS ANGELES, CA</Text>
       </View>
-    </TouchableOpacity >
+    </TouchableOpacity > */}
+    </View>
   );
 
   return (
-    <View style={{ backgroundColor: "white", flex: 1 }}>
+    <View style={{ backgroundColor: '#E7F3FE', flex: 1 }}>
       <Text style={styles.titletext}>Events</Text>
       <View style={styles.filterContainer}>
         {filterOptions.map((option) => (
+          <>
+          
           <TouchableOpacity
             key={option.value}
             style={[
@@ -204,6 +209,7 @@ export default function EventsFeed() {
               {option.label}
             </Text>
           </TouchableOpacity>
+          </>
         ))}
       </View>
       <FlatList
