@@ -1,3 +1,31 @@
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("./_fonts/BarlowCondensed-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("./_fonts/BarlowCondensed-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("./_fonts/BarlowCondensed-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("./_fonts/BarlowCondensed-SemiBoldItalic.ttf") format("truetype");
+  font-weight: 600;
+  font-style: italic;
+}
+
 /* Container for the entire rewards section */
 .container {
   padding: 0;
@@ -160,7 +188,7 @@
 
 body {
   font-family: "Arial", sans-serif;
-  background-color: #f5f5f5;
+  background-color: #fff;
   margin: 0;
   padding: 0;
 }
@@ -242,9 +270,9 @@ body {
 }
 
 .floating-add-button {
-  position: absolute;
-  top: 6.5vw;
-  right: 20px;
+  position: fixed;
+  top: 11vw;
+  right: 14rem;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -263,11 +291,14 @@ body {
   order: 0;
   flex-grow: 0;
   z-index: 10;
+  transition: all 0.3s ease;
 }
 
 .floating-add-button:hover {
-  background-color: white;
-  color: #10167f;
+  background-color: #10167f;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(16, 22, 127, 0.2);
 }
 
 .modal-overlay {
@@ -348,22 +379,22 @@ body {
 .rewards-header {
   position: absolute;
   top: 50%;
-  left: 5%;
+  left: 12%;
   transform: translateY(-50%);
   z-index: 10;
 }
 
 .rewards-title {
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: "Barlow Condensed";
   font-weight: 1000;
-  font-size: 4rem;
+  font-size: 7rem;
   color: white;
   font-style: italic;
 }
 
 .rewards-description {
-  font-family: "Helvetica", sans-serif;
-  font-weight: 400;
+  font-family: "Barlow Condensed";
+  font-weight: 100;
   font-size: 1.5rem;
   color: white;
 }
@@ -376,4 +407,151 @@ body {
 
 .rewards-section {
   margin-top: 40px; /* Adjust this value as needed */
+}
+
+/* --- Statistics Section --- */
+.statistics-section {
+  width: 100%;
+  background: #fff;
+  padding: 32px 0 16px 0;
+  margin-bottom: 12px;
+  border-bottom: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.statistics-title {
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-style: italic;
+  text-align: left;
+  width: 100%;
+  margin-left: 0;
+  margin-bottom: 1.2rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4a3d9e;
+}
+.statistics-divider {
+  border: none;
+  border-top: 2px solid #4a3d9e;
+  width: 100%;
+  margin-left: 0;
+  margin-bottom: 1.2rem;
+}
+.statistics-bar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 7rem;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+}
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  padding: 0 8px 0 0;
+  position: relative;
+}
+
+.stat-title {
+  font-size: 1rem;
+  color: #b0b0d0;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  text-align: left;
+  letter-spacing: 0.5px;
+  margin-left: 0;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #23235f;
+  margin-bottom: 0;
+  margin-right: 0;
+  line-height: 1.1;
+  text-align: left;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: #4a3d9e;
+  font-weight: 700;
+  margin-bottom: 0;
+  margin-right: 0;
+  text-align: left;
+}
+
+/* Blue vertical bar between stat blocks */
+.stat-block:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: -3.5rem;
+  top: 1rem;
+  height: 1.5rem;
+  width: 0.13rem;
+  background: #a8a8c8;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+.stat-desc {
+  font-size: 0.95rem;
+  color: #b0b0d0;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  text-align: center;
+}
+.stat-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-left: 0;
+}
+
+/* --- Filter/Sort Section --- */
+.filter-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 18px 6vw 8px 0;
+  background: #fff;
+  margin-bottom: 8px;
+  width: calc(100% - 6vw);
+}
+.filter-label {
+  font-size: 1rem;
+  color: #4a3d9e;
+  font-weight: 700;
+  margin-right: 8px;
+  text-align: center;
+}
+.filter-btn {
+  background: #fff;
+  color: #4a3d9e;
+  border: 1.5px solid #4a3d9e;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+.filter-btn:hover,
+.filter-btn.active {
+  background: #4a3d9e;
+  color: #fff;
+}
+
+.statistics-container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  max-width: none;
 }

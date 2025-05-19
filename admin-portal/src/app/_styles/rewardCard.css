@@ -29,6 +29,10 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  border-right: 1px solid #e0e0f0;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  height: 100%;
 }
 
 .reward-title {
@@ -50,8 +54,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   border-right: 1px solid #e0e0f0;
-  padding: 0 1.5rem;
+  padding-left: 0.5rem;
+  padding-right: 1.5rem;
+  gap: 0.3rem;
 }
 
 .reward-section:last-child {
@@ -62,12 +69,14 @@
   color: #b0b0d0;
   font-size: 0.95rem;
   margin-bottom: 0.2rem;
+  text-align: center;
 }
 
 .reward-value {
   color: #2d217c;
   font-weight: 700;
   font-size: 1.1rem;
+  text-align: center;
 }
 
 .inventory-bar-container {
@@ -92,6 +101,23 @@
   align-items: center;
   gap: 1rem;
   margin-left: 1.5rem;
+}
+
+.reward-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.reward-actions button:hover {
+  transform: scale(1.1);
+}
+
+.delete-button:hover {
+  color: #ff4444;
 }
 
 /* New styles for Image */
@@ -126,4 +152,17 @@
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
+}
+
+.reward-unassigned {
+  color: #2d217c;
+  font-style: italic;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.blue-dot {
+  color: #2d217c;
+  font-size: 1.1em;
+  margin-right: 6px;
 }

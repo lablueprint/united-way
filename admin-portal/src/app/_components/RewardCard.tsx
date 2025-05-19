@@ -6,17 +6,30 @@ import "../_styles/rewardCard.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+// Temporary Transaction type based on TransactionCard usage
+interface Transaction {
+  _id: string;
+  user: string;
+  reward: { _id: string; name: string; cost: number };
+}
+
 // Example reward for demonstration
 interface RewardCardProps {
   reward: Reward;
+  transactions: Transaction[];
+  onDelete: (rewardId: string) => Promise<void>;
 }
 
-const RewardCard = ({ reward }: RewardCardProps) => {
+const RewardCard = ({ reward, transactions, onDelete }: RewardCardProps) => {
   // Use schema values for inventory and events
   const inventory = reward.quantity;
   const inventoryMax = reward.quantity;
   const inventoryPercent = (inventory / inventoryMax) * 100;
   const router = useRouter();
+  // Calculate redeemed count for this reward
+  const redeemedCount = transactions.filter(
+    (t) => t.reward && t.reward._id === reward._id
+  ).length;
   return (
     <div className="reward-container">
       <div className="reward-image">
@@ -35,15 +48,19 @@ const RewardCard = ({ reward }: RewardCardProps) => {
       </div>
       <div className="reward-details">
         <div className="reward-title">{reward.name}</div>
-        {/* Additional fields from schema */}
-        <div className="reward-section">
-          <div className="reward-label">Description</div>
-          <div className="reward-value">{reward.description}</div>
-        </div>
-        <div className="reward-section">
-          <div className="reward-label">Directions</div>
-          <div className="reward-value">{reward.directions}</div>
-        </div>
+        {reward.assignedEvents && reward.assignedEvents.length > 0 ? (
+          <div className="reward-redeemed">
+            <span className="green-dot">●</span>
+            <span className="redeemed-text">
+              Redeemed: {redeemedCount} out of {reward.quantity}
+            </span>
+          </div>
+        ) : (
+          <div className="reward-unassigned">
+            <span className="blue-dot">●</span>
+            Assign to an event
+          </div>
+        )}
       </div>
       <div className="reward-section">
         <div className="reward-label">Points</div>
@@ -60,15 +77,49 @@ const RewardCard = ({ reward }: RewardCardProps) => {
           <div
             className="inventory-bar"
             style={
-              { "--inventory-width": `${inventoryPercent}%` } as React.CSSProperties
+              {
+                "--inventory-width": `${inventoryPercent}%`,
+              } as React.CSSProperties
             }
           />
         </div>
       </div>
       <div className="reward-actions">
-        <button onClick={() => router.push(`/rewards/edit/${reward._id}`)} title="Edit">✏️</button>
-        <span title="View Details">👁️</span>
-        <span title="Delete">🗑️</span>
+        <button
+          onClick={() => router.push(`/rewards/edit/${reward._id}`)}
+          title="Edit"
+          className="action-button"
+        >
+          <Image
+            src="/rewardsAssets/edit.svg"
+            alt="Edit"
+            width={38}
+            height={38}
+            style={{ objectFit: "contain" }}
+          />
+        </button>
+        <span title="View Details">
+          <Image
+            src="/rewardsAssets/view.svg"
+            alt="View"
+            width={38}
+            height={38}
+            style={{ objectFit: "contain" }}
+          />
+        </span>
+        <button
+          onClick={() => onDelete(reward._id)}
+          title="Delete"
+          className="delete-button action-button"
+        >
+          <Image
+            src="/rewardsAssets/delete.svg"
+            alt="Delete"
+            width={38}
+            height={38}
+            style={{ objectFit: "contain" }}
+          />
+        </button>
       </div>
     </div>
   );
