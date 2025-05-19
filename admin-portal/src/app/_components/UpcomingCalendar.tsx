@@ -4,6 +4,9 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import "../_styles/UpcomingCalendar.css"
 import { ChevronLeft, ChevronRight, Edit} from "lucide-react"
+import { RequestType } from "../_interfaces/RequestInterfaces";
+import useApiAuth from "../_hooks/useApiAuth";
+import { useRouter } from 'next/navigation';
 
 
 
@@ -41,6 +44,8 @@ const UpcomingCalendar = () => {
   const activeTabRef = useRef("All");
   const [listEvents, setListEvents] = useState<Event[]>([])
   const listEventsRef = useRef([])
+  const [org, sendRequest] = useApiAuth();
+  const router = useRouter();
 
   const dayNames = [
     { day: "SUN"},
@@ -52,11 +57,15 @@ const UpcomingCalendar = () => {
     { day: "SAT"},
   ]
 
-  const org = useSelector((state: RootState) => ({
-    orgId: state.auth.orgId,
-    authToken: state.auth.authToken,
-    refreshToken: state.auth.refreshToken
-  }));
+  // const org = useSelector((state: RootState) => ({
+  //   orgId: state.auth.orgId,
+  //   authToken: state.auth.authToken,
+  //   refreshToken: state.auth.refreshToken
+  // }));
+
+  const handleMakeEvent = () => {
+    router.push('/events/editor'); // or `/events/${eventId}`
+  };
 
   const handleViewMode = async (mode: string) => {
     setViewMode(mode); 
@@ -69,7 +78,11 @@ const UpcomingCalendar = () => {
   };
 
   const formatDate = useCallback((date: Date) =>
-    date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }),
+    date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'America/Los_Angeles',
+    }),
     []
   );
 
@@ -83,25 +96,56 @@ const UpcomingCalendar = () => {
     const dayOfWeek = today.getDay();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - dayOfWeek);
-
+    console.log("Start of week", startOfWeek)
     const weeks = [];
     for (let i = 0; i < 4; i++) {
       const start = new Date(startOfWeek);
+      console.log("In loop", start)
       start.setDate(start.getDate() + i * 7);
       const end = new Date(start);
       end.setDate(start.getDate() + 6);
+      console.log("Start: ", start, " ", "End: ", end)
       const label = `${formatDate(start)} – ${formatDate(end)}`.toUpperCase();;
       const value = `${start.toISOString()}_${end.toISOString()}`;
       weeks.push({
         label,
         value,
       });
+      console.log("Label", label)
     }
+    console.log("Weeks", weeks)
     return weeks;
   }, [formatDate]);
 
-  const getNextWeek = async (up: boolean) => {
-    if (up) {
+  const getPreviousWeek = async () => {
+    setIndex(indexOfWeek-1);
+    indexRef.current = indexOfWeek - 1;
+    const [startISO, endISO] = selectedWeekRef.current.split('_');
+    const startDate = new Date(startISO);
+    const endDate = new Date(endISO);
+    startDate.setDate(startDate.getDate() - 7);
+    endDate.setDate(endDate.getDate() - 7);
+    selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
+    selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
+    setSelectedWeekLabel(selectedWeekLabelRef.current);
+    setSelectedWeek(selectedWeekRef.current);
+
+    setEventData({});
+    
+    setSelectedDate(null);
+    const [start, end] = selectedWeekRef.current.split('_');
+    const date = new Date(end);
+
+    const monthYear = date.toLocaleString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    });
+
+    setCurrentMonth(monthYear)
+  }
+
+  const getNextWeek = async () => {
+    
       setIndex(indexOfWeek+1);
       indexRef.current = indexOfWeek + 1;
       const [startISO, endISO] = selectedWeekRef.current.split('_');
@@ -113,22 +157,9 @@ const UpcomingCalendar = () => {
       selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
       setSelectedWeekLabel(selectedWeekLabelRef.current);
       setSelectedWeek(selectedWeekRef.current);
-    }
-    else if (!up) {
-      setIndex(indexOfWeek-1);
-      indexRef.current = indexOfWeek - 1;
-      const [startISO, endISO] = selectedWeekRef.current.split('_');
-      const startDate = new Date(startISO);
-      const endDate = new Date(endISO);
-      startDate.setDate(startDate.getDate() - 7);
-      endDate.setDate(endDate.getDate() - 7);
-      selectedWeekLabelRef.current = `${formatDate(startDate)} – ${formatDate(endDate)}`.toUpperCase();;
-      selectedWeekRef.current = `${startDate.toISOString()}_${endDate.toISOString()}`;
-      setSelectedWeekLabel(selectedWeekLabelRef.current);
-      setSelectedWeek(selectedWeekRef.current);
-    }
-    else {return;}
+    
     setEventData({});
+    
     setSelectedDate(null);
     const [start, end] = selectedWeekRef.current.split('_');
     const date = new Date(end);
@@ -215,26 +246,31 @@ const UpcomingCalendar = () => {
   const getAllEvents = async () => {
     let mylistEvents = {}
     try {
-      const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/tag/${activeTabRef.current}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${org.authToken}`,
-          }
-        }
-      );
-      
-      mylistEvents = response.data;
+      // const response: AxiosResponse = await axios.get(
+      //   `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/tag/${activeTabRef.current}`,
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "Authorization": `Bearer ${org.authToken}`,
+      //     }
+      //   }
+      // );
+
+      const body = {};
+      const requestType = RequestType.GET;
+      const endpoint = `events/tag/${activeTabRef.current}`;
+      const response = await sendRequest({ body, requestType, endpoint });
+      mylistEvents = response;
     } catch (error) {
       console.error(`getEventsForWeek: Error fetching all events:`, error);
       setListEvents([]);
     }
-    setListEvents(mylistEvents.data);
-    listEventsRef.current = mylistEvents.data;
+    setListEvents(mylistEvents);
+    listEventsRef.current = mylistEvents;
   }
 
   const getEventsForWeek = async () => {
+    console.log("Running getEventsForWeek")
     if (!selectedWeek) {
       return;
     }
@@ -242,7 +278,7 @@ const UpcomingCalendar = () => {
     if (selectedWeek == '') {
       week = selectedWeekRef.current
     } else {
-      week = selectedWeek
+      week = selectedWeekRef.current
     }
     const [startDateString, endDateString] = week.split("_");
     const startDate = new Date(startDateString);
@@ -255,17 +291,23 @@ const UpcomingCalendar = () => {
       const ISODate = formatDateForController(current);
 
       try {
-        const response: AxiosResponse = await axios.get(
-          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/byDay/${ISODate}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${org.authToken}`,
-            }
-          }
-        );
+        // const response: AxiosResponse = await axios.get(
+        //   `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/byDay/${ISODate}`,
+        //   {
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       "Authorization": `Bearer ${org.authToken}`,
+        //     }
+        //   }
+        // );
+
+        const body = {};
+        const requestType = RequestType.GET;
+        const endpoint = `events/byDay/${ISODate}`;
+        const response = await sendRequest({ body, requestType, endpoint });
+        newEventData[formattedDate] = response || [];
         
-        newEventData[formattedDate] = response.data;
+        
       } catch (error) {
         console.error(`getEventsForWeek: Error fetching events for ${formattedDate}:`, error);
         newEventData[formattedDate] = [];
@@ -351,7 +393,7 @@ const UpcomingCalendar = () => {
 
           </div>
           <div className = "hero-button-container">
-            <div className = "hero-button">
+            <div className = "hero-button" onClick = {handleMakeEvent}>
             + CREATE EVENT
             </div>
           </div>
@@ -411,8 +453,8 @@ const UpcomingCalendar = () => {
       {/* Calendar Days */}
       
       <div className="calendar-days">
-      <button className="nav-button" onClick = {() => getNextWeek(false)}>
-      <ChevronLeft size={16} onClick = {() => getNextWeek(true)}/>
+      <button className="nav-button">
+      <ChevronLeft size={16} onClick = {() => getPreviousWeek()}/>
         </button>
         <div className="calendar-grid">
           {/* Day names row */}
@@ -441,13 +483,17 @@ const UpcomingCalendar = () => {
                         : date[date.length - 1]}
                       </div>
                       <div className="day-dots">
-                      <p>{ 
-                      events.length >= 3 
-                        ? "•••" 
-                        : events.length >= 1 
-                          ? "•" 
-                          : <span style={{ visibility: 'hidden' }}>.</span> 
-                    }</p>
+                      <p>
+                        {events !== undefined ? (
+                          events.length >= 3 ? (
+                            "•••"
+                          ) : events.length >= 1 ? (
+                            "•"
+                          ) : (
+                            <span style={{ visibility: 'hidden' }}>.</span>
+                          )
+                        ) : null}
+                      </p>
                     </div>
                     </button>
                     
@@ -465,6 +511,8 @@ const UpcomingCalendar = () => {
       <div className="list-group-container current">
               {selectedDate === null ? (
                   <p>Loading...</p>
+                ) : !Array.isArray(selectedDate) ? (
+                  <p>Unexpected error</p>
                 ) : selectedDate.length === 0 ? (
                   <p>No events on this day</p>
                 ) : (
@@ -500,7 +548,7 @@ const UpcomingCalendar = () => {
                               <div className = "attend">
                                 
                               <div className="attend-image">
-                              <img src="/images/attend.svg" />
+                              <img src="/UpcomingCalendar/images/attend.svg" />
                               
                               </div>
                               <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>

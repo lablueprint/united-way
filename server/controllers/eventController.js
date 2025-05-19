@@ -4,6 +4,7 @@ const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 // Example of creating a document in the database
 const createEvent = async (req, res) => {
   req.body.organizerID = req.params.id;
+  req.body.name = "Title";
   const event = new Event(req.body);
   try {
     const data = await event.save(event);
@@ -487,8 +488,11 @@ const getEventsByDay = async (req, res) => {
         $lte: endOfDay,
       },
     }).sort({ date: 1 }); // Sort by the date field in ascending order
-    
-    res.status(200).json(events);
+    res.status(200).json({
+      status: "success",
+      message: "Event successfully deleted.",
+      data: events,
+    });
   } catch (error) {
     console.error("Error fetching events:", error);
     res.status(500).json({ error: "Internal server error." });

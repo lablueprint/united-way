@@ -25,8 +25,7 @@ export default function Landing() {
       >
         Example HTTP Request button
       </button><br />
-      <UpcomingCalendar/>
-      Org: {org.orgId}<br />
+      {/* Org: {org.orgId}<br /> */}
       {/* Auth: {org.authToken}<br />
       Refresh: {org.refreshToken}<br /> */}
       

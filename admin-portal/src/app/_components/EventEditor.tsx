@@ -5,7 +5,7 @@ import QRCode from 'react-qr-code';
 import '../_styles/EventEditor.css';
 import { pen, logo } from '../../../public/EventEditor/EventEditor-index'
 import axios from 'axios';
-
+import { useRouter } from 'next/navigation';
 import { RequestType } from '../_interfaces/RequestInterfaces';
 import useApiAuth from '../_hooks/useApiAuth';
 
@@ -52,22 +52,30 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
         { label: "Central Time (CT) America/Chicago", value: "CT" },
         { label: "Eastern Time (ET) America/New York", value: "ET" },
     ];
+    const router = useRouter();
 
     useEffect(() => {
         (async () => {
             // Parse the event's JSON from db
             // NOTE: This pings the database twice for some reason, doesnt affect correction though, so whatevs
             // NOTE: We can ignore the draft list as we can generate a new one
+            
             const eventData = await getEventById();
-            setUpdatedName(eventData.name)
+            setUpdatedName(eventData.name ?? "");
             setUpdatedDate(new Date(eventData.date))
             // We dont use Duration?
             setIsDraft(eventData.draft)
             setUpdatedDescription(eventData.description)
             setStartTime(eventData.startTime)
             setEndTime(eventData.endTime)
-            setLatitude(eventData.location.coordinates[0])
-            setLongitude(eventData.location.coordinates[1])
+            if (eventData.location?.coordinates?.length === 2) {
+                setLatitude(eventData.location.coordinates[0]);
+                setLongitude(eventData.location.coordinates[1]);
+              } else {
+                console.warn('Missing or malformed coordinates in eventData:', eventData.location);
+                setLatitude(0); // or some default/fallback
+                setLongitude(0);
+              }
             setUpdatedTags(eventData.tags)
             // TODO: No registeredUsers, activity, image for now ... .. . ...
         })();
@@ -329,6 +337,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                                 console.log(err);
                             }
                         }
+                        router.push('/events');
                     }}>
                         CANCEL
                     </button>
@@ -391,7 +400,11 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                             type="date"
                             id="hiddenDateInput"
                             className="hiddenModal flexIt"
-                            value={updatedDate ? updatedDate.toISOString().split('T')[0] : ''}
+                            value={
+                                updatedDate instanceof Date && !isNaN(updatedDate.getTime())
+                                  ? updatedDate.toISOString().split('T')[0]
+                                  : ''
+                              }
                             onChange={(event) => { setUpdatedDate(parseDate(new Date((event.target as HTMLInputElement).value))) }}
                         />
                     </div>
@@ -497,11 +510,11 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
 
                 {/* Keyword Buttons */}
                 <div className="tagOptions flexIt">
-                    {
+                    {   
                         EventTags.map((tagName, index) => {
                             return (
                                 <button
-                                    className={updatedTags[index] ? "tagPillSelected" : "tagPillNotSelected"}
+                                    className={updatedTags != null && updatedTags[index] ? "tagPillSelected" : "tagPillNotSelected"}
                                     key={index}
                                     onClick={() => {
                                         const newTags = [...updatedTags];
