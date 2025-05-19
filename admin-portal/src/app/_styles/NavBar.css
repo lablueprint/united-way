@@ -1,0 +1,56 @@
+.body {
+  background-color: white;
+  padding-top: 1.25rem;
+  padding-right: 4rem;
+  padding-bottom: 1.25rem;
+  padding-left: 4rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.leftContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 6.25rem;
+}
+
+.rightContainer {
+  display: flex;
+}
+
+.logoContainer {
+  display: flex;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: darkblue;
+  font-family: Barlow condensed;
+}
+
+.tabContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 6.25rem;
+}
+
+.tabHeader {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  font-size: 1.125rem;
+  color: darkblue;
+  background-color: white;
+  border: none;
+}
+
+.tabHeader:focus {
+  font-weight: 700;
+}
+
+
+.profileButton {
+  margin-left: auto;
+}

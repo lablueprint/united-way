@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios, { AxiosResponse } from "axios";
 import { EventTags } from "../_interfaces/EventInterfaces";
-import { useSelector } from 'react-redux';
 import { RootState } from '../_interfaces/AuthInterfaces';
 import QRCode from 'react-qr-code';
 import '../_styles/EventEditor.css';
 import { pen, logo } from '../../../public/EventEditor/EventEditor-index'
-import ActivityDropdown from "./ActivityDropdown";
+import axios from 'axios';
+
+import { RequestType } from '../_interfaces/RequestInterfaces';
+import useApiAuth from '../_hooks/useApiAuth';
 
 interface EventEditorProps {
     orgName: string;
@@ -43,7 +44,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
     // This timer will start when the user stops typing and reset once the user starts typing again
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const [org, sendRequest] = useApiAuth();
 
     const timeZones = [
         { label: "Pacific Time (PT) America/Los Angeles", value: "PT" },
@@ -154,35 +155,28 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
 
                 const uploadDraftList = generateDraftList()
 
-                const response: AxiosResponse = await axios.patch(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`,
-                    {
-                        name: updatedName,
-                        date: updatedDate,
-                        duration: 0, // Hardcoded for now
-                        draft: currIsDraft,
-                        draftList: uploadDraftList,
-                        description: updatedDescription,
-                        startTime: startTime,
-                        endTime: endTime,
-                        location: {
-                            type: "Point",
-                            coordinates: [currLongitude, currLatitude]
-                        },
-                        organizerID: org.orgId,
-                        tags: selectedTags,
-                        registeredUsers: [], // Hardcoded for now
-                        activity: [], // Hardcoded for now
-                        image: "placeholder" // Hardcoded for now
+                const body = {
+                    name: updatedName,
+                    date: updatedDate,
+                    duration: 0, // Hardcoded for now
+                    draft: currIsDraft,
+                    draftList: uploadDraftList,
+                    description: updatedDescription,
+                    startTime: startTime,
+                    endTime: endTime,
+                    location: {
+                        type: "Point",
+                        coordinates: [currLongitude, currLatitude]
                     },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${org.authToken}`
-                        }
-                    }
-                );
-                setSubmissionStatus(`Success!: ${response.data.message}`);
+                    organizerID: org.orgId,
+                    tags: selectedTags,
+                    registeredUsers: [], // Hardcoded for now
+                    activity: [], // Hardcoded for now
+                    image: "placeholder" // Hardcoded for now
+                };
+                const endpoint = `events/${eventId}`;
+                const requestType = RequestType.PATCH;
+                await sendRequest({ requestType, endpoint, body });
                 changeState(false);
             }
             else {
@@ -209,13 +203,10 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
 
     const getEventById = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${org.authToken}`
-                }
-            });
-            const { data } = response.data;
+            const requestType: RequestType = RequestType.GET;
+            const body = {};
+            const endpoint = `events/${eventId}`;
+            const data = await sendRequest({ requestType, body, endpoint })
             return data;
         } catch (err) {
             console.log(err);
@@ -300,7 +291,6 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                         <div className="customizeText">
                             Customize your Event
                         </div>
-                        <ActivityDropdown eventId={eventId} isDraft={isDraft}/>
                         <div className="customizeButtonFormat">
                             <button className="customizeButton">
                                 Add Poll
@@ -325,18 +315,16 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                     }}>
                         SAVE
                     </button>
-                    <button className="bigPillButton" onClick={() => {
+                    <button className="bigPillButton" onClick={async () => {
                         changeState(false)
                         // If event just created, delete the event
                         // NOTE: This is not async, might cause problems later
                         if (justCreated) {
                             try {
-                                axios.delete(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`, {
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "Authorization": `Bearer ${org.authToken}`
-                                    }
-                                });
+                                const requestType: RequestType = RequestType.DELETE;
+                                const body = {};
+                                const endpoint = `events/${eventId}`;
+                                await sendRequest({ requestType, body, endpoint });
                             } catch (err) {
                                 console.log(err);
                             }
