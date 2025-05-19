@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from "axios";
 import { useSelector } from 'react-redux';
@@ -27,6 +29,8 @@ export default function BetterEventEditor() {
     const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
     const [isEditingLocation, setIsEditingLocation] = useState<boolean>(false);
     const [isDisplayingTagModal, setIsDisplayingTagModal] = useState<boolean>(false);
+    const [image, setImage] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [timeoutID, setTimeoutID] = useState<NodeJS.Timeout>();
     const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken }})
 
@@ -73,6 +77,40 @@ export default function BetterEventEditor() {
             console.log(err);
         }
     }
+
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+            // Upload the image
+            const imageUrl = await uploadOrgImage(file);
+            console.log("Uploaded image URL:", imageUrl);
+            setImage(imageUrl);
+        }
+    };
+
+    const uploadOrgImage = async (file: File) => {
+        console.log("Image upload token:", org.authToken);
+        const formData = new FormData();
+        formData.append("image", file);
+        const response = await axios.post(
+            `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}/addImage`,
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${org.authToken}`,
+                    "Content-Type": "multipart/form-data"
+                },
+            }
+        );
+        console.log("Image upload response:", response.data);
+        return response.data.imageUrl;
+    };
     
     return (
         <div>
@@ -108,11 +146,16 @@ export default function BetterEventEditor() {
                 <div className="event-editor-interface">
                     <div className="image-editor-and-tags">
                         <div className="image-editor">
-                            <div className="add-photo-parent">
+                            <div className="add-photo-parent" onClick={() => {handleImageChange}}>
                                 <div className="add_photo-image">
                                     <Image src={add_photo} alt="Add Photo Icon" width={60} height={60} />
                                 </div>
                                 <div className="add_photo-subtitle">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                    />
                                     Upload Images Here
                                 </div>
                             </div>

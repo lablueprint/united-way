@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../_interfaces/AuthInterfaces';
 import { Activity } from "../../_interfaces/EventInterfaces";
 import Image from 'next/image'
 import { drop_down, drop_up } from '../../../../public/EventActivities/EventActivities-index'
@@ -56,9 +54,6 @@ export default function EventActivityDropdown({ activityTitle, activities, setAc
                 <div className="activity-header-row">
                     <div className="activity-title-count-parent">
                         <div className="activity-title-text">{activityTitle}</div>
-                        <div className="activity-count">
-                            {activities.length}
-                        </div>
                     </div>
                     <div className="activity-button-dropdown">
                         <div className="add-button">
