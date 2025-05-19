@@ -14,6 +14,8 @@ export interface EventData {
     type: string;
     coordinates: number[];
   };
+  startTime: string;
+  endTime: string;
   organizerID: string;
   tags: string[];
   registeredUsers: string[];
@@ -24,22 +26,18 @@ interface Props {
   events: EventData[];
   intervalMs?: number;
   visibleCount?: number;
-  startTime?: string;
-  endTime?: string;
 }
 
 export default function EventCarousel({
   events,
   intervalMs = 3000,
   visibleCount = 4,
-  startTime = "12:00",
-  endTime = "12:01",
 }: Props) {
   const [visibleEvents, setVisibleEvents] = useState<EventData[]>([]);
   const [focusIndex, setFocusIndex] = useState(0);
   const [pageIndex, setPageIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
-  
+
   const totalPages = Math.ceil(events.length / visibleCount);
 
   // Initialize first page on load
@@ -53,39 +51,45 @@ export default function EventCarousel({
   }, [events, visibleCount]);
 
   // Auto scroll and rotate pages
+  // Auto scroll and rotate pages
   useEffect(() => {
     if (events.length === 0) return;
-  
+
     const totalPages = Math.ceil(events.length / visibleCount);
-  
+
     const interval = setInterval(() => {
+      if (totalPages <= 1) {
+        setFocusIndex((prev) =>
+          prev < visibleEvents.length - 1 ? prev + 1 : 0
+        );
+        return;
+      }
+
       setFocusIndex((prevFocus) => {
         const isAtBottom = prevFocus >= visibleEvents.length - 1;
-  
+
         if (!isAtBottom) {
           return prevFocus + 1;
         }
-  
-        // Start transition
+
         setTransitioning(true);
-  
-        // After transition duration, switch page
+
         setTimeout(() => {
           const nextPage = (pageIndex + 1) % totalPages;
           const start = nextPage * visibleCount;
           const end = start + visibleCount;
           const nextVisibleEvents = events.slice(start, end);
-  
+
           setVisibleEvents(nextVisibleEvents);
           setPageIndex(nextPage);
           setFocusIndex(0);
           setTransitioning(false);
-        }, 300); 
-  
-        return prevFocus; // temporarily freeze focus until transition completes
+        }, 300);
+
+        return prevFocus;
       });
     }, intervalMs);
-  
+
     return () => clearInterval(interval);
   }, [events, intervalMs, visibleCount, pageIndex, visibleEvents.length]);
 
@@ -126,7 +130,7 @@ export default function EventCarousel({
                     <div className="event-date-time">
                       <p className="event-date">Today</p>
                       <p className="event-time">
-                        {startTime} - {endTime}
+                        {event.startTime} - {event.endTime} PM
                       </p>
                     </div>
                   </>
