@@ -3,7 +3,6 @@ import axios, { AxiosResponse } from "axios";
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
-import HomePage from '../../_components/HomePage';
 
 import { useState } from "react";
 export default function Landing() {
@@ -45,7 +44,6 @@ export default function Landing() {
       <div>
         Result: {responseValue}
       </div>
-      <HomePage></HomePage>
     </div>
   );
 }

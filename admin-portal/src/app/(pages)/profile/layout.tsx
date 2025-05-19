@@ -34,10 +34,8 @@ export default function PagesLayout({
     }, []);
 
     return (
-        <html lang="en">
-            <body>
-                {children}
-            </body>
-        </html>
+        <div>
+            {signedIn ? children : <></>}
+        </div>
     );
 }

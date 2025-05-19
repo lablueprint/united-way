@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
-import styles from '../../_styles/OrganizationProfile.module.css';
+import styles from "./page.module.css"
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../_interfaces/AuthInterfaces';
 import { logout } from '../../_utils/redux/orgSlice';
@@ -57,26 +57,27 @@ export default function Profile() {
   // State to store original data for comparison
   const [originalData, setOriginalData] = useState<OrgDetails>({
     name: "",
-    email: "", 
-    password: "", 
-    community: "", 
-    description: "", 
-    dateJoined: "", 
-    website: "", 
-    instagram: "", 
-    facebook: "", 
+    email: "",
+    password: "",
+    community: "",
+    description: "",
+    dateJoined: "",
+    website: "",
+    instagram: "",
+    facebook: "",
     phoneNumber: ""
   });
   const [updateSuccess, setUpdateSuccess] = useState<boolean | null>(null);
-  
-  const org = useSelector((state: RootState) => ({ 
-    orgId: state.auth.orgId, 
-    authToken: state.auth.authToken, 
-    refreshToken: state.auth.refreshToken 
+
+  const org = useSelector((state: RootState) => ({
+    orgId: state.auth.orgId,
+    authToken: state.auth.authToken,
+    refreshToken: state.auth.refreshToken
   }));
 
   const fetchOrgData = async () => {
     try {
+      console.log(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`)
       const response = await axios.get(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`,
         {
@@ -87,7 +88,7 @@ export default function Profile() {
         }
       );
       const { data } = response.data;
-      
+
       // Set individual state variables
       setName(data.name || "");
       setEmail(data.email || "");
@@ -99,7 +100,7 @@ export default function Profile() {
       setInstagram(data.instagram || "");
       setFacebook(data.facebook || "");
       setPhoneNumber(data.phoneNumber || "");
-      
+
       // Set original data for comparison
       setOriginalData(data);
     } catch (err) {
@@ -109,7 +110,7 @@ export default function Profile() {
 
   useEffect(() => {
     fetchOrgData();
-  }, [org.orgId, org.authToken]);
+  }, []);
 
   // Get current state as an object for comparison with original data
   const getCurrentFormData = (): OrgDetails => {
@@ -126,12 +127,12 @@ export default function Profile() {
       phoneNumber
     };
   };
-  
+
   const handleSubmit = async () => {
     try {
       const currentData = getCurrentFormData();
       const updateData: UserUpdate = {};
-      
+
       // Only include fields that have changed
       Object.keys(currentData).forEach(key => {
         const typedKey = key as keyof OrgDetails;
@@ -139,14 +140,14 @@ export default function Profile() {
           updateData[typedKey] = currentData[typedKey];
         }
       });
-      
+
       if (Object.keys(updateData).length === 0) {
         console.log('No changes to update');
         return;
       }
-      
+
       console.log('Update data:', updateData);
-      
+
       // Make the API call to update organization data
       const response = await axios.patch(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`,
@@ -158,19 +159,19 @@ export default function Profile() {
           }
         }
       );
-      
+
       console.log('User updated successfully', response.data);
       setUpdateSuccess(true);
       setOriginalData(currentData);
-      
+
     } catch (error) {
       console.error('Update failed:', error);
       setUpdateSuccess(false);
-      
+
       // Reset error message after 3 seconds
     }
   };
-  
+
   const handleLogout = async () => {
     await dispatch(logout());
     router.push("/");
@@ -211,7 +212,7 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-            
+
             {/* Basic Information Section */}
             <div className={styles.basicInfoContainer}>
               <div className={styles.basicHeader}>
@@ -290,7 +291,7 @@ export default function Profile() {
                 </div>
               </button>
             </div>
-            
+
             {/* Contact Information Section */}
             <div className={styles.basicInfoContainer}>
               <div className={styles.basicHeader}>
@@ -377,7 +378,7 @@ export default function Profile() {
                 </div>
               </button>
             </div>
-            
+
             {/* Account Settings Section */}
             <div className={styles.settingsContainer}>
               <div className={styles.basicHeader}>
@@ -397,15 +398,15 @@ export default function Profile() {
                     </div>
                   </div>
                   <div className={styles.languageRight}>
-                    <button className={`${language ? "" : styles.selected} ${styles.switchButton}`} onClick={() => {setLanguage(false)}}>
+                    <button className={`${language ? "" : styles.selected} ${styles.switchButton}`} onClick={() => { setLanguage(false) }}>
                       <div className={styles.switchHeading}>
                         ES
                       </div>
                     </button>
-                    <button className={`${language ? styles.selected : ""} ${styles.switchButton}`} onClick={() => {setLanguage(true)}}>
+                    <button className={`${language ? styles.selected : ""} ${styles.switchButton}`} onClick={() => { setLanguage(true) }}>
                       <div className={styles.switchHeading}>
                         EN
-                      </div>    
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -422,15 +423,15 @@ export default function Profile() {
                     </div>
                   </div>
                   <div className={styles.languageRight}>
-                    <button className={`${twoStep ? "" : styles.selected } ${styles.switchButton}`} onClick={() => {setTwoStep(false)}}>
+                    <button className={`${twoStep ? "" : styles.selected} ${styles.switchButton}`} onClick={() => { setTwoStep(false) }}>
                       <div className={styles.switchHeading}>
                         OFF
                       </div>
                     </button>
-                    <button className={`${twoStep ? styles.selected : "" } ${styles.switchButton}`} onClick={() => {setTwoStep(true)}}>
+                    <button className={`${twoStep ? styles.selected : ""} ${styles.switchButton}`} onClick={() => { setTwoStep(true) }}>
                       <div className={styles.switchHeading}>
                         ON
-                      </div>    
+                      </div>
                     </button>
                   </div>
                 </div>
