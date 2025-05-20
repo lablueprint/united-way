@@ -12,13 +12,13 @@ export default function StackLayout() {
                 }}
             />
             <Stack.Screen
-                name="pictureChanger"
+                name="contact"
                 options={{
                     headerShown: false,
                 }}
             />
             <Stack.Screen
-                name="profileEditor"
+                name="account"
                 options={{
                     headerShown: false,
                 }}

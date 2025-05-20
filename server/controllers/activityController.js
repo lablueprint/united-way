@@ -90,25 +90,6 @@ const getActivitiesByFilter = async (req, res) => {
   }
 };
 
-
-// const getActivitiesByFilter = async (req, res) => {
-//   try {
-//     const activities = await Activity.find(req.body);
-//     res.status(200).json({
-//       status: "success",
-//       message: "Activity successfully received.",
-//       data: activities
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       status: "failure",
-//       message: "Server-side error: could not receive activities.",
-//       data: {}
-//     });
-//   }
-// };
-
 const editActivityDetails = async (req, res) => {
   const activityId = req.params.id;
   try {

@@ -3,17 +3,21 @@ import EventEditor from "./EventEditor";
 import useApiAuth from '../_hooks/useApiAuth';
 import { RequestType, Request } from '../_interfaces/RequestInterfaces';
 import { EventData } from '../_interfaces/EventInterfaces';
+import Image from 'next/image';
+import { placeholder } from '../../../public/Landing/Landing-index';
+import '../_styles/EventCard.css';
 
 interface EventCardProps {
     id: string;
     removeFromList: (id: string) => void;
     orgName: string;
+    onClick: () => void;
 }
 
-export default function EventCard({ id, removeFromList, orgName }: EventCardProps) {
+export default function EventCard({ id, removeFromList, orgName, onClick }: EventCardProps) {
+    // make image static right now? need to add into schema later on?
     const [showButtons, setShowButtons] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [showModal, setShowModal] = useState(false);
     const [eventData, setEventData] = useState<EventData>({
         organizerId: "",
         _id: "",
@@ -32,6 +36,9 @@ export default function EventCard({ id, removeFromList, orgName }: EventCardProp
         registeredUsers: [],
         activities: []
     });
+    // event schema has the date as a string right now, but needs to be event object
+    const location = "Los Angeles, CA";
+
     const [org, sendRequest] = useApiAuth();
 
     const deleteEvent = async (e: MouseEvent<HTMLButtonElement>) => {
@@ -79,28 +86,40 @@ export default function EventCard({ id, removeFromList, orgName }: EventCardProp
 
     useEffect(() => {
         const fetchData = async () => {
-            setEventData(await getEventById());
+            const data = await getEventById();
+            setEventData({
+                ...data,
+                date: new Date(data.date)
+            });
         };
         fetchData();
     }, []);
 
+    const getMonthAbbreviation = (date: Date) => {
+        return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
+    };
+
     return (
         // Show event name, show buttons on hover
-        <div>
-            <div
-                onMouseEnter={() => setShowButtons(true)}
-                onMouseLeave={() => setShowButtons(false)}
-            >
-                <p>{eventData.name}</p>
-                {showButtons && (
-                    <>
-                        <button onClick={deleteEvent}>Delete</button>
-                        <button onClick={() => { setIsEditing(!isEditing); }}>Edit</button>
-                    </>
-                )}
+        <div
+            className="event-card"
+            onClick={onClick}
+        >
+            <Image className="event-image" style={{ objectFit: 'contain' }} src={placeholder} alt="Event thumbnail" />
+            <div className="event-content-info">
+                <div className="event-name">{eventData.name}</div>
+                <div className="event-date-time">
+                    <p className="event-card-date">{getMonthAbbreviation(eventData.date)} {eventData.date.getDate()}</p>
+                    <p>|</p>
+                    <p className="event-card-time">{eventData.startTime} - {eventData.endTime} PM</p>
+                </div>
+                <div className="event-card-location">{location}</div>
             </div>
-
-            {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={id} justCreated={false} />}
         </div>
+
+
+
+
+
     );
 }

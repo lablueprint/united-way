@@ -1,0 +1,387 @@
+@font-face {
+  font-family: "BarlowCondensedExtraBoldItalic";
+  src: url("./_fonts/BarlowCondensed-ExtraBoldItalic.ttf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.pollEditor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #FFFFFF;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+/* — Header section — */
+.pollEditorHeader {
+  position: relative;
+  color: #FFFFFF;
+  font-family: "BarlowCondensedExtraBoldItalic";
+  width: 100%;
+  height: 18.375rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 6rem;
+  padding-right: 6rem;
+  background-image: url('./_images/banner-logo.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.pollEditorHeaderTitle {
+  margin: 0;
+  font-size: 6.25rem;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.pollEditorHeaderSubtitle {
+  margin-top: 1rem;
+  font-family: "Helvetica";
+  font-weight: 400;
+  font-size: 1.375rem;
+  opacity: 0.85;
+}
+
+.createPollsButton {
+  position: absolute;
+  right: 6rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  font-family: "Helvetica";
+  border-radius: 6.25rem;
+  border: none;
+  background-color: white;
+  color: #10167F;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* — Draft & Save — */
+.draftSavePublishBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.5rem 6rem 1.5rem 6rem;
+}
+
+.savePublishBox {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.draftButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #E6E6E6;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-family: Helvetica, sans-serif;
+  font-weight: 700;
+  color: #595959;
+}
+
+.draftButton img {
+  width: 1rem;
+  height: 1rem;
+}
+
+.deletePollButton {
+  padding: 0.6rem 1.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: "Helvetica";
+  border-radius: 6.25rem;
+  border-color: transparent;
+  background-color: transparent;
+  text-transform: uppercase;
+  color: #10167F;
+  cursor: pointer;
+}
+
+.savePollButton {
+  padding: 0.6rem 1.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: "Helvetica";
+  border-radius: 6.25rem;
+  border-color: transparent;
+  background-color: #10167F;
+  text-transform: uppercase;
+  color: white;
+  cursor: pointer;
+}
+
+/* — Question box — */
+.questionBox {
+  flex-grow: 1;
+  border: none;
+  border-radius: 1rem;
+  background-color: #FFFFFF;
+  margin: 0 6rem;
+}
+
+.pollTitle {
+  font-family: "BarlowCondensedExtraBoldItalic";
+  font-size: 3rem;
+  margin-bottom: 2.5rem;
+  color: #10167F;
+  text-transform: uppercase;
+  border: none;
+  padding: 0.5rem 0;
+  transition: all 0.2s ease;
+}
+/* — Question list & panels — */
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  font-family: "Helvetica";
+}
+
+.questionPanel {
+  border: 1px solid #10167F66;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  background-color: white;
+  font-family: "Helvetica";
+}
+
+.dragHandle {
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  margin-left: 0.3rem;
+  opacity: 0.6;
+}
+
+.questionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.questionLabel {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #10167F;
+  margin-right: 1rem;
+  white-space: nowrap;
+}
+
+.questionInput {
+  width: 87%;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #10167F;
+  background-color: transparent;
+  padding: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.questionInput:focus {
+  outline: none;
+  background-color: #F8F9FF;
+}
+
+.questionToolbar {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.questionToolbar button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.questionToolbar button:hover {
+  background-color: #F8F9FF;
+}
+
+/* — Options — */
+.optionList {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.optionRow:hover {
+  background-color: #F8F9FF;
+}
+
+.optionRow input[type="radio"] {
+  accent-color: #10167F;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.optionInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-family: "Helvetica";
+  color: #10167F;
+  padding: 0.5rem;
+  margin: 0;
+  transition: all 0.2s ease;
+}
+
+.optionInput:focus {
+  outline: none;
+  color: #10167F;
+}
+
+.addOptionButton {
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  width: calc(100% - 2rem);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.addOptionButton:hover {
+  background-color: #F8F9FF;
+}
+
+.addOptionButton .optionText {
+  font-size: 1rem;
+  font-family: "Helvetica";
+  color: #10167F;
+  opacity: 0.8;
+}
+
+.removeOptionButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.optionRow:hover .removeOptionButton {
+  opacity: 1;
+}
+
+/* — Bottom action buttons — */
+.questionActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-left: 6rem;
+  margin-right: 6rem;
+  border-bottom: 1px solid #10167F66;
+  margin-bottom: 4rem;
+}
+
+.addQuestionButton {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  font-family: "Helvetica";
+  border-radius: 6.25rem;
+  border: 1px solid #10167F;
+  background-color: transparent;
+  color: #10167F;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* — Poll Controls — */
+
+.pollControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* — Point Value — */
+
+.pointValue {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 0 6rem;
+}
+
+.pointValue label {
+  font-family: "Helvetica";
+  font-size: 1rem;
+  font-weight: bold;
+  color: #10167F;
+}
+
+.pointValueControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pointValueControl button {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: #10167F;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  border-color: transparent;
+}
+
+.pointValueDisplay {
+  width: 3rem;
+  text-align: center;
+  border: none;
+  font-family: "Helvetica";
+  font-size: 1rem;
+  font-weight: bold;
+  color: #10167F4D;
+  padding: 0.7rem;
+  border-color: none;
+  background: transparent;
+}

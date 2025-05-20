@@ -6,6 +6,8 @@ const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 
 const createOrganization = async (req, res) => {
   try {
+    req.body.dateJoined = new Date();
+
     bcrypt.hash(
       req.body.password,
       `$2b$${process.env.SALT_ROUNDS}$${process.env.HASH_SALT}`,
@@ -142,6 +144,12 @@ const editOrganizationDetails = async (req, res) => {
   }
 
   const orgId = req.params.id;
+
+  // The following fields should not be edited using this function.
+  delete req.body["_id"];
+  delete req.body["email"];
+  delete req.body["password"];
+
   const updateInput = req.body;
   try {
     console.log("This is the update input", updateInput);
@@ -149,18 +157,17 @@ const editOrganizationDetails = async (req, res) => {
       { _id: orgId },
       { $set: updateInput }
     );
-    console.log("Result of updateOne:", result);
     if (result.modifiedCount === 0) {
-      res.status(404).json({
+      res.status(304).json({
         status: "failure",
         message: "Organization not found or no changes made.",
-        data: result,
+        data: {},
       });
     } else {
       res.status(200).json({
         status: "success",
         message: "Organization updated successfully.",
-        data: result,
+        data: newData,
       });
     }
   } catch (err) {
