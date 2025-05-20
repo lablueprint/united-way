@@ -2,10 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  images: {
+    domains: ["unitedway-uploads.s3.us-east-2.amazonaws.com"],
+  },
   reactStrictMode: false,
   env: {
     IP_ADDRESS: "",
-    PORT: "",
+    PORT: "4000",
   },
 };
 
