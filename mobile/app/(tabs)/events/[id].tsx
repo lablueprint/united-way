@@ -9,6 +9,7 @@ import { io, Socket } from "socket.io-client";
 import { useRef } from 'react';
 import Poll from '../../_components/Poll';
 import Announcement from '../../_components/Announcement';
+import Raffle from '../../_components/Raffle';
 
 const windowHeight = Dimensions.get('window').height;
 
@@ -53,6 +54,9 @@ export default function EventDetails() {
   const [organizationName, setOrganizationName] = useState("");
   const [joinedRaffles, setJoinedRaffles] = useState(false);
   const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
+  const [drawnNumber, setDrawnNumber] = useState<number | null>(null);
+  const [winner, setWinner] = useState<boolean | null>(null);
+  const [raffleVisible, setRaffleVisible] = useState(false);
   const [pollVisible, setPollVisible] = useState(false);
   const [announcementVisible, setAnnouncementVisible] = useState(false);
   const [pollId, setPollId] = useState<string | null>(null);
@@ -226,6 +230,10 @@ export default function EventDetails() {
     setAnnouncementVisible(false);
   }
 
+  const closeRaffle = () => {
+    setRaffleVisible(false);
+  }
+
   const listenForEventUpdates = () => {
     const socket = socketRef.current;
     // Listen for messages from the server
@@ -276,12 +284,19 @@ export default function EventDetails() {
     socket?.on('new raffle number', (raffleNumber) => {
       console.log('New raffle number:', raffleNumber);
       setRaffleNumber(raffleNumber);
+      setDrawnNumber(null);
+      setWinner(null);
+      setRaffleVisible(true);
     });
     socket?.on('raffle winner', (randomRaffleNumber) => {
-      Alert.alert(`Raffle result: ${randomRaffleNumber}`, 'You won the raffle!');
+      setDrawnNumber(randomRaffleNumber);
+      setWinner(true);
+      setRaffleVisible(true);
     });
     socket?.on('raffle loser', (randomRaffleNumber) => {
-      Alert.alert(`Raffle result: ${randomRaffleNumber}`, 'You did not win the raffle. Better luck next time!');
+      setDrawnNumber(randomRaffleNumber);
+      setWinner(false);
+      setRaffleVisible(true);
     });
     // Listen for disconnection
     socket?.on('disconnect', () => {
@@ -436,6 +451,23 @@ export default function EventDetails() {
           >
             <View style={styles.modalOverlay}>
               {announcementId && socketRef.current && <Announcement activityId={announcementId} closeAnnouncement={closeAnnouncement} />}
+            </View>
+          </Modal>
+          :
+          <></>
+        }
+        {(registeredUsers).includes(user.userId) ?
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={raffleVisible}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+              setRaffleVisible(!raffleVisible);
+            }}
+          >
+            <View style={styles.modalOverlay}>
+              {socketRef.current && raffleNumber && <Raffle number={raffleNumber} drawnNumber={drawnNumber} winner={winner} closeRaffle={closeRaffle} />}
             </View>
           </Modal>
           :
