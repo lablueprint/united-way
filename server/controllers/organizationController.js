@@ -13,6 +13,7 @@ const createOrganization = async (req, res) => {
         req.body.password = hash;
         const newOrganization = new Organization(req.body);
         const data = await newOrganization.save(newOrganization);
+        console.log("This is the data", data);
         res.status(201).json({
           status: "success",
           message: "Organization successfully created.",
@@ -150,7 +151,6 @@ const editOrganizationDetails = async (req, res) => {
     );
     console.log("Result of updateOne:", result);
     if (result.modifiedCount === 0) {
-
       res.status(404).json({
         status: "failure",
         message: "Organization not found or no changes made.",
@@ -176,12 +176,12 @@ const editOrganizationDetails = async (req, res) => {
 // using id to find which organization we're returning
 const getAssociatedEvents = async (req, res) => {
   const orgId = req.params.id;
-  (orgId)
+  orgId;
   try {
     const organizationByID = await Organization.findOne({ _id: orgId });
     if (organizationByID) {
       const eventList = organizationByID["activeEvents"];
-      (eventList);
+      eventList;
       res.status(200).json({
         status: "success",
         message: "Successfully received associated events for organization",
@@ -267,10 +267,10 @@ const addImageToOrganization = async (req, res) => {
     }
     console.log("Image uploaded to S3:", result.url);
 
-  // Send back the URL
+    // Send back the URL
     return res.status(200).json({
       status: "success",
-      imageUrl: result.url
+      imageUrl: result.url,
     });
   } catch (err) {
     console.error("Error in addImageToOrganization:", err);

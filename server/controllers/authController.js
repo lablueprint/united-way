@@ -125,8 +125,9 @@ const refreshOrgAccessToken = async (req, res) => {
 
 const verifyOrgLogin = async (req, res) => {
   try {
+    console.log("req.body", req.body);
     const org = await Organization.findOne({email: req.body.email});
-
+    console.log("org", org);
     const match = await bcrypt.compare(req.body.password, org.password);
     if (match) {
       res.status(200).json({

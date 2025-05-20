@@ -15,7 +15,7 @@ const transactionSchema = new mongoose.Schema({
     name: { type: String, required: true }, // Reward name (e.g., "Cookie")
     cost: { type: Number, required: true }, 
   },
-  isRedeemed: {
+  isClaimed: {
     type: Boolean, // Type of transaction (e.g., earning or redeeming points)
     required: true,
   },

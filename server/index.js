@@ -10,21 +10,19 @@ const uri = process.env.MONGODB_URI;
 const port = process.env.PORT;
 
 // Route Imports
-const exampleRouter = require('./routes/exampleRoute.js');
-const authRouter = require('./routes/authRoutes.js')
-const eventRouter = require('./routes/eventRoutes.js');
-const organizationRouter = require('./routes/organizationRoutes.js');
-const userRouter = require('./routes/userRoutes.js');
-const activityRouter = require('./routes/activityRoutes.js')
-const twoFactorRouter = require('./routes/twoFactorRoutes.js')
+const exampleRouter = require("./routes/exampleRoute.js");
+const authRouter = require("./routes/authRoutes.js");
+const eventRouter = require("./routes/eventRoutes.js");
+const organizationRouter = require("./routes/organizationRoutes.js");
+const userRouter = require("./routes/userRoutes.js");
+const activityRouter = require("./routes/activityRoutes.js");
+const twoFactorRouter = require("./routes/twoFactorRoutes.js");
+const transactionRouter = require("./routes/transactionRoutes.js");
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
   try {
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
@@ -73,9 +71,14 @@ app.use("/activities", activityRouter);
 
 app.use("/twofactor", twoFactorRouter);
 
-app.use("/twofactor", twoFactorRouter);
-
-app.use("/twofactor", twoFactorRouter);
+app.use(
+  "/transactions",
+  jwt({
+    secret: process.env.JWT_SECRET,
+    algorithms: ["HS256"],
+  })
+);
+app.use("/transactions", transactionRouter);
 
 app.get("/", (req, res) => {
   // defines a route where if we send get req to the route, will send back resp
@@ -85,4 +88,3 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Server started at port ${port}`);
 });
-
