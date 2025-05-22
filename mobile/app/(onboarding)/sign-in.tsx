@@ -116,16 +116,15 @@ export default function SignUpScreen() {
 
             <View style={styles.createAccountSection}>
               <Text style={styles.createAccountLabel}>FIRST TIME HERE?</Text>
-              <Link style={styles.createAccountLink} href="/sign-up">
-                CREATE ACCOUNT
-              </Link>
+              <TouchableOpacity
+                onPress={() => { router.dismissTo('/(onboarding)/sign-up'); }}
+              >
+                <Text style={styles.createAccountLink}>
+                  SIGN IN
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
-
-          {/* Super special dev button */}
-          {/* <Link href="/(tabs)" style={styles.text}>
-          Skip this and go home
-        </Link> */}
         </View>
 
         {/* Language selector */}

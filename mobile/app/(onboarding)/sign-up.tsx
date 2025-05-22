@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  SafeAreaView,
   View,
   Text,
   TextInput,
@@ -264,21 +265,27 @@ export default function SignUpScreen() {
                 <Text style={[styles.loginLabel, { flex: 1 }]}>
                   ALREADY HAVE AN ACCOUNT?
                 </Text>
-                <Link
-                  style={[styles.loginLink, { flex: 1, textAlign: "right" }]}
-                  href="/sign-in"
+                <TouchableOpacity
+                  onPress={() => { router.push('/(onboarding)/sign-in'); }}
                 >
-                  SIGN IN
-                </Link>
+                  <Text style={[styles.loginLink, { flex: 1, textAlign: "right" }]}>
+                    SIGN IN
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>
         ) : (
-          <View style={{ marginHorizontal: 50 }}>
+          <SafeAreaView style={{
+            marginHorizontal: 50,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            flexGrow: 1
+          }}>
             <Text style={styles.title}>2-Step Verification</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter verification code"
               value={code}
               onChangeText={setCode}
               keyboardType="number-pad"
@@ -286,7 +293,7 @@ export default function SignUpScreen() {
             <TouchableOpacity style={styles.button} onPress={verifyOTP}>
               <Text style={styles.buttonText}>Verify</Text>
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
         )}
 
         {/* Language selector */}
