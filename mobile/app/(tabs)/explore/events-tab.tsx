@@ -4,7 +4,6 @@ import EventsFeed from "../../_components/EventsFeed";
 
 const styles = StyleSheet.create({
   homeStyle: {
-    backgroundColor: "#ff9600",
     height: "100%",
   },
 });

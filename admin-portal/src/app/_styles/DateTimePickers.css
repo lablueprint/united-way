@@ -1,0 +1,251 @@
+@font-face {
+  font-family: "BarlowCondensedBold";
+  src: url("./_fonts/BarlowCondensed-Bold.ttf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.controlGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #F8F9FF;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.5rem;
+  width: 100%;
+}
+
+.controlGroup label {
+  font-family: "BarlowCondensedBold";
+  font-size: 1.5rem;
+  color: #10167F;
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin-left: 0.5rem;
+}
+
+.dateSelect,
+.timeSelect {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  min-width: 9.375rem;
+}
+
+.dateSelect:hover,
+.timeSelect:hover {
+  border-color: #10167F;
+}
+
+.dateSelect span:first-child,
+.timeSelect span:first-child {
+  font-family: "Helvetica";
+  font-size: 0.8rem;
+  color: #10167F4D;
+}
+
+.dropdownArrow {
+  font-size: 0.4rem;
+  color: #10167F;
+  margin-left: 0.25rem;
+}
+
+/* Calendar Popup Container */
+.calendarPopup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 0 40px 0 rgba(0,0,0,0.25);
+  padding: 2rem 2.5rem 2rem 2.5rem;
+  z-index: 1000;
+  width: 350px;
+  min-width: 320px;
+}
+
+/* Calendar Header */
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.calendarHeader span {
+  font-family: "BarlowCondensedBold";
+  font-size: 2.156rem;
+  color: #10167F;
+}
+
+.calendarHeaderButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.calendarHeader button {
+  background: none;
+  border: none;
+  color: #10167F;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.calendarHeader button:hover {
+  color: #0D1143;
+}
+
+/* Days of Week */
+.calendarDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dayHeader {
+  text-align: center;
+  font-family: "Helvetica";
+  font-size: 1.1rem;
+  color: #444;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  padding: 0.25rem 0;
+}
+
+/* Calendar Grid (Dates) */
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  font-family: "Helvetica";
+  font-size: 1.1rem;
+  color: #444;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  padding: 0;
+  width: 100%;
+}
+
+.day.selected {
+  background: #10167F;
+  color: #fff;
+}
+
+.day:hover:not(:disabled) {
+  background: #F8F9FF;
+}
+
+.day:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.calendarNavButton {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: none;
+  border: none;
+  color: #10167F;
+  font-family: "BarlowCondensedBold";
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+/* Time Picker */
+.clockIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Click-away handling */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.timeRangeSelect {
+  display: flex;
+  align-items: center;
+}
+
+.timeRangeSelect input[type="time"] {
+  font-family: "Helvetica";
+  font-size: 0.8rem;
+  color: #10167F4D;
+  margin-right: 0.5rem;
+}
+
+.timeRangeSeparator {
+  font-family: "Helvetica";
+  font-size: 1.25rem;
+  color: #10167F4D;
+  margin: 0 0.5rem;
+}
+
+.timePickerContainer {
+  position: relative;
+}
+
+.timeSelect {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.timeSelect:hover {
+  background: rgba(16, 22, 127, 0.05);
+  border-radius: 0.5rem;
+}
+
+.timeDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.timeValue {
+  font-family: "Helvetica";
+  font-size: 1rem;
+  color: #10167F4D;
+}
+
+/* --- Time Range Picker Modern Styling --- */
+input[type="time"] {
+  background: transparent;
+  border: transparent;
+  padding: 0.75rem 1.5rem;
+  font-family: "Helvetica";
+  outline: none;
+  text-align: center;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}

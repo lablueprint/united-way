@@ -16,54 +16,47 @@ export default function Editor() {
 
   useEffect(() => {
     const createBlankEvent = async () => {
-      try {
-        const requestType = RequestType.POST;
-        const endpoint = "events/orgs/:id/createEvent";
-        const body = {
-          name: "Your Event Name",
-          date: new Date(),
-          duration: 0, // Hardcoded for now
-          draft: true,
-          draftList: [],
-          description: "Your Event Description",
-          startTime: '12:00',
-          endTime: '12:01',
-          location: {
-            type: "Point",
-            coordinates: [0, 0]
-          },
-          organizerID: org.orgId,
-          tags: [],
-          registeredUsers: [], // Hardcoded for now
-          activity: [], // Hardcoded for now
-          image: "placeholder" // Hardcoded for now
-        };
-        const data = await sendRequest({ requestType, endpoint, body });
-        return data._id;
-      } catch (err) {
-        console.log(err);
-        return ""
-      }
+      const requestType = RequestType.POST;
+      const endpoint = "events/orgs/:id/createEvent";
+      const body = {
+        name: "Your Event Name",
+        date: new Date(),
+        duration: 0, // Hardcoded for now
+        draft: true,
+        draftList: [],
+        description: "Your Event Description",
+        startTime: '12:00',
+        endTime: '12:01',
+        location: {
+          type: "Point",
+          coordinates: [0, 0]
+        },
+        organizerID: org.orgId,
+        tags: [],
+        registeredUsers: [], // Hardcoded for now
+        activity: [], // Hardcoded for now
+        image: "placeholder" // Hardcoded for now
+      };
+      const data = await sendRequest({ requestType, endpoint, body });
+      console.log("indicator function ran");
+      return data._id;
     }
 
     const createEvent = async () => {
-      try {
-        if (editingId == "") {
-          const _id = await createBlankEvent()
-          if (_id != "") {
-            console.log("data set")
-            setIsEditing(!isEditing)
-            setEditingId(_id);
-          }
+      if (editingId == "") {
+        const _id = await createBlankEvent()
+        if (_id != "") {
+          console.log("data set")
+          setIsEditing(!isEditing)
+          setEditingId(_id);
         }
-
-      } catch (err) {
-        console.log(err);
-        return ""
       }
     };
 
-    createEvent();
+    if (!isEditing) {
+      console.log("Creating event")
+      createEvent();
+    }
   }, []);
 
   console.log(editingId)

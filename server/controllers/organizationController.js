@@ -5,6 +5,8 @@ const { generateToken } = require("../controllers/authController");
 
 const createOrganization = async (req, res) => {
   try {
+    req.body.dateJoined = new Date();
+
     bcrypt.hash(
       req.body.password,
       `$2b$${process.env.SALT_ROUNDS}$${process.env.HASH_SALT}`,
@@ -64,12 +66,12 @@ const getAllOrganizations = async (req, res) => {
 // for async functions must use await -- so you can resolve content later
 // pass in parameter of curly braces == no filter
 const getOrganizationById = async (req, res) => {
-    if (req.auth.role != 'admin' && req.auth.role != "user") {
+    if (req.auth.role != 'admin' && req.auth.role != "user" && req.auth.role != "organization") {
         res.status(401).json({
-      status: "failure",
-      message: "Invalid authorization token for request.",
-      data: {}
-    });
+          status: "failure",
+          message: "Invalid authorization token for request.",
+          data: {}
+        });
         return;
     }
     const organizationId = req.params.id;
@@ -134,23 +136,32 @@ const editOrganizationDetails = async (req, res) => {
   }
 
   const orgId = req.params.id;
+
+  // The following fields should not be edited using this function.
+  delete req.body["_id"];
+  delete req.body["email"];
+  delete req.body["password"];
+
   const updateInput = req.body;
   try {
     const result = await Organization.updateOne(
       { _id: orgId },
       { $set: updateInput }
     );
+
+    const newData = await Organization.findById(orgId);
+
     if (result.modifiedCount === 0) {
-      res.status(404).json({
+      res.status(304).json({
         status: "failure",
         message: "Organization not found or no changes made.",
-        data: result,
+        data: {},
       });
     } else {
       res.status(200).json({
         status: "success",
         message: "Organization updated successfully.",
-        data: result,
+        data: newData,
       });
     }
   } catch (err) {

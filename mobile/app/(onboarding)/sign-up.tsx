@@ -188,7 +188,7 @@ export default function SignUpScreen() {
           })
         );
         router.push({
-          pathname: "/onboarding",
+          pathname: "/interest",
           params: {
             id: response.data.data._id,
             authToken: response.data.authToken,
@@ -276,13 +276,7 @@ export default function SignUpScreen() {
             )}
           </View>
         ) : (
-          <SafeAreaView style={{
-            marginHorizontal: 50,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            flexGrow: 1
-          }}>
+          <SafeAreaView style={styles.twoStepContainer}>
             <Text style={styles.title}>2-Step Verification</Text>
             <TextInput
               style={styles.input}
@@ -318,6 +312,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+  },
+  twoStepContainer: {
+    marginHorizontal: 50,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    flexGrow: 1
   },
   background: {
     flex: 1,
@@ -368,7 +369,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontSize: 18,
     fontFamily: "Helvetica",
-    fontWeight: "bold",
+    fontWeight: 700,
   },
   signUpButton: {
     backgroundColor: "rgb(255, 255, 255)",

@@ -120,7 +120,7 @@ export default function SignUpScreen() {
                 onPress={() => { router.dismissTo('/(onboarding)/sign-up'); }}
               >
                 <Text style={styles.createAccountLink}>
-                  SIGN IN
+                  SIGN UP
                 </Text>
               </TouchableOpacity>
             </View>

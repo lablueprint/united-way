@@ -5,6 +5,8 @@ import QRCode from 'react-qr-code';
 import '../_styles/EventEditor.css';
 import { pen, logo } from '../../../public/EventEditor/EventEditor-index'
 import axios from 'axios';
+import ActivityDropdown from './ActivityDropdown';
+
 import { useRouter } from 'next/navigation';
 import { RequestType } from '../_interfaces/RequestInterfaces';
 import useApiAuth from '../_hooks/useApiAuth';
@@ -310,6 +312,7 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                                 <QRCode value={eventId} />
                             </div>
                         </div>
+                        <ActivityDropdown eventId={eventId} isDraft={true} />
                     </div>
                 </div>
             </div>
@@ -329,14 +332,10 @@ export default function EventEditor({ orgName, changeState, eventId, justCreated
                         // If event just created, delete the event
                         // NOTE: This is not async, might cause problems later
                         if (justCreated) {
-                            try {
-                                const requestType: RequestType = RequestType.DELETE;
-                                const body = {};
-                                const endpoint = `events/${eventId}`;
-                                await sendRequest({ requestType, body, endpoint });
-                            } catch (err) {
-                                console.log(err);
-                            }
+                            const requestType: RequestType = RequestType.DELETE;
+                            const body = {};
+                            const endpoint = `events/${eventId}`;
+                            await sendRequest({ requestType, body, endpoint });
                         }
                         router.push('/events');
                     }}>

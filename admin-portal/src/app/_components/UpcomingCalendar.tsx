@@ -453,7 +453,7 @@ const UpcomingCalendar = () => {
                                 : date[date.length - 1]}
                             </div>
                             <div className="day-dots">
-                              <p>
+                              <div>
                                 {events !== undefined ? (
                                   events.length >= 3 ? (
                                     "•••"
@@ -463,7 +463,7 @@ const UpcomingCalendar = () => {
                                     <div style={{ visibility: 'hidden' }}>.</div>
                                   )
                                 ) : null}
-                              </p>
+                              </div>
                             </div>
                           </button>
 
