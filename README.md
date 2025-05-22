@@ -10,7 +10,7 @@ Our project builds on the mission to make it easier for residents to connect wit
 Change directories into the repository `united-way`. 
 Run the command:
 ```shell
-cd admin-portal && npm i && cd ../mobile && npm i && cd ../server && npm i`
+cd admin-portal && npm i && cd ../mobile && npm i && cd ../server && npm i
 ```
 This will directly install the requisite dependencies that are listed within `package.json` to be able to run the web, mobile and server applications, respectively.
 

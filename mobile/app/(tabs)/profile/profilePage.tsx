@@ -160,16 +160,18 @@ export default function Profile() {
                         </Text>
                     </View>
                 </View>
-                <TouchableOpacity style={guestStyles.signUpButton} onPress={() => {
-                    router.push({
-                        pathname: "/(onboarding)/sign-up",
-                        params: { tempId: user.userId }
-                    });
-                }}>
-                    <Text style={[Typography.h3, guestStyles.signUpText]}>
-                        SIGN UP
-                    </Text>
-                </TouchableOpacity>
+                <View style={styles.linkContainer}>
+                    <TouchableOpacity style={guestStyles.signUpButton} onPress={() => {
+                        router.push({
+                            pathname: "/(onboarding)/sign-up",
+                            params: { tempId: user.userId }
+                        });
+                    }}>
+                        <Text style={[Typography.h3, guestStyles.signUpText]}>
+                            SIGN UP
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </SafeAreaView>
         )
     }
@@ -228,15 +230,15 @@ const guestStyles = StyleSheet.create({
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        rowGap: 40,
-        backgroundColor: Color.uwLightBlue
+        rowGap: 40
     },
     innerContainer: {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        rowGap: 64
+        rowGap: 64,
+        paddingHorizontal: 24,
     },
     innerContent: {
         width: "100%"

@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   ImageBackground,
+  SafeAreaView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -60,21 +61,25 @@ export default function OnboardingScreen() {
     if (page < pages.length - 1) {
       setPage(page + 1);
     } else {
-      router.push("/interest");
+      router.push("/(tabs)");
     }
   };
 
   const handleSkip = () => {
-    router.push("/interest");
+    router.push("/(tabs)");
   };
 
   return (
     <ImageBackground source={current.background} style={styles.background}>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.label}>{current.label}</Text>
-          <Text style={styles.title}>{current.title}</Text>
-          <Text style={styles.subtitle}>{current.subtitle}</Text>
+          <View style={styles.textContainer}>
+            <View>
+              <Text style={styles.label}>{current.label}</Text>
+              <Text style={styles.title}>{current.title}</Text>
+            </View>
+            <Text style={styles.subtitle}>{current.subtitle}</Text>
+          </View>
 
           <View style={styles.progressDots}>
             {pages.map((_, i) => (
@@ -101,7 +106,7 @@ export default function OnboardingScreen() {
         <TouchableOpacity onPress={handleSkip}>
           <Text style={styles.skipText}>SKIP</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 }
@@ -114,13 +119,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    marginVertical: 50,
-  },
-  formContainer: {
-    flex: 1,
-    backgroundColor: "transparent",
-    marginTop: 200,
+    marginTop: 110
   },
   content: {
     flex: 1,
@@ -134,14 +133,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   header: {
-    marginBottom: 20,
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 64,
+    paddingHorizontal: 24,
   },
   label: {
     color: "white",
     fontSize: 16,
     marginBottom: 4,
-    marginTop: 110,
     fontFamily: "BarlowCondensedBoldItalic",
+  },
+  textContainer: {
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 36,
+    minHeight: 250,
+    maxHeight: 250,
   },
   title: {
     fontSize: 48,
@@ -160,8 +168,6 @@ const styles = StyleSheet.create({
   progressDots: {
     flexDirection: "row",
     gap: 6,
-    marginTop: 24,
-    marginBottom: 24,
   },
   dot: {
     width: 4,

@@ -37,7 +37,7 @@ export default function InterestsScreen() {
   };
 
   const handleContinue = () => {
-    router.push({ pathname: "/(tabs)" });
+    router.push({ pathname: "/onboarding" });
   };
 
   return (
@@ -71,7 +71,7 @@ export default function InterestsScreen() {
                     style={[
                       styles.interestText,
                       selectedInterests.includes(interest) &&
-                        styles.selectedText,
+                      styles.selectedText,
                     ]}
                   >
                     {interest}
