@@ -1,5 +1,5 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
-import EventEditor from "./EventEditor";
+import BetterEventEditor from "./BetterEventEditor";
 import useApiAuth from '../_hooks/useApiAuth';
 import { RequestType, Request } from '../_interfaces/RequestInterfaces';
 import { EventData } from '../_interfaces/EventInterfaces';
@@ -34,7 +34,9 @@ export default function EventCard({ id, removeFromList, orgName, onClick }: Even
         },
         tags: [],
         registeredUsers: [],
-        activities: []
+        activities: [],
+        imageUrl: "",
+        userCount: 0
     });
     // event schema has the date as a string right now, but needs to be event object
     const location = "Los Angeles, CA";
@@ -115,6 +117,8 @@ export default function EventCard({ id, removeFromList, orgName, onClick }: Even
                 </div>
                 <div className="event-card-location">{location}</div>
             </div>
+
+            {isEditing && <BetterEventEditor eventId={id} />}
         </div>
 
 

@@ -1,0 +1,34 @@
+@font-face {
+    font-family: "Barlow";
+    font-style: italics;
+    font-weight: normal;
+    src: url("./_fonts/BarlowCondensed-SemiBoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Barlow";
+    font-style: italics;
+    font-weight: bold;
+    src: url("./_fonts/BarlowCondensed-BoldItalic.ttf") format("opentype");
+}
+
+@font-face {
+    font-family: "Barlow-Normal";
+    font-style: italics;
+    font-weight: normal;
+    src: url("./_fonts/BarlowCondensed-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Barlow-Normal";
+    font-style: italics;
+    font-weight: bold;
+    src: url("./_fonts/BarlowCondensed-Bold.ttf") format("opentype");
+}
+
+.border-margin {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem 9rem 1.25rem 9rem
+}

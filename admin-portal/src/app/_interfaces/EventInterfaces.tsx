@@ -17,6 +17,7 @@ export interface Activity {
     timeStart: Date;
     timeEnd: Date;
     active: boolean;
+    title: string;
 }
 
 export interface PollContent {
@@ -39,10 +40,7 @@ export const EventTags: string[] = [
     'Wellness',
     'Music',
     'Pets',
-    'Shopping',
-    'Reading',
     'Travel',
-    'Home',
     'Vehicles'
 ];
 
@@ -61,6 +59,21 @@ export interface EventData {
     };
     organizerId: string;
     tags: string[];
+    imageUrl: string;
+    userCount: number;
     registeredUsers: string[];
     activities: Activity[];
+}
+
+export interface EventEditorProps {
+    orgName: string;
+    changeState: React.Dispatch<React.SetStateAction<boolean>>;
+    eventId: string;
+    justCreated: boolean;
+}
+
+export interface LocationProps {
+    display_name: string;
+    lat: string;
+    lon: string;
 }

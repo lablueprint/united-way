@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
-import EventEditor from '@/app/_components/EventEditor';
+import BetterEventEditor from '@/app/_components/BetterEventEditor';
 import useApiAuth from "@/app/_hooks/useApiAuth";
 import { RequestType } from "@/app/_interfaces/RequestInterfaces";
 
@@ -63,11 +63,8 @@ export default function Editor() {
   return (
     <>
       {isEditing && (
-        <EventEditor
-          orgName={orgName}
-          changeState={setIsEditing}
+        <BetterEventEditor
           eventId={editingId}
-          justCreated={true}
         />
       )}
     </>
