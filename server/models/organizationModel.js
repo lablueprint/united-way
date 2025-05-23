@@ -26,6 +26,10 @@ const organizationSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
+  email: {
+    required: true,
+    type: String,
+  },
   users: [String], // Array of user IDs
   rewards: [
     {

@@ -56,3 +56,94 @@
   font-weight: bold;
   font-family: 'Barlow';
 }
+
+.buttonDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding-top: .521vw;
+  padding-right: 7.813vw;
+}
+
+.previewButton {
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: .572rem 1.25rem;
+gap: .524rem;
+
+width: 6.37vw;
+height: 1.875vw;
+color: #10167F;
+background-color: white;
+font-family: Helvetica;
+font-weight: 700;
+font-size: .75rem;
+border: 0.062rem solid rgba(16, 22, 127, 0.4);
+border-radius: 4.765rem;
+
+}
+
+.previewIcon {
+  /*TODO: fix eye clipping, the image is clipped \
+  when the .previewButton class
+  has a FIXED HEIGHT
+  */
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  
+}
+
+.editButton {
+ /* Primary */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 9.14851px 20px;
+gap: 8.39px;
+color: white;
+font-family: Helvetica;
+font-weight: 700;
+font-size: .635vw;
+width: 68px;
+height: 36px;
+
+background: #10167F;
+border-radius: 76.2376px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+}
+
+.content{
+
+  display: flex;
+  width: 100vw;
+  height: 100vh; /* or any height you want */
+}
+
+.pageRight, .pageLeft{
+  flex: 1; 
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.rewardTitle{
+  font-family: Barlow;
+  font-weight: bold;
+  font-size: 1.875rem;
+  font-style: italics;
+  color:#10167F;
+
+}

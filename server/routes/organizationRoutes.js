@@ -44,4 +44,8 @@ organizationRouter.get(
   organizationController.getAssociatedEvents
 );
 
+organizationRouter.get("/:id/rewards/:rewardId", 
+  organizationController.getRewardById
+);
+
 module.exports = organizationRouter;

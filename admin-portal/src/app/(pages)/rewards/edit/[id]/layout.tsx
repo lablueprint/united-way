@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import React, { useEffect, useState } from 'react';
-import { login } from '../../../_utils/redux/orgSlice';
+import { login } from '../../../../_utils/redux/orgSlice';
 
 export default function PagesLayout({
     children,

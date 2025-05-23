@@ -20,6 +20,7 @@ export default function SignIn() {
     // Check if password is correct
     const targetOrg = await getOrgByEmail();
     const signIn = await verifySignIn();
+    console.log(email, password);
     if (targetOrg.data.length === 0 || signIn === null) {
       window.alert('Email or password is incorrect.');
       return;

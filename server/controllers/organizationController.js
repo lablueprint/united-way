@@ -104,6 +104,64 @@ const getOrganizationById = async (req, res) => {
   }
 };
 
+const getRewardById = async (req, res) => {
+  console.log("This is checking auth for org", req.auth.role);
+  if (
+    req.auth.role !== "admin" &&
+    req.auth.role !== "user" &&
+    req.auth.role !== "organization"
+  ) {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {},
+    });
+    return;
+  }
+
+  const organizationId = req.params.id;
+  const rewardId = req.params.rewardId;
+console.log(
+    "This is the organizationId and rewardId", organizationId, rewardId);
+  try {
+    const organization = await Organization.findOne({ _id: organizationId });
+
+    if (!organization) {
+      return res.status(404).json({
+        status: "failure",
+        message: "Organization not found.",
+        data: {},
+      });
+    }
+
+    const reward = organization.rewards.find(
+      (r) => r._id.toString() === rewardId
+    );
+
+    if (!reward) {
+      return res.status(404).json({
+        status: "failure",
+        message: "Reward not found.",
+        data: {},
+      });
+    }
+    console.log("Reward data:", reward);
+
+    return res.status(200).json({
+      status: "success",
+      message: "Reward successfully retrieved.",
+      data: reward,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: could not find reward.",
+      data: {},
+    });
+  }
+};
+
 const getOrganizationsByFilter = async (req, res) => {
   try {
     const orgByFilter = await Organization.find(req.body);
@@ -287,6 +345,7 @@ module.exports = {
   getAllOrganizations,
   getOrganizationsByFilter,
   getOrganizationById,
+  getRewardById,
   editOrganizationDetails,
   getAssociatedEvents,
   deleteOrganization,

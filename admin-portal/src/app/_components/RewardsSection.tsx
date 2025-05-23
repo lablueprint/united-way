@@ -16,6 +16,8 @@ export interface Reward {
   image: string;
   cost: number;
   quantity: number;
+  description: string;
+  directions: string;
   _id: string;
 }
 
@@ -28,7 +30,6 @@ const RewardsSection = () => {
   // Select primitive values to avoid object dependency changes
   const orgId = useSelector((state: RootState) => state.auth.orgId);
   const authToken = useSelector((state: RootState) => state.auth.authToken);
-
   useEffect(() => {
     const fetchRewards = async () => {
       try {
