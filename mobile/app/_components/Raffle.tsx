@@ -104,17 +104,17 @@ const styles = StyleSheet.create({
   },
   ticket: {
     resizeMode: 'contain',
-    height: 220,
-    width: width - 96,
+    height: height * 0.25,
+    width: 'auto',
     marginTop: 16,
   },
   ticketText: {
     fontFamily: 'BarlowCondensedBold',
-    fontSize: 56,
+    fontSize: (width - 96) * 0.17,
     fontWeight: 700,
     position: 'absolute',
-    top: 104,
-    left: 118,
+    top: '45%',
+    left: '35%',
     color: "white",
   }
 });
