@@ -16,6 +16,15 @@ export default function EventScanner() {
   const [scanned, setScanned] = useState(false);
   const [hasNavigated, setHasNavigated] = useState(false);
 
+
+  const user = useSelector((state) => {
+    return {
+      userId: state.auth.userId,
+      authToken: state.auth.authToken,
+      refreshToken: state.auth.refreshToken
+    }
+  });
+
   const router = useRouter();
   const pathname = usePathname();
   const params = useLocalSearchParams();
@@ -71,7 +80,7 @@ export default function EventScanner() {
           setHasNavigated(false);
         }} />
       )}
-      <Button
+      {/* <Button
         title={'Scan'}
         onPress={() => {
           if (scanned || hasNavigated) return;
@@ -87,7 +96,7 @@ export default function EventScanner() {
           });
         }
         }
-      />
+      /> */}
     </View>
   );
 }

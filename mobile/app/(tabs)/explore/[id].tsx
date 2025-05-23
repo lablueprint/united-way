@@ -1,8 +1,15 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, StyleSheet, ScrollView, Modal, Alert } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { io, Socket } from "socket.io-client";
+import { useRef } from 'react';
+import Poll from '../../_components/Poll';
+import Announcement from '../../_components/Announcement';
+import Raffle from '../../_components/Raffle';
+
+const windowHeight = Dimensions.get('window').height;
 
 import useApiAuth from '@/app/_hooks/useApiAuth';
 import { RequestType } from '@/app/_interfaces/RequestInterfaces';
@@ -48,9 +55,39 @@ export default function EventDetails() {
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
   const [organizationName, setOrganizationName] = useState("");
 
+  // Raffle states
+  const [joinedRaffles, setJoinedRaffles] = useState(false);
+  const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
+  const [drawnNumber, setDrawnNumber] = useState<number | null>(null);
+  const [winner, setWinner] = useState<boolean | null>(null);
+  const [raffleVisible, setRaffleVisible] = useState(false);
+
+  // Poll states
+  const [pollVisible, setPollVisible] = useState(false);
+  const [pollId, setPollId] = useState<string | null>(null);
+  const [pollResponses, setPollResponses] =  useState<(number | null)[]>([]);
+  const [showResults, setShowResults] = useState(false);
+
+  // Announcement states
+  const [announcementVisible, setAnnouncementVisible] = useState(false);
+  const [announcementId, setAnnouncementId] = useState<string | null>(null);
   const { id } = useLocalSearchParams();
 
   const [user, sendRequest] = useApiAuth();
+
+  const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    if ((registeredUsers).includes(user.userId) && !socketRef.current) {
+      socketRef.current = io(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}`);
+      const socket = socketRef.current;
+      // Send a message to the server
+      socket.emit('message', `Connecting at ${new Date()}`);
+      // Join the event room
+      socket.emit('join event', eventData);
+      listenForEventUpdates();
+    }
+  }, [registeredUsers]);
 
   const getEventDetails = async () => {
     try {
@@ -106,7 +143,6 @@ export default function EventDetails() {
     } catch (err) {
       console.error(err);
     }
-
   };
 
   const removeUserFromEvent = async (userId: string) => {
@@ -152,10 +188,106 @@ export default function EventDetails() {
       await removeUserFromEvent(user.userId);
 
       setRegisteredUsers(registeredUsers.filter(id => id !== user.userId));
+      setJoinedRaffles(false);
+      setRaffleNumber(null);
+      socketRef.current?.emit('leave event', eventData);
+      socketRef.current?.disconnect();
+      socketRef.current = null;
     } catch (err) {
       console.error(err);
     }
   };
+
+  const closePoll = () => {
+    setPollVisible(false);
+  }
+
+  const closeAnnouncement = () => {
+    setAnnouncementVisible(false);
+  }
+
+  const closeRaffle = () => {
+    setRaffleVisible(false);
+  }
+
+  const listenForEventUpdates = () => {
+    const socket = socketRef.current;
+    // Listen for messages from the server
+    socket?.on('message', (data) => {
+      console.log('Message from server:', data);
+    });
+    // Listen for event and activity updates
+    socket?.on('event start', (data) => {
+      console.log('Event started:', data.name);
+      Alert.alert('Event started', `The event ${data.name} has started!`);
+    });
+    socket?.on('event end', (data) => {
+      closePoll();
+      closeAnnouncement();
+      closeRaffle();
+      console.log('Event ended:', data.name);
+      Alert.alert('Event ended', `The event ${data.name} has ended!`);
+    });
+    socket?.on('announcement start', (id) => {
+      console.log('Announcement starting');
+      setAnnouncementVisible(true);
+      setAnnouncementId(id);
+    });
+    socket?.on('announcement end', (id) => {
+      console.log('Announcement ending');
+      setAnnouncementVisible(false);
+      setAnnouncementId(null);
+    });
+    socket?.on('poll', (id) => {
+      console.log('Poll starting');
+      setShowResults(false);
+      setPollVisible(true);
+      setPollId(id);
+    });
+    socket?.on('poll results', (id) => {
+      setShowResults(true);
+      setPollVisible(true);
+      setPollId(id);
+    })
+    socket?.on('activity start', (data) => {
+      console.log('Activity started:', data.type);
+      Alert.alert('Activity started', `An activity of type ${data.type} has started.`);
+    });
+    socket?.on('activity end', (data) => {
+      console.log('Activity ended:', data.type);
+      Alert.alert('Activity ended', `An activity of type ${data.type} has ended.`);
+    });
+    // Listen for raffle updates
+    socket?.on('new raffle number', (raffleNumber) => {
+      console.log('New raffle number:', raffleNumber);
+      setRaffleNumber(raffleNumber);
+      setDrawnNumber(null);
+      setWinner(null);
+      setRaffleVisible(true);
+    });
+    socket?.on('raffle winner', (randomRaffleNumber) => {
+      setDrawnNumber(randomRaffleNumber);
+      setWinner(true);
+      setRaffleVisible(true);
+    });
+    socket?.on('raffle loser', (randomRaffleNumber) => {
+      setDrawnNumber(randomRaffleNumber);
+      setWinner(false);
+      setRaffleVisible(true);
+    });
+    // Listen for disconnection
+    socket?.on('disconnect', () => {
+      socketRef.current = null;
+      console.log('Disconnected from server');
+    });
+  }
+
+  const handleJoinRaffles = () => {
+    if (!joinedRaffles && eventData && eventData.registeredUsers.includes(user.userId)) {
+      setJoinedRaffles(true);
+      socketRef.current?.emit('join raffle', eventData);
+    }
+  }
 
   useEffect(() => {
     const getOrganizationName = async () => {
@@ -264,6 +396,60 @@ export default function EventDetails() {
             <Text style={styles.reward}>Reward Component Placeholder</Text>
           </View>
         </View>
+        {/* Poll modal */
+        (registeredUsers).includes(user.userId) ?
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={pollVisible}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+              setPollVisible(!pollVisible);
+            }}
+          >
+            <View style={styles.modalOverlay}>
+              {pollId && socketRef.current && <Poll activityId={pollId} socket={socketRef.current} closePoll={closePoll} showResults={showResults} pollResponses={pollResponses} setPollResponses={setPollResponses}/>}
+            </View>
+          </Modal>
+          :
+          <></>
+        }
+        {/* Announcement modal */
+        (registeredUsers).includes(user.userId) ?
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={announcementVisible}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+              setAnnouncementVisible(!announcementVisible);
+            }}
+          >
+            <View style={styles.modalOverlay}>
+              {announcementId && socketRef.current && <Announcement activityId={announcementId} closeAnnouncement={closeAnnouncement} />}
+            </View>
+          </Modal>
+          :
+          <></>
+        }
+        {/* Raffle modal */
+        (registeredUsers).includes(user.userId) ?
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={raffleVisible}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+              setRaffleVisible(!raffleVisible);
+            }}
+          >
+            <View style={styles.modalOverlay}>
+              {socketRef.current && raffleNumber && <Raffle number={raffleNumber} drawnNumber={drawnNumber} winner={winner} closeRaffle={closeRaffle} />}
+            </View>
+          </Modal>
+          :
+          <></>
+        }
         {(registeredUsers).includes(user.userId) ?
           <View style={styles.section}>
             <Text style={styles.subheader}>Raffle</Text>
@@ -274,10 +460,18 @@ export default function EventDetails() {
                 <Text style={styles.description}>Raffle Gift Details</Text>
               </View>
             </View>
-            <TouchableOpacity><Text style={styles.darkButton}>Join</Text></TouchableOpacity>
+            {!joinedRaffles &&
+              <TouchableOpacity onPress={handleJoinRaffles}>
+                <Text style={styles.darkButton}>Join</Text>
+              </TouchableOpacity>
+            }
+            {joinedRaffles && raffleNumber &&
+              <Text>Your raffle number is {raffleNumber}.</Text>
+            }
           </View>
           :
           <></>
+          
         }
 
       </ScrollView>
@@ -409,5 +603,10 @@ const styles = StyleSheet.create({
   },
   buttonWrap: {
     flexShrink: 0,
-  }
+  },
+  modalOverlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: windowHeight,
+  },
 });
