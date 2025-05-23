@@ -89,11 +89,13 @@ const verifyUserLogin = async (req, res) => {
 const refreshOrgAccessToken = async (req, res) => {
   try {
       // Verify the refresh token and get the user id.
+      ("refresh was called", req.auth.uid)
       const org = await Organization.findOne({_id: req.auth.uid});
 
       // Ensure that the org id actually exists within the MongoDB cluster
       // If org is not found:
-      if (!org) {
+      if (org == null) {
+        ("here");
           res.status(401).json({
               status: "failure",
               message: "Unable to verify refresh token.",
@@ -123,6 +125,7 @@ const refreshOrgAccessToken = async (req, res) => {
 
 const verifyOrgLogin = async (req, res) => {
   try {
+    console.log("here")
     const org = await Organization.findOne({email: req.body.email});
 
     const match = await bcrypt.compare(req.body.password, org.password);

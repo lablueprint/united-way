@@ -1,0 +1,94 @@
+@font-face {
+    font-family: 'BarlowCondensed';
+    src: url("./_fonts/BarlowCondensed-ExtraBoldItalic.ttf") format("truetype");
+    font-weight: bolder;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'BarlowCondensed';
+    src: url("./_fonts/BarlowCondensed-BoldItalic.ttf") format("truetype");
+    font-weight: bold;
+    font-style: italic;
+}
+
+.footerBody {
+    padding: 5rem;
+    display: flex;
+    flex-direction: column;
+    background-color: #F3F3F3;
+}
+
+.orgHeader {
+    /* src: url("./_fonts/BarlowCondensed-ExtraBoldItalic.ttf") format("truetype"); */
+    font-size: 2rem;
+    color: #10167F;
+    font-family: 'BarlowCondensed';
+    font-weight: bold;
+    font-style: italic;
+    line-height: 2rem;
+}
+
+.sectionA {
+    display: flex;
+    flex-direction: row;
+    column-gap: 60;
+}
+
+.sectionA1 {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1.25rem;
+    width: 50%;
+}
+
+.sectionA2 {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1.25rem;
+    width: 25%;
+}
+
+.sectionA3 {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1.25rem;
+    width: 25%;
+}
+
+.sectionB {
+    height: 1px;
+    width: 100%;
+    background-color: #10167F;
+    margin: 30px 0;
+}
+
+.sectionC {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.sectionHeader {
+    font-family: Helvetica, sans-serif;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #10167F;
+}
+
+.sectionContent {
+    font-family: Helvetica, sans-serif;
+    font-size: 1.1rem;
+    font-weight: normal;
+    color: #10167F;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.1rem;
+}
+
+.subtitle {
+    font-family: Helvetica, sans-serif;
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #10167F;
+}

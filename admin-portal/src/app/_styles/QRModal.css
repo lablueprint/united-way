@@ -1,0 +1,107 @@
+.modalContainer {
+    display: flex;
+    flex-direction:column;
+    padding: 1.5rem;
+    gap: 2rem;
+    position: relative;
+    z-index: 999999;
+    border-style: none;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0px 4px 40px 0px rgba(0, 0, 0, 0.2);
+    width: 520px;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.2);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+}
+
+.headerContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.headerWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.headerText {
+    font-weight: 700;
+    font-family: "BarlowCondensed";
+    font-style: italic;
+    color: rgba(16, 22, 127, 1);
+    text-transform: uppercase;
+    font-size: 1.75rem;
+}
+
+.headerDescription {
+    font-size: 1.125rem;
+    color: rgba(16, 22, 127, 0.6);
+}
+
+.buttonContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.lightButton, .darkButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.875rem 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}   
+
+.lightButton:hover, .darkButton:hover {
+    cursor: pointer;
+}
+
+.lightButton {
+    background-color: #FFFFFF;
+    color: rgba(16, 22, 127, 0.8);
+    padding: 0.875rem 1.5rem;
+    border-style: none;
+}
+
+.darkButton {
+    background-color: rgba(16, 22, 127, 1);
+    color: rgba(255, 255, 255, 1);
+    border-style: none;
+    border-radius: 100px;
+}
+
+.qrContain {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0.5rem;
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(16, 22, 127, 0.2);
+}
+
+.exit:hover {
+    cursor: pointer;
+}

@@ -82,7 +82,20 @@ app.use("/events", eventRouter);
 
 app.use("/activities", activityRouter);
 
-app.use('/twofactor',twoFactorRouter);
+app.use(
+  "/twofactor",
+  jwt({
+    secret: process.env.JWT_SECRET,
+    algorithms: ["HS256"],
+  }).unless({
+    path: [
+      "/twofactor/sendOTP",  // <- allow without token
+      "/twofactor/verifyCode"    // <- allow user to verify OTP without token
+    ]
+  })
+);
+
+app.use('/twofactor' ,twoFactorRouter);
 
 app.get('/', (req, res) => { // defines a route where if we send get req to the route, will send back resp
   res.send('Hello World!'); // routers are groupings of endpoints

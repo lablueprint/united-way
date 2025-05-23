@@ -18,6 +18,11 @@ const organizationSchema = new mongoose.Schema({
   pastEvents: [String],
   email: String,
   password: String,
+  dateJoined: Date,
+  website: String,
+  instagram: String,
+  facebook: String,
+  phoneNumber: String,
 });
 
 module.exports = mongoose.model('Organization', organizationSchema);

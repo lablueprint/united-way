@@ -3,6 +3,8 @@ const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 
 // Example of creating a document in the database
 const createEvent = async (req, res) => {
+  req.body.organizerID = req.params.id;
+  req.body.name = "Title";
   const event = new Event(req.body);
   try {
     const data = await event.save(event);
@@ -213,7 +215,9 @@ const removeUserFromEvent = async (req, res) => {
 const getEventById = async (req, res) => {
   const eventId = req.params.id;
   try {
+    ("Here is the event", eventId);
     const event = await Event.findById(eventId);
+    (event);
     res.status(200).json({
       status: "success",
       message: "Event successfully received.",
@@ -246,6 +250,124 @@ const getAllEvents = async (req, res) => {
     });
   }
 };
+
+const getEventsByOrganization = async (req, res) => {
+  try {
+    const events = await Event.find({organizerID: req.params.id});
+    res.status(200).json({
+      status: "success",
+      message: "Event successfully received.",
+      data: events,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: could not receive events.",
+      data: {},
+    });
+  }
+}
+
+const getAllEventsByTag = async (req, res) => {
+  try {
+    const tag = req.params.tag;
+    const orgId = req.body.orgId;
+
+    // Ensure the date is provided
+    if (!tag) {
+      tag = "All";
+    }
+    data_dict = {}
+    // Parse the date and calculate the start and end of the day
+    const todayStart = new Date();
+    const todayEnd = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    todayEnd.setHours(23, 59, 59, 999);
+
+
+    // Query the database for events on the specific day, sorted by date
+    if (tag == "Upcoming") {
+      const events = await Event.find({
+        organizerID: orgId,
+        date: {
+          $gte: todayEnd,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Upcoming"] = events;
+      res.status(200).json({
+        status: "success",
+        message: "Event(s) successfully received.",
+        data: data_dict
+      });
+    }
+    else if (tag == "Current") {
+      const events = await Event.find({
+        organizerID: orgId,
+        date: {
+          $gte: todayStart,
+          $lte: todayEnd,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Current"] = events;
+       res.status(200).json({
+        status: "success",
+        message: "Event(s) successfully received.",
+        data: data_dict
+      });
+    }
+    else if (tag == "Past") {
+      const events = await Event.find({
+        organizerID: orgId,
+        date: {
+          $lte: todayStart,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Past"] = events;
+      res.status(200).json({
+        status: "success",
+        message: "Event(s) successfully received.",
+        data: data_dict,
+      });
+    }
+    else {
+      const eventsCurrent = await Event.find({
+        organizerID: orgId,
+        date: {
+          $gte: todayStart,
+          $lte: todayEnd,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Current"] = eventsCurrent;
+
+      const eventsUpcoming = await Event.find({
+        organizerID: orgId,
+        date: {
+          $gte: todayEnd,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Upcoming"] = eventsUpcoming;
+
+      const eventsPast = await Event.find({
+        organizerID: orgId,
+        date: {
+          $lte: todayStart,
+        },
+      }).sort({ date: -1 }); // Sort by the date field in ascending order
+      data_dict["Past"] = eventsPast;
+      
+      res.status(200).json({
+        status: "success",
+        message: "Event(s) successfully received.",
+        data: data_dict,
+      });
+
+    }
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+}
 
 //
 // TODO: filter by including sub-element matches as well
@@ -298,7 +420,9 @@ const editEventDetails = async (req, res) => {
 
 const deleteEvent = async (req, res) => {
   try {
+    console.log("deleting event")
     const data = await Event.findByIdAndDelete(req.params.id);
+    console.log(data)
     res.status(200).json({
       status: "success",
       message: "Event successfully deleted.",
@@ -351,17 +475,53 @@ const getPolls = async (req, res) => {
   }
 }
 
+const getEventsByDay = async (req, res) => {
+  try {
+    const date = req.params.date;
+
+    // Ensure the date is provided
+    if (!date) {
+      return res.status(400).json({ error: "A date is required." });
+    }
+
+    // Parse the date and calculate the start and end of the day
+    const startOfDay = new Date(date);
+    const endOfDay = new Date(date);
+  
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Query the database for events on the specific day, sorted by date
+    const events = await Event.find({
+      date: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    }).sort({ date: 1 }); // Sort by the date field in ascending order
+    res.status(200).json({
+      status: "success",
+      message: "Event successfully deleted.",
+      data: events,
+    });
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 module.exports = {
   createEvent,
   removeUserFromEvent,
   getEventById,
   getAllEvents,
   getEventsByFilter,
+  getEventsByOrganization,
   editEventDetails,
   deleteEvent,
   addUserToEvent,
   addActivity,
   getPolls,
   addImageToEvent,
-  removeImageFromEvent
+  removeImageFromEvent,
+  getEventsByDay,
+  getAllEventsByTag,
 };

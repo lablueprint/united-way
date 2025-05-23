@@ -1,0 +1,35 @@
+.activity-editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #F9FCFF;
+  z-index: 1000;
+  overflow: auto;
+}
+
+.activity-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.activity-editor-title {
+  margin: 0;
+}
+
+.activity-editor-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.activity-editor-delete {
+  color: #ff4d4f;
+  cursor: pointer;
+}
+
+.activity-editor-delete:hover {
+  text-decoration: underline;
+}

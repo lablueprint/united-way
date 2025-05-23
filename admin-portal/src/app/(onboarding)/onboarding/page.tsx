@@ -2,43 +2,23 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from "axios";
-import { useSelector } from 'react-redux';
+import useApiAuth from "../../_hooks/useApiAuth";
+import { RequestType } from "../../_interfaces/RequestInterfaces"
 
 export default function Onboarding() {
   const router = useRouter();
+  const [org, sendRequest] = useApiAuth();
   const [community, setCommunity] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [name, setName] = useState<string>('');
 
-  interface RootState {
-    auth: {
-      orgId: string;
-      authToken: string;
-      refreshToken: string;
-    };
-  }
-
-  // Get global state
-  const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
-  const apiEndpoint = `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`;
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Submit form data
-    const formData = { community: community, description: description, location: { type: "Point", coordinates: [0, 0, 0] }, name: name, };
-    try {
-      await axios.patch(apiEndpoint, formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${org.authToken}`,
-            'Content-Type': "application/json"
-          }
-        }
-      );
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    }
+    const requestType = RequestType.PATCH;
+    const body = { community: community, description: description, location: { type: "Point", coordinates: [0, 0, 0] }, name: name, };
+    const endpoint = "orgs/:id";
+    await sendRequest({ requestType, body, endpoint })
 
     router.push('/tabs'); // '/landing'
   };

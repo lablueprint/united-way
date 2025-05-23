@@ -10,6 +10,19 @@ export default function StackLayout() {
           animation: "slide_from_left"
         }}
       />
+      <Stack.Screen
+        name='[id]'
+        options={{
+          headerShown: false,
+          animation: "none"
+        }}
+      />
+      <Stack.Screen
+        name='associated-events'
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

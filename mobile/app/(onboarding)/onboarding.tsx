@@ -1,213 +1,208 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Button } from 'react-native';
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
-import axios, { AxiosResponse } from "axios";
-import DropDownPicker from 'react-native-dropdown-picker';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ImageBackground,
+  SafeAreaView,
+} from "react-native";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+
+const pages = [
+  {
+    key: 1,
+    title: "STAY CONNECTED",
+    subtitle:
+      "Choose the communities you want to engage with — whether it’s your neighborhood, school, or city. We’ll make sure you see events and rewards that matter to you.",
+    label: "APP OVERVIEW",
+    background: require("../../assets/images/onboarding/background-1.png"),
+  },
+  {
+    key: 2,
+    title: "CREATE YOUR PROFILE",
+    subtitle:
+      "Tell us a little about yourself and choose the communities you care about. This helps us tailor events, rewards, and experiences just for you.",
+    label: "PROFILE PAGE",
+    background: require("../../assets/images/onboarding/background-2.png"),
+  },
+  {
+    key: 3,
+    title: "EVENTS MADE FOR YOU",
+    subtitle:
+      "Discover events tailored to your interests and location. View details, sign up, and check in when you arrive to unlock live event features like polls, surveys, announcements, and raffles.",
+    label: "EXPLORE PAGE",
+    background: require("../../assets/images/onboarding/background-3.png"),
+  },
+  {
+    key: 4,
+    title: "COMMUNITY LEVELS",
+    subtitle:
+      "Grow with your community by showing up, participating, and engaging. Earn achievements to unlock rewards that level up with you!",
+    label: "REWARDS PAGE",
+    background: require("../../assets/images/onboarding/background-4.png"),
+  },
+  {
+    key: 5,
+    title: "EARN POINTS, GET REWARDS",
+    subtitle:
+      "Every action counts! Collect points and stamps at events, climb tiers, and redeem awesome rewards — from in-app goodies to real-world prizes.",
+    label: "REWARDS PAGE",
+    background: require("../../assets/images/onboarding/background-5.png"),
+  },
+];
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const { id, authToken } = params;
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [ethnicity, setEthnicity] = useState('');
-  const [community, setCommunity] = useState('');
-  // Gender selector
-  const [open, setOpen] = useState(false);
-  const [gender, setGender] = useState(null);
-  const [items, setItems] = useState([
-    { label: 'Male', value: 'male' },
-    { label: 'Female', value: 'female' },
-    { label: 'Other', value: 'other' },
-  ]);
+  const [page, setPage] = useState(0);
+  const current = pages[page];
 
-  const [title, setTitle] = useState("What is your name?");
-  const [subtitle, setSubtitle] = useState("Please enter your first and last name");
-  const [placeholder, setPlaceholder] = useState("Name");
-  const [textInput, setTextInput] = useState("");
-  const [dropDownInput, setDropDownInput] = useState(null);
-  const [state, setState] = useState(1);
-
-  const handleEditUser = async () => {
-    try {
-      const response: AxiosResponse = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/${id}`,
-        {
-          name: name,
-          phoneNumber: phone,
-          demographics: {
-            ethnicity: ethnicity,
-            community: community,
-            gender: gender
-          }
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': "application/json"
-          }
-        }
-      );
-      // Navigate to home screen
-      router.push({ pathname: "/interest" })
-      //router.push("/(tabs)");
-    } catch (err) {
-      console.log(err);
+  const handleContinue = () => {
+    if (page < pages.length - 1) {
+      setPage(page + 1);
+    } else {
+      router.push("/(tabs)");
     }
-  }
-  useEffect(() => {
+  };
 
-    if (state == 1) {
-      setTitle("What is your name?");
-
-      setSubtitle("Please enter your first and last name");
-      setPlaceholder(name || "Name");
-      setTextInput(name);
-    } else if (state == 2) {
-      setTitle("Phone Number");
-      setName(textInput)
-
-      setSubtitle("Enter your number to receive updates");
-      setPlaceholder(phone || "Phone Number");
-      setTextInput(phone);
-    } else if (state == 3) {
-      setTitle("Language");
-
-      setPhone(textInput)
-      setSubtitle("Enter your Preferred Language");
-      setPlaceholder(ethnicity || "Language");
-      setTextInput(ethnicity);
-    } else if (state == 4) {
-      setTitle("Community");
-      setEthnicity(textInput)
-
-      setSubtitle("Enter your Community");
-      setPlaceholder(community || "Community");
-      setTextInput(community);
-    } else if (state == 5) {
-      setTitle("Gender");
-      setCommunity(textInput)
-      setSubtitle("Enter your Gender");
-      setPlaceholder(gender || "Please select");
-      setTextInput("");
-    } else if (state == 6) {
-      setGender(dropDownInput)
-      handleEditUser()
-    }
-  }, [state]); // Runs when `state` changes
-
-  const handleContinue1 = async () => {
-    setState(state => state + 1);
-  }
-
-  const handleBack = async () => {
-    if (state > 1) {
-      setState(state => state - 1); // Decrease the state first
-    }
-
-  }
+  const handleSkip = () => {
+    router.push("/(tabs)");
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.formContainer}>
-        {state != 6 ?
-          (<View style={styles.content}>
-            {state != 1 ?
-              (<TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                <Text style={styles.backButtonText}>&lt; Back</Text>
-              </TouchableOpacity>) : <></>}
-            <View style={styles.header}>
-              <Text style={styles.title}>{title}</Text>
-              <Text style={styles.subtitle}>
-                {subtitle}
-              </Text>
+    <ImageBackground source={current.background} style={styles.background}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.textContainer}>
+            <View>
+              <Text style={styles.label}>{current.label}</Text>
+              <Text style={styles.title}>{current.title}</Text>
             </View>
-            {state != 5
-              ? (<TextInput
-                style={styles.input}
-                value={textInput}
-                onChangeText={setTextInput}
-                placeholder={placeholder} />)
-              : (<DropDownPicker
-                open={open}
-                value={gender}
-                items={items}
-                setOpen={setOpen}
-                setValue={setGender}
-                setItems={setItems}
-                placeholder="Gender"
-              />)}
+            <Text style={styles.subtitle}>{current.subtitle}</Text>
+          </View>
 
+          <View style={styles.progressDots}>
+            {pages.map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.dot,
+                  i === page ? styles.activeDot : styles.inactiveDot,
+                ]}
+              />
+            ))}
+          </View>
+        </View>
 
-            <TouchableOpacity style={styles.continueButton} onPress={handleContinue1}>
-              <Text style={styles.continueButtonText}>Continue</Text>
-            </TouchableOpacity>
-            <Text style={styles.textdd}>
-              Let's get you onboarded!
-            </Text>
-          </View>) : <Text>Loading...</Text>}
-      </View>
-    </View>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={handleContinue}
+        >
+          <Text style={styles.continueButtonText}>
+            {page === pages.length - 1 ? "LET'S GET STARTED" : "CONTINUE"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleSkip}>
+          <Text style={styles.skipText}>SKIP</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-
-  formContainer: {
+  background: {
     flex: 1,
-    padding: 20,
-    marginTop: 60,
-  },
-  textdd: {
-    color: 'black',
-    margin: 24,
+    resizeMode: "cover",
+    justifyContent: "center",
   },
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 40,
+    marginTop: 110
   },
   content: {
     flex: 1,
-    padding: 20,
-    marginTop: 40,
-  },
-  header: {
-    marginBottom: 40,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
-  input: {
-    backgroundColor: '#F5F5F5',
-    padding: 16,
-    borderRadius: 8,
-    fontSize: 18,
-    marginBottom: 24,
-    letterSpacing: 1,
-  },
-  continueButton: {
-    backgroundColor: 'black',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  continueButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    justifyContent: "flex-start",
   },
   backButton: {
-
+    marginBottom: 20,
   },
   backButtonText: {
-    color: 'black',
+    color: "#C6C6DC",
     fontSize: 16,
-    marginVertical: 10,
-  }
+  },
+  header: {
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 64,
+    paddingHorizontal: 24,
+  },
+  label: {
+    color: "white",
+    fontSize: 16,
+    marginBottom: 4,
+    fontFamily: "BarlowCondensedBoldItalic",
+  },
+  textContainer: {
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 36,
+    minHeight: 250,
+    maxHeight: 250,
+  },
+  title: {
+    fontSize: 48,
+    textTransform: "uppercase",
+    color: "white",
+    marginBottom: 24,
+    fontFamily: "BarlowCondensedBoldItalic",
+    lineHeight: 50,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: "white",
+    fontFamily: "Helvetica",
+    marginBottom: 16,
+  },
+  progressDots: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 4,
+  },
+  activeDot: {
+    backgroundColor: "white",
+    width: 20,
+  },
+  inactiveDot: {
+    backgroundColor: "#5E5E80",
+  },
+  continueButton: {
+    backgroundColor: "white",
+    paddingVertical: 18,
+    borderRadius: 100,
+    alignItems: "center",
+    marginTop: "auto",
+    marginBottom: 18,
+  },
+  continueButtonText: {
+    color: "#1A1A8E",
+    fontSize: 18,
+    fontWeight: "bold",
+    fontFamily: "Helvetica",
+    textTransform: "uppercase",
+  },
+  skipText: {
+    textAlign: "center",
+    color: "#C6C6DC",
+    fontSize: 18,
+    fontWeight: "bold",
+    fontFamily: "Helvetica",
+    textDecorationLine: "underline",
+    marginBottom: 20,
+  },
 });

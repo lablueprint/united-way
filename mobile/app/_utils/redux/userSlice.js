@@ -16,19 +16,26 @@ const userSlice = createSlice({
             SecureStore.setItemAsync("user", JSON.stringify(action.payload))
         },
         logout: (state) => {
-            // const deleteSecureStoreItem = async () => {
-            //     await SecureStore.deleteItemAsync("user");
-            // }
             state.userId = "";
             state.authToken = "";
             state.refreshToken = "";
             SecureStore.deleteItemAsync("user");
+        },
+        refresh: (state, action) => {
+            state.authToken = action.payload.authToken;
+            localStorage.setItem('user', 
+                JSON.stringify({
+                    userId: state.userId,
+                    authToken: action.payload.authToken, 
+                    refreshToken: state.refreshToken
+                })
+            );
         }
     }
 })
 
 const {
-    login, logout
+    login, logout, refresh
 } = userSlice.actions
-export { login, logout };
+export { login, logout, refresh };
 export default userSlice.reducer;

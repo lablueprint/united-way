@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Button, Dimensions, TouchableOpacity, Image } from "react-native";
-import axios from "axios";
+import { View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity, Image } from "react-native";
 import { Typography } from '../_styles/globals';
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
@@ -13,6 +14,7 @@ interface AnnouncementProps {
 
 export default function Announcement({ activityId, closeAnnouncement }: AnnouncementProps) {
   const [announcement, setAnnouncement] = useState<AnnouncementData>();
+  const [user, sendRequest] = useApiAuth();
 
   interface AnnouncementData {
     eventID: string;
@@ -24,10 +26,11 @@ export default function Announcement({ activityId, closeAnnouncement }: Announce
 
   const fetchAnnouncement = async () => {
     try {
-      const { data } = await axios.get(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/activities/${activityId}`,
-      );
-      setAnnouncement(data.data);
+      const body = {};
+      const requestType = RequestType.GET;
+      const endpoint = `activities/${activityId}`;
+      const data = await sendRequest({ body, requestType, endpoint });
+      setAnnouncement(data);
     } catch (error) {
       console.error("Error fetching announcements:", error);
     }
