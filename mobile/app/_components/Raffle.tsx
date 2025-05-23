@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Button, Dimensions, TouchableOpacity, Image } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image } from "react-native";
 import { Typography } from '../_styles/globals';
 
 const height = Dimensions.get('window').height;
