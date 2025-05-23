@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, Button, Dimensions, TouchableOpacity, Image } from "react-native";
-import axios from "axios";
 import { Typography } from '../_styles/globals';
-import { transform } from "@babel/core";
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;

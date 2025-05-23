@@ -52,17 +52,24 @@ export default function EventDetails() {
 
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
   const [organizationName, setOrganizationName] = useState("");
+
+  // Raffle states
   const [joinedRaffles, setJoinedRaffles] = useState(false);
   const [raffleNumber, setRaffleNumber] = useState<number | null>(null);
   const [drawnNumber, setDrawnNumber] = useState<number | null>(null);
   const [winner, setWinner] = useState<boolean | null>(null);
   const [raffleVisible, setRaffleVisible] = useState(false);
+
+  // Poll states
   const [pollVisible, setPollVisible] = useState(false);
-  const [announcementVisible, setAnnouncementVisible] = useState(false);
   const [pollId, setPollId] = useState<string | null>(null);
   const [pollResponses, setPollResponses] =  useState<(number | null)[]>([]);
-  const [announcementId, setAnnouncementId] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
+
+  // Announcement states
+  const [announcementVisible, setAnnouncementVisible] = useState(false);
+  const [announcementId, setAnnouncementId] = useState<string | null>(null);
+
   const { id, origin } = useLocalSearchParams();
   const org = useSelector((state) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
   const user = useSelector((state) => { return { userId: state.auth.userId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
@@ -248,6 +255,7 @@ export default function EventDetails() {
     socket?.on('event end', (data) => {
       closePoll();
       closeAnnouncement();
+      closeRaffle();
       console.log('Event ended:', data.name);
       Alert.alert('Event ended', `The event ${data.name} has ended!`);
     });
@@ -422,7 +430,8 @@ export default function EventDetails() {
             <Text style={styles.reward}>Reward Component Placeholder</Text>
           </View>
         </View>
-        {(registeredUsers).includes(user.userId) ?
+        {/* Poll modal */
+        (registeredUsers).includes(user.userId) ?
           <Modal
             animationType="slide"
             transparent={true}
@@ -439,7 +448,8 @@ export default function EventDetails() {
           :
           <></>
         }
-        {(registeredUsers).includes(user.userId) ?
+        {/* Announcement modal */
+        (registeredUsers).includes(user.userId) ?
           <Modal
             animationType="slide"
             transparent={true}
@@ -456,7 +466,8 @@ export default function EventDetails() {
           :
           <></>
         }
-        {(registeredUsers).includes(user.userId) ?
+        {/* Raffle modal */
+        (registeredUsers).includes(user.userId) ?
           <Modal
             animationType="slide"
             transparent={true}

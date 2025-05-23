@@ -17,7 +17,6 @@ interface PollCardProps {
     setPollResponses: (pollResponses: (number | null)[]) => void;
 }
 
-// Note: the Polls take in a Poll activity id. 
 export default function Poll({ activityId, socket, closePoll, showResults, pollResponses, setPollResponses}: PollCardProps) {
     const [poll, setPoll] = useState<PollInterface>();
     const [questionIndex, setQuestionIndex] = useState<number>(0); // tracking question index for each poll
@@ -118,12 +117,11 @@ export default function Poll({ activityId, socket, closePoll, showResults, pollR
                         showResults ?
                         poll.content[questionIndex]?.options.map((option) => (
                             <View key={option.id} style={responses[questionIndex] === option.id ? styles.selectedOptionContainer : styles.optionContainer}>
-                                <View style={[styles.percentageContainer, { width: poll.content[questionIndex].totalVotes > 0 ? `${Math.round((option.count / poll.content[questionIndex].totalVotes) * 100)}%` : '0%'}]}>
-                                    <Text style={[Typography.h3, styles.optionLetter]}>{String.fromCharCode(option.id + 64)}</Text>
-                                    <Text style={styles.optionText}>
-                                        {option.text}
-                                    </Text>
-                                </View>
+                                <Text style={[Typography.h3, styles.optionLetter]}>{String.fromCharCode(option.id + 64)}</Text>
+                                <Text style={styles.optionText}>
+                                    {option.text}
+                                </Text>
+                                <View style={[styles.percentageContainer, { width: poll.content[questionIndex].totalVotes > 0 ? `${Math.round((option.count / poll.content[questionIndex].totalVotes) * 100)}%` : '0%'}]} />
                                 <View style={styles.percentageTextContainer}>
                                     <Text style={styles.optionText}>
                                         {poll.content[questionIndex].totalVotes > 0 ? `${Math.round((option.count / poll.content[questionIndex].totalVotes) * 100)}%` : '0%'}
@@ -236,6 +234,7 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         flexDirection: 'row',
         alignItems: 'center',
+        position: 'absolute',
     },
     button: {
         backgroundColor: '#10167F',
