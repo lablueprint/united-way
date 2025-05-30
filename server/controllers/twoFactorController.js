@@ -25,6 +25,7 @@ const hash = async (code) => {
 
 // Function to verify OTP
 const verifyCode = async (req, res) => {
+    console.log("Inside VERIFYCODEEEE")
     const { code, hashedCode } = req.body;
 
     // Compare hashed stored code with provided code
@@ -34,6 +35,7 @@ const verifyCode = async (req, res) => {
 
 // Function to send OTP (Handles both verifyEmail & sendOTP)
 const sendOTP = async (req, res) => {
+    
   try {
     const { email } = req.body;
     if (!email) {

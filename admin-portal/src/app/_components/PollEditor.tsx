@@ -1,7 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios, { AxiosResponse } from "axios";
-import { useSelector } from "react-redux";
 import { RootState } from "../_interfaces/AuthInterfaces";
 import "../_styles/PollEditor.css";
 import Image from 'next/image';
@@ -11,6 +9,9 @@ import Draft from "../_styles/_images/draft.svg";
 import StarIcon from "../_styles/_images/star.svg";
 import DatePicker from './DatePicker';
 import TimePicker from './TimePicker';
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 interface Choice {
   id: number;
@@ -50,10 +51,8 @@ export default function PollEditor({
   const [pageTitle, setPageTitle] = useState("");
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [pointValue, setPointValue] = useState(0);
-  
-  const org = useSelector((state: RootState) => ({
-    authToken: state.auth.authToken,
-  }));
+
+  const [org, sendRequest] = useApiAuth();
 
   useEffect(() => {
     (async () => {
@@ -83,20 +82,14 @@ export default function PollEditor({
         pointValue
       };
 
-      await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        {
-          content: updatedContent,
-          timeStart,
-          timeEnd,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${org.authToken}`,
-          },
-        }
-      );
+      const requestType = RequestType.PATCH;
+      const endpoint = `activities/${activityId}`;
+      const body = {
+        content: updatedContent,
+        timeStart,
+        timeEnd,
+      };
+      await sendRequest({ requestType, endpoint, body })
     } catch (e) {
       console.error("Failed to patch activity:", e);
       alert("Failed to save poll.");
@@ -126,15 +119,11 @@ export default function PollEditor({
 
   const getActivityById = async (id: string) => {
     try {
-      const resp: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${org.authToken}`,
-          },
-        }
-      );
-      return resp.data.data;
+      const requestType = RequestType.GET;
+      const endpoint = `activities/${id}`;
+      const body = {}
+      const data = await sendRequest({ requestType, endpoint, body });
+      return data;
     } catch {
       return { content: [] };
     }
@@ -163,11 +152,11 @@ export default function PollEditor({
         i !== qIdx
           ? q
           : {
-              ...q,
-              options: q.options.map((c, j) =>
-                j !== cIdx ? c : { ...c, text }
-              ),
-            }
+            ...q,
+            options: q.options.map((c, j) =>
+              j !== cIdx ? c : { ...c, text }
+            ),
+          }
       )
     );
 
@@ -186,18 +175,18 @@ export default function PollEditor({
         i !== qIdx
           ? q
           : {
-              ...q,
-              options: [
-                ...q.options,
-                {
-                  id: q.options.length
-                    ? Math.max(...q.options.map((c) => c.id)) + 1
-                    : 1,
-                  text: `Choice ${q.options.length + 1}`,
-                  count: 0,
-                },
-              ],
-            }
+            ...q,
+            options: [
+              ...q.options,
+              {
+                id: q.options.length
+                  ? Math.max(...q.options.map((c) => c.id)) + 1
+                  : 1,
+                text: `Choice ${q.options.length + 1}`,
+                count: 0,
+              },
+            ],
+          }
       )
     );
 
@@ -256,7 +245,7 @@ export default function PollEditor({
             <Image src={StarIcon} alt="Star" width={24} height={24} />
             <label>POINT VALUE</label>
             <div className="pointValueControl">
-              <button 
+              <button
                 onClick={() => setPointValue(prev => Math.max(0, prev - 1))}
                 disabled={pointValue <= 0}
               >
@@ -272,8 +261,8 @@ export default function PollEditor({
 
         <div className="questionList">
           {questions.map((q, qIdx) => (
-            <div 
-              key={qIdx} 
+            <div
+              key={qIdx}
               className="questionPanel"
               onDragOver={(e) => handleDragOver(e, qIdx)}
             >
@@ -289,7 +278,7 @@ export default function PollEditor({
                   <button onClick={() => deleteQuestion(qIdx)}>
                     <Image src={TrashCanIcon} alt="Delete" />
                   </button>
-                  <div 
+                  <div
                     className="dragHandle"
                     draggable
                     onDragStart={() => handleDragStart(qIdx)}

@@ -7,7 +7,7 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 export default function Home() {
   const router : AppRouterInstance = useRouter();
   useEffect(() => {
-    router.push("sign-up");
+    router.push("/sign-up");
   }, []);
 
   return (
