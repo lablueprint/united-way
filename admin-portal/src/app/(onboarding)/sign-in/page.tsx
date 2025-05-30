@@ -48,6 +48,8 @@ export default function SignIn() {
   }
 
   const verifySignIn = async () => {
+    console.log("email: ", email);
+    console.log("password: ", password); 
     try {
       const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/auth/orgLogin`,
         {
