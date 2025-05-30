@@ -1,0 +1,160 @@
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.25s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modalContent {
+  background: #fff;
+  border-radius: 2rem;
+  box-shadow: 0 0 40px 0 rgba(0,0,0,0.25);
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  min-width: 400px;
+  max-width: 95vw;
+  min-height: 300px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #10167F;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.closeButton:hover {
+  color: #0D1143;
+}
+
+.announcementModalContent {
+  min-width: 35.656rem;
+  max-width: 95vw;
+  background: #fff;
+  border-radius: 2rem;
+  box-shadow: 0 0 40px 0 rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+.announcementHeader {
+  font-family: "BarlowCondensedItalic", Arial, sans-serif;
+  font-size: 1.75rem;
+  color: #10167F;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.announcementFieldLabel {
+  font-family: "BarlowCondensedItalic", Arial, sans-serif;
+  font-size: 1.25rem;
+  color: #10167F;
+  text-transform: uppercase;
+  font-weight: 600; 
+}
+
+.announcementInput,
+.announcementTextarea {
+  width: 100%;
+  background: #F6F7FB;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1rem;
+  font-size: 1.1rem;
+  font-family: "BarlowCondensedItalic", Arial, sans-serif;
+  color: #10167F;
+  font-weight: 600;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.announcementInput::placeholder,
+.announcementTextarea::placeholder {
+  color: #10167F66;
+  font-style: italic;
+  font-weight: bold;
+  font-family: "BarlowCondensedItalic", Arial, sans-serif;
+}
+
+.announcementScheduleRow {
+  display: flex;
+  align-items: center;
+  background: #F6F7FB;
+  border-radius: 0.75rem;
+  padding-left: 0.5rem;
+  gap: 1rem;
+}
+
+.announcementScheduleLabel {
+  font-family: "BarlowCondensedItalic", Arial, sans-serif;
+  color: #10167F;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.announcementTimeInput {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: #10167F;
+  font-family: "BarlowCondensedBold", Arial, sans-serif;
+  width: 40%;
+}
+
+.announcementTimeInputContainer {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.announcementButtonRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.announcementCancelButton {
+  background: #fff;
+  color: #10167F;
+  border: 1px solid #10167F;
+  border-radius: 2rem;
+  padding: 0.75rem 1.7rem;
+  font-family: "BarlowCondensedBold", Arial, sans-serif;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.announcementPublishButton {
+  background: #10167F;
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.75rem 1.7rem;
+  font-family: "BarlowCondensedBold", Arial, sans-serif;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+}
