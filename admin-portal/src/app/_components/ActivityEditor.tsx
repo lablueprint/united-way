@@ -152,11 +152,11 @@ export default function ActivityEditor({
         )}
         {activity.type === "announcement" && (
           <>
-            <h3>Announcement Editor</h3>
             <AnnouncementEditor
               activityId={activity._id}
               timeStart={start as Date}
-              timeEnd={end as Date}
+              onCancel={onCancel}
+              onTimeUpdate={updateTime}
             />
           </>
         )}
