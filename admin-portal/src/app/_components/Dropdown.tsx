@@ -2,31 +2,47 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import '../_styles/Dropdown.css';
-import { PollContent } from "../_interfaces/EventInterfaces";
+import { Activity, PollContent, AnnouncementContent } from "../_interfaces/EventInterfaces";
 
-export interface DropDownProps<Item> {
+export interface DropDownProps {
   title: string;
-  items: Item[];
-  renderItem: (item: Item, onEdit: (id: string) => void) => React.ReactNode;
+  items: Activity[];
   onCreate: () => void;
   onEditItem: (id: string) => void;
   onOpen?: () => void;
 }
 
-export default function DropDown<Item>({
+export default function DropDown({
   title,
   items,
-  renderItem,
   onCreate,
   onEditItem,
   onOpen,
-}: DropDownProps<Item>) {
+}: DropDownProps) {
   const [open, setOpen] = useState(false);
 
   const toggle = () => {
     const next = !open;
     setOpen(next);
     if (next && onOpen) onOpen();
+  };
+
+  const renderActivityTitle = (act: Activity) => {
+    switch (act.type) {
+      case "announcement":
+        return (act.content as AnnouncementContent).title || "Untitled Announcement";
+      case "poll":
+        return (act.content as PollContent).title || "Untitled Poll";
+      default:
+        return "Untitled";
+    }
+  };
+
+  const renderActivityContent = (act: Activity) => {
+    if (act.type === "announcement") {
+      return (act.content as AnnouncementContent).text || "No description";
+    }
+    return null;
   };
 
   return (
@@ -53,13 +69,10 @@ export default function DropDown<Item>({
 
                   {/* Main info */}
                   <div className="cardInfo">
-                    <h4 className="cardTitle">
-                      {(act as any).type === "poll" 
-                        ? ((act as any).content as PollContent).title || "Untitled"
-                        : (act as any).content[0]?.title 
-                          || (act as any).content[0]?.question 
-                          || "Untitled"}
-                    </h4>
+                    <h4 className="heading3 cardTitle">{renderActivityTitle(act)}</h4>
+                    {renderActivityContent(act) && (
+                      <p className="label cardDescription">{renderActivityContent(act)}</p>
+                    )}
                   </div>
 
                   {/* Footer with Edit button */}

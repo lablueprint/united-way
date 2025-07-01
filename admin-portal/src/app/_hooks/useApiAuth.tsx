@@ -46,7 +46,7 @@ function useApiAuth() {
             orgs/createOrg
             orgs/:id
     */
-    async function sendRequest({ requestType, endpoint, body }: Request): Any {
+    async function sendRequest({ requestType, endpoint, body = {} }: Request): Any {
         let response;
         switch (requestType) {
             case RequestType.GET: {

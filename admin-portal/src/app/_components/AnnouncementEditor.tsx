@@ -1,103 +1,125 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "../_styles/AnnouncementModal.css";
+import ClockIcon from "../_styles/_images/clock.svg";
+import Image from "next/image";
 
 import useApiAuth from "../_hooks/useApiAuth";
 import { RequestType } from "../_interfaces/RequestInterfaces";
 
 interface Announcement {
+  title: string;
   text: string;
 }
 
 interface AnnouncementEditorProps {
   activityId: string;
   timeStart: Date;
-  timeEnd: Date;
+  onCancel?: () => void;
+  onTimeUpdate?: (newStart: Date, newEnd: Date) => void;
 }
 
-export default function AnnouncementEditor({ activityId, timeStart, timeEnd }: AnnouncementEditorProps) {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [isModified, setIsModified] = useState(false);
-  const [org, sendRequest] = useApiAuth();
+export default function AnnouncementEditor({
+  activityId,
+  timeStart,
+  onCancel,
+  onTimeUpdate
+}: AnnouncementEditorProps) {
+  const [announcement, setAnnouncement] = useState<Announcement>({ title: "", text: "" });
+  const [scheduledTime, setScheduledTime] = useState<string>(
+    timeStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+  );
+  const [_, sendRequest] = useApiAuth();
+
 
   useEffect(() => {
-    const fetchAnnouncements = async () => {
-      const activityData = await getActivityById(activityId);
-      setAnnouncements(activityData.content.length > 0 ? activityData.content : [{ text: "" }]);
+    // Fetch existing announcement data if editing
+    const fetchAnnouncement = async () => {
+      try {
+        const requestType = RequestType.GET;
+        const endpoint = `activities/${activityId}`;
+        const data = await sendRequest({ requestType, endpoint });
+        if (data.content) {
+          setAnnouncement({
+            title: data.content.title || "",
+            text: data.content.text || ""
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching announcement:", error);
+      }
     };
-    fetchAnnouncements();
+
+    if (activityId) {
+      fetchAnnouncement();
+    }
   }, [activityId]);
 
-  const getActivityById = async (activityId: string) => {
+  const handleSave = async () => {
     try {
-      const body = {};
-      const endpoint = `activities/${activityId}`;
-      const requestType = RequestType.GET;
-      return await sendRequest({ body, endpoint, requestType });
-    } catch (err) {
-      console.log(err);
-      return { content: [] };
-    }
-  };
+      const newStart = new Date(timeStart);
+      const [hours, minutes] = scheduledTime.split(':');
+      newStart.setHours(parseInt(hours), parseInt(minutes));
 
-  const handleTextChange = (index: number, newText: string) => {
-    const updated = [...announcements];
-    updated[index].text = newText;
-    setAnnouncements(updated);
-    setIsModified(true);
-  };
+      const newEnd = new Date(newStart);
+      newEnd.setMinutes(newEnd.getMinutes() + 5); // 5 minute duration for announcements
 
-  const addAnnouncement = () => {
-    setAnnouncements([...announcements, { text: "" }]);
-    setIsModified(true);
-  };
-
-  const deleteAnnouncement = (index: number) => {
-    if (announcements.length === 1) return;
-    const updated = announcements.filter((_, i) => i !== index);
-    setAnnouncements(updated);
-    setIsModified(true);
-  };
-
-  const saveAnnouncements = async () => {
-    try {
+      // Update the activity with title and message in content object
       const body = {
-        content: announcements,
-        timeStart,
-        timeEnd
+        content: {
+          title: announcement.title,
+          text: announcement.text
+        },
+        timeStart: newStart,
+        timeEnd: newEnd
       };
       const endpoint = `activities/${activityId}`;
       const requestType = RequestType.PATCH;
       await sendRequest({ body, endpoint, requestType });
-      setIsModified(false);
-    } catch (err) {
-      console.log(err);
+
+      onTimeUpdate?.(newStart, newEnd);
+      onCancel?.();
+    } catch (error) {
+      console.error("Error saving announcement:", error);
     }
   };
 
   return (
-    <div>
-      <h3>Announcements</h3>
-      {announcements.map((announcement, index) => (
-        <div key={index} style={{ marginBottom: "10px" }}>
-          <textarea
-            name="text"
-            placeholder="Enter announcement text"
-            value={announcement.text}
-            onChange={(event) => handleTextChange(index, event.target.value)}
-            rows={3}
-            style={{ width: "100%" }}
-          />
-          <button onClick={() => deleteAnnouncement(index)} disabled={announcements.length === 1}>
-            Delete
-          </button>
+    <div className="modalOverlay">
+      <div className="modalContent announcementModalContent">
+        <div className="announcementHeader">ADD ANNOUNCEMENT</div>
+        <div className="announcementFieldLabel">TITLE</div>
+        <input
+          className="announcementInput"
+          placeholder="TITLE"
+          value={announcement.title}
+          onChange={e => setAnnouncement({ ...announcement, title: e.target.value })}
+        />
+        <div className="announcementFieldLabel">DESCRIPTION</div>
+        <textarea
+          className="announcementTextarea"
+          placeholder="Description"
+          value={announcement.text}
+          onChange={e => setAnnouncement({ ...announcement, text: e.target.value })}
+        />
+        <div className="announcementScheduleRow">
+          <Image src={ClockIcon} alt="Clock" width={20} height={20} />
+          <span className="announcementScheduleLabel">SCHEDULE TIME</span>
+          <div className="announcementTimeInputContainer">
+            <input
+              className="announcementTimeInput"
+              type="time"
+              value={scheduledTime}
+              onChange={(e) => setScheduledTime(e.target.value)}
+            />
+          </div>
         </div>
-      ))}
-      <button type="button" onClick={addAnnouncement}>
-        Add
-      </button>
-      <button type="button" onClick={saveAnnouncements} disabled={!isModified}>
-        Save
-      </button>
+        <div className="announcementButtonRow">
+          <button className="announcementCancelButton" onClick={onCancel}>CANCEL</button>
+          <button className="announcementPublishButton" onClick={handleSave}>PUBLISH</button>
+        </div>
+      </div>
     </div>
   );
 }
