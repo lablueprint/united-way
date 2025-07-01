@@ -69,9 +69,9 @@ export default function DropDown({
 
                   {/* Main info */}
                   <div className="cardInfo">
-                    <h4 className="cardTitle">{renderActivityTitle(act)}</h4>
+                    <h4 className="heading3 cardTitle">{renderActivityTitle(act)}</h4>
                     {renderActivityContent(act) && (
-                      <p className="cardDescription">{renderActivityContent(act)}</p>
+                      <p className="label cardDescription">{renderActivityContent(act)}</p>
                     )}
                   </div>
 

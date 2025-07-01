@@ -5,6 +5,9 @@ import "../_styles/AnnouncementModal.css";
 import ClockIcon from "../_styles/_images/clock.svg";
 import Image from "next/image";
 
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
+
 interface Announcement {
   title: string;
   text: string;
@@ -17,25 +20,26 @@ interface AnnouncementEditorProps {
   onTimeUpdate?: (newStart: Date, newEnd: Date) => void;
 }
 
-export default function AnnouncementEditor({ 
-  activityId, 
+export default function AnnouncementEditor({
+  activityId,
   timeStart,
   onCancel,
-  onTimeUpdate 
+  onTimeUpdate
 }: AnnouncementEditorProps) {
   const [announcement, setAnnouncement] = useState<Announcement>({ title: "", text: "" });
   const [scheduledTime, setScheduledTime] = useState<string>(
     timeStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
   );
+  const [_, sendRequest] = useApiAuth();
+
 
   useEffect(() => {
     // Fetch existing announcement data if editing
     const fetchAnnouncement = async () => {
       try {
-        const response = await axios.get(
-          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`
-        );
-        const data = response.data.data;
+        const requestType = RequestType.GET;
+        const endpoint = `activities/${activityId}`;
+        const data = await sendRequest({ requestType, endpoint });
         if (data.content) {
           setAnnouncement({
             title: data.content.title || "",
@@ -62,17 +66,17 @@ export default function AnnouncementEditor({
       newEnd.setMinutes(newEnd.getMinutes() + 5); // 5 minute duration for announcements
 
       // Update the activity with title and message in content object
-      await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/${activityId}`,
-        {
-          content: {
-            title: announcement.title,
-            text: announcement.text
-          },
-          timeStart: newStart,
-          timeEnd: newEnd
-        }
-      );
+      const body = {
+        content: {
+          title: announcement.title,
+          text: announcement.text
+        },
+        timeStart: newStart,
+        timeEnd: newEnd
+      };
+      const endpoint = `activities/${activityId}`;
+      const requestType = RequestType.PATCH;
+      await sendRequest({ body, endpoint, requestType });
 
       onTimeUpdate?.(newStart, newEnd);
       onCancel?.();
@@ -103,9 +107,9 @@ export default function AnnouncementEditor({
           <Image src={ClockIcon} alt="Clock" width={20} height={20} />
           <span className="announcementScheduleLabel">SCHEDULE TIME</span>
           <div className="announcementTimeInputContainer">
-            <input 
-              className="announcementTimeInput" 
-              type="time" 
+            <input
+              className="announcementTimeInput"
+              type="time"
               value={scheduledTime}
               onChange={(e) => setScheduledTime(e.target.value)}
             />

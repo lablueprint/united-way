@@ -22,10 +22,10 @@
 }
 
 .divider {
-  border: none; 
-  height: 1px; 
+  border: none;
+  height: 1px;
   margin-bottom: 5px;
-  margin-top: 5px;  
+  margin-top: 5px;
   background-color: #10167F33;
   width: 100%;
 }
@@ -148,7 +148,7 @@
   border: 0.063rem solid #10167F33;
   border-radius: 9999px;
   padding: 0.25rem 0.75rem;
-  color:#10167F33;
+  color: #10167F33;
   background-color: transparent;
   cursor: pointer;
 }
