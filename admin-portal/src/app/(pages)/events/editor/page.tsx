@@ -1,18 +1,16 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
-import { logout } from '../../_utils/redux/orgSlice';
-import { useRouter } from 'next/navigation';
 import EventEditor from '@/app/_components/EventEditor';
 import useApiAuth from "@/app/_hooks/useApiAuth";
 import { RequestType } from "@/app/_interfaces/RequestInterfaces";
-
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Editor() {
   const [org, sendRequest] = useApiAuth();
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [editingId, setEditingId] = useState<string>("");
-  const [orgName, setOrgName] = useState<string>("test org");
+  const searchParams = useSearchParams();
+  const [eventId, setEventId] = useState<string | null>(searchParams.get("id"));
+  const [isNewEvent, _] = useState<boolean>(searchParams.get("id" === null));
+  const router = useRouter();
 
   useEffect(() => {
     const createBlankEvent = async () => {
@@ -38,33 +36,24 @@ export default function Editor() {
         image: "placeholder" // Hardcoded for now
       };
       const data = await sendRequest({ requestType, endpoint, body });
-      console.log("indicator function ran");
-      return data._id;
+      setEventId(data._id);
     }
 
-    const createEvent = async () => {
-      if (editingId == "") {
-        const _id = await createBlankEvent()
-        if (_id != "") {
-          console.log("data set")
-          setIsEditing(!isEditing)
-          setEditingId(_id);
-        }
-      }
-    };
-
-    if (!isEditing) {
-      createEvent();
+    if (eventId === null) {
+      createBlankEvent();
     }
   }, []);
 
+  // TODO: add the isNewEvent boolean to the EventEditor props.
+  // This will help solve the issue with regards to event cancel deletion.
   return (
     <>
-      {isEditing && (
-        <EventEditor
-          eventId={editingId}
+      {
+        eventId !== null ? <EventEditor
+          eventId={eventId}
         />
-      )}
+          : <></>
+      }
     </>
   );
 }

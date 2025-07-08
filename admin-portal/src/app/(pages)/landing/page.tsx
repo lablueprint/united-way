@@ -227,7 +227,7 @@ export default function Landing() {
             onClick={async () => {
               const _id = await createBlankEvent()
               if (_id != "") {
-                router.push(`/event/${_id}`);
+                router.push(`/events/${_id}`);
               }
             }}>
             <Image src={addIcon} alt="Plus icon for creating a new event" width={10} />
