@@ -1,6 +1,7 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const Organization = require("../models/organizationModel");
+const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 const { generateToken } = require("../controllers/authController");
 
 const createOrganization = async (req, res) => {
@@ -237,6 +238,51 @@ const deleteOrganization = async (req, res) => {
   }
 };
 
+const addImageToOrganization = async (req, res) => {
+  if (req.auth.role !== "admin" && req.auth.role !== "organization") {
+    return res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {},
+    });
+  }
+
+  if (!req.files || !req.files.image) {
+    return res.status(400).json({
+      status: "failure",
+      message: "No image file provided",
+      data: {},
+    });
+  }
+
+  const orgId = req.params.id;
+  const image = req.files.image;
+  const fileName = `organizations/${orgId}/${Date.now()}-${image.name}`;
+
+  try {
+    // Upload to S3
+    const result = await putObject(image.data, fileName);
+    console.log("S3 upload result:", result);
+    if (!result) {
+      throw new Error("Failed to upload to S3");
+    }
+    console.log("Image uploaded to S3:", result.url);
+
+  // Send back the URL
+    return res.status(200).json({
+      status: "success",
+      imageUrl: result.url
+    });
+  } catch (err) {
+    console.error("Error in addImageToOrganization:", err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: image could not be uploaded",
+      data: {},
+    });
+  }
+};
+
 module.exports = {
   createOrganization,
   getAllOrganizations,
@@ -245,4 +291,5 @@ module.exports = {
   editOrganizationDetails,
   getAssociatedEvents,
   deleteOrganization,
+  addImageToOrganization,
 };

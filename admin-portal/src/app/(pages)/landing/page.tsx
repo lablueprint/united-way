@@ -4,7 +4,7 @@ import { logout } from '../../_utils/redux/orgSlice';
 import { useRouter } from 'next/navigation';
 
 import EventCard from "@/app/_components/EventCard";
-import EventEditor from "@/app/_components/EventEditor";
+import BetterEventEditor from "@/app/_components/BetterEventEditor";
 import EventCarousel from "@/app/_components/EventCarousel";
 import EventEndMarker from '@/app/_components/EventEndMarker';
 
@@ -227,10 +227,8 @@ export default function Landing() {
             className={styles.button}
             onClick={async () => {
               const _id = await createBlankEvent()
-
               if (_id != "") {
-                setIsEditing(!isEditing)
-                setEditingId(_id);
+                router.push(`/event/${_id}`);
               }
             }}>
             <Image src={addIcon} alt="Plus icon for creating a new event" width={10} />
@@ -309,9 +307,6 @@ export default function Landing() {
         </div>
 
       )}
-
-      {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={editingId} justCreated={true} />}
     </div>
   );
-
 }

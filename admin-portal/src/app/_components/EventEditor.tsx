@@ -4,9 +4,8 @@ import { RootState } from '../_interfaces/AuthInterfaces';
 import QRCode from 'react-qr-code';
 import '../_styles/EventEditor.css';
 import { pen, logo } from '../../../public/EventEditor/EventEditor-index'
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import ActivityDropdown from './ActivityDropdown';
-
 import { useRouter } from 'next/navigation';
 import { RequestType } from '../_interfaces/RequestInterfaces';
 import useApiAuth from '../_hooks/useApiAuth';
