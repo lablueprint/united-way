@@ -9,6 +9,11 @@ export interface QuizContent {
     singleSelect: boolean;
 }
 
+export interface AnnouncementContent {
+    title: string;
+    text: string;
+}
+
 export interface Activity {
     _id: string;
     eventID: string;

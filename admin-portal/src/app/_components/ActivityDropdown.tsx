@@ -67,21 +67,13 @@ export default function ActivityDropdown({ eventId, isDraft }: ActivityDropdownP
         const items = activities.filter(a => a.type === type);
 
         return (
-          <DropDown<Activity>
+          <DropDown
             key={type}
             title={title}
             items={items}
             onOpen={reload}
             onCreate={() => setCreatingType(type)}
             onEditItem={id => setSelectedId(id)}
-            renderItem={(act, onEdit) => (
-              <div>
-                <span>
-                  {`${title} ${items.indexOf(act) + 1}`}
-                </span>
-                <button onClick={() => onEdit(act._id)}>Edit</button>
-              </div>
-            )}
           />
         );
       })}
