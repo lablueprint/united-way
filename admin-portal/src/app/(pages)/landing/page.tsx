@@ -1,21 +1,20 @@
 "use client";
+import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
-import { useRouter } from 'next/navigation';
 
 import EventCard from "@/app/_components/EventCard";
-import BetterEventEditor from "@/app/_components/BetterEventEditor";
 import EventCarousel from "@/app/_components/EventCarousel";
 import EventEndMarker from '@/app/_components/EventEndMarker';
 
 import Image from "next/image";
-import { emptyLogo, addIcon, rightArrow, single, attendee } from '../../../../public/Landing/Landing-index';
+import { addIcon, attendee, emptyLogo, rightArrow, single } from '../../../../public/Landing/Landing-index';
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import useApiAuth from '@/app/_hooks/useApiAuth';
 import { RequestType } from '@/app/_interfaces/RequestInterfaces';
-import styles from "./page.module.css"
+import styles from "./page.module.css";
 
 // TO-DO:
 // 1. Link view all events page.

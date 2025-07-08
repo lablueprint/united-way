@@ -1,11 +1,11 @@
-import React, { useState, useEffect, MouseEvent } from 'react';
-import BetterEventEditor from "./BetterEventEditor";
-import useApiAuth from '../_hooks/useApiAuth';
-import { RequestType, Request } from '../_interfaces/RequestInterfaces';
-import { EventData } from '../_interfaces/EventInterfaces';
 import Image from 'next/image';
+import { MouseEvent, useEffect, useState } from 'react';
 import { placeholder } from '../../../public/Landing/Landing-index';
+import useApiAuth from '../_hooks/useApiAuth';
+import { EventData } from '../_interfaces/EventInterfaces';
+import { RequestType } from '../_interfaces/RequestInterfaces';
 import '../_styles/EventCard.css';
+import EventEditor from "./EventEditor";
 
 interface EventCardProps {
     id: string;
@@ -118,12 +118,7 @@ export default function EventCard({ id, removeFromList, orgName, onClick }: Even
                 <div className="event-card-location">{location}</div>
             </div>
 
-            {isEditing && <BetterEventEditor eventId={id} />}
+            {isEditing && <EventEditor eventId={id} />}
         </div>
-
-
-
-
-
     );
 }

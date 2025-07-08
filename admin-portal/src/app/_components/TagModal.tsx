@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import React, { useState } from 'react';
+import { close } from '../../../public/EventEditor/EventEditor-index';
 import { EventTags } from "../_interfaces/EventInterfaces";
-import Image from 'next/image'
-import { close } from '../../../public/BetterEventEditor/BetterEventEditor-index'
-import '../_styles/AddTagsModal.css';
+import '../_styles/TagModal.css';
 
-interface AddTagsModalInterface {
+interface TagModalInterface {
     tags: boolean[];
     setTags: React.Dispatch<React.SetStateAction<boolean[]>>;
     setIsDisplayingTagModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -12,16 +12,16 @@ interface AddTagsModalInterface {
 
 const selectedTagColors = ["tag-selected-red", "tag-selected-salmon", "tag-selected-yellow"]
 
-const AddTagsModal: React.FC<AddTagsModalInterface> = ({tags, setTags, setIsDisplayingTagModal}) => {
+const TagModal: React.FC<TagModalInterface> = ({ tags, setTags, setIsDisplayingTagModal }) => {
     const [workingSetTags, setWorkingSetTags] = useState<boolean[]>(tags);
     return (
         <div className="gray-opacity-overlay">
             <div className="modal-content">
                 <div className="modal-text-parent">
-                    <div className="modal-close-image" onClick={()=>{
+                    <div className="modal-close-image" onClick={() => {
                         setIsDisplayingTagModal(false);
                     }}>
-                        <Image src={ close } alt="Close Icon" width={16} height={16} />
+                        <Image src={close} alt="Close Icon" width={16} height={16} />
                     </div>
                     <div className="modal-title">
                         ADD TAGS
@@ -52,18 +52,18 @@ const AddTagsModal: React.FC<AddTagsModalInterface> = ({tags, setTags, setIsDisp
                 <div className="cancel-save">
                     {
                         workingSetTags.includes(true) ?
-                        <div className="save-button" onClick={()=>{ 
-                            setTags(workingSetTags);
-                            setIsDisplayingTagModal(false); 
-                        }}>
-                            Save
-                        </div>
-                        :
-                        <div className="cancel-text" onClick={()=>{
-                            setIsDisplayingTagModal(false);
-                        }}>
-                            Cancel
-                        </div>
+                            <div className="save-button" onClick={() => {
+                                setTags(workingSetTags);
+                                setIsDisplayingTagModal(false);
+                            }}>
+                                Save
+                            </div>
+                            :
+                            <div className="cancel-text" onClick={() => {
+                                setIsDisplayingTagModal(false);
+                            }}>
+                                Cancel
+                            </div>
                     }
                 </div>
             </div>
@@ -71,4 +71,4 @@ const AddTagsModal: React.FC<AddTagsModalInterface> = ({tags, setTags, setIsDisp
     );
 }
 
-export default AddTagsModal;
+export default TagModal;
