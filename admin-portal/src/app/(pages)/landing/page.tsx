@@ -112,37 +112,6 @@ export default function Landing() {
     }
   };
 
-  const createBlankEvent = async () => {
-    try {
-      const requestType = RequestType.POST;
-      const endpoint = "events/orgs/:id/createEvent";
-      const body = {
-        name: "Your Event Name",
-        date: new Date(),
-        duration: 0, // Hardcoded for now
-        draft: true,
-        draftList: [],
-        description: "Your Event Description",
-        startTime: '12:00',
-        endTime: '12:01',
-        location: {
-          type: "Point",
-          coordinates: [0, 0]
-        },
-        organizerID: org.orgId,
-        tags: [],
-        registeredUsers: [], // Hardcoded for now
-        activity: [], // Hardcoded for now
-        image: "placeholder" // Hardcoded for now
-      };
-      const data = await sendRequest({ requestType, endpoint, body });
-      return data._id;
-    } catch (err) {
-      console.log(err);
-      return ""
-    }
-  }
-
   useEffect(() => {
     const fetchTodayEvent = async () => {
       if (todayIds.length === 1) {
@@ -225,10 +194,7 @@ export default function Landing() {
           <button
             className={styles.button}
             onClick={async () => {
-              const _id = await createBlankEvent()
-              if (_id != "") {
-                router.push(`/events/${_id}`);
-              }
+              router.push(`/events/editor`);
             }}>
             <Image src={addIcon} alt="Plus icon for creating a new event" width={10} />
             {isEditing ? "Cancel Event" : "Create Event"}
