@@ -54,7 +54,6 @@ export default function Landing() {
   const [eventIds, setEventIds] = useState<string[]>([]);
   const [orgName, setOrgName] = useState<string>("");
   const [editingId, setEditingId] = useState<string>("");
-  // const [draftIds, setDraftIds] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [upcomingIds, setUpcomingIds] = useState<string[]>([]);
   const [todayIds, setTodayIds] = useState<string[]>([]);

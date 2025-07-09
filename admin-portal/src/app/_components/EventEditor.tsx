@@ -2,24 +2,25 @@
 
 import axios, { AxiosResponse } from "axios";
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { add_photo, calendar, clock, down_arrow, draft, hero, person, right_arrow } from '../../../public/EventEditor/EventEditor-index';
-import { RootState } from '../_interfaces/AuthInterfaces';
 import { EventTags, LocationProps } from "../_interfaces/EventInterfaces";
 import '../_styles/EventEditor.css';
+
+import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 import ActivityDropdown from './ActivityDropdown';
 import TagModal from "./TagModal";
 
 interface EventEditorProps {
     eventId: string;
+    justCreated: boolean;
 }
 
-export default function EventEditor({ eventId }: EventEditorProps): React.ReactElement {
+export default function EventEditor({ eventId, justCreated = false }: EventEditorProps): React.ReactElement {
     const router = useRouter();
     const [eventTitle, setEventTitle] = useState<string>("");
     const [eventDescription, setEventDescription] = useState<string>("");
@@ -46,7 +47,7 @@ export default function EventEditor({ eventId }: EventEditorProps): React.ReactE
     const [isShowingStartTime, setIsShowingStartTime] = useState<boolean>(false);
     const [isShowingEndTime, setIsShowingEndTime] = useState<boolean>(false);
 
-    const org = useSelector((state: RootState) => { return { orgId: state.auth.orgId, authToken: state.auth.authToken, refreshToken: state.auth.refreshToken } })
+    const [org, sendRequest] = useApiAuth();
 
     const dateInputRef = useRef<HTMLInputElement>(null);
     const startTimeRef = useRef<HTMLInputElement>(null);
@@ -119,6 +120,16 @@ export default function EventEditor({ eventId }: EventEditorProps): React.ReactE
         return currDraftList
     }
 
+    const handleCancel = async () => {
+        if (justCreated) {
+            const endpoint = `events/${eventId}`;
+            const requestType = RequestType.DELETE;
+            const body = {};
+            await sendRequest({ endpoint, requestType, body });
+        }
+        router.back();
+    }
+
     // TODO: maybe refresh to populate the event into org upon successful patch?
     // TODO: Update schema to handle user count?
     // Creates a JSON and attempts to patch it to DB
@@ -132,35 +143,29 @@ export default function EventEditor({ eventId }: EventEditorProps): React.ReactE
 
                 const uploadDraftList = generateDraftList()
 
-                const response: AxiosResponse = await axios.patch(
-                    `http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`,
-                    {
-                        name: eventTitle,
-                        date: eventDate,
-                        duration: 0, // Hardcoded for now
-                        draft: currIsDraft,
-                        draftList: uploadDraftList,
-                        description: eventDescription,
-                        startTime: startTime,
-                        endTime: endTime,
-                        location: {
-                            type: "Point",
-                            coordinates: [longitude, latitude]
-                        },
-                        organizerID: org.orgId,
-                        tags: selectedTags,
-                        registeredUsers: [], // Hardcoded for now
-                        activity: [], // Hardcoded for now
-                        imageURL: image,
-                        userCount: eventAttendeesCount,
+                const endpoint = `events/${eventId}`;
+                const body = {
+                    name: eventTitle,
+                    date: eventDate,
+                    duration: 0, // Hardcoded for now
+                    draft: currIsDraft,
+                    draftList: uploadDraftList,
+                    description: eventDescription,
+                    startTime: startTime,
+                    endTime: endTime,
+                    location: {
+                        type: "Point",
+                        coordinates: [longitude, latitude]
                     },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${org.authToken}`
-                        }
-                    }
-                );
+                    organizerID: org.orgId,
+                    tags: selectedTags,
+                    registeredUsers: [], // Hardcoded for now
+                    activity: [], // Hardcoded for now
+                    imageURL: image,
+                    userCount: eventAttendeesCount,
+                }
+                const requestType = RequestType.PATCH;
+                await sendRequest({ requestType, body, endpoint });
                 router.push('/events');
             }
             else {
@@ -231,7 +236,6 @@ export default function EventEditor({ eventId }: EventEditorProps): React.ReactE
     };
 
     const uploadOrgImage = async (file: File) => {
-        console.log("Image upload token:", org.authToken);
         const formData = new FormData();
         formData.append("image", file);
         const response = await axios.post(
@@ -244,7 +248,6 @@ export default function EventEditor({ eventId }: EventEditorProps): React.ReactE
                 },
             }
         );
-        console.log("Image upload response:", response.data);
         return response.data.imageUrl;
     };
 
@@ -306,7 +309,12 @@ export default function EventEditor({ eventId }: EventEditorProps): React.ReactE
                         <div className="draft-indicator-text">DRAFT</div>
                     </div>
                     <div className="cancel-save-publish-parent">
-                        <Link className="cancel-button" href="/events">CANCEL</Link>
+                        <button
+                            className="cancel-button"
+                            onClick={handleCancel}
+                        >
+                            CANCEL
+                        </button>
                         <div className="save-button" onClick={() => { handlePatch(true) }}>SAVE</div>
                         <div className="publish-button" onClick={() => { handlePatch(false) }}>PUBLISH</div>
                     </div>

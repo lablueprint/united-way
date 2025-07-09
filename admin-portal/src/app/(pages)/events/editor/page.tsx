@@ -9,7 +9,7 @@ export default function Editor() {
   const [org, sendRequest] = useApiAuth();
   const searchParams = useSearchParams();
   const [eventId, setEventId] = useState<string | null>(searchParams.get("id"));
-  const [isNewEvent, _] = useState<boolean>(searchParams.get("id" === null));
+  const [isNewEvent, _] = useState<boolean>(searchParams.get("id") === null);
   const router = useRouter();
 
   useEffect(() => {
@@ -46,11 +46,13 @@ export default function Editor() {
 
   // TODO: add the isNewEvent boolean to the EventEditor props.
   // This will help solve the issue with regards to event cancel deletion.
+  console.log(isNewEvent)
   return (
     <>
       {
         eventId !== null ? <EventEditor
           eventId={eventId}
+          justCreated={isNewEvent}
         />
           : <></>
       }
