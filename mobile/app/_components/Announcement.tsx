@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
-
+import { View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity, Image } from "react-native";
+import { Typography } from '../_styles/globals';
 import useApiAuth from "../_hooks/useApiAuth";
 import { RequestType } from "../_interfaces/RequestInterfaces";
 
+const height = Dimensions.get('window').height;
+const width = Dimensions.get('window').width;
+
 interface AnnouncementProps {
   activityId: string;
+  closeAnnouncement: () => void;
 }
 
-export default function Announcement({ activityId }: AnnouncementProps) {
+export default function Announcement({ activityId, closeAnnouncement }: AnnouncementProps) {
   const [announcement, setAnnouncement] = useState<AnnouncementData>();
   const [user, sendRequest] = useApiAuth();
 
@@ -45,47 +49,65 @@ export default function Announcement({ activityId }: AnnouncementProps) {
   }
 
   return (
-    <ScrollView>
-      <View key={announcement._id} style={styles.card}>
-        <Text style={styles.timeText}>
-          Aired on: {new Date(announcement.timeStart).toLocaleString()}
+    <View key={announcement._id} style={styles.card}>
+      {/* <Text style={styles.timeText}>
+        Aired on: {new Date(announcement.timeStart).toLocaleString()}
+      </Text> */}
+      <View style={styles.header}>
+        <Text style={[Typography.h3, styles.headingText]}>
+          ANNOUNCEMENT
         </Text>
-
-        {announcement.content.map((textObj, index) => (
-          <Text key={index} style={styles.announcementText}>
-            {textObj.text}
-          </Text>
-        ))}
+        <TouchableOpacity onPress={closeAnnouncement}>
+          <Image style={styles.icon} source={require('../../assets/activities/close_blue.png')} />
+        </TouchableOpacity>
       </View>
-    </ScrollView>
+      {announcement.content.map((textObj, index) => (
+        <Text key={index} style={[Typography.body2, styles.announcementText]}>
+          {textObj.text}
+        </Text>
+      ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#1e1e1e",
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    padding: 24,
+    borderRadius: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
-    marginBottom: 10,
+    width: width - 48,
   },
   timeText: {
     fontSize: 14,
     color: "#fff",
     marginBottom: 10,
   },
+  headingText: {
+    fontSize: 26,
+    color: "#10167F",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   announcementText: {
     fontSize: 16,
-    color: "#fff",
-    marginBottom: 10,
+    marginTop: 16,
+    color: "#10167F99",
   },
   loadingText: {
     fontSize: 16,
     color: "#aaa",
     textAlign: "center",
     marginTop: 20,
+  },
+  icon: {
+    height: 30,
+    width: 30,
   },
 });
