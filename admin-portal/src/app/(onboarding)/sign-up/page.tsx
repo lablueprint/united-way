@@ -141,14 +141,14 @@ export default function SignUp() {
     try {
       const response: AxiosResponse = await axios.post(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
-        { email, password }
+        { email, password, name: orgName }
       );
       dispatch(login({
         orgId: response.data.data._id,
         authToken: response.data.authToken,
         refreshToken: response.data.refreshToken
       }));
-      router.push('/onboarding');
+      router.push('/tabs')
     } catch (err) {
       console.log(err);
     }
@@ -230,17 +230,27 @@ export default function SignUp() {
         </>
       ) : (
         // 2FA Verification Form (phase 1)
-        <div className={`whiteText`} >
-          <div>2-Step Verification</div>
+        <div className={`${styles.verifySection} whiteText`} >
+          <div className={`heading3`}>
+            2-Step Verification
+          </div>
           <div>
-            <p>Please enter the verification code sent to your email.</p>
+            <p
+              className={`label ${styles.inputLabel}`}
+            >
+              VERIFICATION CODE
+            </p>
             <input
+              className={styles.inputField}
               type="text"
               placeholder="Enter verification code"
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value)}
             />
-            <button onClick={verifyOTP}>Verify</button>
+            <button
+              onClick={verifyOTP}
+              className={`body3 ${styles.signUpButton}`}
+            >Verify</button>
           </div>
         </div>
       )

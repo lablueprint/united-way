@@ -4,7 +4,7 @@ import "../_styles/NavlessBar.css";
 
 export default function NavlessBar() {
     return (
-        <div className="logoContainer">
+        <div className="NavlessBar-logoContainer">
             <Image
                 src="/uw-logo-white.svg"
                 width={149}

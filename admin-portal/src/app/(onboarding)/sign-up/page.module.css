@@ -92,3 +92,12 @@
 .signUpContainer {
     background: var(--uw-dark-blue-bg);
 }
+
+.verifySection {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    row-gap: 1rem;
+}
