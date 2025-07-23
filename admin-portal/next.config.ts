@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
 
   reactStrictMode: false,
   env: {
-    IP_ADDRESS: "",
-    PORT: "",
+    IP_ADDRESS: "10.131.144.142",
+    PORT: "4000",
   },
   images: {
     domains: ['unitedway-uploads.s3.us-east-2.amazonaws.com']

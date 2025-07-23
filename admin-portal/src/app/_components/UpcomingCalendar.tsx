@@ -1,11 +1,11 @@
-import "../_styles/UpcomingCalendar.css"
+import "../_styles/UpcomingCalendar.css";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Edit } from "lucide-react"
+import { ChevronLeft, ChevronRight, Edit } from "lucide-react";
 import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { RequestType } from "../_interfaces/RequestInterfaces";
 import useApiAuth from "../_hooks/useApiAuth";
+import { RequestType } from "../_interfaces/RequestInterfaces";
 
 import { VisibleEventEndMarker } from "./EventEndMarker";
 
@@ -56,7 +56,7 @@ const UpcomingCalendar = () => {
   ]
 
   const handleMakeEvent = () => {
-    router.push('/events/editor'); // or `/events/${eventId}`
+    router.push('/events/editor');
   };
 
   const handleViewMode = async (mode: string) => {
