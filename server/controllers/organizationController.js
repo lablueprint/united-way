@@ -2,6 +2,7 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const Organization = require("../models/organizationModel");
 const { generateToken } = require("../controllers/authController");
+const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
 
 const createOrganization = async (req, res) => {
   try {
@@ -14,6 +15,7 @@ const createOrganization = async (req, res) => {
         req.body.password = hash;
         const newOrganization = new Organization(req.body);
         const data = await newOrganization.save(newOrganization);
+        console.log("This is the data", data);
         res.status(201).json({
           status: "success",
           message: "Organization successfully created.",
@@ -39,65 +41,70 @@ const createOrganization = async (req, res) => {
 
 // only using req when we apply filters
 const getAllOrganizations = async (req, res) => {
-    if (req.auth.role != 'admin') {
-        res.status(401).json({
-            status: "failure",
-            message: "Invalid authorization token for request.",
-            data: {}
-        });
-        return;
-    }
-    try {
-        const organizations = await Organization.find();
-        res.status(200).json({
-            status: "success",
-            message: "Organization(s) successfully retrieved.",
-            data: organizations
-        });
-    } catch (err) {
-        res.status(500).json({
-            status: "failure",
-            message: "Server-side error: could not retrieve all organizations.",
-            data: {}
-        });
-    }
+  if (req.auth.role != "admin") {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {},
+    });
+    return;
+  }
+  try {
+    const organizations = await Organization.find();
+    res.status(200).json({
+      status: "success",
+      message: "Organization(s) successfully retrieved.",
+      data: organizations,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: could not retrieve all organizations.",
+      data: {},
+    });
+  }
 };
 
 // for async functions must use await -- so you can resolve content later
 // pass in parameter of curly braces == no filter
 const getOrganizationById = async (req, res) => {
-    if (req.auth.role != 'admin' && req.auth.role != "user" && req.auth.role != "organization") {
-        res.status(401).json({
-          status: "failure",
-          message: "Invalid authorization token for request.",
-          data: {}
-        });
-        return;
+  if (
+    req.auth.role != "admin" &&
+    req.auth.role != "user" &&
+    req.auth.role != "organization"
+  ) {
+    res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {},
+    });
+    return;
+  }
+  const organizationId = req.params.id;
+  try {
+    const organizationByID = await Organization.findOne({
+      _id: organizationId,
+    });
+    if (organizationByID) {
+      res.status(200).json({
+        status: "success",
+        message: "Organization successfully retrieved.",
+        data: organizationByID,
+      });
+    } else {
+      res.status(404).json({
+        status: "failure",
+        message: "Error: organization not found.",
+        data: {},
+      });
     }
-    const organizationId = req.params.id;
-    try {
-        const organizationByID = await Organization.findOne({  _id: organizationId });
-        if (organizationByID) {
-            res.status(200).json({
-                status: "success",
-                message: "Organization successfully retrieved.",
-                data: organizationByID
-            });
-        }
-        else {
-            res.status(404).json({
-                status: "failure",
-                message: "Error: organization not found.",
-                data: {}
-            });
-        }
-    } catch (err) {
-        res.status(500).json({
-            status: "failure",
-            message: "Server-side error: could not find organization.",
-            data: {}
-        });
-    }
+  } catch (err) {
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: could not find organization.",
+      data: {},
+    });
+  }
 };
 
 const getOrganizationsByFilter = async (req, res) => {
@@ -126,11 +133,12 @@ const getOrganizationsByFilter = async (req, res) => {
 };
 
 const editOrganizationDetails = async (req, res) => {
-  if (req.auth.role != 'organization') {
+  console.log("This is checking auth for org", req.auth.role);
+  if (req.auth.role != "organization") {
     res.status(401).json({
       status: "failure",
       message: "Invalid authorization token for request.",
-      data: {}
+      data: {},
     });
     return;
   }
@@ -144,13 +152,11 @@ const editOrganizationDetails = async (req, res) => {
 
   const updateInput = req.body;
   try {
+    console.log("This is the update input", updateInput);
     const result = await Organization.updateOne(
       { _id: orgId },
       { $set: updateInput }
     );
-
-    const newData = await Organization.findById(orgId);
-
     if (result.modifiedCount === 0) {
       res.status(304).json({
         status: "failure",
@@ -165,6 +171,7 @@ const editOrganizationDetails = async (req, res) => {
       });
     }
   } catch (err) {
+    console.error("Error in editOrganizationDetails:", err);
     res.status(500).json({
       status: "failure",
       message: "Server-side error: update not completed.",
@@ -176,12 +183,12 @@ const editOrganizationDetails = async (req, res) => {
 // using id to find which organization we're returning
 const getAssociatedEvents = async (req, res) => {
   const orgId = req.params.id;
-  (orgId)
+  orgId;
   try {
     const organizationByID = await Organization.findOne({ _id: orgId });
     if (organizationByID) {
       const eventList = organizationByID["activeEvents"];
-      (eventList);
+      eventList;
       res.status(200).json({
         status: "success",
         message: "Successfully received associated events for organization",
@@ -208,7 +215,7 @@ const deleteOrganization = async (req, res) => {
     res.status(401).json({
       status: "failure",
       message: "Invalid authorization token for request.",
-      data: {}
+      data: {},
     });
     return;
   }
@@ -237,6 +244,51 @@ const deleteOrganization = async (req, res) => {
   }
 };
 
+const addImageToOrganization = async (req, res) => {
+  if (req.auth.role !== "admin" && req.auth.role !== "organization") {
+    return res.status(401).json({
+      status: "failure",
+      message: "Invalid authorization token for request.",
+      data: {},
+    });
+  }
+
+  if (!req.files || !req.files.image) {
+    return res.status(400).json({
+      status: "failure",
+      message: "No image file provided",
+      data: {},
+    });
+  }
+
+  const orgId = req.params.id;
+  const image = req.files.image;
+  const fileName = `organizations/${orgId}/${Date.now()}-${image.name}`;
+
+  try {
+    // Upload to S3
+    const result = await putObject(image.data, fileName);
+    console.log("S3 upload result:", result);
+    if (!result) {
+      throw new Error("Failed to upload to S3");
+    }
+    console.log("Image uploaded to S3:", result.url);
+
+    // Send back the URL
+    return res.status(200).json({
+      status: "success",
+      imageUrl: result.url,
+    });
+  } catch (err) {
+    console.error("Error in addImageToOrganization:", err);
+    res.status(500).json({
+      status: "failure",
+      message: "Server-side error: image could not be uploaded",
+      data: {},
+    });
+  }
+};
+
 module.exports = {
   createOrganization,
   getAllOrganizations,
@@ -245,4 +297,5 @@ module.exports = {
   editOrganizationDetails,
   getAssociatedEvents,
   deleteOrganization,
+  addImageToOrganization,
 };

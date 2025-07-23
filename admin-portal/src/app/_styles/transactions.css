@@ -1,0 +1,55 @@
+/* BeachBonfireTable.css */
+
+/* Container for the table */
+.table-container {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    width: 450px;
+    
+  }
+  
+  /* Style for the table */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border:none;
+  }
+  
+  /* Style for table header */
+  .table th,
+  .table td {
+    padding: 10px;
+    text-align: left;
+    color: #10167F;
+  }
+  
+  .table th {
+    background-color: #f9f9f9;
+    font-weight: bold;
+    font-size: 24px;
+    border-bottom: #10167F33;
+  }
+
+  .table td {
+    font-size: 16px;
+  }
+
+  .table thead tr {
+    border-bottom: 3px solid #ddd;  /* Add a border at the bottom of the header */
+  }
+  
+  
+  /* Style for even rows */
+  .table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  /* Hover effect for rows */
+  .table tr:hover {
+    background-color: #e0e0e0;
+  }
+  
