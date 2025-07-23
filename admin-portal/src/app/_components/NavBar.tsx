@@ -1,8 +1,7 @@
-import React from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image'
 
-import "../_styles/NavBar.css"
+import "../_styles/NavBar.css";
 
 export default function NavigationBar() {
     const router = useRouter();
@@ -10,7 +9,7 @@ export default function NavigationBar() {
     return (
         <div className="body">
             <div className="leftContainer">
-                <div className="logoContainer">
+                <div className="NavBar-logoContainer" onClick={() => { router.push("/landing") }}>
                     <Image
                         src="/uwlogo.svg"
                         width={149}
@@ -19,13 +18,13 @@ export default function NavigationBar() {
                     />
                 </div>
                 <div className="tabContainer">
-                    <button className="tabHeader" onClick={() => { router.push('/landing'); }}>Home</button>
-                    <button className="tabHeader" onClick={() => { router.push('/events'); }}>Events</button>
-                    <button className="tabHeader" onClick={() => { router.push('/rewards'); }}>Rewards</button>
+                    <button className="NavBar-tabHeader" onClick={() => { router.push('/landing'); }}>Home</button>
+                    <button className="NavBar-tabHeader" onClick={() => { router.push('/events'); }}>Events</button>
+                    <button className="NavBar-tabHeader" onClick={() => { router.push('/rewards'); }}>Rewards</button>
                 </div>
             </div>
             <div className="rightContainer">
-                <button className="tabHeader" onClick={() => { router.push('/profile'); }}>
+                <button className="NavBar-tabHeader" onClick={() => { router.push('/profile'); }}>
                     <Image
                         src="/profilelogo.svg"
                         width={32}
