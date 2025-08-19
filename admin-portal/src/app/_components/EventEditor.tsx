@@ -12,7 +12,7 @@ import '../_styles/EventEditor.css';
 import useApiAuth from "../_hooks/useApiAuth";
 import { RequestType } from "../_interfaces/RequestInterfaces";
 
-import ActivityDropdown from './ActivityDropdown';
+import ActivityDropdown from "./ActivityDropdown";
 import TagModal from "./TagModal";
 
 interface EventEditorProps {
@@ -169,7 +169,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                 router.push('/events');
             }
             else {
-                console.log("Upload Failure: Empty Arguments")
+                console.warn("Upload Failure: Empty Arguments")
             }
         } catch (err) {
             console.log(err);
@@ -284,7 +284,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
     };
 
     return (
-        <div>
+        <div className="event-editor-main">
             {/* Events header */}
             <div className="event-header">
                 <div className="event-header-info">
@@ -301,106 +301,74 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                     View current, published, past, and event drafts.
                 </div>
             </div>
+
+            <div className="draft-save-publish-indicators">
+                <div className="draft-indicator">
+                    <div className="draft-indicator-logo"><Image src={draft} alt="Draft Icon" width={18} height={18} /></div>
+                    <div className="draft-indicator-text">DRAFT</div>
+                </div>
+                <div className="cancel-save-publish-parent">
+                    <button
+                        className="cancel-button"
+                        onClick={handleCancel}
+                    >
+                        CANCEL
+                    </button>
+                    <div className="save-button" onClick={() => { handlePatch(true) }}>SAVE</div>
+                    <div className="publish-button" onClick={() => { handlePatch(false) }}>PUBLISH</div>
+                </div>
+            </div>
+
             {/* Editor Body */}
             <div className="editor-body-parent">
-                <div className="draft-save-publish-indicators">
-                    <div className="draft-indicator">
-                        <div className="draft-indicator-logo"><Image src={draft} alt="Draft Icon" width={24} height={24} /></div>
-                        <div className="draft-indicator-text">DRAFT</div>
-                    </div>
-                    <div className="cancel-save-publish-parent">
-                        <button
-                            className="cancel-button"
-                            onClick={handleCancel}
-                        >
-                            CANCEL
-                        </button>
-                        <div className="save-button" onClick={() => { handlePatch(true) }}>SAVE</div>
-                        <div className="publish-button" onClick={() => { handlePatch(false) }}>PUBLISH</div>
-                    </div>
-                </div>
-
                 <div className="event-editor-interface">
                     <div className="image-editor-and-tags">
-                        {/* This setup creates a hidden input that's triggered by clicking the label */}
+                        {/* Hidden file input */}
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleImageChange}
                             className="hidden"
-                            id="imageUpload"  // This ID connects the input to the label
+                            id="imageUpload"
                         />
-                        {
-                            image ?
-                                <label htmlFor="imageUpload" className="image-editor-with-image">
-                                    <div className="add_photo-image-with-image">
-                                        <Image src={image} alt="Add Photo Icon" width={513} height={450} />
+
+                        {/* Single label toggles between two views */}
+                        <label htmlFor="imageUpload" className={image ? "image-editor-with-image" : "image-editor"}>
+                            {image ? (
+                                <div className="add_photo-image-with-image">
+                                    <Image src={image} alt="Uploaded Image" width={570} height={500} />
+                                </div>
+                            ) : (
+                                <div className="add-photo-parent">
+                                    <div className="add_photo-image">
+                                        <Image src={add_photo} alt="Add Photo Icon" width={60} height={60} />
                                     </div>
-                                </label>
-                                :
-                                <label htmlFor="imageUpload" className="image-editor">
-                                    <label htmlFor="imageUpload" className="add-photo-parent">
-                                        <div className="add_photo-image">
-                                            <Image src={add_photo} alt="Add Photo Icon" width={60} height={60} />
-                                        </div>
-                                        <div className="add_photo-subtitle">
-                                            Upload Images Here
-                                        </div>
-                                    </label>
-                                </label>
-                        }
-                        <div className="tags-title">
-                            SELECT KEYWORDS
-                        </div>
-                        <div className="tags-parent">
-                            <div className="tags-container">
-                                {
-                                    isDisplayingTagModal ?
-                                        (<TagModal tags={tags} setTags={setTags} setIsDisplayingTagModal={setIsDisplayingTagModal} />)
-                                        :
-                                        EventTags.map((_, index) => {
-                                            return (
-                                                tags[index] ?
-                                                    <div
-                                                        className={selectedTagColors[(index) % 3]}
-                                                        key={index}>
-                                                        {EventTags[index]}
-                                                    </div>
-                                                    :
-                                                    <React.Fragment key={index}></React.Fragment>
-                                            )
-                                        })
-                                }
-                            </div>
-                            <div className="add-tag-button" onClick={() => { setIsDisplayingTagModal(true) }}>
-                                + ADD TAG
-                            </div>
-                        </div>
-                        <ActivityDropdown eventId={eventId} isDraft={true} />
+                                    <div className="add_photo-subtitle">Upload Images Here</div>
+                                </div>
+                            )}
+                        </label>
                     </div>
                     <div className="event-detail-fields">
                         <div className="event-title-and-org">
-                            <div className="event-name-title">EVENT NAME</div>
-                            <div onClick={() => setIsEditingEventTitle(true)}>
-                                {
-                                    isEditingEventTitle ?
-                                        <textarea
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter") { setIsEditingEventTitle(false) }
-                                            }}
-                                            onBlur={() => { setIsEditingEventTitle(false); }}
-                                            className="event-title-editor-card" name="eventTitle" placeholder="TITLE" value={eventTitle} onChange={(event) => { setEventTitle(event.target.value) }}
-                                        />
-                                        :
-                                        <div className="event-title-editor-card">{eventTitle.length == 0 ? (<div className="event-title-editor-card-empty">TITLE</div>) : eventTitle}</div>
-                                }
-                            </div>
+                            <div className="event-editor-field-title">EVENT NAME</div>
+                            <div
+                                className={`event-title-editor-card`}
+                                contentEditable
+                                suppressContentEditableWarning
+                                onInput={(e) => setEventTitle(e.currentTarget.textContent)}
+                                onBlur={(e) => {
+                                    if (e.currentTarget.textContent.trim() === "") {
+                                        setEventTitle("");
+                                    }
+                                }}
+                                data-placeholder="Title"
+                            ></div>
                             <div className="organization-attendees-grandparent">
                                 <div className="org-box-parent">
                                     <div className="org-logo"><Image src={hero} alt="Hero Icon" width={28} height={28} /></div>
                                     <div className="org-info">
                                         Hosted by
-                                        <div className="org-name">United Way</div>
+                                        <div className="org-name">Place-holder name</div>
                                     </div>
                                 </div>
                                 <div className="attendees-parent">
@@ -485,54 +453,46 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                         </div>
 
                         <div className="description-location-attendees">
-                            <div className="description-parent">
-                                <div className="description-title">DESCRIPTION</div>
-                                <div onClick={() => setIsEditingDescription(true)}>
-                                    {
-                                        isEditingDescription ?
-                                            <textarea
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") { setIsEditingDescription(false) }
-                                                }}
-                                                onBlur={() => { setIsEditingDescription(false); }}
-                                                className="description-body" name="description" placeholder="Description" value={eventDescription} onChange={(event) => { setEventDescription(event.target.value) }}
-                                            />
-                                            :
-                                            <div className="description-body">
-                                                {(eventDescription?.length ?? 0) === 0 ?
-                                                    (<div className="description-body-empty">Description</div>)
-                                                    :
-                                                    eventDescription
-                                                }
-                                            </div>
-                                    }
-                                </div>
+                            <div className="event-editor-field-parent">
+                                <div className="event-editor-field-title">DESCRIPTION</div>
+                                <div
+                                    className={`event-title-editor-card`}
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onInput={(e) => setEventDescription(e.currentTarget.textContent)}
+                                    onBlur={(e) => {
+                                        if (e.currentTarget.textContent.trim() === "") {
+                                            setEventTitle("");
+                                        }
+                                    }}
+                                    data-placeholder="Event Description"
+                                ></div>
                             </div>
-                            <div className="location-parent">
-                                <div className="location-title">ADDRESS</div>
-                                <div onClick={() => setIsEditingLocation(true)}>
-                                    {
-                                        isEditingLocation ?
-                                            <textarea
-                                                onChange={(e) => {
-                                                    // If an existing timeout exists, kill it (because we're going to set a new one)
-                                                    if (timeoutID) {
-                                                        clearTimeout(timeoutID);
-                                                    }
-                                                    setAddress(e.target.value);
-                                                    const newTimeoutID = setTimeout(() => getLocationJSON(e.target.value), 500);
-                                                    setTimeoutID(newTimeoutID);
-                                                }}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") { setIsEditingLocation(false) }
-                                                }}
-                                                onBlur={() => { setIsEditingLocation(false); }}
-                                                className="location" name="location" placeholder="Location" value={address}
-                                            />
-                                            :
-                                            <div className="location">{address.length == 0 ? (<div className="location-empty">Location</div>) : address}</div>
-                                    }
-                                </div>
+                            <div className="event-editor-field-parent">
+                                <div className="event-editor-field-title">ADDRESS</div>
+                                <div
+                                    id="event-editor-location-field"
+                                    className="event-title-editor-card"
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    data-placeholder="Location"
+                                    onInput={(e) => {
+                                        // debounce typing before fetching
+                                        if (timeoutID) clearTimeout(timeoutID);
+
+                                        const value = e.currentTarget.textContent;
+                                        setAddress(value);
+
+                                        const newTimeoutID = setTimeout(() => getLocationJSON(value), 500);
+                                        setTimeoutID(newTimeoutID);
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.currentTarget.textContent.trim() === "") {
+                                            setAddress("");
+                                            setOptions([]);
+                                        }
+                                    }}
+                                ></div>
                                 {/* If multiple results return, this is the modal that pops up */}
                                 <div className="searchOptionsParent">
                                     <div className="searchOptions">
@@ -543,6 +503,8 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                                                         setLatitude(parseFloat(option.lat));
                                                         setLongitude(parseFloat(option.lon));
                                                         setAddress(option.display_name);
+                                                        const locationField = document.getElementById("event-editor-location-field");
+                                                        locationField!.innerHTML = option.display_name
                                                         setOptions([]);
                                                     }}>
                                                     {option.display_name}
@@ -556,6 +518,36 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                     </div>
                 </div>
             </div>
+            <div>
+                <div className="tags-title">
+                    SELECT KEYWORDS
+                </div>
+                <div className="tags-parent">
+                    <div className="tags-container">
+                        {
+                            isDisplayingTagModal ?
+                                (<TagModal tags={tags} setTags={setTags} setIsDisplayingTagModal={setIsDisplayingTagModal} />)
+                                :
+                                EventTags.map((_, index) => {
+                                    return (
+                                        tags[index] ?
+                                            <div
+                                                className={selectedTagColors[(index) % 3]}
+                                                key={index}>
+                                                {EventTags[index]}
+                                            </div>
+                                            :
+                                            <React.Fragment key={index}></React.Fragment>
+                                    )
+                                })
+                        }
+                    </div>
+                    <div className="add-tag-button" onClick={() => { setIsDisplayingTagModal(true) }}>
+                        + ADD TAG
+                    </div>
+                </div>
+            </div>
+            <ActivityDropdown eventId={eventId} isDraft={true} />
         </div>
     )
 }

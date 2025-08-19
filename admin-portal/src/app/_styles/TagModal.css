@@ -26,6 +26,7 @@
     font-weight: bold;
     src: url("./_fonts/BarlowCondensed-Bold.ttf") format("opentype");
 }
+
 .gray-opacity-overlay {
     align-items: center;
     background-color: rgba(0, 0, 0, 0.5);
@@ -100,7 +101,7 @@
     border-style: solid;
     border-radius: 4.75rem;
     border-width: 0.1rem;
-    color:rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
     cursor: pointer;
     display: flex;
     font-family: "Helvetica";
@@ -117,7 +118,7 @@
     border-style: solid;
     border-radius: 4.75rem;
     border-width: 0.1rem;
-    color:rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
     cursor: pointer;
     display: flex;
     font-family: "Helvetica";
@@ -134,7 +135,7 @@
     border-style: solid;
     border-radius: 4.75rem;
     border-width: 0.1rem;
-    color:rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
     cursor: pointer;
     display: flex;
     font-family: "Helvetica";
@@ -151,7 +152,7 @@
     border-style: solid;
     border-radius: 4.75rem;
     border-width: 0.1rem;
-    color:rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
     cursor: pointer;
     display: flex;
     font-family: "Helvetica";
@@ -160,35 +161,4 @@
     font-weight: 700;
     max-width: 9rem;
     padding: 0.65rem 1rem 0.65rem 1rem;
-}
-
-.cancel-save {
-    bottom: 1.25rem;
-    cursor: pointer;
-    display: flex;
-    position: absolute;
-    right: 1.25rem;
-}
-
-.cancel-text {
-    color: #171885;
-    font-family: "Helvetica";
-    font-size: 1.2rem;
-    font-weight: 400;
-}
-
-.save-button {
-    background-color: #171885 !important;
-    border: none;
-    border-radius: 6.25rem;
-    color: #ffffff !important;
-    cursor: pointer;
-    display: flex;
-    font-family: "Helvetica";
-    font-size: 1.2rem;
-    font-weight: 700;
-    justify-content: center;
-    max-width: 9rem;
-    padding: 0.62rem 1.25rem;
-    text-align: center;
 }
