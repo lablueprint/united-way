@@ -19,8 +19,9 @@
   display: flex;
 }
 
-.logoContainer {
+.NavBar-logoContainer {
   display: flex;
+  cursor: pointer;
 }
 
 .logo {
@@ -37,16 +38,22 @@
   gap: 6.25rem;
 }
 
-.tabHeader {
+.NavBar-tabHeader {
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 1.125rem;
-  color: darkblue;
+  color: var(--uw-dark-blue);
   background-color: white;
   border: none;
+  cursor: pointer;
 }
 
-.tabHeader:focus {
+.NavBar-tabHeader:hover {
+  color: var(--uw-dark-blue);
+  opacity: 0.6;
+}
+
+.NavBar-tabHeader:focus {
   font-weight: 700;
 }
 

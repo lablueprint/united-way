@@ -1,13 +1,14 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import React, { useState, FormEvent } from 'react';
 import axios, { AxiosResponse } from "axios";
-import { login } from '../../_utils/redux/orgSlice';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { login } from '../../_utils/redux/orgSlice';
 
-import styles from './page.module.css'
+import NavlessBar from "@/app/_components/NavlessBar";
+import styles from './page.module.css';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -63,40 +64,52 @@ export default function SignIn() {
   }
 
   return (
-    <div className={styles.formContainer}>
-      For returning organizations:
-      <form
-        className={styles.formContent}
-        onSubmit={handleSubmit}>
-        <p
-          className={styles.inputLabel}
-        >Email:</p>
-        <input
-          className={styles.inputField}
-          type="email"
-          // placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
-        />
-        <p
-          className={styles.inputLabel}
-        >Password:</p>
-        <input
-          className={styles.inputField}
-          type="password"
-          // placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
-        />
-        <button
-          className={styles.signInButton}
-          type="submit">
-          Submit
-        </button>
-      </form>
-      <Link href="/sign-up">
-        Don&apos;t have an account? Sign up
-      </Link>
+    <div className={styles.rootBg}>
+      <NavlessBar />
+      <div className={styles.formContainer}>
+        <div className={`heading2 whiteText`}>
+          SIGN IN
+        </div>
+        <form
+          className={styles.formContent}
+          onSubmit={handleSubmit}>
+          <div className={`${styles.fieldArea}`}>
+            <p
+              className={`label ${styles.inputLabel}`}
+            >E-MAIL</p>
+            <input
+              className={styles.inputField}
+              type="email"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+            />
+          </div>
+          <div className={`${styles.fieldArea}`}>
+            <p
+              className={`label ${styles.inputLabel}`}
+            >PASSWORD</p>
+            <input
+              className={styles.inputField}
+              type="password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+            />
+          </div>
+          <button
+            className={`body3 ${styles.signInButton}`}
+            type="submit">
+            SIGN IN
+          </button>
+        </form>
+        <Link href="/sign-up" className={`${styles.signUpLink}`}>
+          <div className={`label whiteText`}>
+            FIRST TIME HERE?
+          </div>
+          <div className={`label whiteText boldText`}>
+            SIGN UP
+          </div>
+        </Link>
+      </div >
     </div>
   );
 }

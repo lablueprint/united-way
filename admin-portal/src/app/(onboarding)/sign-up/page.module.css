@@ -3,12 +3,14 @@
     display: flex;
     row-gap: 1em;
     flex-direction: column;
-    align-items: center;
+    align-items: left;
+    margin: 0 5rem;
     justify-content: center;
     height: 100vh;
-    background-color: #fff;
+    background-color: var(--uw-dark-blue-bg);
     color: #000;
     font-family: 'Arial', sans-serif;
+    width: 20rem;
 }
 
 /* Style the form container */
@@ -16,8 +18,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 320px;
-    background: white;
+    row-gap: 0.5rem;
+    width: 100%;
+    background: var(--uw-dark-blue-bg);
+}
+
+.fieldArea {
+    width: 100%;
 }
 
 /* Label styling */
@@ -25,7 +32,7 @@
     width: 100%;
     font-size: 12px;
     font-weight: bold;
-    color: #333;
+    color: #FFFFFF;
     margin: 5px 0;
 }
 
@@ -36,9 +43,10 @@
     font-size: 14px;
     border: none;
     border-radius: 5px;
-    background: #f5f5f5;
+    background-color: rgb(256, 256, 256, 0.2);
+    color: #FFFFFF;
     outline: none;
-    color: black;
+
 }
 
 /* Forgot password link */
@@ -54,11 +62,11 @@
     text-decoration: underline;
 }
 
-/* Sign in button */
+/* Sign up button */
 .signUpButton {
     width: 100%;
-    background-color: #000;
-    color: white;
+    background-color: #FFFFFF;
+    color: var(--uw-dark-blue-bg);
     padding: 12px;
     border: none;
     border-radius: 5px;
@@ -66,30 +74,30 @@
     cursor: pointer;
     transition: 0.3s;
     margin: 1em 0em;
-}
 
-.signUpButton:hover {
-    background-color: #222;
-}
-
-/* Bottom text */
-.signUpText {
-    font-size: 12px;
-    color: #333;
-    margin-top: 15px;
-}
-
-/* Link for new account */
-.signUpText a {
-    color: #000;
-    text-decoration: none;
     font-weight: bold;
 }
 
-.signUpText a:hover {
-    text-decoration: underline;
+.signUpButton:hover {
+    opacity: 80%;
+}
+
+.signInLink {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 20rem;
 }
 
 .signUpContainer {
-    background-color: #fff;
+    background: var(--uw-dark-blue-bg);
+}
+
+.verifySection {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    row-gap: 1rem;
 }
