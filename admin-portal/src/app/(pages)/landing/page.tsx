@@ -1,21 +1,20 @@
 "use client";
+import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
-import { useRouter } from 'next/navigation';
 
 import EventCard from "@/app/_components/EventCard";
-import EventEditor from "@/app/_components/EventEditor";
 import EventCarousel from "@/app/_components/EventCarousel";
 import EventEndMarker from '@/app/_components/EventEndMarker';
 
 import Image from "next/image";
-import { emptyLogo, addIcon, rightArrow, single, attendee } from '../../../../public/Landing/Landing-index';
+import { addIcon, attendee, emptyLogo, rightArrow, single } from '../../../../public/Landing/Landing-index';
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import useApiAuth from '@/app/_hooks/useApiAuth';
 import { RequestType } from '@/app/_interfaces/RequestInterfaces';
-import styles from "./page.module.css"
+import styles from "./page.module.css";
 
 // TO-DO:
 // 1. Link view all events page.
@@ -55,7 +54,6 @@ export default function Landing() {
   const [eventIds, setEventIds] = useState<string[]>([]);
   const [orgName, setOrgName] = useState<string>("");
   const [editingId, setEditingId] = useState<string>("");
-  // const [draftIds, setDraftIds] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [upcomingIds, setUpcomingIds] = useState<string[]>([]);
   const [todayIds, setTodayIds] = useState<string[]>([]);
@@ -112,37 +110,6 @@ export default function Landing() {
       return err;
     }
   };
-
-  const createBlankEvent = async () => {
-    try {
-      const requestType = RequestType.POST;
-      const endpoint = "events/orgs/:id/createEvent";
-      const body = {
-        name: "Your Event Name",
-        date: new Date(),
-        duration: 0, // Hardcoded for now
-        draft: true,
-        draftList: [],
-        description: "Your Event Description",
-        startTime: '12:00',
-        endTime: '12:01',
-        location: {
-          type: "Point",
-          coordinates: [0, 0]
-        },
-        organizerID: org.orgId,
-        tags: [],
-        registeredUsers: [], // Hardcoded for now
-        activity: [], // Hardcoded for now
-        image: "placeholder" // Hardcoded for now
-      };
-      const data = await sendRequest({ requestType, endpoint, body });
-      return data._id;
-    } catch (err) {
-      console.log(err);
-      return ""
-    }
-  }
 
   useEffect(() => {
     const fetchTodayEvent = async () => {
@@ -226,12 +193,7 @@ export default function Landing() {
           <button
             className={styles.button}
             onClick={async () => {
-              const _id = await createBlankEvent()
-
-              if (_id != "") {
-                setIsEditing(!isEditing)
-                setEditingId(_id);
-              }
+              router.push(`/events/editor`);
             }}>
             <Image src={addIcon} alt="Plus icon for creating a new event" width={10} />
             {isEditing ? "Cancel Event" : "Create Event"}
@@ -309,9 +271,6 @@ export default function Landing() {
         </div>
 
       )}
-
-      {isEditing && <EventEditor orgName={orgName} changeState={setIsEditing} eventId={editingId} justCreated={true} />}
     </div>
   );
-
 }
