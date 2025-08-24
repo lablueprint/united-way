@@ -167,7 +167,7 @@ const editOrganizationDetails = async (req, res) => {
       res.status(200).json({
         status: "success",
         message: "Organization updated successfully.",
-        data: newData,
+        data: result,
       });
     }
   } catch (err) {

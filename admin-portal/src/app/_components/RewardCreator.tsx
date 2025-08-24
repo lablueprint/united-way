@@ -1,10 +1,9 @@
-import React, { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../_interfaces/AuthInterfaces";
 import "../_styles/createReward.css";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 const CreateReward = () => {
   const [name, setName] = useState("");

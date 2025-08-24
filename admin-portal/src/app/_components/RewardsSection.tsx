@@ -1,17 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import "../_styles/rewardsComponent.css";
 import axios from "axios";
-import { RootState } from "../_interfaces/AuthInterfaces";
-//new changes for the CreateReward.tsx
+import { useEffect, useState } from "react";
+import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
+import "../_styles/rewardsComponent.css";
+//new changes for the RewardCreator.tsx
 import { useRouter } from "next/navigation";
-import RewardCard from "./RewardCard";
 import useApiAuth from "../_hooks/useApiAuth";
 import { RequestType } from "../_interfaces/RequestInterfaces";
+import RewardCard from "./RewardCard";
 
 export interface Reward {
   name: string;
@@ -82,17 +80,17 @@ const RewardsSection = () => {
     //       },
     //     }
     //   );
-      const updatedRewards = rewards.filter(
-        (reward) => reward._id !== rewardId
-      );
-      const endpoint = `orgs/${org.orgId}`;
-      const body = {
-        rewards: updatedRewards,
-      }
-      const requestType = RequestType.PATCH;
-      const data = await sendRequest({ requestType, body, endpoint });
-      setRewards(updatedRewards);
-      setRefreshTrigger((prev) => prev + 1);
+    const updatedRewards = rewards.filter(
+      (reward) => reward._id !== rewardId
+    );
+    const endpoint = `orgs/${org.orgId}`;
+    const body = {
+      rewards: updatedRewards,
+    }
+    const requestType = RequestType.PATCH;
+    const data = await sendRequest({ requestType, body, endpoint });
+    setRewards(updatedRewards);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   useEffect(() => {
@@ -132,18 +130,27 @@ const RewardsSection = () => {
 
   return (
     <div className="rewards-container">
-      <div className="rewards-image">
-        <img src="/home-banner.svg" alt="Rewards" className="rewards-image" />
-        <div className="rewards-header">
-          <h1 className="rewards-title">REWARDS</h1>
-          <p className="rewards-description">View and edit your rewards.</p>
+      <div className="hero-container">
+        <div className="hero-logo-container">
+          <div className="hero-logo"></div>
         </div>
-        <button
-          className="floating-add-button sleek-add-button"
-          onClick={() => router.push("/rewards/create")}
-        >
-          + CREATE REWARDS
-        </button>
+        <div className="hero-content">
+          <div className="hero-text">
+
+            <div className="hero-title">
+              REWARDS
+            </div>
+            <div className="hero-subtitle">
+              View and edit your rewards.
+            </div>
+
+          </div>
+          <div className="hero-button-container">
+            <div className="hero-button" onClick={() => router.push("/rewards/create")}>
+              + CREATE REWARDS
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Statistics Section */}

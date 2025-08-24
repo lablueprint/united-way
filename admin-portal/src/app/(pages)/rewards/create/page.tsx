@@ -1,6 +1,6 @@
 "use client";
-import CreateReward from "@/app/_components/CreateReward";
+import RewardCreator from "@/app/_components/RewardCreator";
 
 export default function CreateRewardPage() {
-  return <CreateReward />;
+  return <RewardCreator />;
 }
