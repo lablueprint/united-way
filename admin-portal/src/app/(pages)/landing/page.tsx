@@ -1,21 +1,20 @@
 "use client";
+import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../_utils/redux/orgSlice';
-import { useRouter } from 'next/navigation';
 
 import EventCard from "@/app/_components/EventCard";
-import EventEditor from "@/app/_components/EventEditor";
 import EventCarousel from "@/app/_components/EventCarousel";
 import EventEndMarker from '@/app/_components/EventEndMarker';
 
 import Image from "next/image";
-import { emptyLogo, addIcon, rightArrow, single, attendee } from '../../../../public/Landing/Landing-index';
+import { addIcon, attendee, emptyLogo, rightArrow, single } from '../../../../public/Landing/Landing-index';
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import useApiAuth from '@/app/_hooks/useApiAuth';
 import { RequestType } from '@/app/_interfaces/RequestInterfaces';
-import styles from "./page.module.css"
+import styles from "./page.module.css";
 
 // TO-DO:
 // 1. Link view all events page.
@@ -55,7 +54,6 @@ export default function Landing() {
   const [eventIds, setEventIds] = useState<string[]>([]);
   const [orgName, setOrgName] = useState<string>("");
   const [editingId, setEditingId] = useState<string>("");
-  // const [draftIds, setDraftIds] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [upcomingIds, setUpcomingIds] = useState<string[]>([]);
   const [todayIds, setTodayIds] = useState<string[]>([]);
@@ -112,37 +110,6 @@ export default function Landing() {
       return err;
     }
   };
-
-  const createBlankEvent = async () => {
-    try {
-      const requestType = RequestType.POST;
-      const endpoint = "events/orgs/:id/createEvent";
-      const body = {
-        name: "Your Event Name",
-        date: new Date(),
-        duration: 0, // Hardcoded for now
-        draft: true,
-        draftList: [],
-        description: "Your Event Description",
-        startTime: '12:00',
-        endTime: '12:01',
-        location: {
-          type: "Point",
-          coordinates: [0, 0]
-        },
-        organizerID: org.orgId,
-        tags: [],
-        registeredUsers: [], // Hardcoded for now
-        activity: [], // Hardcoded for now
-        image: "placeholder" // Hardcoded for now
-      };
-      const data = await sendRequest({ requestType, endpoint, body });
-      return data._id;
-    } catch (err) {
-      console.log(err);
-      return ""
-    }
-  }
 
   useEffect(() => {
     const fetchTodayEvent = async () => {
@@ -211,24 +178,99 @@ export default function Landing() {
   }, []);
 
   return (
-    <div>
-      Welcome to the test landing page.
-      <OrganizationProfile></OrganizationProfile>
-      <button
-        onClick={() => {
-          console.log("Result: ", exampleGetToRoot());
-        }}
-      >
-        Example HTTP Request button
-      </button><br />
-      {/* Org: {org.orgId}<br />
-      Auth: {org.authToken}<br />
-      Refresh: {org.refreshToken}<br /> */}
-      <button onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
-        Log out
-      </button>
-      {/* <div>Result: {responseValue}</div> */}
+    <div className={styles.body}>
+      <div className={styles.navBar}>
+        <button className={styles.button} onClick={() => { dispatchLogout(); router.push('/sign-up'); }}>
+          Log out
+        </button>
+      </div>
+      <div className={styles.hero}>
+        <div className={styles.heroInfo}>
+          <div className={styles.heroHeader}>
+            <h1 className={styles.heroWelcome}>Welcome, {orgName}</h1>
+            <p className={styles.heroText}>This is your admin portal. You’re able to manage events and rewards for users.</p>
+          </div>
+          <button
+            className={styles.button}
+            onClick={async () => {
+              router.push(`/events/editor`);
+            }}>
+            <Image src={addIcon} alt="Plus icon for creating a new event" width={10} />
+            {isEditing ? "Cancel Event" : "Create Event"}
+          </button>
+        </div>
+      </div>
+      {upcomingIds.length > 0 ? (
+        <div className={styles.content}>
+          <div className={styles.eventContainer}>
+            {/* If no events today, display empty event screen. */}
+            {todayIds.length > 0 ? (
+              <div>
+                <div className="event-list today-list">
+                  {/* single event view*/}
+                  {todayIds.length == 1 ? (
+                    <div className="single event-today">
+                      <Image className="single-event-img" src={single} alt="Event thumbnail" />
+                      <div className="landing-event">
+                        <div className="event-date-time">
+                          <p className="event-date">Today</p>
+                          <p className="event-time">{startTime} - {endTime}</p>
+                        </div>
+                        <div className="event-name">{eventData.name}</div>
+                        <div className="event-details">
+                          <div className="event-card-location">{location}</div>
+                          <div className="event-attendees">
+                            <Image src={attendee} alt="Attendee icon" />
+                            <p className="attendee-info">{eventData.registeredUsers.length} Attendees</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  ) : (
+                    <EventCarousel events={allEvents} intervalMs={2000} visibleCount={4} />
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={styles.emptyList}>
+                <div className={styles.emptyListContainer}>
+                  <h2 className={styles.emptyTitle}>Events Today</h2>
+                  <div className={styles.emptyContentContainer}>
+                    <div className={styles.emptyImgContainer}>
+                      <Image width={80} src={emptyLogo} alt="United Way Logo Sheer Blue" />
+                    </div>
+                    <p className={styles.emptyText}>No events today.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className={styles.eventContainer}>
+            <div className={styles.listTitle}>
+              <h2 className={styles.subtitle}>Upcoming Events</h2>
+              <h2 className={styles.subtitleLink}>View All Events <Image className="arrow-icon" width={11} src={rightArrow} alt="Right Arrow Icon" /></h2>
+            </div>
+            <div className={`${styles.eventList} ${styles.upcomingList}`}>
+              {upcomingIds.length > 0 && upcomingIds.map((id: string) => {
+                return (
+                  <EventCard id={id} key={id} removeFromList={removeFromList} orgName={orgName} onClick={() => router.push(`/landing/${id}`)} />
+                );
+              })}
+            </div>
+          </div>
+          <EventEndMarker />
+        </div>
+
+      ) : (
+        <div className={styles.emptyEvent}>
+          <div className={styles.emptyContent}>
+            <Image src={emptyLogo} alt="United Way Sheer Blue Logo" width={80} />
+            <p className={styles.emptyText}>No upcoming events.</p>
+          </div>
+        </div>
+
+      )}
     </div>
   );
-
 }

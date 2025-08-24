@@ -1,17 +1,19 @@
 "use client";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useDispatch } from 'react-redux';
-import React, { useState, useEffect, FormEvent } from 'react';
+import NavlessBar from "@/app/_components/NavlessBar";
 import axios, { AxiosResponse } from "axios";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { login } from '../../_utils/redux/orgSlice';
-import styles from "./page.module.css"
+import styles from "./page.module.css";
 
 export default function SignUp() {
   // phase: 0 = sign-up form; 1 = 2FA verification form.
   const [phase, setPhase] = useState(0);
 
   // Sign-up form fields
+  const [orgName, setOrgName] = useState('')
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -139,14 +141,14 @@ export default function SignUp() {
     try {
       const response: AxiosResponse = await axios.post(
         `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
-        { email, password }
+        { email, password, name: orgName }
       );
       dispatch(login({
         orgId: response.data.data._id,
         authToken: response.data.authToken,
         refreshToken: response.data.refreshToken
       }));
-      router.push('/onboarding');
+      router.push('/tabs')
     } catch (err) {
       console.log(err);
     }
@@ -157,66 +159,102 @@ export default function SignUp() {
       {phase === 0 ? (
         // Sign-up Form (phase 0)
         <>
+          <NavlessBar />
           <div className={styles.formContainer}>
-            For new organizations:
+            <div className={`heading2 whiteText`}>
+              SIGN UP
+            </div>
+
             <form
-              className={styles.formContent}
+              className={`${styles.formContent}`}
               onSubmit={handleSubmit}
             >
-              <p
-                className={styles.inputLabel}
-              >Email:</p>
-              <input
-                className={styles.inputField}
-                type="email"
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-              />
-              <p
-                className={styles.inputLabel}
-              >Password:</p>
-              <input
-                className={styles.inputField}
-                type="password"
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-              />
-              <p
-                className={styles.inputLabel}
-              >Confirm Password:</p>
-              <input
-                className={styles.inputField}
-                type="password"
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                value={confirmPassword}
-              />
+              <div className={`${styles.fieldArea}`}>
+                <p
+                  className={`label ${styles.inputLabel}`}
+                >ORGANIZATION NAME</p>
+                <input
+                  className={styles.inputField}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  value={orgName}
+                />
+              </div>
+              <div className={`${styles.fieldArea}`}>
+                <p
+                  className={`label ${styles.inputLabel}`}
+                >E-MAIL</p>
+                <input
+                  className={styles.inputField}
+                  type="email"
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                />
+              </div>
+              <div className={`${styles.fieldArea}`}>
+                <p
+                  className={`label ${styles.inputLabel}`}
+                >PASSWORD</p>
+                <input
+                  className={styles.inputField}
+                  type="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
+                />
+              </div>
+              <div className={`${styles.fieldArea}`}>
+                <p
+                  className={`label ${styles.inputLabel}`}
+                >CONFIRM PASSWORD</p>
+                <input
+                  className={styles.inputField}
+                  type="password"
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={confirmPassword}
+                />
+              </div>
               <button
-                className={styles.signUpButton}
+                className={`body3 ${styles.signUpButton}`}
                 type="submit">
-                Submit
+                SIGN UP
               </button>
             </form>
-            <Link href="/sign-in">
-              Already have an account? Sign in
+            <Link href="/sign-in" className={`${styles.signInLink}`}>
+              <div className={`label whiteText`}>
+                ALREADY HAVE AN ACCOUNT?
+              </div>
+              <div className={`label whiteText boldText`}>
+                SIGN IN
+              </div>
             </Link>
           </div>
         </>
       ) : (
         // 2FA Verification Form (phase 1)
-        <div className={styles.signUpText}>
-          <div>2-Step Verification</div>
+        <div className={`${styles.verifySection} whiteText`} >
+          <div className={`heading3`}>
+            2-Step Verification
+          </div>
           <div>
-            <p>Please enter the verification code sent to your email.</p>
+            <p
+              className={`label ${styles.inputLabel}`}
+            >
+              VERIFICATION CODE
+            </p>
             <input
+              className={styles.inputField}
               type="text"
               placeholder="Enter verification code"
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value)}
             />
-            <button onClick={verifyOTP}>Verify</button>
+            <button
+              onClick={verifyOTP}
+              className={`body3 ${styles.signUpButton}`}
+            >Verify</button>
           </div>
         </div>
-      )}
-    </div>)
+      )
+      }
+    </div >)
 
 }

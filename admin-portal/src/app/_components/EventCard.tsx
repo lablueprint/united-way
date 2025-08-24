@@ -1,11 +1,11 @@
-import React, { useState, useEffect, MouseEvent } from 'react';
-import EventEditor from "./EventEditor";
-import useApiAuth from '../_hooks/useApiAuth';
-import { RequestType, Request } from '../_interfaces/RequestInterfaces';
-import { EventData } from '../_interfaces/EventInterfaces';
 import Image from 'next/image';
+import { MouseEvent, useEffect, useState } from 'react';
 import { placeholder } from '../../../public/Landing/Landing-index';
+import useApiAuth from '../_hooks/useApiAuth';
+import { EventData } from '../_interfaces/EventInterfaces';
+import { RequestType } from '../_interfaces/RequestInterfaces';
 import '../_styles/EventCard.css';
+import EventEditor from "./EventEditor";
 
 interface EventCardProps {
     id: string;
@@ -34,7 +34,9 @@ export default function EventCard({ id, removeFromList, orgName, onClick }: Even
         },
         tags: [],
         registeredUsers: [],
-        activities: []
+        activities: [],
+        imageUrl: "",
+        userCount: 0
     });
     // event schema has the date as a string right now, but needs to be event object
     const location = "Los Angeles, CA";
@@ -115,11 +117,8 @@ export default function EventCard({ id, removeFromList, orgName, onClick }: Even
                 </div>
                 <div className="event-card-location">{location}</div>
             </div>
+
+            {isEditing && <EventEditor eventId={id} />}
         </div>
-
-
-
-
-
     );
 }

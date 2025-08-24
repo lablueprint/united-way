@@ -17,6 +17,7 @@ coverage
 .next/
 out/
 admin-portal/next.config.ts
+admin-portal/next.config.js
 mobile/ios
 
 # production

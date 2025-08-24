@@ -1,8 +1,8 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const Organization = require("../models/organizationModel");
-const { generateToken } = require("../controllers/authController");
 const { putObject, deleteObject } = require("../utils/aws/s3Bucket");
+const { generateToken } = require("../controllers/authController");
 
 const createOrganization = async (req, res) => {
   try {

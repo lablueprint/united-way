@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const fileUpload = require("express-fileupload");
 
 const organizationRouter = express.Router();
@@ -12,6 +12,16 @@ organizationRouter.use(
     abortOnLimit: true,
     responseOnLimit: "File size limit has been reached",
   })
+);
+
+// File upload middleware
+organizationRouter.use(
+    fileUpload({
+        createParentPath: true,
+        limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+        abortOnLimit: true,
+        responseOnLimit: "File size limit has been reached",
+    })
 );
 
 // General organization operations
@@ -33,6 +43,11 @@ organizationRouter.patch(
   "/:id",
   organizationController.editOrganizationDetails
 );
+organizationRouter.post(
+  "/:id/addImage",
+  organizationController.addImageToOrganization
+);
+
 organizationRouter.post(
   "/:id/addImage",
   organizationController.addImageToOrganization

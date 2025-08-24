@@ -33,3 +33,46 @@
 .activity-editor-delete:hover {
   text-decoration: underline;
 }
+
+.activityItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.announcementTitle {
+  font-family: "BarlowCondensed";
+  font-size: 1.75rem;
+  color: #10167F;
+  font-weight: bold;
+}
+
+.announcementText {
+  font-family: "BarlowCondensed";
+  font-size: 0.9rem;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.activityItem button {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: #10167F;
+  cursor: pointer;
+  font-family: "BarlowCondensed";
+  font-size: 0.9rem;
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.activityItem button:hover {
+  text-decoration: underline;
+}

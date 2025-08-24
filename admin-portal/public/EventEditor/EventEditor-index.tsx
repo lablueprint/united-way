@@ -1,7 +1,23 @@
-import logo from './images/logo.jpeg'
-import pen from './images/pen.png'
+import add_photo from './images/add_photo.svg'
+import banner from './images/banner.svg'
+import calendar from './images/calendar.svg'
+import clock from './images/clock.svg'
+import close from './images/close.svg'
+import down_arrow from './images/down_arrow.svg'
+import draft from './images/draft.svg'
+import hero from './images/hero.svg'
+import person from './images/person.svg'
+import right_arrow from './images/right_arrow.svg'
 
 export {
-    logo,
-    pen
+    add_photo,
+    banner,
+    calendar,
+    clock,
+    close,
+    down_arrow,
+    draft,
+    hero,
+    person,
+    right_arrow,
 }
