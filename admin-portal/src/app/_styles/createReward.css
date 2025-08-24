@@ -1,0 +1,474 @@
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("./_fonts/BarlowCondensed-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("./_fonts/BarlowCondensed-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("./_fonts/BarlowCondensed-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("./_fonts/BarlowCondensed-SemiBoldItalic.ttf") format("truetype");
+  font-weight: 600;
+  font-style: italic;
+}
+/* Rewards Banner and Image Styles */
+.rewards-image {
+  position: relative;
+  width: 100%;
+  height: 30vh;
+  overflow: hidden;
+}
+
+.rewards-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.rewards-header {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.rewards-title {
+  font-family: "Barlow Condensed";
+  font-weight: 1000;
+  font-size: 5rem;
+  color: white;
+  font-style: italic;
+}
+
+.rewards-description {
+  font-family: "Helvetica";
+  font-weight: 100;
+  font-size: 1.4rem;
+  color: white;
+}
+
+.create-reward-page {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-top: 0;
+  gap: 3rem;
+  width: 100%;
+}
+
+.create-reward-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  height: 88px;
+  box-sizing: border-box;
+  background-color: #fff;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.create-reward-header .header-left {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 18px;
+}
+
+.create-reward-header .header-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a4b;
+  letter-spacing: 0.02em;
+  margin-right: 18px;
+}
+
+.create-reward-header .header-nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: 18px;
+}
+
+.create-reward-header .header-nav-btn {
+  background: none;
+  border: none;
+  color: #1a1a4b;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px 18px;
+  border-radius: 20px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.create-reward-header .header-nav-btn.active,
+.create-reward-header .header-nav-btn:hover {
+  background: #1a1a4b;
+  color: #fff;
+}
+
+.create-reward-left {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-top: 32px;
+  margin-top: 0;
+  background: #fff;
+  padding-right: 0;
+}
+
+.image-upload-area {
+  width: 80rem;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  height: 28rem;
+  background: rgba(16, 22, 127, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10vw;
+  margin-top: 5rem;
+  margin-right: 5vw;
+  margin-bottom: 5rem;
+  color: #b0b0d0;
+  font-size: 1.2rem;
+}
+
+.image-upload-area input[type="file"] {
+  display: none;
+}
+
+.image-upload-btn {
+  background: none;
+  color: #10167f;
+  border: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.create-reward-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 32px 0 0;
+  margin-top: 0;
+  background: #fff;
+}
+
+.create-reward-form {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.2rem;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.form-fields-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 400px;
+  width: 100%;
+  margin-top: 0rem;
+}
+
+.form-header-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.create-reward-form label:first-of-type {
+  margin-top: 1rem;
+}
+
+.create-reward-form label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #10167f;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2rem;
+}
+
+.create-reward-form input,
+.create-reward-form textarea {
+  font-family: "Barlow Condensed", sans-serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.2rem;
+  background: #f7f8fc;
+  border: none !important;
+  border-radius: 12px;
+  padding: 0.6rem 1.2rem;
+  margin-bottom: 0rem;
+  color: #10167f;
+}
+
+/* Specific styles for description and directions textareas */
+.create-reward-form .description-textarea,
+.create-reward-form .directions-textarea {
+  font-family: Helvetica, Arial, sans-serif !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-size: 1rem !important;
+  background: #f7f8fc !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  min-height: 5rem !important;
+  margin-bottom: 2rem !important;
+  resize: none !important;
+}
+
+.create-reward-form .description-textarea::placeholder,
+.create-reward-form .directions-textarea::placeholder {
+  font-family: Helvetica, Arial, sans-serif !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  color: #b0b0d0 !important;
+}
+
+.create-reward-form .quantity-row,
+.create-reward-form .point-value-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.create-reward-form .quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.create-reward-form .quantity-btn {
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  color: rgba(16, 22, 127, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  font-family: "Barlow Condensed", sans-serif;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.create-reward-form .quantity-btn:first-of-type {
+  transform: translateY(-0.1rem);
+  font-size: 1.4rem;
+}
+
+.create-reward-form .quantity-btn:hover {
+  color: rgba(16, 22, 127, 1);
+}
+
+.create-reward-form .quantity-value {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1a1a4b;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 6px 18px;
+  font-size: 0.95rem;
+}
+
+.save-btn {
+  background: #10167f;
+  color: #ffff;
+  border: 2px solid #10167f;
+  border-radius: 5rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+.cancel-btn {
+  background: #fff;
+  color: #10167f;
+  border-radius: 5rem;
+  border: #ffff;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+.save-btn:hover,
+.cancel-btn:hover {
+  background: #10167f;
+  color: #fff;
+}
+
+.create-reward-header img {
+  height: 40px;
+  width: auto;
+  max-height: 40px;
+  max-width: 120px;
+  object-fit: contain;
+  display: block;
+}
+
+.save-btn-row {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  margin-right: 7.5rem;
+  top: 22rem;
+}
+
+.save-btn {
+  margin-top: 0;
+}
+
+.create-reward-form input:focus,
+.create-reward-form textarea:focus {
+  outline: none;
+  box-shadow: none;
+  border: none !important;
+}
+
+@media (max-width: 1100px) {
+  .create-reward-form {
+    flex-direction: column;
+    max-width: 98vw;
+    min-width: unset;
+    gap: 24px;
+    padding: 24px 8px;
+  }
+  .form-fields-col {
+    min-width: unset;
+  }
+  .image-upload-area {
+    margin: 0 auto;
+  }
+}
+
+/* All other inputs (including Reward Name) use Barlow Condensed */
+.create-reward-form input[type="text"] {
+  font-family: "Barlow Condensed", sans-serif;
+  font-style: italic;
+}
+
+.reward-title-input::placeholder {
+  color: #cccccc;
+  opacity: 1; /* Firefox */
+}
+
+.reward-title-input:-ms-input-placeholder {
+  color: #cccccc; /* Internet Explorer */
+}
+
+.reward-title-input::-ms-input-placeholder {
+  color: #cccccc; /* Microsoft Edge */
+}
+
+.form-fields-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  background: #f7f8fc;
+  border-radius: 12px;
+  padding: 0.7rem 0.7rem;
+  gap: 0.3rem;
+  min-width: 15rem;
+  box-shadow: none;
+}
+
+.input-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.input-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #1a1a4b;
+  letter-spacing: 0.04em;
+  margin-right: 1.2rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  margin-top: -0.5rem;
+  position: relative;
+  top: -0.5rem;
+}
+
+.input-field {
+  width: 2rem;
+  background: transparent;
+  border: none;
+  font-family: "Barlow Condensed", sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #1a1a4b;
+  text-align: center;
+  outline: none;
+  margin-right: 0.2rem;
+}
+
+.input-field::-webkit-inner-spin-button,
+.input-field::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-field[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.form-fields-col .reward-title-input {
+  margin-bottom: 1.5rem !important;
+  min-height: 5.5rem;
+}

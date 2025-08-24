@@ -29,7 +29,6 @@ export default function UserSignUpForm() {
       numStamps: 0,
       pastEvents: [],
       phoneNumber: phoneNum,
-      points: 0,
       registeredEvents: []
     })
   }

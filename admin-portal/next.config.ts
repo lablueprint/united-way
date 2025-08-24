@@ -2,15 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-
   reactStrictMode: false,
   env: {
-    IP_ADDRESS: "10.131.144.142",
+    IP_ADDRESS: "10.131.104.164",
     PORT: "4000",
   },
   images: {
-    domains: ['unitedway-uploads.s3.us-east-2.amazonaws.com']
-  }
+    domains: ["unitedway-uploads.s3.us-east-2.amazonaws.com"],
+  },
 };
 
 export default nextConfig;

@@ -371,9 +371,7 @@ const UpcomingCalendar = () => {
               + CREATE EVENT
             </div>
           </div>
-
         </div>
-
       </div>
       <div className={`${viewMode === "Default" ? "calendar" : ""}`}></div>
       <div className="calendar-container">
