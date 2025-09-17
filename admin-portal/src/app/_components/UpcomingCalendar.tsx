@@ -27,6 +27,12 @@ interface Event {
   locationString: string;
 }
 
+interface MappedEvents {
+  Current: Event[]
+  Upcoming: Event[]
+  Past: Event[]
+}
+const MappedEventsDefault = { Current: [], Past: [], Upcoming: [] }
 
 const UpcomingCalendar = () => {
   const [viewMode, setViewMode] = useState("Default")
@@ -43,8 +49,8 @@ const UpcomingCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState('')
   const [activeTab, setActiveTab] = useState("All")
   const activeTabRef = useRef("All");
-  const [listEvents, setListEvents] = useState<Event[]>([])
-  const listEventsRef = useRef<Event[]>([])
+  const [listEvents, setListEvents] = useState<MappedEvents>(MappedEventsDefault)
+  const listEventsRef = useRef<MappedEvents>(MappedEventsDefault)
   const [org, sendRequest] = useApiAuth();
   const router = useRouter();
 
@@ -227,14 +233,14 @@ const UpcomingCalendar = () => {
   const handleTabClick = async (tab: string) => {
     setActiveTab(tab);
     activeTabRef.current = tab
-    setListEvents([]);
-    listEventsRef.current = [];
+    setListEvents(MappedEventsDefault)
+    listEventsRef.current = MappedEventsDefault
     getAllEvents();
 
   }
 
   const getAllEvents = async () => {
-    let mylistEvents: Event[] = []
+    let mylistEvents: MappedEvents = MappedEventsDefault
     try {
       const body = {
         orgId: org.orgId
@@ -247,7 +253,7 @@ const UpcomingCalendar = () => {
       listEventsRef.current = mylistEvents;
     } catch (error) {
       console.error(`getEventsForWeek: Error fetching all events:`, error);
-      setListEvents([]);
+      setListEvents(MappedEventsDefault);
     }
   }
 
@@ -310,8 +316,7 @@ const UpcomingCalendar = () => {
     }
     else {
       setEventData({});
-      setListEvents([]);
-      listEventsRef.current = [];
+      listEventsRef.current = { Current: [], Past: [], Upcoming: [] };
     }
   }, [selectedWeek, viewMode]);
 
@@ -370,7 +375,6 @@ const UpcomingCalendar = () => {
           </div>
         </div>
       </div>
-      <div className={`${viewMode === "Default" ? "calendar" : ""}`}></div>
       <div className="calendar-container">
         {viewMode == "Calendar" ?
           <>
@@ -391,7 +395,7 @@ const UpcomingCalendar = () => {
                   <div className="view-text" >VIEW</div>
                 </div>
                 <button
-                  className={`view-tab ${viewMode === "Default" ? "active" : ""}`}
+                  className={`view-tab`}
                   onClick={() => { handleViewMode("Default") }}
                 >
                   Default
@@ -468,7 +472,7 @@ const UpcomingCalendar = () => {
                   </div>
                 </div>
                 <button className="nav-button">
-                  <ChevronRight size={16} onClick={() => getNextWeek(true)} />
+                  <ChevronRight size={16} onClick={() => getNextWeek()} />
                 </button>
 
               </div>
@@ -534,98 +538,99 @@ const UpcomingCalendar = () => {
                       <VisibleEventEndMarker />
                     </div>
                   ) : (
-                    Object.entries(listEventsRef.current).map(([groupName, events]) => (
+                    Object.entries(listEventsRef.current).map(([groupName, events]: [string, Event[]]) => (
                       <div key={groupName} className='event-content-container'>
                         <div className="event-header">
                           <div className="current-title">{`${groupName.toUpperCase()} EVENTS`}</div>
-                          <div className="event-count">{`${listEventsRef.current[groupName].length}`}</div>
+                          <div className="event-count">{`${events.length}`}</div>
                         </div>
                         <div className={`list-group-container ${groupName.toLowerCase()}`}>
-                          {events.map((event: Event, index) => {
-                            if (groupName === "Current") {
-                              return (
-                                <EventCard id={event._id} key={event._id} removeFromList={() => { }} orgName={"Placeholder"} onClick={() => {
-                                  router.push(`/events/editor?id=${event._id}`)
-                                }} />
-                              );
-                            } else if (groupName === "Past") {
-                              return (
-                                <div key={event._id} className="event-item past-event">
-                                  <div className="event-details-content">
-                                    <div className="event-title">{event.name}</div>
-                                    <div >•</div>
-                                    <div className="event-info-past">
-                                      <div className="event-date">
-                                        {event.date != null
-                                          ? new Date(event.date).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric'
-                                          }).toUpperCase()
-                                          : "No date"}
-                                      </div>
-                                      <div >|</div>
-                                      <div className="event-time">
-                                        {event.date != null
-                                          ? new Date(event.date).toLocaleTimeString('en-US', {
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                            hour12: true
-                                          })
-                                          : "No time"}
-                                      </div>
-                                      <div className="event-location">
-                                        {event.locationString == null ? "No location specified" : event.locationString}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            } else if (groupName === "Upcoming") {
-                              return (
-                                <EventCard id={event._id} key={event._id} removeFromList={() => { }} orgName={"Placeholder"} onClick={() => {
-                                  router.push(`/events/editor?id=${event._id}`)
-                                }} />
-                              );
-                            } else {
-                              return (
-                                <div key={event._id} className="event-item">
-                                  <div className="event-details-content">
-                                    <div className="event-title">{event.name}</div>
-                                    <div>•</div>
-                                    <div className="event-info">
-                                      <div className="event-date">
-                                        {event.date != null
-                                          ? new Date(event.date).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric'
-                                          }).toUpperCase()
-                                          : "No date"}
-                                      </div>
-                                      <div>|</div>
-                                      <div className="event-time">
-                                        {event.date != null
-                                          ? new Date(event.date).toLocaleTimeString('en-US', {
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                            hour12: true
-                                          })
-                                          : "No time"}
-                                      </div>
+                          {
+                            events.map((event: Event, index) => {
+                              if (groupName === "Current") {
+                                return (
+                                  <EventCard id={event._id} key={event._id} removeFromList={() => { }} orgName={"Placeholder"} onClick={() => {
+                                    router.push(`/events/editor?id=${event._id}`)
+                                  }} />
+                                );
+                              } else if (groupName === "Past") {
+                                return (
+                                  <div key={event._id} className="event-item past-event">
+                                    <div className="event-details-content">
+                                      <div className="event-title">{event.name}</div>
                                       <div >•</div>
-                                      <div className="event-location">
-                                        {event.locationString == null ? "No location specified" : event.locationString}
+                                      <div className="event-info-past">
+                                        <div className="event-date">
+                                          {event.date != null
+                                            ? new Date(event.date).toLocaleDateString('en-US', {
+                                              month: 'short',
+                                              day: 'numeric'
+                                            }).toUpperCase()
+                                            : "No date"}
+                                        </div>
+                                        <div >|</div>
+                                        <div className="event-time">
+                                          {event.date != null
+                                            ? new Date(event.date).toLocaleTimeString('en-US', {
+                                              hour: 'numeric',
+                                              minute: '2-digit',
+                                              hour12: true
+                                            })
+                                            : "No time"}
+                                        </div>
+                                        <div className="event-location">
+                                          {event.locationString == null ? "No location specified" : event.locationString}
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="edit-right-aligned">
-                                    <button className="edit-button">
-                                      <Edit size={16} />
-                                    </button>
+                                );
+                              } else if (groupName === "Upcoming") {
+                                return (
+                                  <EventCard id={event._id} key={event._id} removeFromList={() => { }} orgName={"Placeholder"} onClick={() => {
+                                    router.push(`/events/editor?id=${event._id}`)
+                                  }} />
+                                );
+                              } else {
+                                return (
+                                  <div key={event._id} className="event-item">
+                                    <div className="event-details-content">
+                                      <div className="event-title">{event.name}</div>
+                                      <div>•</div>
+                                      <div className="event-info">
+                                        <div className="event-date">
+                                          {event.date != null
+                                            ? new Date(event.date).toLocaleDateString('en-US', {
+                                              month: 'short',
+                                              day: 'numeric'
+                                            }).toUpperCase()
+                                            : "No date"}
+                                        </div>
+                                        <div>|</div>
+                                        <div className="event-time">
+                                          {event.date != null
+                                            ? new Date(event.date).toLocaleTimeString('en-US', {
+                                              hour: 'numeric',
+                                              minute: '2-digit',
+                                              hour12: true
+                                            })
+                                            : "No time"}
+                                        </div>
+                                        <div >•</div>
+                                        <div className="event-location">
+                                          {event.locationString == null ? "No location specified" : event.locationString}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="edit-right-aligned">
+                                      <button className="edit-button">
+                                        <Edit size={16} />
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
-                              );
-                            }
-                          })}
+                                );
+                              }
+                            })}
                         </div>
                       </div>
                     ))

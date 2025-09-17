@@ -1,26 +1,10 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
 import '@/app/_styles/EventCarousel.css';
 import Image from 'next/image';
-import placeholderTwo from '../../../public/Landing/images/single-event.svg';
+import { useEffect, useState } from 'react';
 import rightArrowDark from '../../../public/EventCarousel/images/right-arrow-dark.svg';
-
-export interface EventData {
-  _id: string;
-  name: string;
-  date: Date;
-  description: string;
-  location: {
-    type: string;
-    coordinates: number[];
-  };
-  startTime: string;
-  endTime: string;
-  organizerID: string;
-  tags: string[];
-  registeredUsers: string[];
-  imageURL: string;
-}
+import placeholderTwo from '../../../public/Landing/images/single-event.svg';
+import { EventData } from '../_interfaces/EventInterfaces';
 
 interface Props {
   events: EventData[];
@@ -102,7 +86,7 @@ export default function EventCarousel({
         <Image
           className="carousel-img"
           fill
-          src={featuredEvent?.imageURL || placeholderTwo}
+          src={featuredEvent?.imageUrl || placeholderTwo}
           alt="Featured event thumbnail."
         />
       </div>

@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import useApiAuth from '../../../_hooks/useApiAuth';
-import { Activity, EventData } from '../../../_interfaces/EventInterfaces';
+import { Activity, EventData, EventDataDefault } from '../../../_interfaces/EventInterfaces';
 import { RequestType } from '../../../_interfaces/RequestInterfaces';
 import { logout } from '../../../_utils/redux/orgSlice';
 import styles from './page.module.css';
@@ -23,24 +23,7 @@ export default function EventManagement() {
     const [polls, setPolls] = useState<Activity[]>([]);
     const [announcements, setAnnouncements] = useState<Activity[]>([]);
     const [drawings, setDrawings] = useState<Activity[]>([]);
-    const [eventData, setEventData] = useState<EventData>({
-        organizerId: "",
-        _id: "",
-        name: "",
-        date: new Date(),
-        draft: true,
-        draftList: [],
-        startTime: "",
-        endTime: "",
-        description: "",
-        location: {
-            type: "",
-            coordinates: [],
-        },
-        tags: [],
-        registeredUsers: [],
-        activities: []
-    });
+    const [eventData, setEventData] = useState<EventData>(EventDataDefault);
 
     const dispatch = useDispatch();
     const router = useRouter();
@@ -199,7 +182,7 @@ export default function EventManagement() {
                         </div>
                     </div>
                 </div>
-                {isEditing && <EventEditor orgName="Placeholder" changeState={setIsEditing} eventId={editingId} justCreated={false} />}
+                {isEditing && <EventEditor eventId={editingId} justCreated={false} />}
                 {isModalOpen && <QRModal isOpen={isModalOpen} eventId={editingId} onClose={() => setIsModalOpen(false)} />}
             </div>
         </div>

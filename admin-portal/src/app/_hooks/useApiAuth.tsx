@@ -45,7 +45,7 @@ function useApiAuth() {
             orgs/createOrg
             orgs/:id
     */
-    async function sendRequest({ requestType, endpoint, body = {} }: Request): Any {
+    async function sendRequest({ requestType, endpoint, body = {} }: Request): Promise<any> {
         let response;
         switch (requestType) {
             case RequestType.GET: {
@@ -58,7 +58,7 @@ function useApiAuth() {
                     })
                     const { data }: Response = response.data;
                     return data;
-                } catch (error) {
+                } catch (error: any) {
                     console.error(error);
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {
@@ -87,7 +87,7 @@ function useApiAuth() {
                     const { data }: Response = response.data;
                     return data;
                     break;
-                } catch (error) {
+                } catch (error: any) {
                     console.error(error);
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {
@@ -117,7 +117,7 @@ function useApiAuth() {
 
                     const { data }: Response = response.data;
                     return data;
-                } catch (error) {
+                } catch (error: any) {
                     console.error(error);
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {
@@ -145,7 +145,7 @@ function useApiAuth() {
                     })
                     const { data }: Response = response.data;
                     return data;
-                } catch (error) {
+                } catch (error: any) {
                     console.error(error);
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {

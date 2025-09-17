@@ -70,6 +70,27 @@ export interface EventData {
     activities: Activity[];
 }
 
+export const EventDataDefault = {
+    organizerId: "",
+    _id: "",
+    name: "",
+    date: new Date(),
+    draft: true,
+    draftList: [],
+    startTime: "",
+    endTime: "",
+    description: "",
+    location: {
+        type: "",
+        coordinates: [],
+    },
+    tags: [],
+    registeredUsers: [],
+    activities: [],
+    imageUrl: "",
+    userCount: 0
+}
+
 export interface EventEditorProps {
     orgName: string;
     changeState: React.Dispatch<React.SetStateAction<boolean>>;

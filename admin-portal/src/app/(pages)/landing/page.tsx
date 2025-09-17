@@ -6,6 +6,7 @@ import { logout } from '../../_utils/redux/orgSlice';
 import EventCard from "@/app/_components/EventCard";
 import EventCarousel from "@/app/_components/EventCarousel";
 import EventEndMarker from '@/app/_components/EventEndMarker';
+import { EventData, EventDataDefault } from '@/app/_interfaces/EventInterfaces';
 
 import Image from "next/image";
 import { addIcon, attendee, emptyLogo, rightArrow, single } from '../../../../public/Landing/Landing-index';
@@ -22,22 +23,6 @@ import styles from "./page.module.css";
 // 3. Replace image placeholders with actual event images.
 // 4. Fix issue where you can continue scrolling after opening 'Create Event'
 export default function Landing() {
-
-  interface EventData {
-    _id: string;
-    name: string;
-    date: Date;
-    description: string;
-    location: {
-      type: string;
-      coordinates: number[];
-    };
-    organizerID: string;
-    tags: string[];
-    registeredUsers: string[];
-    imageURL: string;
-    // activities: Activity[];
-  }
   const dispatch = useDispatch();
   const router = useRouter();
   const [org, sendRequest] = useApiAuth();
@@ -57,20 +42,7 @@ export default function Landing() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [upcomingIds, setUpcomingIds] = useState<string[]>([]);
   const [todayIds, setTodayIds] = useState<string[]>([]);
-  const [eventData, setEventData] = useState<EventData>({
-    organizerID: "",
-    _id: "",
-    name: "",
-    date: new Date(),
-    description: "",
-    location: {
-      type: "",
-      coordinates: [],
-    },
-    tags: [],
-    registeredUsers: [],
-    imageURL: "",
-  });
+  const [eventData, setEventData] = useState<EventData>(EventDataDefault);
 
   // slider states
   const [allEvents, setAllEvents] = useState<EventData[]>([]);
