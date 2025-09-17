@@ -4,8 +4,17 @@ import { useSelector } from "react-redux";
 import { RootState } from "../_interfaces/AuthInterfaces";
 import "../_styles/transactions.css";
 
+interface TransactionData {
+  _id: string,
+  user: string,
+  reward: {
+    name: string,
+    cost: string,
+  }
+}
+
 const TransactionsCard = () => {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<TransactionData[]>([]);
 
   const org = useSelector((state: RootState) => {
     return {

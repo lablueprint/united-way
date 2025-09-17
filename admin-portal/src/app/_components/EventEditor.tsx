@@ -355,9 +355,9 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                                 className={`event-title-editor-card`}
                                 contentEditable
                                 // suppressContentEditableWarning
-                                onInput={(e) => setEventTitle(e.currentTarget.textContent)}
+                                onInput={(e) => setEventTitle(e.currentTarget.textContent ? e.currentTarget.textContent : "")}
                                 onBlur={(e) => {
-                                    if (e.currentTarget.textContent.trim() === "") {
+                                    if (e.currentTarget.textContent && e.currentTarget.textContent.trim() === "") {
                                         setEventTitle("");
                                     }
                                 }}
@@ -459,9 +459,9 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                                     className={`event-title-editor-card`}
                                     contentEditable
                                     suppressContentEditableWarning
-                                    onInput={(e) => setEventDescription(e.currentTarget.textContent)}
+                                    onInput={(e) => setEventDescription(e.currentTarget.textContent ? e.currentTarget.textContent : "")}
                                     onBlur={(e) => {
-                                        if (e.currentTarget.textContent.trim() === "") {
+                                        if (e.currentTarget.textContent && e.currentTarget.textContent.trim() === "") {
                                             setEventTitle("");
                                         }
                                     }}
@@ -480,14 +480,14 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                                         // debounce typing before fetching
                                         if (timeoutID) clearTimeout(timeoutID);
 
-                                        const value = e.currentTarget.textContent;
+                                        const value = e.currentTarget.textContent ?? "";
                                         setAddress(value);
 
                                         const newTimeoutID = setTimeout(() => getLocationJSON(value), 500);
                                         setTimeoutID(newTimeoutID);
                                     }}
                                     onBlur={(e) => {
-                                        if (e.currentTarget.textContent.trim() === "") {
+                                        if (e.currentTarget.textContent && e.currentTarget.textContent.trim() === "") {
                                             setAddress("");
                                             setOptions([]);
                                         }
