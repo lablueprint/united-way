@@ -1,8 +1,8 @@
-import { RequestType, Request, Response } from "../_interfaces/RequestInterfaces";
-import { useSelector, useDispatch } from "react-redux";
-import { refresh } from '../_utils/redux/userSlice';
-import axios from "axios";
 import { createSelector } from "@reduxjs/toolkit";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { Request, RequestType, Response } from "../_interfaces/RequestInterfaces";
+import { refresh } from '../_utils/redux/userSlice';
 
 const memoizedSelector = createSelector(
     (state) => state.auth,
@@ -22,7 +22,7 @@ function useApiAuth() {
     async function refreshToken(onComplete: (newAuthToken: string) => object) {
         const endpoint = "auth/userRefresh";
         try {
-            const response = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${endpoint}`, {}, {
+            const response = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${endpoint}`, {}, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${user.refreshToken}`
@@ -50,7 +50,7 @@ function useApiAuth() {
         switch (requestType) {
             case RequestType.GET: {
                 try {
-                    response = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${expandId(endpoint)}`, {
+                    response = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${expandId(endpoint)}`, {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${user.authToken}`
@@ -62,7 +62,7 @@ function useApiAuth() {
                     console.error(error);
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {
-                            response = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${expandId(endpoint)}`, {
+                            response = await axios.get(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${expandId(endpoint)}`, {
                                 headers: {
                                     "Content-Type": "application/json",
                                     "Authorization": `Bearer ${newAuthToken}`
@@ -76,7 +76,7 @@ function useApiAuth() {
             }
             case RequestType.PATCH: {
                 try {
-                    response = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${expandId(endpoint)}`, body,
+                    response = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${expandId(endpoint)}`, body,
                         {
                             headers: {
                                 "Content-Type": "application/json",
@@ -90,7 +90,7 @@ function useApiAuth() {
                     console.error(error);
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {
-                            response = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${expandId(endpoint)}`, body,
+                            response = await axios.patch(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${expandId(endpoint)}`, body,
                                 {
                                     headers: {
                                         "Content-Type": "application/json",
@@ -105,7 +105,7 @@ function useApiAuth() {
             }
             case RequestType.POST: {
                 try {
-                    response = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${expandId(endpoint)}`, body,
+                    response = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${expandId(endpoint)}`, body,
                         {
                             headers: {
                                 "Content-Type": "application/json",
@@ -119,7 +119,7 @@ function useApiAuth() {
                     console.error(error);
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {
-                            response = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${expandId(endpoint)}`, body,
+                            response = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${expandId(endpoint)}`, body,
                                 {
                                     headers: {
                                         "Content-Type": "application/json",
@@ -134,7 +134,7 @@ function useApiAuth() {
             }
             case RequestType.DELETE: {
                 try {
-                    response = await axios.delete(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${expandId(endpoint)}`, {
+                    response = await axios.delete(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${expandId(endpoint)}`, {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${user.authToken}`
@@ -146,7 +146,7 @@ function useApiAuth() {
                     console.error(error);
                     if (error.response.status === 401) {
                         return refreshToken(async (newAuthToken: string) => {
-                            response = await axios.delete(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/${expandId(endpoint)}`, {
+                            response = await axios.delete(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/${expandId(endpoint)}`, {
                                 headers: {
                                     "Content-Type": "application/json",
                                     "Authorization": `Bearer ${newAuthToken}`

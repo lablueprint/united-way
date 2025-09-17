@@ -36,7 +36,7 @@ export default function SignIn() {
 
   const getOrgByEmail = async () => {
     try {
-      const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/filtered`,
+      const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/filtered`,
         {
           email: email
         }
@@ -49,10 +49,8 @@ export default function SignIn() {
   }
 
   const verifySignIn = async () => {
-    console.log("email: ", email);
-    console.log("password: ", password); 
     try {
-      const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/auth/orgLogin`,
+      const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/auth/orgLogin`,
         {
           email: email,
           password: password

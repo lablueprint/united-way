@@ -73,7 +73,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
 
     const getEventById = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/events/${eventId}`, {
+            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/events/${eventId}`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${org.authToken}`
@@ -239,7 +239,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
         const formData = new FormData();
         formData.append("image", file);
         const response = await axios.post(
-            `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}/addImage`,
+            `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${org.orgId}/addImage`,
             formData,
             {
                 headers: {
@@ -284,8 +284,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
     };
 
     return (
-        <div className="event-editor-main">
-            {/* Events header */}
+        <div>
             <div className="event-header">
                 <div className="event-header-info">
                     <div className="event-directory-path">
@@ -301,26 +300,27 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                     View current, published, past, and event drafts.
                 </div>
             </div>
+            <div className="event-editor-main">
+                {/* Events header */}
 
-            <div className="draft-save-publish-indicators">
-                <div className="draft-indicator">
-                    <div className="draft-indicator-logo"><Image src={draft} alt="Draft Icon" width={18} height={18} /></div>
-                    <div className="draft-indicator-text">DRAFT</div>
+                <div className="draft-save-publish-indicators">
+                    <div className="draft-indicator">
+                        <div className="draft-indicator-logo"><Image src={draft} alt="Draft Icon" width={18} height={18} /></div>
+                        <div className="draft-indicator-text">DRAFT</div>
+                    </div>
+                    <div className="cancel-save-publish-parent">
+                        <button
+                            className="cancel-button"
+                            onClick={handleCancel}
+                        >
+                            CANCEL
+                        </button>
+                        <div className="save-button" onClick={() => { handlePatch(true) }}>SAVE</div>
+                        <div className="publish-button" onClick={() => { handlePatch(false) }}>PUBLISH</div>
+                    </div>
                 </div>
-                <div className="cancel-save-publish-parent">
-                    <button
-                        className="cancel-button"
-                        onClick={handleCancel}
-                    >
-                        CANCEL
-                    </button>
-                    <div className="save-button" onClick={() => { handlePatch(true) }}>SAVE</div>
-                    <div className="publish-button" onClick={() => { handlePatch(false) }}>PUBLISH</div>
-                </div>
-            </div>
 
-            {/* Editor Body */}
-            <div className="editor-body-parent">
+                {/* Editor Body */}
                 <div className="event-editor-interface">
                     <div className="image-editor-and-tags">
                         {/* Hidden file input */}
@@ -354,7 +354,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                             <div
                                 className={`event-title-editor-card`}
                                 contentEditable
-                                suppressContentEditableWarning
+                                // suppressContentEditableWarning
                                 onInput={(e) => setEventTitle(e.currentTarget.textContent)}
                                 onBlur={(e) => {
                                     if (e.currentTarget.textContent.trim() === "") {
@@ -362,7 +362,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                                     }
                                 }}
                                 data-placeholder="Title"
-                            ></div>
+                            />
                             <div className="organization-attendees-grandparent">
                                 <div className="org-box-parent">
                                     <div className="org-logo"><Image src={hero} alt="Hero Icon" width={28} height={28} /></div>
@@ -517,37 +517,37 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
                         </div>
                     </div>
                 </div>
-            </div>
-            <div>
-                <div className="tags-title">
-                    SELECT KEYWORDS
-                </div>
-                <div className="tags-parent">
-                    <div className="tags-container">
-                        {
-                            isDisplayingTagModal ?
-                                (<TagModal tags={tags} setTags={setTags} setIsDisplayingTagModal={setIsDisplayingTagModal} />)
-                                :
-                                EventTags.map((_, index) => {
-                                    return (
-                                        tags[index] ?
-                                            <div
-                                                className={selectedTagColors[(index) % 3]}
-                                                key={index}>
-                                                {EventTags[index]}
-                                            </div>
-                                            :
-                                            <React.Fragment key={index}></React.Fragment>
-                                    )
-                                })
-                        }
+                <div>
+                    <div className="tags-title">
+                        SELECT KEYWORDS
                     </div>
-                    <div className="add-tag-button" onClick={() => { setIsDisplayingTagModal(true) }}>
-                        + ADD TAG
+                    <div className="tags-parent">
+                        <div className="tags-container">
+                            {
+                                isDisplayingTagModal ?
+                                    (<TagModal tags={tags} setTags={setTags} setIsDisplayingTagModal={setIsDisplayingTagModal} />)
+                                    :
+                                    EventTags.map((_, index) => {
+                                        return (
+                                            tags[index] ?
+                                                <div
+                                                    className={selectedTagColors[(index) % 3]}
+                                                    key={index}>
+                                                    {EventTags[index]}
+                                                </div>
+                                                :
+                                                <React.Fragment key={index}></React.Fragment>
+                                        )
+                                    })
+                            }
+                        </div>
+                        <div className="add-tag-button" onClick={() => { setIsDisplayingTagModal(true) }}>
+                            + ADD TAG
+                        </div>
                     </div>
                 </div>
+                <ActivityDropdown eventId={eventId} isDraft={true} />
             </div>
-            <ActivityDropdown eventId={eventId} isDraft={true} />
         </div>
     )
 }

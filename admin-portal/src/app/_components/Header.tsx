@@ -1,8 +1,5 @@
-import { useState } from "react";
 import React from "react";
 import '../_styles/Header.css';
-import addIcon from '../_styles/_images/add-icon.svg';
-import Image from "next/image";
 
 interface HeaderProps {
     headerText?: string;

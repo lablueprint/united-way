@@ -15,7 +15,6 @@ const createOrganization = async (req, res) => {
         req.body.password = hash;
         const newOrganization = new Organization(req.body);
         const data = await newOrganization.save(newOrganization);
-        console.log("This is the data", data);
         res.status(201).json({
           status: "success",
           message: "Organization successfully created.",
@@ -133,7 +132,6 @@ const getOrganizationsByFilter = async (req, res) => {
 };
 
 const editOrganizationDetails = async (req, res) => {
-  console.log("This is checking auth for org", req.auth.role);
   if (req.auth.role != "organization") {
     res.status(401).json({
       status: "failure",
@@ -152,7 +150,6 @@ const editOrganizationDetails = async (req, res) => {
 
   const updateInput = req.body;
   try {
-    console.log("This is the update input", updateInput);
     const result = await Organization.updateOne(
       { _id: orgId },
       { $set: updateInput }
@@ -268,11 +265,9 @@ const addImageToOrganization = async (req, res) => {
   try {
     // Upload to S3
     const result = await putObject(image.data, fileName);
-    console.log("S3 upload result:", result);
     if (!result) {
       throw new Error("Failed to upload to S3");
     }
-    console.log("Image uploaded to S3:", result.url);
 
     // Send back the URL
     return res.status(200).json({

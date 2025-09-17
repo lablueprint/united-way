@@ -46,7 +46,6 @@ export default function Editor() {
 
   // TODO: add the isNewEvent boolean to the EventEditor props.
   // This will help solve the issue with regards to event cancel deletion.
-  console.log(isNewEvent)
   return (
     <>
       {

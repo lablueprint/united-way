@@ -420,9 +420,7 @@ const editEventDetails = async (req, res) => {
 
 const deleteEvent = async (req, res) => {
   try {
-    console.log("deleting event")
     const data = await Event.findByIdAndDelete(req.params.id);
-    console.log(data)
     res.status(200).json({
       status: "success",
       message: "Event successfully deleted.",

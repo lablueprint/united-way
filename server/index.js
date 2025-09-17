@@ -36,62 +36,77 @@ const app = express(); //define app using express, defines handlers
 app.use(cors()); // use app.use to use router -- cross origin requests, allow retrieve req from diff ip address
 app.use(express.json());
 
-// API Routes
-app.use("/test", exampleRouter); // given ip address, /test is where example router logic will be handle
-app.use("/auth", authRouter);
+// Health check endpoint for ALB (before other routes)
+app.get("/api/health", (req, res) => {
+  // Check MongoDB connection
+  const mongoStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    mongodb: mongoStatus,
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// API Routes - Updated with /api prefix
+app.use("/api/test", exampleRouter); // given ip address, /api/test is where example router logic will be handle
+app.use("/api/auth", authRouter);
 
 app.use(
-  "/orgs",
+  "/api/orgs",
   jwt({
     secret: process.env.JWT_SECRET,
     algorithms: ["HS256"],
-  }).unless({ path: ["/orgs/createOrg", "/orgs/filtered"] })
+  }).unless({ path: ["/api/orgs/createOrg", "/api/orgs/filtered"] })
 );
-app.use("/orgs", organizationRouter);
+app.use("/api/orgs", organizationRouter);
 
 app.use(
-  "/users",
+  "/api/users",
   jwt({
     secret: process.env.JWT_SECRET,
     algorithms: ["HS256"],
-  }).unless({ path: ["/users/createUser", /^\/users\/email\/([^\/]*)$/] })
+  }).unless({ path: ["/api/users/createUser", /^\/api\/users\/email\/([^\/]*)$/] })
 );
-app.use("/users", userRouter);
+app.use("/api/users", userRouter);
 
 app.use(
-  "/events",
+  "/api/events",
   jwt({
     secret: process.env.JWT_SECRET,
     algorithms: ["HS256"],
   })
 );
-app.use("/events", eventRouter);
+app.use("/api/events", eventRouter);
 
-app.use("/activities", activityRouter);
+app.use("/api/activities", activityRouter);
 
 app.use(
-  "/twofactor",
+  "/api/twofactor",
   jwt({
     secret: process.env.JWT_SECRET,
     algorithms: ["HS256"],
   }).unless({
     path: [
-      "/twofactor/sendOTP",  // <- allow without token
-      "/twofactor/verifyCode"    // <- allow user to verify OTP without token
+      "/api/twofactor/sendOTP",  // <- allow without token
+      "/api/twofactor/verifyCode"    // <- allow user to verify OTP without token
     ]
   })
 );
+app.use("/api/twofactor", twoFactorRouter);
 
 app.use(
-  "/transactions",
+  "/api/transactions",
   jwt({
     secret: process.env.JWT_SECRET,
     algorithms: ["HS256"],
   })
 );
-app.use("/transactions", transactionRouter);
+app.use("/api/transactions", transactionRouter);
 
-app.get("/", (req, res) => {
+// Root endpoint (non-API)
+app.get("/api", (req, res) => {
   // defines a route where if we send get req to the route, will send back resp
   res.send("Hello World!"); //routers are groupings of endpoints
 });

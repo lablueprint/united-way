@@ -1,9 +1,8 @@
 "use client";
 // Added following line
-import { useState } from "react";
-import axios, { AxiosResponse } from "axios";
 import RewardsSection from "@/app/_components/RewardsSection";
-import TransactionsCard from "@/app/_components/TransactionCard";
+import axios, { AxiosResponse } from "axios";
+import { useState } from "react";
 
 import "../../_styles/rewardsPage.css";
 
@@ -14,7 +13,7 @@ export default function Rewards() {
   const exampleGetToRoot = async () => {
     try {
       const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/transactions/`
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/transactions/`
       );
       setResponseValue(response.data);
     } catch (error) {

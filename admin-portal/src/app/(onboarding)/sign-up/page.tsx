@@ -72,7 +72,7 @@ export default function SignUp() {
   const getOrgByEmail = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/filtered`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/filtered`,
         { email }
       );
       return response.data;
@@ -101,7 +101,7 @@ export default function SignUp() {
   const sendOTP = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/twofactor/sendOTP`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/twofactor/sendOTP`,
         { email }
       );
       if (response.data) {
@@ -120,7 +120,7 @@ export default function SignUp() {
   const verifyOTP = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/twofactor/verifyCode`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/twofactor/verifyCode`,
         { code: otpCode, hashedCode }
       );
       if (response.data === true) {
@@ -140,7 +140,7 @@ export default function SignUp() {
 
     try {
       const response: AxiosResponse = await axios.post(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/createOrg`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/createOrg`,
         { email, password, name: orgName }
       );
       dispatch(login({

@@ -1,9 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
 import axios from "axios";
-import DropDown from "./Dropdown";
-import ActivityEditor from "./ActivityEditor";
+import { useEffect, useState } from "react";
 import type { Activity } from "../_interfaces/EventInterfaces";
+import ActivityEditor from "./ActivityEditor";
+import DropDown from "./Dropdown";
 
 interface ActivityDropdownProps {
   eventId: string;
@@ -18,10 +18,10 @@ interface Section {
 }
 
 export default function ActivityDropdown({ eventId, isDraft }: ActivityDropdownProps) {
-  const [activities,     setActivities]   = useState<Activity[]>([]);
-  const [refresh,        setRefresh]      = useState(0);
-  const [creatingType,   setCreatingType] = useState<ActivityType | null>(null);
-  const [selectedId,     setSelectedId]   = useState<string | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [refresh, setRefresh] = useState(0);
+  const [creatingType, setCreatingType] = useState<ActivityType | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const sections: Section[] = [
     { title: "Announcements", type: "announcement" },
@@ -35,7 +35,7 @@ export default function ActivityDropdown({ eventId, isDraft }: ActivityDropdownP
   useEffect(() => {
     axios
       .post(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/activities/filtered`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/activities/filtered`,
         { eventID: eventId }
       )
       .then(res => setActivities(res.data.data))
