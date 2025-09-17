@@ -1,18 +1,17 @@
+import axios from "axios";
+import { useRouter } from "expo-router";
 import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
+  Image,
+  ImageBackground,
   SafeAreaView,
   StatusBar,
-  ImageBackground,
-  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import React from "react";
-import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
 import { login } from "../_utils/redux/userSlice";
-import axios from "axios";
 
 export default function SignUpScreen() {
   const dispatch = useDispatch();
@@ -27,7 +26,7 @@ export default function SignUpScreen() {
 
   const handleTempLogin = async () => {
     const response: AxiosResponse = await axios.post(
-      `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
+      `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/users/createUser`,
       {
         isTemporary: true,
       }

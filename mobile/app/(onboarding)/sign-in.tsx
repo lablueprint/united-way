@@ -1,19 +1,19 @@
+import axios, { AxiosResponse } from "axios";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
-  StyleSheet,
-  Pressable,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
   Alert,
   Image,
   ImageBackground,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import React, { useState } from "react";
-import { Link, useRouter } from "expo-router";
-import axios, { AxiosResponse } from "axios";
-import { login } from "../_utils/redux/userSlice";
 import { useDispatch } from "react-redux";
+import { login } from "../_utils/redux/userSlice";
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState("");
@@ -43,7 +43,7 @@ export default function SignUpScreen() {
   const getUserByEmail = async () => {
     try {
       const response: AxiosResponse = await axios.get(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/users/email/${email}`
       );
       return response.data.data;
     } catch (err) {
@@ -54,7 +54,7 @@ export default function SignUpScreen() {
   const verifySignIn = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/auth/userLogin`,
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/auth/userLogin`,
         {
           email: email,
           password: password,

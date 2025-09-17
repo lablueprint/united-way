@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import "../_styles/transactions.css";
 import { RootState } from "../_interfaces/AuthInterfaces";
+import "../_styles/transactions.css";
 
 const TransactionsCard = () => {
   const [transactions, setTransactions] = useState([]);
@@ -18,11 +18,9 @@ const TransactionsCard = () => {
     const fetchTransactions = async () => {
       try {
         const response: AxiosResponse = await axios.get(
-          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/transactions/`
+          `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/transactions/`
         );
-        console.log(response.data);
         setTransactions(response.data);
-        console.log(response.data);
       } catch (err) {
         console.error(err);
       }

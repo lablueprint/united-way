@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
+import axios, { AxiosResponse } from "axios";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { useEffect, useState } from "react";
 import {
+  Alert,
+  Image,
+  ImageBackground,
   SafeAreaView,
-  View,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  StyleSheet,
-  Image,
-  ImageBackground,
+  View,
 } from "react-native";
-import { useRouter, Redirect, Link } from "expo-router";
-import axios, { AxiosResponse } from "axios";
-import * as SecureStore from "expo-secure-store";
 import { useDispatch } from "react-redux";
 import { login } from "../_utils/redux/userSlice";
-import { useLocalSearchParams } from "expo-router";
 
 enum SignUpState {
   SignUpForm, // 0
@@ -96,7 +95,7 @@ export default function SignUpScreen() {
   const userExists = async (): Promise<any> => {
     try {
       const response: AxiosResponse = await axios.get(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/email/${email}`
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/users/email/${email}`
       );
       return response.data.data;
     } catch (err) {
@@ -121,7 +120,7 @@ export default function SignUpScreen() {
   const sendOTP = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/sendOTP`,
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/twofactor/sendOTP`,
         { email } // sending the email to the backend
       );
       if (response.data) {
@@ -140,7 +139,7 @@ export default function SignUpScreen() {
   const verifyOTP = async () => {
     try {
       const response: AxiosResponse = await axios.post(
-        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/twofactor/verifyCode`,
+        `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/twofactor/verifyCode`,
         { code, hashedCode }
       );
       if (response.data === true) {
@@ -171,7 +170,7 @@ export default function SignUpScreen() {
 
       if (tempId == undefined) {
         const response: AxiosResponse = await axios.post(
-          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
+          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/users/createUser`,
           {
             email: email,
             password: password,
@@ -196,7 +195,7 @@ export default function SignUpScreen() {
         });
       } else {
         const response: AxiosResponse = await axios.patch(
-          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`,
+          `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/users/createUser`,
           {
             email: email,
             password: password,

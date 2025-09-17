@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, FormEvent } from 'react';
 import axios from "axios";
+import { FormEvent, useState } from 'react';
 
 interface OrganizationSignUpFormProps {
   id: string;
@@ -13,7 +13,7 @@ export default function NewOrganizationForm({ id }: OrganizationSignUpFormProps)
   const [location, setLocation] = useState<string>('');
   const [name, setName] = useState<string>('');
 
-  const apiEndpoint = `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${id}`;
+  const apiEndpoint = `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${id}`;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

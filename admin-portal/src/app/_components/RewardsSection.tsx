@@ -69,7 +69,7 @@ const RewardsSection = () => {
     //     (reward) => reward._id !== rewardId
     //   );
     //   const response = await axios.patch(
-    //     `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${orgId}`,
+    //     `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${orgId}`,
     //     {
     //       rewards: updatedRewards,
     //     },
@@ -119,7 +119,6 @@ const RewardsSection = () => {
         const body = {};
         const requestType = RequestType.GET;
         const data = await sendRequest({ requestType, body, endpoint });
-        console.log("This is the data: ", data);
       } catch (err) {
         console.error(err);
       }

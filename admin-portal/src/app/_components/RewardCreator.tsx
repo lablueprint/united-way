@@ -33,17 +33,15 @@ const CreateReward = () => {
       reader.readAsDataURL(file);
       // Upload the image
       const imageUrl = await uploadOrgImage(file);
-      console.log("Uploaded image URL:", imageUrl);
       setImage(imageUrl);
     }
   };
 
   const uploadOrgImage = async (file: File) => {
-    console.log("Image upload token:", org.authToken);
     const formData = new FormData();
     formData.append("image", file);
     const response = await axios.post(
-      `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}/addImage`,
+      `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${org.orgId}/addImage`,
       formData,
       {
         headers: {
@@ -51,7 +49,6 @@ const CreateReward = () => {
         },
       }
     );
-    console.log("Image upload response:", response.data);
     return response.data.imageUrl;
   };
 
@@ -68,7 +65,7 @@ const CreateReward = () => {
       };
       // Fetch current rewards
       const currOrg = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${org.orgId}`,
         {
           headers: {
             Authorization: `Bearer ${org.authToken}`,
@@ -79,7 +76,7 @@ const CreateReward = () => {
       const rewards = currOrg.data.data.rewards || [];
       // Add new reward
       const response = await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/orgs/${org.orgId}`,
+        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${org.orgId}`,
         {
           rewards: [...rewards, newReward],
         },

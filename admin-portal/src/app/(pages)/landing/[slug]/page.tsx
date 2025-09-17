@@ -1,24 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import React from "react";
-import styles from './page.module.css';
-import addIcon from '../_styles/_images/add-icon.svg';
-import Image from "next/image";
-import { useDispatch } from 'react-redux';
-import { logout } from '../../../_utils/redux/orgSlice';
-import { useRouter } from 'next/navigation';
-import { useParams } from 'next/navigation'
-import useApiAuth from '../../../_hooks/useApiAuth';
-import { RequestType, Request } from '../../../_interfaces/RequestInterfaces';
-import { EventData, Activity } from '../../../_interfaces/EventInterfaces';
 import ActivityCard from "@/app/_components/ActivityCard";
 import EventEditor from "@/app/_components/EventEditor";
 import QRModal from "@/app/_components/QRModal";
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useDispatch } from 'react-redux';
+import useApiAuth from '../../../_hooks/useApiAuth';
+import { Activity, EventData } from '../../../_interfaces/EventInterfaces';
+import { RequestType } from '../../../_interfaces/RequestInterfaces';
+import { logout } from '../../../_utils/redux/orgSlice';
+import styles from './page.module.css';
 
 export default function EventManagement() {
     const params = useParams(); //expecting event id as a string
-    const slug = params.slug as string; 
+    const slug = params.slug as string;
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingId, setEditingId] = useState<string>("");
@@ -48,9 +44,9 @@ export default function EventManagement() {
 
     const dispatch = useDispatch();
     const router = useRouter();
-  
+
     const dispatchLogout = async () => {
-      await dispatch(logout());
+        await dispatch(logout());
     }
 
     const getEventById = async (id: string) => {
@@ -61,7 +57,6 @@ export default function EventManagement() {
             const data = await sendRequest({ requestType, endpoint, body });
             return data;
         } catch (err) {
-            console.log(err);
             return err;
         }
     };
@@ -72,101 +67,98 @@ export default function EventManagement() {
             setEventData({
                 ...data,
                 date: new Date(data.date)
-              });
+            });
         };
         fetchData();
     }, []);
 
     useEffect(() => {
         const fetchActivitiesByType = async () => {
-          try {
-            const requestType = RequestType.POST;
-            const endpoint = "activities/filtered";
-      
-            const fetchByType = async (type: string) => {
-              const body = { eventID: slug, type };
-              const response = await sendRequest({ requestType, endpoint, body });
-              const rawData = Array.isArray(response) ? response : [];
-              
-              // Turns date object that gets auto converted to string back into date
-              const parsedData = rawData.map((activity: Activity) => ({
-                ...activity,
-                timeStart: new Date(activity.timeStart),
-                timeEnd: new Date(activity.timeEnd),
-              }));
-            
-              return parsedData;
-            };
-      
-            const pollsData = await fetchByType("poll");
-            const announcementsData = await fetchByType("announcement");
-            const drawingsData = await fetchByType("drawing");
-      
-            setPolls(pollsData);
-            setAnnouncements(announcementsData);
-            setDrawings(drawingsData);
-            setActivities([...pollsData, ...announcementsData, ...drawingsData]);
-      
-            console.log(pollsData);
-            console.log(slug);
-          } catch (err) {
-            console.error("Error fetching activities by type:", err);
-          }
-        };
-      
-        fetchActivitiesByType();
-      }, [slug]);
-      
-    
-      const createBlankEvent = async () => {
-        try {
-          const requestType = RequestType.POST;
-          const endpoint = "events/orgs/:id/createEvent";
-          const body = {
-            name: "Your Event Name",
-            date: new Date(),
-            duration: 0, // Hardcoded for now
-            draft: true,
-            draftList: [],
-            description: "Your Event Description",
-            startTime: '12:00',
-            endTime: '12:01',
-            location: {
-              type: "Point",
-              coordinates: [0, 0]
-            },
-            organizerID: org.orgId,
-            tags: [],
-            registeredUsers: [], // Hardcoded for now
-            activity: [], // Hardcoded for now
-            image: "placeholder" // Hardcoded for now
-          };
-          const data = await sendRequest({ requestType, endpoint, body });
-          return data._id;
-        } catch (err) {
-          console.log(err);
-          return ""
-        }
-      }
+            try {
+                const requestType = RequestType.POST;
+                const endpoint = "activities/filtered";
 
-    return(
+                const fetchByType = async (type: string) => {
+                    const body = { eventID: slug, type };
+                    const response = await sendRequest({ requestType, endpoint, body });
+                    const rawData = Array.isArray(response) ? response : [];
+
+                    // Turns date object that gets auto converted to string back into date
+                    const parsedData = rawData.map((activity: Activity) => ({
+                        ...activity,
+                        timeStart: new Date(activity.timeStart),
+                        timeEnd: new Date(activity.timeEnd),
+                    }));
+
+                    return parsedData;
+                };
+
+                const pollsData = await fetchByType("poll");
+                const announcementsData = await fetchByType("announcement");
+                const drawingsData = await fetchByType("drawing");
+
+                setPolls(pollsData);
+                setAnnouncements(announcementsData);
+                setDrawings(drawingsData);
+                setActivities([...pollsData, ...announcementsData, ...drawingsData]);
+            } catch (err) {
+                console.error("Error fetching activities by type:", err);
+            }
+        };
+
+        fetchActivitiesByType();
+    }, [slug]);
+
+
+    const createBlankEvent = async () => {
+        try {
+            const requestType = RequestType.POST;
+            const endpoint = "events/orgs/:id/createEvent";
+            const body = {
+                name: "Your Event Name",
+                date: new Date(),
+                duration: 0, // Hardcoded for now
+                draft: true,
+                draftList: [],
+                description: "Your Event Description",
+                startTime: '12:00',
+                endTime: '12:01',
+                location: {
+                    type: "Point",
+                    coordinates: [0, 0]
+                },
+                organizerID: org.orgId,
+                tags: [],
+                registeredUsers: [], // Hardcoded for now
+                activity: [], // Hardcoded for now
+                image: "placeholder" // Hardcoded for now
+            };
+            const data = await sendRequest({ requestType, endpoint, body });
+            return data._id;
+        } catch (err) {
+            console.log(err);
+            return ""
+        }
+    }
+
+    return (
         <div className={styles.manageWrap}>
             <div className={styles.manageContainer}>
                 <div className={styles.manageHeader}>
                     <div className={styles.manageTitle}>{eventData.name}</div>
                     <div className={styles.buttonContainer}>
-                        <button 
+                        <button
                             className={styles.lightButton}
                             onClick={async () => {
                                 const _id = await createBlankEvent()
-                
+
                                 if (_id != "") {
-                                setIsEditing(!isEditing)
-                                setEditingId(eventData._id);
+                                    setIsEditing(!isEditing)
+                                    setEditingId(eventData._id);
                                 }
                             }}
                         >Edit Event</button>
-                        <button 
+                        <button
                             className={styles.darkButton}
                             onClick={() => setIsModalOpen(true)}
                         >View QR Code</button>
@@ -180,7 +172,7 @@ export default function EventManagement() {
                         </div>
                         <div className={styles.activityContainer}>
                             {polls.map((poll) => (
-                                <ActivityCard key={poll._id} activity={poll}/>
+                                <ActivityCard key={poll._id} activity={poll} />
                             ))}
                         </div>
                     </div>
@@ -191,7 +183,7 @@ export default function EventManagement() {
                         </div>
                         <div className={styles.activityContainer}>
                             {drawings.map((drawing) => (
-                                <ActivityCard key={drawing._id} activity={drawing}/>
+                                <ActivityCard key={drawing._id} activity={drawing} />
                             ))}
                         </div>
                     </div>
@@ -202,13 +194,13 @@ export default function EventManagement() {
                         </div>
                         <div className={styles.activityContainer}>
                             {announcements.map((announcement) => (
-                                <ActivityCard key={announcement._id} activity={announcement}/>
+                                <ActivityCard key={announcement._id} activity={announcement} />
                             ))}
                         </div>
                     </div>
                 </div>
                 {isEditing && <EventEditor orgName="Placeholder" changeState={setIsEditing} eventId={editingId} justCreated={false} />}
-                {isModalOpen && <QRModal isOpen={isModalOpen} eventId={editingId} onClose={() => setIsModalOpen(false)} /> }
+                {isModalOpen && <QRModal isOpen={isModalOpen} eventId={editingId} onClose={() => setIsModalOpen(false)} />}
             </div>
         </div>
     );

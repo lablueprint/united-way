@@ -1,6 +1,6 @@
-import {useState} from 'react';
-import { View, Button, TextInput } from 'react-native';
 import axios from 'axios';
+import { useState } from 'react';
+import { Button, TextInput, View } from 'react-native';
 
 export default function UserSignUpForm() {
   const [email, onChangeEmail] = useState('');
@@ -16,7 +16,7 @@ export default function UserSignUpForm() {
     onChangePhoneNum('');
     onChangeCommunity('');
 
-    const { data } = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/users/createUser`, {
+    const { data } = await axios.post(`http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT}/api/users/createUser`, {
       collectedStamps: [],
       demographics: {
         gender: false,

@@ -160,7 +160,7 @@ export default function Landing() {
           date: new Date(event.date),
         }))
 
-        setOrgName("Kimberly");
+        setOrgName("LA Blueprint");
         setTodayIds((normalizedEventData.filter((event: EventData) => isToday(event.date) == true)).map((event: EventData) => event._id));
         setUpcomingIds(
           normalizedEventData

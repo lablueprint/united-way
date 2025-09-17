@@ -10,7 +10,7 @@
     width: 100vw;
     background-size: cover;
     background-repeat: no-repeat;
-    padding: 1rem 5.5rem 3rem 5.5rem;
+    padding: 1rem 7.5rem 3rem 7.5rem;
 }
 
 .event-header-info {
@@ -149,7 +149,7 @@
 
 .event-editor-interface {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
     column-gap: 2rem;
 }

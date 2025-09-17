@@ -1,10 +1,10 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import styles from "./page.module.css"
-import { useDispatch } from 'react-redux';
-import { logout } from '../../_utils/redux/orgSlice';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../_utils/redux/orgSlice';
+import styles from "./page.module.css";
 
 import useApiAuth from '@/app/_hooks/useApiAuth';
 import { RequestType } from '@/app/_interfaces/RequestInterfaces';

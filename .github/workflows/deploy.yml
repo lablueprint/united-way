@@ -1,0 +1,158 @@
+name: Deploy Next.js + Express with CDK
+
+on:
+  push:
+    branches: 
+      - main        # Deploy to prod
+      - develop     # Deploy to staging
+  pull_request:
+    branches: [main, develop]
+
+env:
+  AWS_REGION: us-west-1
+  NODE_VERSION: '18'
+
+jobs:
+  # Determine environment based on branch
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+    steps:
+      - name: Set environment
+        id: set-env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "environment=staging" 
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+
+  # Deploy infrastructure with CDK
+  infrastructure:
+    needs: setup
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'  # Only deploy on push, not PR
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      admin-portal-bucket: ${{ steps.deploy.outputs.AdminPortalBucketName }}
+      cloudfront-id: ${{ steps.deploy.outputs.CloudFrontDistributionId }}
+      deployment-bucket: ${{ steps.deploy.outputs.DeploymentBucketName }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: infrastructure/package-lock.json
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Install CDK dependencies
+        working-directory: infrastructure
+        run: npm ci
+      
+      - name: Deploy infrastructure
+        id: deploy
+        working-directory: infrastructure
+        run: |
+          # Deploy with environment-specific context
+          npx cdk deploy --require-approval never \
+            --context environment=${{ needs.setup.outputs.environment }} \
+            --context mongodb-uri="${{ secrets.MONGODB_URI }}" \
+            --context jwt-secret="${{ secrets.JWT_SECRET }}" \
+            --outputs-file outputs.json
+          
+          # Export outputs for other jobs
+          echo "AdminPortalBucketName=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].AdminPortalBucketName')" >> $GITHUB_OUTPUT
+          echo "CloudFrontDistributionId=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].CloudFrontDistributionId')" >> $GITHUB_OUTPUT
+          echo "DeploymentBucketName=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].DeploymentBucketName')" >> $GITHUB_OUTPUT
+
+  # Deploy admin-portal
+  deploy-admin-portal:
+    needs: [setup, infrastructure]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: admin-portal/package-lock.json
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Install and build Next.js
+        working-directory: admin-portal
+        run: |
+          npm ci
+          npm run build
+          npm run export
+      
+      - name: Deploy to S3
+        working-directory: admin-portal
+        run: |
+          aws s3 sync ./out s3://${{ needs.infrastructure.outputs.admin-portal-bucket }} --delete
+      
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ needs.infrastructure.outputs.cloudfront-id }} \
+            --paths "/*"
+
+  # Deploy backend
+  deploy-server:
+    needs: [setup, infrastructure]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Create deployment package
+        working-directory: server
+        run: |
+          zip -r ../server-deployment.zip . -x "node_modules/*" "*.git*"
+      
+      - name: Upload to S3
+        run: |
+          aws s3 cp server-deployment.zip s3://${{ needs.infrastructure.outputs.deployment-bucket }}/server-deployment-${{ github.sha }}.zip
+      
+      - name: Create CodeDeploy deployment
+        run: |
+          aws deploy create-deployment \
+            --application-name ExpressAPI-${{ needs.setup.outputs.environment }} \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name ExpressAPIGroup-${{ needs.setup.outputs.environment }} \
+            --s3-location bucket=${{ needs.infrastructure.outputs.deployment-bucket }},key=server-deployment-${{ github.sha }}.zip,bundleType=zip

@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { Activity, QuizContent } from "../_interfaces/EventInterfaces";
+import { useEffect, useState } from "react";
+import { Activity } from "../_interfaces/EventInterfaces";
 
 import useApiAuth from "../_hooks/useApiAuth";
 import { RequestType } from "../_interfaces/RequestInterfaces";

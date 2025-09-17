@@ -9,6 +9,8 @@ import { RequestType } from "../_interfaces/RequestInterfaces";
 
 import { VisibleEventEndMarker } from "./EventEndMarker";
 
+import EventCard from "./EventCard";
+
 interface Event {
   organizerId: string;
   _id: string;
@@ -24,6 +26,7 @@ interface Event {
   activities: [];
   locationString: string;
 }
+
 
 const UpcomingCalendar = () => {
   const [viewMode, setViewMode] = useState("Default")
@@ -88,24 +91,19 @@ const UpcomingCalendar = () => {
     const dayOfWeek = today.getDay();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - dayOfWeek);
-    console.log("Start of week", startOfWeek)
     const weeks = [];
     for (let i = 0; i < 4; i++) {
       const start = new Date(startOfWeek);
-      console.log("In loop", start)
       start.setDate(start.getDate() + i * 7);
       const end = new Date(start);
       end.setDate(start.getDate() + 6);
-      console.log("Start: ", start, " ", "End: ", end)
       const label = `${formatDate(start)} – ${formatDate(end)}`.toUpperCase();;
       const value = `${start.toISOString()}_${end.toISOString()}`;
       weeks.push({
         label,
         value,
       });
-      console.log("Label", label)
     }
-    console.log("Weeks", weeks)
     return weeks;
   }, [formatDate]);
 
@@ -254,7 +252,6 @@ const UpcomingCalendar = () => {
   }
 
   const getEventsForWeek = async () => {
-    console.log("Running getEventsForWeek")
     if (!selectedWeek) {
       return;
     }
@@ -485,45 +482,9 @@ const UpcomingCalendar = () => {
                   <VisibleEventEndMarker />
                 ) : (
                   selectedDate.map((event) => (
-                    <div key={event._id} className="current-item-container">
-                      <div className="event-image">
-                        <img src={event.image || "/placeholder.svg"} alt="Event" />
-                      </div>
-                      <div className="event-details-container">
-                        <div className="event-title">{event.name}</div>
-                        <div className="event-info">
-                          <div className="event-date">
-                            {event.date != null
-                              ? new Date(event.date).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric'
-                              }).toUpperCase()
-                              : "No date"}
-                          </div>
-                          <div >|</div>
-                          <div className="event-time">
-                            {event.date != null
-                              ? new Date(event.date).toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                hour12: true
-                              })
-                              : "No time"}
-                          </div>
-                          <div className="event-location">
-                            {event.locationString == "" ? "No location specified" : event.locationString}
-                          </div>
-                          <div className="attend">
-
-                            <div className="attend-image">
-                              <img src="/UpcomingCalendar/images/attend.svg" />
-
-                            </div>
-                            <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <EventCard id={event._id} key={event._id} removeFromList={() => { }} orgName={"Placeholder"} onClick={() => {
+                      router.push(`/events/editor?id=${event._id}`)
+                    }} />
                   ))
                 )}
               </div>
@@ -583,46 +544,9 @@ const UpcomingCalendar = () => {
                           {events.map((event: Event, index) => {
                             if (groupName === "Current") {
                               return (
-                                <div key={event.id || index} className="current-item-container">
-                                  <div className="event-image">
-                                    <img src={event.image || "/placeholder.svg"} alt="Event" />
-                                  </div>
-                                  <div className="event-details-container">
-                                    <div className="event-title">{event.name.toUpperCase()}</div>
-                                    <div className="event-info">
-                                      <div className="event-date">
-                                        {event.date != null
-                                          ? new Date(event.date).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric'
-                                          }).toUpperCase()
-                                          : "No date"}
-                                      </div>
-                                      <div >|</div>
-                                      <div className="event-time">
-                                        {event.date != null
-                                          ? new Date(event.date).toLocaleTimeString('en-US', {
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                            hour12: true
-                                          })
-                                          : "No time"}
-                                      </div>
-                                    </div>
-                                    <div className="event-location">
-                                      {event.locationString == "" ? "No location specified" : event.locationString}
-                                    </div>
-                                    <div className="attend">
-
-                                      <div className="attend-image">
-                                        <img src="/UpcomingCalendar/images/attend.svg" />
-
-
-                                      </div>
-                                      <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
-                                    </div>
-                                  </div>
-                                </div>
+                                <EventCard id={event._id} key={event._id} removeFromList={() => { }} orgName={"Placeholder"} onClick={() => {
+                                  router.push(`/events/editor?id=${event._id}`)
+                                }} />
                               );
                             } else if (groupName === "Past") {
                               return (
@@ -658,46 +582,9 @@ const UpcomingCalendar = () => {
                               );
                             } else if (groupName === "Upcoming") {
                               return (
-                                <div key={event._id} className="current-item-container">
-                                  <div className="event-image">
-                                    <img src={event.image || "/placeholder.svg"} alt="Event" />
-                                  </div>
-                                  <div className="event-details-container">
-                                    <div className="event-title">{event.name}</div>
-                                    <div className="event-info">
-                                      <div className="event-date">
-                                        {event.date != null
-                                          ? new Date(event.date).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric'
-                                          }).toUpperCase()
-                                          : "No date"}
-                                      </div>
-                                      <div >|</div>
-                                      <div className="event-time">
-                                        {event.date != null
-                                          ? new Date(event.date).toLocaleTimeString('en-US', {
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                            hour12: true
-                                          })
-                                          : "No time"}
-                                      </div>
-
-                                    </div>
-                                    <div className="event-location">
-                                      {event.locationString == "" ? "No location specified" : event.locationString}
-                                    </div>
-                                    <div className="attend">
-
-                                      <div className="attend-image">
-                                        <img src="/UpcomingCalendar/images/attend.svg" />
-
-                                      </div>
-                                      <div className='text'><div>{event.registeredUsers.length} Attendees</div></div>
-                                    </div>
-                                  </div>
-                                </div>
+                                <EventCard id={event._id} key={event._id} removeFromList={() => { }} orgName={"Placeholder"} onClick={() => {
+                                  router.push(`/events/editor?id=${event._id}`)
+                                }} />
                               );
                             } else {
                               return (

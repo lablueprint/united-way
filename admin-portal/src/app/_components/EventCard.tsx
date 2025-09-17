@@ -1,11 +1,12 @@
 import Image from 'next/image';
 import { MouseEvent, useEffect, useState } from 'react';
-import { placeholder } from '../../../public/Landing/Landing-index';
 import useApiAuth from '../_hooks/useApiAuth';
 import { EventData } from '../_interfaces/EventInterfaces';
 import { RequestType } from '../_interfaces/RequestInterfaces';
 import '../_styles/EventCard.css';
-import EventEditor from "./EventEditor";
+
+import eventPoster from '../../../public/event-poster.svg';
+import { attendee } from '../../../public/Landing/Landing-index';
 
 interface EventCardProps {
     id: string;
@@ -56,23 +57,6 @@ export default function EventCard({ id, removeFromList, orgName, onClick }: Even
         }
     };
 
-    const editEvent = async (name: string, date: Date, description: string, tags: string[]) => {
-        try {
-            const requestType = RequestType.PATCH;
-            const body = {
-                name: name,
-                date: date,
-                description: description,
-                tags: tags
-            };
-            const endpoint = `events/${id}`;
-            const data = await sendRequest({ requestType, body, endpoint });
-            setEventData(data);
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
     const getEventById = async () => {
         try {
             const body = {};
@@ -102,12 +86,11 @@ export default function EventCard({ id, removeFromList, orgName, onClick }: Even
     };
 
     return (
-        // Show event name, show buttons on hover
         <div
             className="event-card"
             onClick={onClick}
         >
-            <Image className="event-image" style={{ objectFit: 'contain' }} src={placeholder} alt="Event thumbnail" />
+            <Image className="event-image" style={{ objectFit: 'contain' }} src={eventPoster} alt="Event thumbnail" />
             <div className="event-content-info">
                 <div className="event-name">{eventData.name}</div>
                 <div className="event-date-time">
@@ -116,9 +99,11 @@ export default function EventCard({ id, removeFromList, orgName, onClick }: Even
                     <p className="event-card-time">{eventData.startTime} - {eventData.endTime} PM</p>
                 </div>
                 <div className="event-card-location">{location}</div>
+                <div className="attend">
+                    <Image src={attendee} alt={eventData.name} />
+                    <div className='text'>{eventData.registeredUsers.length} Attendees</div>
+                </div>
             </div>
-
-            {isEditing && <EventEditor eventId={id} />}
         </div>
     );
 }
