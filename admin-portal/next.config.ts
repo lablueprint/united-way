@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: false,
   env: {
-    IP_ADDRESS: "192.168.0.121",
+    IP_ADDRESS: "localhost",
     PORT: "4000",
   },
   images: {

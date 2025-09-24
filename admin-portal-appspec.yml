@@ -1,0 +1,43 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /opt/admin-portal
+    overwrite: yes
+    pattern:
+      - "**"
+    except:
+      - "node_modules/**"
+      - ".git/**"
+      - "*.log"
+      - ".env*"
+      - ".next/**"
+permissions:
+  - object: /opt/admin-portal
+    owner: adminportal
+    group: adminportal
+    mode: 755
+    type:
+      - directory
+      - file
+hooks:
+  BeforeInstall:
+    - location: scripts/stop_admin_portal.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: scripts/install_admin_portal_dependencies.sh
+      timeout: 600
+      runas: root
+  ApplicationStart:
+    - location: scripts/start_admin_portal.sh
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: scripts/stop_admin_portal.sh
+      timeout: 300
+      runas: root
+  ValidateService:
+    - location: scripts/validate_admin_portal.sh
+      timeout: 300
+      runas: root

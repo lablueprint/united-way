@@ -25,7 +25,7 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "environment=staging" 
+            echo "environment=staging" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
@@ -40,7 +40,6 @@ jobs:
       id-token: write
       contents: read
     outputs:
-      admin-portal-bucket: ${{ steps.deploy.outputs.AdminPortalBucketName }}
       cloudfront-id: ${{ steps.deploy.outputs.CloudFrontDistributionId }}
       deployment-bucket: ${{ steps.deploy.outputs.DeploymentBucketName }}
     
@@ -52,10 +51,14 @@ jobs:
           AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+          HASH_SALT: ${{ secrets.HASH_SALT }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
         run: |
           echo "Checking required environment variables..."
           echo "Environment is ${{ needs.setup.outputs.environment }}"
-          REQUIRED_SECRETS=("AWS_ROLE_ARN" "MONGODB_URI" "JWT_SECRET")
+          REQUIRED_SECRETS=("AWS_ROLE_ARN" "MONGODB_URI" "JWT_SECRET" "REFRESH_SECRET" "HASH_SALT" "EMAIL_USER" "EMAIL_PASS")
 
           missing=false
           for secret in "${REQUIRED_SECRETS[@]}"; do
@@ -99,12 +102,15 @@ jobs:
             --context environment=${{ needs.setup.outputs.environment }} \
             --context mongodb-uri="${{ secrets.MONGODB_URI }}" \
             --context jwt-secret="${{ secrets.JWT_SECRET }}" \
+            --context refresh-secret="${{ secrets.REFRESH_SECRET }}" \
+            --context email-user="${{ secrets.EMAIL_USER }}" \
+            --context email-pass="${{ secrets.EMAIL_PASS }}" \
+            --context hash-salt="${{ secrets.HASH_SALT }}" \
             --outputs-file outputs.json
           
           # Export outputs for other jobs
-          echo "AdminPortalBucketName=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].AdminPortalBucketName')" >> $GITHUB_OUTPUT
-          echo "CloudFrontDistributionId=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].CloudFrontDistributionId')" >> $GITHUB_OUTPUT
-          echo "DeploymentBucketName=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].DeploymentBucketName')" >> $GITHUB_OUTPUT
+          echo "CloudFrontDistributionId=$(cat outputs.json | jq -r '.["AdminPortalServer-${{ needs.setup.outputs.environment }}"].CloudFrontDistributionId')" >> $GITHUB_OUTPUT
+          echo "DeploymentBucketName=$(cat outputs.json | jq -r '.["AdminPortalServer-${{ needs.setup.outputs.environment }}"].DeploymentBucketName')" >> $GITHUB_OUTPUT
 
   # Deploy admin-portal
   deploy-admin-portal:
@@ -119,30 +125,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: admin-portal/package-lock.json
-      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
       
-      - name: Install and build Next.js
+      - name: Create deployment package
         working-directory: admin-portal
         run: |
-          npm ci
-          npm run build
-          npm run export
+          zip -r ../admin-portal-deployment.zip . -x "node_modules/*" "*.git*"
       
-      - name: Deploy to S3
-        working-directory: admin-portal
+      - name: Upload to S3
         run: |
-          aws s3 sync ./out s3://${{ needs.infrastructure.outputs.admin-portal-bucket }} --delete
+          aws s3 cp admin-portal-deployment.zip s3://${{ needs.infrastructure.outputs.deployment-bucket }}/admin-portal-deployment-${{ github.sha }}.zip
+      
+      - name: Create CodeDeploy deployment
+        run: |
+          aws deploy create-deployment \
+            --application-name AdminPortal-${{ needs.setup.outputs.environment }} \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name AdminPortalGroup-${{ needs.setup.outputs.environment }} \
+            --s3-location bucket=${{ needs.infrastructure.outputs.deployment-bucket }},key=admin-portal-deployment-${{ github.sha }}.zip,bundleType=zip
       
       - name: Invalidate CloudFront
         run: |
