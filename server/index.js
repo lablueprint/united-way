@@ -7,7 +7,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const uri = process.env.MONGODB_URI;
-const port = process.env.PORT;
+const port = 4000;
+const jwtSecret = process.env.JWT_SECRET;
 
 // Route Imports
 const exampleRouter = require("./routes/exampleRoute.js");
@@ -56,7 +57,7 @@ app.use("/api/auth", authRouter);
 app.use(
   "/api/orgs",
   jwt({
-    secret: process.env.JWT_SECRET,
+    secret: jwtSecret,
     algorithms: ["HS256"],
   }).unless({ path: ["/api/orgs/createOrg", "/api/orgs/filtered"] })
 );
@@ -65,7 +66,7 @@ app.use("/api/orgs", organizationRouter);
 app.use(
   "/api/users",
   jwt({
-    secret: process.env.JWT_SECRET,
+    secret: jwtSecret,
     algorithms: ["HS256"],
   }).unless({ path: ["/api/users/createUser", /^\/api\/users\/email\/([^\/]*)$/] })
 );
@@ -74,7 +75,7 @@ app.use("/api/users", userRouter);
 app.use(
   "/api/events",
   jwt({
-    secret: process.env.JWT_SECRET,
+    secret: jwtSecret,
     algorithms: ["HS256"],
   })
 );
@@ -85,7 +86,7 @@ app.use("/api/activities", activityRouter);
 app.use(
   "/api/twofactor",
   jwt({
-    secret: process.env.JWT_SECRET,
+    secret: jwtSecret,
     algorithms: ["HS256"],
   }).unless({
     path: [
@@ -99,7 +100,7 @@ app.use("/api/twofactor", twoFactorRouter);
 app.use(
   "/api/transactions",
   jwt({
-    secret: process.env.JWT_SECRET,
+    secret: jwtSecret,
     algorithms: ["HS256"],
   })
 );

@@ -35,7 +35,7 @@ export default function ActivityDropdown({ eventId, isDraft }: ActivityDropdownP
   useEffect(() => {
     axios
       .post(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/activities/filtered`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/activities/filtered`,
         { eventID: eventId }
       )
       .then(res => setActivities(res.data.data))

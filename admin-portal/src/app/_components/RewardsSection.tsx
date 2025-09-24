@@ -69,7 +69,7 @@ const RewardsSection = () => {
     //     (reward) => reward._id !== rewardId
     //   );
     //   const response = await axios.patch(
-    //     `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${orgId}`,
+    //     `${process.env.NEXT_PUBLIC_API_URL}/api/orgs/${orgId}`,
     //     {
     //       rewards: updatedRewards,
     //     },

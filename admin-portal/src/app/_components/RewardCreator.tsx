@@ -41,7 +41,7 @@ const CreateReward = () => {
     const formData = new FormData();
     formData.append("image", file);
     const response = await axios.post(
-      `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${org.orgId}/addImage`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/orgs/${org.orgId}/addImage`,
       formData,
       {
         headers: {
@@ -65,7 +65,7 @@ const CreateReward = () => {
       };
       // Fetch current rewards
       const currOrg = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${org.orgId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/orgs/${org.orgId}`,
         {
           headers: {
             Authorization: `Bearer ${org.authToken}`,
@@ -76,7 +76,7 @@ const CreateReward = () => {
       const rewards = currOrg.data.data.rewards || [];
       // Add new reward
       const response = await axios.patch(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${org.orgId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/orgs/${org.orgId}`,
         {
           rewards: [...rewards, newReward],
         },

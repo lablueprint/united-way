@@ -2,10 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: "standalone",
   reactStrictMode: false,
   env: {
-    IP_ADDRESS: "192.168.0.121",
-    PORT: "4000",
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000",
   },
   images: {
     domains: ["unitedway-uploads.s3.us-east-2.amazonaws.com"],

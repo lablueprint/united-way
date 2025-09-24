@@ -18,7 +18,7 @@ export default function EventActivities({ eventID }: EventActivitiesProps) {
     useEffect(() => {
         const getOrganizerAnnouncement = async () => {
             try {
-                const response: AxiosResponse = await axios.post(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/activities/filtered`,
+                const response: AxiosResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/activities/filtered`,
                     {
                         eventID: eventID,
                         type: "announcement",
