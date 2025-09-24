@@ -13,7 +13,7 @@ export default function NewOrganizationForm({ id }: OrganizationSignUpFormProps)
   const [location, setLocation] = useState<string>('');
   const [name, setName] = useState<string>('');
 
-  const apiEndpoint = `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${id}`;
+  const apiEndpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/orgs/${id}`;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

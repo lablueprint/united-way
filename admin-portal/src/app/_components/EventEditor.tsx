@@ -73,7 +73,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
 
     const getEventById = async () => {
         try {
-            const response: AxiosResponse = await axios.get(`http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/events/${eventId}`, {
+            const response: AxiosResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${org.authToken}`
@@ -239,7 +239,7 @@ export default function EventEditor({ eventId, justCreated = false }: EventEdito
         const formData = new FormData();
         formData.append("image", file);
         const response = await axios.post(
-            `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/orgs/${org.orgId}/addImage`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/orgs/${org.orgId}/addImage`,
             formData,
             {
                 headers: {

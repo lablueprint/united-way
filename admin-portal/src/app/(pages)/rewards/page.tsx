@@ -13,7 +13,7 @@ export default function Rewards() {
   const exampleGetToRoot = async () => {
     try {
       const response: AxiosResponse = await axios.get(
-        `http://${process.env.IP_ADDRESS}:${process.env.PORT}/api/transactions/`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/transactions/`
       );
       setResponseValue(response.data);
     } catch (error) {

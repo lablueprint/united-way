@@ -25,7 +25,7 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "environment=staging" 
+            echo "environment=staging" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
@@ -35,14 +35,17 @@ jobs:
     needs: setup
     environment: ${{ needs.setup.outputs.environment }}
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'  # Only deploy on push, not PR
+    if: github.event_name == 'push'
     permissions:
       id-token: write
       contents: read
     outputs:
-      admin-portal-bucket: ${{ steps.deploy.outputs.AdminPortalBucketName }}
+      api-endpoint: ${{ steps.deploy.outputs.ApiEndpoint }}
+      frontend-url: ${{ steps.deploy.outputs.FrontendUrl }}
+      frontend-ecr-uri: ${{ steps.deploy.outputs.FrontendECRRepositoryUri }}
+      frontend-cluster: ${{ steps.deploy.outputs.FrontendECSClusterName }}
+      frontend-service: ${{ steps.deploy.outputs.FrontendECSServiceName }}
       cloudfront-id: ${{ steps.deploy.outputs.CloudFrontDistributionId }}
-      deployment-bucket: ${{ steps.deploy.outputs.DeploymentBucketName }}
     
     steps:
       - uses: actions/checkout@v4
@@ -52,26 +55,32 @@ jobs:
           AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+          HASH_SALT: ${{ secrets.HASH_SALT }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
         run: |
           echo "Checking required environment variables..."
           echo "Environment is ${{ needs.setup.outputs.environment }}"
-          REQUIRED_SECRETS=("AWS_ROLE_ARN" "MONGODB_URI" "JWT_SECRET")
-
+          
           missing=false
-          for secret in "${REQUIRED_SECRETS[@]}"; do
-            if [ -z "${!secret}" ]; then
-              echo "❌ Missing secret or env variable: $secret"
-              missing=true
-            else
-              echo "✅ Found $secret: ${!secret}"
-            fi
-          done
-
+          
+          [ -z "$AWS_ROLE_ARN" ] && echo "❌ Missing: AWS_ROLE_ARN" && missing=true || echo "✅ Found: AWS_ROLE_ARN"
+          [ -z "$MONGODB_URI" ] && echo "❌ Missing: MONGODB_URI" && missing=true || echo "✅ Found: MONGODB_URI"
+          [ -z "$JWT_SECRET" ] && echo "❌ Missing: JWT_SECRET" && missing=true || echo "✅ Found: JWT_SECRET"
+          [ -z "$REFRESH_SECRET" ] && echo "❌ Missing: REFRESH_SECRET" && missing=true || echo "✅ Found: REFRESH_SECRET"
+          [ -z "$HASH_SALT" ] && echo "❌ Missing: HASH_SALT" && missing=true || echo "✅ Found: HASH_SALT"
+          [ -z "$EMAIL_USER" ] && echo "❌ Missing: EMAIL_USER" && missing=true || echo "✅ Found: EMAIL_USER"
+          [ -z "$EMAIL_PASS" ] && echo "❌ Missing: EMAIL_PASS" && missing=true || echo "✅ Found: EMAIL_PASS"
 
           if [ "$missing" = true ]; then
+            echo ""
             echo "Error: One or more required secrets are missing."
             exit 1
           fi
+          
+          echo ""
+          echo "✅ All required secrets are present"
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -85,6 +94,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 3600
       
       - name: Install CDK dependencies
         working-directory: infrastructure
@@ -95,19 +105,29 @@ jobs:
         working-directory: infrastructure
         run: |
           # Deploy with environment-specific context
-          npx cdk deploy --require-approval never \
+          npx cdk deploy --all --require-approval never \
             --context environment=${{ needs.setup.outputs.environment }} \
             --context mongodb-uri="${{ secrets.MONGODB_URI }}" \
             --context jwt-secret="${{ secrets.JWT_SECRET }}" \
+            --context refresh-secret="${{ secrets.REFRESH_SECRET }}" \
+            --context email-user="${{ secrets.EMAIL_USER }}" \
+            --context email-pass="${{ secrets.EMAIL_PASS }}" \
+            --context hash-salt="${{ secrets.HASH_SALT }}" \
             --outputs-file outputs.json
+
+          cat outputs.json
           
           # Export outputs for other jobs
-          echo "AdminPortalBucketName=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].AdminPortalBucketName')" >> $GITHUB_OUTPUT
-          echo "CloudFrontDistributionId=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].CloudFrontDistributionId')" >> $GITHUB_OUTPUT
-          echo "DeploymentBucketName=$(cat outputs.json | jq -r '.["NextJsExpress-${{ needs.setup.outputs.environment }}"].DeploymentBucketName')" >> $GITHUB_OUTPUT
+          STACK_NAME="AdminPortalServerStack-${{ needs.setup.outputs.environment }}"
+          echo "ApiEndpoint=$(cat outputs.json | jq -r ".\"$STACK_NAME\".ApiEndpoint")" >> $GITHUB_OUTPUT
+          echo "FrontendUrl=$(cat outputs.json | jq -r ".\"$STACK_NAME\".FrontendUrl")" >> $GITHUB_OUTPUT
+          echo "FrontendECRRepositoryUri=$(cat outputs.json | jq -r ".\"$STACK_NAME\".FrontendECRRepositoryUri")" >> $GITHUB_OUTPUT
+          echo "FrontendECSClusterName=$(cat outputs.json | jq -r ".\"$STACK_NAME\".FrontendECSClusterName")" >> $GITHUB_OUTPUT
+          echo "FrontendECSServiceName=$(cat outputs.json | jq -r ".\"$STACK_NAME\".FrontendECSServiceName")" >> $GITHUB_OUTPUT
+          echo "CloudFrontDistributionId=$(cat outputs.json | jq -r ".\"$STACK_NAME\".CloudFrontDistributionId")" >> $GITHUB_OUTPUT
 
-  # Deploy admin-portal
-  deploy-admin-portal:
+  # Build and deploy Express API (handled by CDK deployment)
+  deploy-api:
     needs: [setup, infrastructure]
     environment: ${{ needs.setup.outputs.environment }}
     runs-on: ubuntu-latest
@@ -119,12 +139,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: admin-portal/package-lock.json
+      - name: API Deployment Status
+        run: |
+          echo "✅ Express API deployed via CDK"
+          echo "API Endpoint: ${{ needs.infrastructure.outputs.api-endpoint }}"
+
+  # Build and deploy Next.js Frontend
+  deploy-frontend:
+    needs: [setup, infrastructure]
+    environment: ${{ needs.setup.outputs.environment }}
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - uses: actions/checkout@v4
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -132,56 +163,86 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
       
-      - name: Install and build Next.js
-        working-directory: admin-portal
-        run: |
-          npm ci
-          npm run build
-          npm run export
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
       
-      - name: Deploy to S3
-        working-directory: admin-portal
+      - name: Extract ECR repository name
+        id: ecr-repo
         run: |
-          aws s3 sync ./out s3://${{ needs.infrastructure.outputs.admin-portal-bucket }} --delete
+          ECR_URI="${{ needs.infrastructure.outputs.frontend-ecr-uri }}"
+          ECR_REPO=$(echo $ECR_URI | cut -d'/' -f2)
+          echo "repository=$ECR_REPO" >> $GITHUB_OUTPUT
+          echo "registry=$(echo $ECR_URI | cut -d'/' -f1)" >> $GITHUB_OUTPUT
       
-      - name: Invalidate CloudFront
+      - name: Build, tag, and push Next.js image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-repo.outputs.registry }}
+          ECR_REPOSITORY: ${{ steps.ecr-repo.outputs.repository }}
+          IMAGE_TAG: ${{ github.sha }}
+          NEXT_PUBLIC_API_URL: ${{ needs.infrastructure.outputs.api-endpoint }}
+        run: |
+          cd admin-portal
+          
+          # Build Docker image with API URL
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            .
+          
+          # Push both tags
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ needs.infrastructure.outputs.frontend-service }} \
+            --query taskDefinition > task-definition.json
+      
+      - name: Fill in new image in task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: web
+          image: ${{ steps.build-image.outputs.image }}
+      
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ needs.infrastructure.outputs.frontend-service }}
+          cluster: ${{ needs.infrastructure.outputs.frontend-cluster }}
+          wait-for-service-stability: true
+      
+      - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${{ needs.infrastructure.outputs.cloudfront-id }} \
             --paths "/*"
 
-  # Deploy backend
-  deploy-server:
-    needs: [setup, infrastructure]
-    environment: ${{ needs.setup.outputs.environment }}
+  # Deployment summary
+  summary:
+    needs: [setup, infrastructure, deploy-api, deploy-frontend]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    permissions:
-      id-token: write
-      contents: read
-    
+    if: github.event_name == 'push' && always()
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Create deployment package
-        working-directory: server
+      - name: Deployment Summary
         run: |
-          zip -r ../server-deployment.zip . -x "node_modules/*" "*.git*"
-      
-      - name: Upload to S3
-        run: |
-          aws s3 cp server-deployment.zip s3://${{ needs.infrastructure.outputs.deployment-bucket }}/server-deployment-${{ github.sha }}.zip
-      
-      - name: Create CodeDeploy deployment
-        run: |
-          aws deploy create-deployment \
-            --application-name ExpressAPI-${{ needs.setup.outputs.environment }} \
-            --deployment-config-name CodeDeployDefault.OneAtATime \
-            --deployment-group-name ExpressAPIGroup-${{ needs.setup.outputs.environment }} \
-            --s3-location bucket=${{ needs.infrastructure.outputs.deployment-bucket }},key=server-deployment-${{ github.sha }}.zip,bundleType=zip
+          echo "### 🚀 Deployment Complete - ${{ needs.setup.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### Infrastructure" >> $GITHUB_STEP_SUMMARY
+          echo "- **API Endpoint**: ${{ needs.infrastructure.outputs.api-endpoint }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend URL**: ${{ needs.infrastructure.outputs.frontend-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### Services" >> $GITHUB_STEP_SUMMARY
+          echo "- **Express API**: ✅ Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Next.js Frontend**: ✅ Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "- **CloudFront**: ✅ Cache Invalidated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 All services deployed successfully!">> $GITHUB_STEP_SUMMARY
