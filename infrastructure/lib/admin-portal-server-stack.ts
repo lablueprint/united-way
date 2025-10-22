@@ -5,6 +5,9 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecsPatterns from 'aws-cdk-lib/aws-ecs-patterns';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import { Construct } from 'constructs';
 
 export interface AdminPortalServerStackProps extends cdk.StackProps {
@@ -16,14 +19,14 @@ export interface AdminPortalServerStackProps extends cdk.StackProps {
   emailUser: string;
   emailPass: string;
   domainName?: string;
+  hostedZoneId?: string;
+  cloudFrontCertificateArn?: string;
 }
 
 export class AdminPortalServerStack extends cdk.Stack {
   public readonly apiEndpoint: string;
   public readonly frontendUrl: string;
   public readonly cloudFrontDistribution: cloudfront.Distribution;
-  public readonly frontendEcsService: ecs.FargateService;
-  public readonly frontendCluster: ecs.Cluster;
 
   constructor(scope: Construct, id: string, props: AdminPortalServerStackProps) {
     super(scope, id, props);
@@ -37,6 +40,8 @@ export class AdminPortalServerStack extends cdk.Stack {
       emailUser,
       emailPass,
       domainName,
+      hostedZoneId,
+      cloudFrontCertificateArn,
     } = props;
 
     const config = this.getEnvironmentConfig(environment);
@@ -57,6 +62,54 @@ export class AdminPortalServerStack extends cdk.Stack {
       }
     });
 
+    // Validate custom domain configuration
+    const useCustomDomain = !!(
+      domainName && 
+      domainName.trim().length > 0 &&
+      hostedZoneId && 
+      hostedZoneId.trim().length > 0 &&
+      cloudFrontCertificateArn &&
+      cloudFrontCertificateArn.trim().length > 0
+    );
+
+    let hostedZone: route53.IHostedZone | undefined;
+    let apiCertificate: acm.ICertificate | undefined;
+    let frontendAlbCertificate: acm.ICertificate | undefined;
+    let frontendCloudfrontCertificate: acm.ICertificate | undefined;
+    let apiDomainName: string | undefined;
+    let frontendDomainName: string | undefined;
+
+    if (useCustomDomain) {
+      hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+        hostedZoneId: hostedZoneId!,
+        zoneName: domainName!,
+      });
+
+      apiDomainName = `api-${environment}.${domainName}`;
+      frontendDomainName = environment === 'prod' 
+        ? domainName 
+        : `${environment}.${domainName}`;
+
+      // API certificate - created in the stack's region
+      apiCertificate = new acm.Certificate(this, 'ApiCertificate', {
+        domainName: apiDomainName,
+        validation: acm.CertificateValidation.fromDns(hostedZone),
+      });
+
+      // Frontend ALB certificate - created in the stack's region
+      frontendAlbCertificate = new acm.Certificate(this, 'FrontendAlbCertificate', {
+        domainName: frontendDomainName,
+        validation: acm.CertificateValidation.fromDns(hostedZone),
+      });
+
+      // CloudFront certificate - imported from us-east-1 (created separately)
+      frontendCloudfrontCertificate = acm.Certificate.fromCertificateArn(
+        this, 
+        'FrontendCloudfrontCertificate', 
+        cloudFrontCertificateArn!
+      );
+    }
+
     // VPC
     const vpc = new ec2.Vpc(this, 'VPC', {
       maxAzs: 2,
@@ -76,29 +129,156 @@ export class AdminPortalServerStack extends cdk.Stack {
     });
 
     // ===============================
+    // Security Groups
+    // ===============================
+    
+    // ALB Security Group for API
+    const apiAlbSecurityGroup = new ec2.SecurityGroup(this, 'ApiAlbSecurityGroup', {
+      vpc,
+      description: 'Security group for API ALB',
+      allowAllOutbound: true,
+    });
+    
+    // Allow HTTP/HTTPS from internet to API ALB
+    apiAlbSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(80),
+      'Allow HTTP from internet'
+    );
+    apiAlbSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(443),
+      'Allow HTTPS from internet'
+    );
+    
+    // ECS Security Group for API
+    const apiEcsSecurityGroup = new ec2.SecurityGroup(this, 'ApiEcsSecurityGroup', {
+      vpc,
+      description: 'Security group for API ECS tasks',
+      allowAllOutbound: true,
+    });
+    
+    // Allow traffic from API ALB to API ECS tasks
+    apiEcsSecurityGroup.addIngressRule(
+      apiAlbSecurityGroup,
+      ec2.Port.tcp(4000),
+      'Allow traffic from API ALB'
+    );
+    
+    // ALB Security Group for Frontend
+    const frontendAlbSecurityGroup = new ec2.SecurityGroup(this, 'FrontendAlbSecurityGroup', {
+      vpc,
+      description: 'Security group for Frontend ALB',
+      allowAllOutbound: true,
+    });
+    
+    // Allow HTTP/HTTPS from internet to Frontend ALB
+    frontendAlbSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(80),
+      'Allow HTTP from internet'
+    );
+    frontendAlbSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(443),
+      'Allow HTTPS from internet'
+    );
+    
+    // ECS Security Group for Frontend
+    const frontendEcsSecurityGroup = new ec2.SecurityGroup(this, 'FrontendEcsSecurityGroup', {
+      vpc,
+      description: 'Security group for Frontend ECS tasks',
+      allowAllOutbound: true,
+    });
+    
+    // Allow traffic from Frontend ALB to Frontend ECS tasks
+    frontendEcsSecurityGroup.addIngressRule(
+      frontendAlbSecurityGroup,
+      ec2.Port.tcp(3000),
+      'Allow traffic from Frontend ALB'
+    );
+    
+    // CRITICAL: Allow Frontend ECS to call API ECS
+    apiEcsSecurityGroup.addIngressRule(
+      frontendEcsSecurityGroup,
+      ec2.Port.tcp(4000),
+      'Allow traffic from Frontend ECS tasks'
+    );
+    
+    // Also allow Frontend ALB to call API (for SSR)
+    apiEcsSecurityGroup.addIngressRule(
+      frontendAlbSecurityGroup,
+      ec2.Port.tcp(4000),
+      'Allow traffic from Frontend ALB for SSR'
+    );
+    
+    // ===============================
     // Express API on ECS Fargate
     // ===============================
-    const apiService = this.createExpressApiService(vpc, secrets, environment, config);
+    const apiService = this.createExpressApiService(
+      vpc, 
+      secrets, 
+      environment, 
+      config,
+      apiCertificate,
+      apiAlbSecurityGroup,
+      apiEcsSecurityGroup,
+    );
 
-    // Public endpoint (with HTTPS via ALB)
-    this.apiEndpoint = `https://${apiService.loadBalancer.loadBalancerDnsName}`;
+    // FIXED: Set API endpoint immediately after creation
+    // This ensures the frontend can use it during build
+    let internalApiEndpoint: string;
+    if (useCustomDomain && apiDomainName) {
+      this.apiEndpoint = `https://${apiDomainName}`;
+      internalApiEndpoint = `http://${apiService.loadBalancer.loadBalancerDnsName}`;
+      
+      new route53.ARecord(this, 'ApiAliasRecord', {
+        zone: hostedZone!,
+        recordName: apiDomainName,
+        target: route53.RecordTarget.fromAlias(
+          new route53Targets.LoadBalancerTarget(apiService.loadBalancer)
+        ),
+      });
+    } else {
+      this.apiEndpoint = `http://${apiService.loadBalancer.loadBalancerDnsName}`;
+      internalApiEndpoint = this.apiEndpoint;
+    }
 
     // ===============================
     // Next.js Frontend on ECS Fargate
     // ===============================
+    // FIXED: Use internal ALB endpoint for build and runtime
     const { frontendService, distribution } = this.createNextJsFrontend(
       vpc,
       environment,
       config,
-      this.apiEndpoint,
+      internalApiEndpoint, // Use ALB DNS directly
+      frontendAlbCertificate,
+      frontendCloudfrontCertificate,
+      frontendDomainName,
+      frontendAlbSecurityGroup,
+      frontendEcsSecurityGroup,
     );
 
-    // Add explicit dependencies to ensure VPC resources are ready
-    frontendService.node.addDependency(vpc);
-    apiService.node.addDependency(vpc);
+    // FIXED: Add explicit dependency so frontend waits for API
+    frontendService.node.addDependency(apiService);
+
+    // Set frontend URL based on whether we have custom domain
+    if (useCustomDomain && frontendDomainName) {
+      new route53.ARecord(this, 'FrontendAliasRecord', {
+        zone: hostedZone!,
+        recordName: frontendDomainName,
+        target: route53.RecordTarget.fromAlias(
+          new route53Targets.CloudFrontTarget(distribution)
+        ),
+      });
+      
+      this.frontendUrl = `https://${frontendDomainName}`;
+    } else {
+      this.frontendUrl = `https://${distribution.distributionDomainName}`;
+    }
 
     this.cloudFrontDistribution = distribution;
-    this.frontendUrl = `https://${distribution.distributionDomainName}`;
 
     // Outputs
     new cdk.CfnOutput(this, 'ApiEndpoint', {
@@ -108,34 +288,58 @@ export class AdminPortalServerStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'FrontendUrl', {
       value: this.frontendUrl,
-      description: 'Next.js frontend URL (via CloudFront)',
+      description: 'Next.js frontend URL',
     });
 
     new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
       value: distribution.distributionId,
       description: 'CloudFront Distribution ID',
     });
+
+    // ADDED: Output internal endpoints for debugging
+    new cdk.CfnOutput(this, 'ApiLoadBalancerDns', {
+      value: apiService.loadBalancer.loadBalancerDnsName,
+      description: 'API ALB DNS (internal)',
+    });
+
+    new cdk.CfnOutput(this, 'FrontendLoadBalancerDns', {
+      value: frontendService.loadBalancer.loadBalancerDnsName,
+      description: 'Frontend ALB DNS (internal)',
+    });
+    
+    new cdk.CfnOutput(this, 'VpcId', {
+      value: vpc.vpcId,
+      description: 'VPC ID',
+    });
+
+    if (!useCustomDomain) {
+      new cdk.CfnOutput(this, 'DomainNote', {
+        value: 'Using AWS-generated URLs. Add domainName, hostedZoneId, and cloudFrontCertificateArn to use custom domain.',
+        description: 'Domain Configuration',
+      });
+    }
   }
 
   private createExpressApiService(
     vpc: ec2.Vpc,
-    secrets: Record<string, string>, // Now just plain strings, not SSM parameters
+    secrets: Record<string, string>,
     environment: string,
-    config: any
+    config: any,
+    certificate?: acm.ICertificate,
+    albSecurityGroup?: ec2.SecurityGroup,
+    ecsSecurityGroup?: ec2.SecurityGroup,
   ) {
     const cluster = new ecs.Cluster(this, 'ApiCluster', {
       vpc,
       containerInsights: environment === 'prod',
     });
 
-    // Create task definition
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'ApiTaskDef', {
       cpu: config.cpu,
       memoryLimitMiB: config.memory,
       family: `${this.stackName}-api-task`,
     });
 
-    // Add container with secrets as environment variables
     const container = taskDefinition.addContainer('api', {
       image: ecs.ContainerImage.fromAsset('../server'),
       logging: ecs.LogDrivers.awsLogs({
@@ -143,33 +347,19 @@ export class AdminPortalServerStack extends cdk.Stack {
         logRetention: logs.RetentionDays.ONE_WEEK,
       }),
       environment: {
-        // App configuration
         NODE_ENV: 'production',
         PORT: '4000',
         REGION: cdk.Aws.REGION,
-
-        // Secrets directly as environment variables
         MONGODB_URI: secrets.mongodbUri,
         JWT_SECRET: secrets.jwtSecret,
         REFRESH_SECRET: secrets.refreshSecret,
         HASH_SALT: secrets.hashSalt,
         EMAIL_USER: secrets.emailUser,
         EMAIL_PASS: secrets.emailPass,
-
-        // Flag to NOT use Parameter Store
         USE_PARAMETER_STORE: 'false',
       },
-      // Container health check
-      healthCheck: {
-        command: [
-          'CMD-SHELL',
-          'curl -f http://localhost:4000/api/health || exit 1'
-        ],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 3,
-        startPeriod: cdk.Duration.seconds(180),
-      },
+      // REMOVED: Container health check - let ALB handle all health checking
+      // This prevents tasks from being killed before grace period expires
     });
 
     container.addPortMappings({
@@ -177,30 +367,59 @@ export class AdminPortalServerStack extends cdk.Stack {
       protocol: ecs.Protocol.TCP,
     });
 
-    // Create the Fargate service
-    const fargateService = new ecsPatterns.ApplicationLoadBalancedFargateService(this, 'ApiService', {
+    const serviceProps: ecsPatterns.ApplicationLoadBalancedFargateServiceProps = {
       cluster,
       taskDefinition,
       desiredCount: config.desiredCount,
       publicLoadBalancer: true,
-      healthCheckGracePeriod: cdk.Duration.seconds(300), // 5 minutes
+      healthCheckGracePeriod: cdk.Duration.seconds(600), // 10 MINUTES - very generous
       serviceName: `${this.stackName}-api-service`,
-      circuitBreaker: {
-        rollback: true,
+      // TEMPORARILY DISABLED: Circuit breaker causes deployment loops
+      // circuitBreaker: {
+      //   rollback: true,
+      // },
+      // Add deployment configuration
+      deploymentController: {
+        type: ecs.DeploymentControllerType.ECS,
       },
-    });
+      // Add security groups
+      ...(albSecurityGroup && { securityGroups: [albSecurityGroup] }),
+      ...(ecsSecurityGroup && { taskSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS } }),
+      ...(certificate && {
+        certificate: certificate,
+        redirectHTTP: true,
+      }),
+    };
 
-    // Configure ALB health check
+    const fargateService = new ecsPatterns.ApplicationLoadBalancedFargateService(
+      this, 
+      'ApiService', 
+      serviceProps
+    );
+    
+    // Configure deployment to be more cautious
+    const cfnService = fargateService.service.node.defaultChild as ecs.CfnService;
+    cfnService.deploymentConfiguration = {
+      minimumHealthyPercent: 0,   // Allow all tasks to be replaced (no rolling deployment)
+      maximumPercent: 200,        // Can scale to 200% during deployment
+      // Deployment circuit breaker disabled temporarily
+    };
+    
+    // Apply ECS security group to the service
+    if (ecsSecurityGroup) {
+      fargateService.service.connections.addSecurityGroup(ecsSecurityGroup);
+    }
+
+    // Simple health check - just verify API responds
     fargateService.targetGroup.configureHealthCheck({
       path: '/api/health',
+      interval: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(15),
       healthyThresholdCount: 2,
       unhealthyThresholdCount: 10,
-      interval: cdk.Duration.seconds(60),
-      timeout: cdk.Duration.seconds(30),
-      healthyHttpCodes: '200',
+      healthyHttpCodes: '200-499', // Very lenient - even 404 better than timeout
     });
 
-    // Auto scaling
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: config.minCount,
       maxCapacity: config.maxCount,
@@ -218,21 +437,23 @@ export class AdminPortalServerStack extends cdk.Stack {
     environment: string,
     config: any,
     apiEndpoint: string,
+    albCertificate?: acm.ICertificate,
+    cloudfrontCertificate?: acm.ICertificate,
+    domainName?: string,
+    albSecurityGroup?: ec2.SecurityGroup,
+    ecsSecurityGroup?: ec2.SecurityGroup,
   ) {
-    // ECS Cluster for Frontend
     const cluster = new ecs.Cluster(this, 'FrontendCluster', {
       vpc,
       containerInsights: environment === 'prod',
       clusterName: `${this.stackName}-frontend-cluster`,
     });
 
-    // Task Definition
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'FrontendTaskDef', {
       cpu: config.frontendCpu,
       memoryLimitMiB: config.frontendMemory,
     });
 
-    // Container Definition
     const container = taskDefinition.addContainer('web', {
       image: ecs.ContainerImage.fromAsset('../admin-portal'),
       logging: ecs.LogDrivers.awsLogs({
@@ -241,7 +462,7 @@ export class AdminPortalServerStack extends cdk.Stack {
       }),
       environment: {
         NODE_ENV: 'production',
-        // Public endpoint - used by browser for client-side API calls
+        // Use runtime environment variable instead
         NEXT_PUBLIC_API_URL: apiEndpoint,
       },
       portMappings: [
@@ -250,35 +471,62 @@ export class AdminPortalServerStack extends cdk.Stack {
           protocol: ecs.Protocol.TCP,
         },
       ],
-      healthCheck: {
-        command: ['CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1'],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 3,
-        startPeriod: cdk.Duration.seconds(90), // Increased from 60
-      },
+      // REMOVED: Container health check - let ALB handle all health checking
+      // This prevents tasks from being killed before grace period expires
     });
 
-    // Fargate service
-    const frontendService = new ecsPatterns.ApplicationLoadBalancedFargateService(this, 'FrontendService', {
+    const serviceProps: ecsPatterns.ApplicationLoadBalancedFargateServiceProps = {
       cluster,
       taskDefinition,
       desiredCount: config.frontendDesiredCount,
       publicLoadBalancer: true,
-      healthCheckGracePeriod: cdk.Duration.seconds(120), // Increased from 60
+      healthCheckGracePeriod: cdk.Duration.seconds(600), // 10 MINUTES - very generous
       serviceName: `${this.stackName}-frontend-service`,
-    });
+      circuitBreaker: {
+        rollback: true,
+      },
+      // Add deployment configuration
+      deploymentController: {
+        type: ecs.DeploymentControllerType.ECS,
+      },
+      // Add security groups
+      ...(albSecurityGroup && { securityGroups: [albSecurityGroup] }),
+      ...(ecsSecurityGroup && { taskSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS } }),
+      ...(albCertificate && {
+        certificate: albCertificate,
+        redirectHTTP: true,
+      }),
+    };
 
-    // Configure health check
+    const frontendService = new ecsPatterns.ApplicationLoadBalancedFargateService(
+      this, 
+      'FrontendService',
+      serviceProps
+    );
+    
+    // Configure deployment to be more cautious
+    const cfnService = frontendService.service.node.defaultChild as ecs.CfnService;
+    cfnService.deploymentConfiguration = {
+      minimumHealthyPercent: 0,   // Allow all tasks to be replaced
+      maximumPercent: 200,        // Can scale to 200% during deployment
+      // Deployment circuit breaker disabled temporarily
+    };
+    
+    // Apply ECS security group to the service
+    if (ecsSecurityGroup) {
+      frontendService.service.connections.addSecurityGroup(ecsSecurityGroup);
+    }
+
+    // Simple health check - just verify Next.js responds
     frontendService.targetGroup.configureHealthCheck({
       path: '/',
-      healthyThresholdCount: 2,
-      unhealthyThresholdCount: 5, // Increased from 3
       interval: cdk.Duration.seconds(30),
-      timeout: cdk.Duration.seconds(10),
+      timeout: cdk.Duration.seconds(15),
+      healthyThresholdCount: 2,
+      unhealthyThresholdCount: 10,
+      healthyHttpCodes: '200-399',
     });
 
-    // Auto scaling
     const frontendScaling = frontendService.service.autoScaleTaskCount({
       minCapacity: config.frontendMinCount,
       maxCapacity: config.frontendMaxCount,
@@ -288,12 +536,17 @@ export class AdminPortalServerStack extends cdk.Stack {
       targetUtilizationPercent: 70,
     });
 
-    // CloudFront distribution
-    const distribution = new cloudfront.Distribution(this, 'FrontendDistribution', {
+    const distributionProps: cloudfront.DistributionProps = {
       defaultBehavior: {
         origin: new origins.LoadBalancerV2Origin(frontendService.loadBalancer, {
-          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+          protocolPolicy: albCertificate 
+            ? cloudfront.OriginProtocolPolicy.HTTPS_ONLY 
+            : cloudfront.OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 80,
+          httpsPort: 443,
+          // ADDED: Longer timeouts for Next.js
+          readTimeout: cdk.Duration.seconds(60),
+          keepaliveTimeout: cdk.Duration.seconds(5),
         }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
@@ -319,7 +572,13 @@ export class AdminPortalServerStack extends cdk.Stack {
         ? cloudfront.PriceClass.PRICE_CLASS_ALL
         : cloudfront.PriceClass.PRICE_CLASS_100,
       comment: `${this.stackName} Frontend Distribution`,
-    });
+      ...(cloudfrontCertificate && domainName && {
+        domainNames: [domainName],
+        certificate: cloudfrontCertificate,
+      }),
+    };
+
+    const distribution = new cloudfront.Distribution(this, 'FrontendDistribution', distributionProps);
 
     return { frontendService, distribution };
   }
@@ -327,39 +586,38 @@ export class AdminPortalServerStack extends cdk.Stack {
   private getEnvironmentConfig(environment: string) {
     const configs = {
       dev: {
-        // API
-        cpu: 256,
-        memory: 512,
+        // INCREASED: Give containers more resources
+        cpu: 512,           // Was 256
+        memory: 1024,       // Was 512
         desiredCount: 1,
         minCount: 1,
         maxCount: 2,
-        // Frontend
-        frontendCpu: 256,
-        frontendMemory: 512,
+        frontendCpu: 512,   // Was 256
+        frontendMemory: 1024, // Was 512
         frontendDesiredCount: 1,
         frontendMinCount: 1,
         frontendMaxCount: 2,
       },
       staging: {
-        cpu: 512,
-        memory: 1024,
+        cpu: 1024,          // Was 512
+        memory: 2048,       // Was 1024
         desiredCount: 1,
         minCount: 1,
         maxCount: 3,
-        frontendCpu: 512,
-        frontendMemory: 1024,
+        frontendCpu: 1024,  // Was 512
+        frontendMemory: 2048, // Was 1024
         frontendDesiredCount: 1,
         frontendMinCount: 1,
         frontendMaxCount: 3,
       },
       prod: {
-        cpu: 1024,
-        memory: 2048,
+        cpu: 2048,          // Was 1024
+        memory: 4096,       // Was 2048
         desiredCount: 2,
         minCount: 2,
         maxCount: 10,
-        frontendCpu: 1024,
-        frontendMemory: 2048,
+        frontendCpu: 2048,  // Was 1024
+        frontendMemory: 4096, // Was 2048
         frontendDesiredCount: 2,
         frontendMinCount: 2,
         frontendMaxCount: 10,

@@ -55,6 +55,9 @@ jobs:
           HASH_SALT: ${{ secrets.HASH_SALT }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
+          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.CLOUDFRONT_CERTIFICATE_ARN }}
         run: |
           echo "Checking required environment variables..."
           echo "Environment is ${{ needs.setup.outputs.environment }}"
@@ -74,6 +77,22 @@ jobs:
           if [ "$missing" = true ]; then
             echo "Error: One or more required secrets are missing."
             exit 1
+          fi
+          
+          # Check optional domain configuration - ALL THREE must be present
+          if [ -n "$DOMAIN_NAME" ] && [ -n "$HOSTED_ZONE_ID" ] && [ -n "$CLOUDFRONT_CERTIFICATE_ARN" ]; then
+            echo "✅ Custom domain configuration complete"
+            echo "   Domain: $DOMAIN_NAME"
+            echo "   Hosted Zone ID: $HOSTED_ZONE_ID"
+            echo "   CloudFront Cert ARN: ${CLOUDFRONT_CERTIFICATE_ARN:0:50}..."
+          else
+            echo "ℹ️  No custom domain configured - will use AWS-generated URLs"
+            if [ -n "$DOMAIN_NAME" ] || [ -n "$HOSTED_ZONE_ID" ] || [ -n "$CLOUDFRONT_CERTIFICATE_ARN" ]; then
+              echo "⚠️  Warning: Partial domain configuration detected. All three secrets required:"
+              echo "   - DOMAIN_NAME"
+              echo "   - HOSTED_ZONE_ID"
+              echo "   - CLOUDFRONT_CERTIFICATE_ARN"
+            fi
           fi
       
       - name: Setup Node.js
@@ -96,17 +115,37 @@ jobs:
       - name: Deploy infrastructure
         id: deploy
         working-directory: infrastructure
+        env:
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
+          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.CLOUDFRONT_CERTIFICATE_ARN }}
         run: |
-          # Deploy with environment-specific context
-          npx cdk deploy --all --require-approval never \
+          # Build CDK command with base parameters
+          CDK_CMD="npx cdk deploy --all --require-approval never \
             --context environment=${{ needs.setup.outputs.environment }} \
-            --context mongodb-uri="${{ secrets.MONGODB_URI }}" \
-            --context jwt-secret="${{ secrets.JWT_SECRET }}" \
-            --context refresh-secret="${{ secrets.REFRESH_SECRET }}" \
-            --context email-user="${{ secrets.EMAIL_USER }}" \
-            --context email-pass="${{ secrets.EMAIL_PASS }}" \
-            --context hash-salt="${{ secrets.HASH_SALT }}" \
-            --outputs-file outputs.json
+            --context mongodb-uri=\"${{ secrets.MONGODB_URI }}\" \
+            --context jwt-secret=\"${{ secrets.JWT_SECRET }}\" \
+            --context refresh-secret=\"${{ secrets.REFRESH_SECRET }}\" \
+            --context email-user=\"${{ secrets.EMAIL_USER }}\" \
+            --context email-pass=\"${{ secrets.EMAIL_PASS }}\" \
+            --context hash-salt=\"${{ secrets.HASH_SALT }}\""
+          
+          # Add domain configuration ONLY if ALL THREE are present and non-empty
+          if [ -n "$DOMAIN_NAME" ] && [ -n "$HOSTED_ZONE_ID" ] && [ -n "$CLOUDFRONT_CERTIFICATE_ARN" ]; then
+            echo "Deploying with custom domain: $DOMAIN_NAME"
+            CDK_CMD="$CDK_CMD \
+              --context domain-name=\"$DOMAIN_NAME\" \
+              --context hosted-zone-id=\"$HOSTED_ZONE_ID\" \
+              --context cloudfront-certificate-arn=\"$CLOUDFRONT_CERTIFICATE_ARN\""
+          else
+            echo "Deploying without custom domain (using AWS-generated URLs)"
+          fi
+          
+          # Add outputs file
+          CDK_CMD="$CDK_CMD --outputs-file outputs.json"
+          
+          # Execute deployment
+          eval $CDK_CMD
           
           # Export outputs for other jobs
           STACK_NAME="AdminPortalServerStack-${{ needs.setup.outputs.environment }}"

@@ -20,21 +20,18 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build arguments for environment variables
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the application
+# Build the application without API URL (will be provided at runtime)
 RUN npm run build
 
-# Production image, copy all the files and run next
+# Production image
 FROM base AS runner
 WORKDIR /app
 
-RUN apk add --no-cache wget
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -43,17 +40,17 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy public assets
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
+# Copy standalone server and its dependencies
+# The standalone folder contains everything needed to run
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+
+# Copy static assets into the correct location
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
@@ -63,4 +60,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["npm", "start"]
+# FIXED: Use node to run server.js directly (standalone doesn't include package.json)
+CMD ["node", "server.js"]
