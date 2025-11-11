@@ -587,40 +587,40 @@ export class AdminPortalServerStack extends cdk.Stack {
     const configs = {
       dev: {
         // INCREASED: Give containers more resources
-        cpu: 512,           // Was 256
-        memory: 1024,       // Was 512
-        desiredCount: 1,
+        cpu: 512,          // Was 1024
+        memory: 1024,       // Was 2048
+        desiredCount: 2,
         minCount: 1,
         maxCount: 2,
-        frontendCpu: 512,   // Was 256
-        frontendMemory: 1024, // Was 512
+        frontendCpu: 512,  // Was 1024
+        frontendMemory: 1024, // Was 2048
         frontendDesiredCount: 1,
         frontendMinCount: 1,
         frontendMaxCount: 2,
       },
       staging: {
-        cpu: 1024,          // Was 512
-        memory: 2048,       // Was 1024
-        desiredCount: 1,
+        cpu: 256,          // Was 1024
+        memory: 512,       // Was 2048
+        desiredCount: 2,
         minCount: 1,
-        maxCount: 3,
-        frontendCpu: 1024,  // Was 512
-        frontendMemory: 2048, // Was 1024
+        maxCount: 2,
+        frontendCpu: 512,  // Was 1024
+        frontendMemory: 1024, // Was 2048
         frontendDesiredCount: 1,
         frontendMinCount: 1,
-        frontendMaxCount: 3,
+        frontendMaxCount: 2,
       },
       prod: {
-        cpu: 2048,          // Was 1024
-        memory: 4096,       // Was 2048
+        cpu: 256,
+        memory: 512,
         desiredCount: 2,
-        minCount: 2,
-        maxCount: 10,
-        frontendCpu: 2048,  // Was 1024
-        frontendMemory: 4096, // Was 2048
-        frontendDesiredCount: 2,
-        frontendMinCount: 2,
-        frontendMaxCount: 10,
+        minCount: 1,
+        maxCount: 2,
+        frontendCpu: 256,
+        frontendMemory: 512,
+        frontendDesiredCount: 1,
+        frontendMinCount: 1,
+        frontendMaxCount: 2,
       },
     };
 
