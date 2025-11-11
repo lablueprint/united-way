@@ -26,7 +26,7 @@ export interface AdminPortalServerStackProps extends cdk.StackProps {
 export class AdminPortalServerStack extends cdk.Stack {
   public readonly apiEndpoint: string;
   public readonly frontendUrl: string;
-  public readonly cloudFrontDistribution: cloudfront.Distribution;
+  public readonly cloudFrontDistribution: cloudfront.Distribution | null;
 
   constructor(scope: Construct, id: string, props: AdminPortalServerStackProps) {
     super(scope, id, props);
@@ -103,29 +103,44 @@ export class AdminPortalServerStack extends cdk.Stack {
       });
 
       // CloudFront certificate - imported from us-east-1 (created separately)
-      frontendCloudfrontCertificate = acm.Certificate.fromCertificateArn(
-        this, 
-        'FrontendCloudfrontCertificate', 
-        cloudFrontCertificateArn!
-      );
+      // Only for production
+      if (environment === 'prod') {
+        frontendCloudfrontCertificate = acm.Certificate.fromCertificateArn(
+          this, 
+          'FrontendCloudfrontCertificate', 
+          cloudFrontCertificateArn!
+        );
+      }
     }
 
-    // VPC
+    // VPC - NO NAT GATEWAY (saves ~$32-45/month)
     const vpc = new ec2.Vpc(this, 'VPC', {
       maxAzs: 2,
-      natGateways: 1,
+      natGateways: 0, // CHANGED: Remove expensive NAT gateway
       subnetConfiguration: [
         {
           cidrMask: 26,
           name: 'Public',
           subnetType: ec2.SubnetType.PUBLIC,
         },
-        {
-          cidrMask: 26,
-          name: 'Private',
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        },
       ],
+    });
+
+    // Add VPC Endpoints for AWS services (replaces NAT gateway)
+    vpc.addInterfaceEndpoint('EcrEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.ECR,
+    });
+
+    vpc.addInterfaceEndpoint('EcrDockerEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.ECR_DOCKER,
+    });
+
+    vpc.addGatewayEndpoint('S3Endpoint', {
+      service: ec2.GatewayVpcEndpointAwsService.S3,
+    });
+
+    vpc.addInterfaceEndpoint('CloudWatchLogsEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
     });
 
     // ===============================
@@ -263,19 +278,21 @@ export class AdminPortalServerStack extends cdk.Stack {
     // FIXED: Add explicit dependency so frontend waits for API
     frontendService.node.addDependency(apiService);
 
-    // Set frontend URL based on whether we have custom domain
+    // Set frontend URL - no CloudFront, always use ALB
     if (useCustomDomain && frontendDomainName) {
+      // Create Route53 record pointing to ALB
       new route53.ARecord(this, 'FrontendAliasRecord', {
         zone: hostedZone!,
         recordName: frontendDomainName,
         target: route53.RecordTarget.fromAlias(
-          new route53Targets.CloudFrontTarget(distribution)
+          new route53Targets.LoadBalancerTarget(frontendService.loadBalancer)
         ),
       });
       
       this.frontendUrl = `https://${frontendDomainName}`;
     } else {
-      this.frontendUrl = `https://${distribution.distributionDomainName}`;
+      // No custom domain, use ALB DNS directly
+      this.frontendUrl = `http://${frontendService.loadBalancer.loadBalancerDnsName}`;
     }
 
     this.cloudFrontDistribution = distribution;
@@ -291,10 +308,12 @@ export class AdminPortalServerStack extends cdk.Stack {
       description: 'Next.js frontend URL',
     });
 
-    new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
-      value: distribution.distributionId,
-      description: 'CloudFront Distribution ID',
-    });
+    if (distribution) {
+      new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
+        value: (distribution as cloudfront.Distribution).distributionId,
+        description: 'CloudFront Distribution ID',
+      });
+    }
 
     // ADDED: Output internal endpoints for debugging
     new cdk.CfnOutput(this, 'ApiLoadBalancerDns', {
@@ -318,6 +337,12 @@ export class AdminPortalServerStack extends cdk.Stack {
         description: 'Domain Configuration',
       });
     }
+
+    // Cost savings note
+    new cdk.CfnOutput(this, 'CostOptimizationNote', {
+      value: `ULTRA cost optimized: Single task per service, minimal resources, no CloudFront, no NAT gateway, 1-day logs`,
+      description: 'Cost Optimization Applied',
+    });
   }
 
   private createExpressApiService(
@@ -331,7 +356,7 @@ export class AdminPortalServerStack extends cdk.Stack {
   ) {
     const cluster = new ecs.Cluster(this, 'ApiCluster', {
       vpc,
-      containerInsights: environment === 'prod',
+      containerInsights: false, // CHANGED: Disable even for prod (saves ~$5/month)
     });
 
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'ApiTaskDef', {
@@ -344,7 +369,7 @@ export class AdminPortalServerStack extends cdk.Stack {
       image: ecs.ContainerImage.fromAsset('../server'),
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'api',
-        logRetention: logs.RetentionDays.ONE_WEEK,
+        logRetention: logs.RetentionDays.ONE_DAY, // CHANGED: Minimal retention (saves ~$10/month)
       }),
       environment: {
         NODE_ENV: 'production',
@@ -358,8 +383,6 @@ export class AdminPortalServerStack extends cdk.Stack {
         EMAIL_PASS: secrets.emailPass,
         USE_PARAMETER_STORE: 'false',
       },
-      // REMOVED: Container health check - let ALB handle all health checking
-      // This prevents tasks from being killed before grace period expires
     });
 
     container.addPortMappings({
@@ -372,19 +395,14 @@ export class AdminPortalServerStack extends cdk.Stack {
       taskDefinition,
       desiredCount: config.desiredCount,
       publicLoadBalancer: true,
-      healthCheckGracePeriod: cdk.Duration.seconds(600), // 10 MINUTES - very generous
+      assignPublicIp: true, // ADDED: Required when no NAT gateway
+      healthCheckGracePeriod: cdk.Duration.seconds(300), // REDUCED: 5 minutes
       serviceName: `${this.stackName}-api-service`,
-      // TEMPORARILY DISABLED: Circuit breaker causes deployment loops
-      // circuitBreaker: {
-      //   rollback: true,
-      // },
-      // Add deployment configuration
       deploymentController: {
         type: ecs.DeploymentControllerType.ECS,
       },
-      // Add security groups
       ...(albSecurityGroup && { securityGroups: [albSecurityGroup] }),
-      ...(ecsSecurityGroup && { taskSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS } }),
+      ...(ecsSecurityGroup && { taskSubnets: { subnetType: ec2.SubnetType.PUBLIC } }), // CHANGED: Public subnet
       ...(certificate && {
         certificate: certificate,
         redirectHTTP: true,
@@ -397,12 +415,11 @@ export class AdminPortalServerStack extends cdk.Stack {
       serviceProps
     );
     
-    // Configure deployment to be more cautious
+    // Configure deployment - must allow at least 150% for AZ rebalancing
     const cfnService = fargateService.service.node.defaultChild as ecs.CfnService;
     cfnService.deploymentConfiguration = {
-      minimumHealthyPercent: 0,   // Allow all tasks to be replaced (no rolling deployment)
-      maximumPercent: 200,        // Can scale to 200% during deployment
-      // Deployment circuit breaker disabled temporarily
+      minimumHealthyPercent: 0,
+      maximumPercent: 150,
     };
     
     // Apply ECS security group to the service
@@ -410,24 +427,18 @@ export class AdminPortalServerStack extends cdk.Stack {
       fargateService.service.connections.addSecurityGroup(ecsSecurityGroup);
     }
 
-    // Simple health check - just verify API responds
+    // Simple health check
     fargateService.targetGroup.configureHealthCheck({
       path: '/api/health',
-      interval: cdk.Duration.seconds(30),
+      interval: cdk.Duration.seconds(60), // CHANGED: Less frequent checks
       timeout: cdk.Duration.seconds(15),
       healthyThresholdCount: 2,
-      unhealthyThresholdCount: 10,
-      healthyHttpCodes: '200-499', // Very lenient - even 404 better than timeout
+      unhealthyThresholdCount: 5, // CHANGED: More lenient
+      healthyHttpCodes: '200-499',
     });
 
-    const scaling = fargateService.service.autoScaleTaskCount({
-      minCapacity: config.minCount,
-      maxCapacity: config.maxCount,
-    });
-
-    scaling.scaleOnCpuUtilization('CpuScaling', {
-      targetUtilizationPercent: 70,
-    });
+    // CHANGED: No auto-scaling (saves complexity and potential extra tasks)
+    // Manual scaling only when needed
 
     return fargateService;
   }
@@ -445,7 +456,7 @@ export class AdminPortalServerStack extends cdk.Stack {
   ) {
     const cluster = new ecs.Cluster(this, 'FrontendCluster', {
       vpc,
-      containerInsights: environment === 'prod',
+      containerInsights: false, // CHANGED: Disable to save costs
       clusterName: `${this.stackName}-frontend-cluster`,
     });
 
@@ -458,11 +469,10 @@ export class AdminPortalServerStack extends cdk.Stack {
       image: ecs.ContainerImage.fromAsset('../admin-portal'),
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'frontend',
-        logRetention: logs.RetentionDays.ONE_WEEK,
+        logRetention: logs.RetentionDays.ONE_DAY, // CHANGED: Minimal retention
       }),
       environment: {
         NODE_ENV: 'production',
-        // Use runtime environment variable instead
         NEXT_PUBLIC_API_URL: apiEndpoint,
       },
       portMappings: [
@@ -471,8 +481,6 @@ export class AdminPortalServerStack extends cdk.Stack {
           protocol: ecs.Protocol.TCP,
         },
       ],
-      // REMOVED: Container health check - let ALB handle all health checking
-      // This prevents tasks from being killed before grace period expires
     });
 
     const serviceProps: ecsPatterns.ApplicationLoadBalancedFargateServiceProps = {
@@ -480,18 +488,14 @@ export class AdminPortalServerStack extends cdk.Stack {
       taskDefinition,
       desiredCount: config.frontendDesiredCount,
       publicLoadBalancer: true,
-      healthCheckGracePeriod: cdk.Duration.seconds(600), // 10 MINUTES - very generous
+      assignPublicIp: true, // ADDED: Required when no NAT gateway
+      healthCheckGracePeriod: cdk.Duration.seconds(300), // REDUCED: 5 minutes
       serviceName: `${this.stackName}-frontend-service`,
-      circuitBreaker: {
-        rollback: true,
-      },
-      // Add deployment configuration
       deploymentController: {
         type: ecs.DeploymentControllerType.ECS,
       },
-      // Add security groups
       ...(albSecurityGroup && { securityGroups: [albSecurityGroup] }),
-      ...(ecsSecurityGroup && { taskSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS } }),
+      ...(ecsSecurityGroup && { taskSubnets: { subnetType: ec2.SubnetType.PUBLIC } }), // CHANGED: Public subnet
       ...(albCertificate && {
         certificate: albCertificate,
         redirectHTTP: true,
@@ -504,12 +508,11 @@ export class AdminPortalServerStack extends cdk.Stack {
       serviceProps
     );
     
-    // Configure deployment to be more cautious
+    // Configure deployment - must allow at least 150% for AZ rebalancing
     const cfnService = frontendService.service.node.defaultChild as ecs.CfnService;
     cfnService.deploymentConfiguration = {
-      minimumHealthyPercent: 0,   // Allow all tasks to be replaced
-      maximumPercent: 200,        // Can scale to 200% during deployment
-      // Deployment circuit breaker disabled temporarily
+      minimumHealthyPercent: 0,
+      maximumPercent: 150, // FIXED: Must be >100 for AZ rebalancing
     };
     
     // Apply ECS security group to the service
@@ -517,68 +520,21 @@ export class AdminPortalServerStack extends cdk.Stack {
       frontendService.service.connections.addSecurityGroup(ecsSecurityGroup);
     }
 
-    // Simple health check - just verify Next.js responds
+    // Simple health check
     frontendService.targetGroup.configureHealthCheck({
       path: '/',
-      interval: cdk.Duration.seconds(30),
+      interval: cdk.Duration.seconds(60), // CHANGED: Less frequent checks
       timeout: cdk.Duration.seconds(15),
       healthyThresholdCount: 2,
-      unhealthyThresholdCount: 10,
+      unhealthyThresholdCount: 5, // CHANGED: More lenient
       healthyHttpCodes: '200-399',
     });
 
-    const frontendScaling = frontendService.service.autoScaleTaskCount({
-      minCapacity: config.frontendMinCount,
-      maxCapacity: config.frontendMaxCount,
-    });
+    // CHANGED: No auto-scaling for cost savings
 
-    frontendScaling.scaleOnCpuUtilization('FrontendCpuScaling', {
-      targetUtilizationPercent: 70,
-    });
-
-    const distributionProps: cloudfront.DistributionProps = {
-      defaultBehavior: {
-        origin: new origins.LoadBalancerV2Origin(frontendService.loadBalancer, {
-          protocolPolicy: albCertificate 
-            ? cloudfront.OriginProtocolPolicy.HTTPS_ONLY 
-            : cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-          httpPort: 80,
-          httpsPort: 443,
-          // ADDED: Longer timeouts for Next.js
-          readTimeout: cdk.Duration.seconds(60),
-          keepaliveTimeout: cdk.Duration.seconds(5),
-        }),
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-        cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
-        cachePolicy: new cloudfront.CachePolicy(this, 'FrontendCachePolicy', {
-          cachePolicyName: `${this.stackName}-frontend-cache`,
-          defaultTtl: cdk.Duration.seconds(0),
-          minTtl: cdk.Duration.seconds(0),
-          maxTtl: cdk.Duration.days(365),
-          enableAcceptEncodingGzip: true,
-          enableAcceptEncodingBrotli: true,
-          headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
-            'Accept',
-            'Accept-Language',
-            'Authorization'
-          ),
-          queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-          cookieBehavior: cloudfront.CacheCookieBehavior.all(),
-        }),
-        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
-      },
-      priceClass: environment === 'prod'
-        ? cloudfront.PriceClass.PRICE_CLASS_ALL
-        : cloudfront.PriceClass.PRICE_CLASS_100,
-      comment: `${this.stackName} Frontend Distribution`,
-      ...(cloudfrontCertificate && domainName && {
-        domainNames: [domainName],
-        certificate: cloudfrontCertificate,
-      }),
-    };
-
-    const distribution = new cloudfront.Distribution(this, 'FrontendDistribution', distributionProps);
+    // CHANGED: Never use CloudFront (saves ~$10-20/month even for prod)
+    // Access ALB directly for all environments
+    let distribution: cloudfront.Distribution | null = null;
 
     return { frontendService, distribution };
   }
@@ -586,41 +542,39 @@ export class AdminPortalServerStack extends cdk.Stack {
   private getEnvironmentConfig(environment: string) {
     const configs = {
       dev: {
-        // INCREASED: Give containers more resources
-        cpu: 512,           // Was 256
-        memory: 1024,       // Was 512
-        desiredCount: 1,
+        cpu: 256,                   // MINIMUM
+        memory: 512,                // MINIMUM
+        desiredCount: 1,            // SINGLE TASK
         minCount: 1,
-        maxCount: 2,
-        frontendCpu: 512,   // Was 256
-        frontendMemory: 1024, // Was 512
-        frontendDesiredCount: 1,
+        maxCount: 1,                // NO AUTO-SCALING
+        frontendCpu: 256,           // MINIMUM
+        frontendMemory: 512,        // MINIMUM
+        frontendDesiredCount: 1,    // SINGLE TASK
         frontendMinCount: 1,
-        frontendMaxCount: 2,
+        frontendMaxCount: 1,        // NO AUTO-SCALING
       },
       staging: {
-        cpu: 1024,          // Was 512
-        memory: 2048,       // Was 1024
-        desiredCount: 1,
+        cpu: 256,
+        memory: 512,
+        desiredCount: 1,            // SINGLE TASK
         minCount: 1,
-        maxCount: 3,
-        frontendCpu: 1024,  // Was 512
-        frontendMemory: 2048, // Was 1024
-        frontendDesiredCount: 1,
+        maxCount: 1,
+        frontendCpu: 256,
+        frontendMemory: 512,
+        frontendDesiredCount: 1,    // SINGLE TASK
         frontendMinCount: 1,
-        frontendMaxCount: 3,
+        frontendMaxCount: 1,
       },
       prod: {
-        cpu: 2048,          // Was 1024
-        memory: 4096,       // Was 2048
-        desiredCount: 2,
-        minCount: 2,
-        maxCount: 10,
-        frontendCpu: 2048,  // Was 1024
-        frontendMemory: 4096, // Was 2048
-        frontendDesiredCount: 2,
-        frontendMinCount: 2,
-        frontendMaxCount: 10,
+        cpu: 256,
+        memory: 512,
+        desiredCount: 1,
+        minCount: 1,
+        maxCount: 1,
+        frontendCpu: 256,
+        frontendMemory: 512,
+        frontendDesiredCount: 1,
+        frontendMinCount: 1,
       },
     };
 
